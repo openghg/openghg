@@ -24,7 +24,7 @@ from openghg.objectstore import get_datasource, open_object_store
 from openghg.retrieve import get_obs_surface, search_surface
 from openghg.standardise import standardise_from_binary_data, standardise_surface
 from openghg.store import ObsSurface
-from openghg.types import MetadataAndData
+from openghg.types import MetadataAndData, StandardiseError
 from openghg.util import create_daterange_str, clean_string
 from pandas import Timestamp
 
@@ -82,8 +82,9 @@ def test_metadata_tac_crds(min_uuids_fixture, hourly_uuids_fixture, bucket):
     with open_object_store(bucket=bucket, data_type="surface", mode="r") as objstore:
         for result in min_uuids:
             species = result["species"]
-            datasource = objstore.get_datasource(uuid=result["uuid"])
-            assert metadata_checker_obssurface(datasource.metadata(), species=species)
+            datasource = objstore.retrieve(uuid=result["uuid"])[0]
+
+            assert metadata_checker_obssurface(datasource.metadata, species=species)
 
             with datasource.get_data(version="latest") as data:
                 assert attributes_checker_obssurface(data.attrs, species=species)
@@ -497,39 +498,6 @@ def test_read_noaa_metastorepack(bucket):
         ch4_data["ch4"][0] == pytest.approx(1.76763e-06)
         ch4_data["ch4_number_of_observations"][0] == 2.0
         ch4_data["ch4_variability"][0] == pytest.approx(1.668772e-09)
-
-
-@pytest.mark.xfail(reason="Deleting datasources will be handled by ObjectStore objects - links to issue #727")
-def test_delete_Datasource(bucket):  # TODO: revive/move this test when `ObjectStore` class created
-    data_filepath = get_surface_datapath(
-        filename="DECC-picarro_TAC_20130131_co2-185m-20220928.nc", source_format="OPENGHG"
-    )
-
-    standardise_surface(
-        store="user",
-        filepath=data_filepath,
-        source_format="OPENGHG",
-        site="tac",
-        network="DECC",
-        instrument="picarro",
-        sampling_period="1h",
-        update_mismatch="attributes",
-        if_exists="new",
-        sort_files=True,
-    )
-
-    with open_object_store(data_type="surface", bucket=bucket) as objstore:
-        uuid = objstore.uuids[0]
-        datasource = objstore.get_datasource(uuid=uuid)
-        data_keys = datasource.data_keys()
-        key = data_keys[0]
-
-        assert exists(bucket=bucket, key=key)
-
-        objstore.delete(uuid)
-
-        assert uuid not in objstore.uuids
-        assert not exists(bucket=bucket, key=key)
 
 
 def test_add_new_data_correct_datasource():
@@ -1001,7 +969,7 @@ def test_obs_data_param_split(data_keyword, data_value_1, data_value_2):
         network="DECC",
         store="group",
         update_mismatch="metadata",
-        **data_labels_1
+        **data_labels_1,
     )
 
     standardise_surface(
@@ -1011,7 +979,7 @@ def test_obs_data_param_split(data_keyword, data_value_1, data_value_2):
         network="DECC",
         store="group",
         update_mismatch="metadata",
-        **data_labels_2
+        **data_labels_2,
     )
 
     tac_1 = get_obs_surface(site="tac", species="co2", **data_labels_1)
@@ -1028,13 +996,13 @@ def test_obs_data_param_split(data_keyword, data_value_1, data_value_2):
 
 
 def test_optional_parameters():
-    """Test if ValueError is raised for invalid input value to calibration_scale."""
+    """Test if StandardiseError is raised for invalid input value to calibration_scale."""
 
     clear_test_stores()
     data_filepath = get_surface_datapath(filename="tac_co2_openghg.nc", source_format="OPENGHG")
 
     with pytest.raises(
-        ValueError,
+        StandardiseError,
         match="Input for 'calibration_scale': unknown does not match value in file attributes: WMO-X2007",
     ):
         standardise_surface(
@@ -1150,7 +1118,7 @@ def test_sync_surface_metadata_store_level(
 
     for res in standardised_data:
         datasource = get_datasource(bucket=bucket, uuid=res["uuid"], data_type="surface")
-        assert metadata_checker_obssurface(datasource.metadata(), species=res["species"])
+        assert metadata_checker_obssurface(datasource.metadata, species=res["species"])
 
         with datasource.get_data(version="latest") as data:
             assert attributes_checker_obssurface(data.attrs, species=res["species"])
@@ -1170,6 +1138,7 @@ def test_co2_games():
         store="user",
     )
 
+
 @pytest.mark.parametrize(
     "tag1, tag2, combined_tag",
     [
@@ -1179,9 +1148,7 @@ def test_co2_games():
     ],
 )
 def test_add_tag(tag1, tag2, combined_tag, reset_mock_user_config):
-    """
-
-    """
+    """ """
     clear_test_stores()
 
     filepath_20230101 = get_surface_datapath(
@@ -1197,29 +1164,31 @@ def test_add_tag(tag1, tag2, combined_tag, reset_mock_user_config):
     instrument = "crds"
     sampling_period = "60s"
     source_format = "openghg"
-    store="user"
+    store = "user"
 
-    standardise_surface(filepath=filepath_20230101,
-                        site=site,
-                        network=network,
-                        instrument=instrument,
-                        sampling_period=sampling_period,
-                        source_format=source_format,
-                        store=store,
-                        update_mismatch="metadata",
-                        tag=tag1,
-                        )
+    standardise_surface(
+        filepath=filepath_20230101,
+        site=site,
+        network=network,
+        instrument=instrument,
+        sampling_period=sampling_period,
+        source_format=source_format,
+        store=store,
+        update_mismatch="metadata",
+        tag=tag1,
+    )
 
-    standardise_surface(filepath=filepath_20230102,
-                        site=site,
-                        network=network,
-                        instrument=instrument,
-                        sampling_period=sampling_period,
-                        source_format=source_format,
-                        store=store,
-                        update_mismatch="metadata",
-                        tag=tag2,
-                        )
+    standardise_surface(
+        filepath=filepath_20230102,
+        site=site,
+        network=network,
+        instrument=instrument,
+        sampling_period=sampling_period,
+        source_format=source_format,
+        store=store,
+        update_mismatch="metadata",
+        tag=tag2,
+    )
 
     data = search_surface(site=site).retrieve()
     metadata = data.metadata

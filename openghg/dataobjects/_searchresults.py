@@ -183,11 +183,14 @@ class SearchResults:
         for uuid in uuids:
             metadata = self.metadata[uuid]
             if version == "latest":
-                version = metadata["latest_version"]
+                version_to_use = metadata["latest_version"]
             else:
                 if version not in metadata["versions"]:
-                    raise ValueError(f"Invalid version {version} for UUID {uuid}")
-
+                    possible_versions = ", ".join(metadata["versions"])
+                    raise ValueError(
+                        f"Invalid version {version} for UUID {uuid} possible versions: {possible_versions}"
+                    )
+                version_to_use = version
             results.append(
                 ObsData(
                     uuid=metadata["uuid"],

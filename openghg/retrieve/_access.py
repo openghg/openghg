@@ -1,8 +1,7 @@
 import logging
 from typing import Any, Union
-from openghg_calscales.functions import convert
 
-from openghg.data_processing import surface_obs_resampler
+from openghg.data_processing import surface_obs_resampler, column_obs_resampler
 from openghg.dataobjects._basedata import _BaseData  # TODO: expose this type?
 from openghg.dataobjects import (
     BoundaryConditionsData,
@@ -12,7 +11,7 @@ from openghg.dataobjects import (
     ObsData,
 )
 from openghg.types import SearchError
-from openghg.util import combine_and_elevate_inlet
+from openghg.util import combine_and_elevate_inlet, assign_units, update_scale
 
 from pandas import Timestamp
 
@@ -28,6 +27,7 @@ multDataTypes = Union[
 def _get_generic(
     combine_multiple_inlets: bool = False,
     ambig_check_params: list | None = None,
+    version: str = "latest",
     **kwargs: Any,
 ) -> _BaseData:
     """Perform a search and create a dataclass object with the results if any are found.
@@ -37,6 +37,7 @@ def _get_generic(
         combine_multiple_inlets: if multiple results are found, combine them and elevate inlet
             to a data variable.
         ambig_check_params: Parameters to check and print if result is ambiguous.
+        version: Version of data to retrieve. Default = "latest".
         kwargs: Additional search terms
 
     Returns:
@@ -53,7 +54,7 @@ def _get_generic(
         raise SearchError(err_msg)
 
     # TODO: UPDATE THIS - just use retrieve when retrieve_all is removed.
-    retrieved_data = results.retrieve_all()
+    retrieved_data = results.retrieve_all(version=version)
 
     if retrieved_data is None:
         err_msg = f"Unable to retrieve results for {keyword_string}"
@@ -79,6 +80,13 @@ def _get_generic(
     else:
         result = retrieved_data
 
+    # TODO: make sure lat and lon have units when stadardising
+    # make sure lat and lon units are set
+    if "lat" in result.data.dims and result.data.lat.attrs.get("units") is None:
+        result.data.lat.attrs["units"] = "degrees_north"
+    if "lon" in result.data.dims and result.data.lon.attrs.get("units") is None:
+        result.data.lon.attrs["units"] = "degrees_east"
+
     return result
 
 
@@ -96,6 +104,9 @@ def get_obs_surface(
     rename_vars: bool = True,
     keep_missing: bool = False,
     keep_variables: list | None = None,
+    target_units: dict | None = None,
+    is_dequantified: bool = True,
+    version: str = "latest",
     **kwargs: Any,
 ) -> ObsData | None:
     """This is the equivalent of the get_obs function from the ACRG repository.
@@ -119,6 +130,14 @@ def get_obs_surface(
         rename_vars: Rename variables from species names to use "mf" explictly.
         keep_missing: Keep missing data points or drop them.
         keep_variables: List of variables to keep. If None, keeps everything.
+        target_units: Dictionary specifying the desired units for each variable in the dataset. Keys are variable names, and values are the units to which the data should be converted.
+        Example:
+        {
+            "mf": "ppm",
+            "mf_variability": "ppm"
+        }
+        is_dequantified: To dequantify the dataset after getting assigned with pint units. By default it will dequantify the data upon return. To keep the quantification applied supply `False`.
+        version: Version of data to retrieve. Default = "latest".
         kwargs: Additional search terms
 
     Returns:
@@ -164,6 +183,7 @@ def get_obs_surface(
     retrieved_data = _get_generic(
         combine_multiple_inlets=isinstance(inlet, slice),  # if range passed for inlet, try to combine
         ambig_check_params=["inlet", "network", "instrument"],
+        version=version,
         **surface_keywords,  # type: ignore
     )
 
@@ -195,6 +215,15 @@ def get_obs_surface(
         logger.info("Loading obs data into memory for resampling.")
         data = data.compute()
 
+        # check for negative uncertainties and set to NaN
+        uncertainty_data_vars = [
+            dv
+            for dv in data.data_vars
+            if str(dv).endswith("repeatability") or str(dv).endswith("variability")
+        ]
+        for dv in uncertainty_data_vars:
+            data[dv] = data[dv].where(data[dv] >= 0.0)  # keep data non-negative values, others set to NaN
+
         var_to_delete = []
         for var in data:
             if data[var].isnull().all():
@@ -217,32 +246,13 @@ def get_obs_surface(
     data.attrs["species"] = species
 
     if "calibration_scale" in data.attrs:
-        data.attrs["scale"] = data.attrs.pop("calibration_scale")
-        existing_calibration_scale = data.attrs["scale"]
-
-        if calibration_scale is not None:
-            target_scale = calibration_scale
-            original_scale = existing_calibration_scale
-
-            if original_scale and target_scale and original_scale != target_scale:
-                logger.warning(f"Converting from calibration scale '{original_scale}' to '{target_scale}'.")
-                for var_name in (
-                    v for v in data.data_vars if isinstance(v, str) and (v == "mf" or v.startswith("mf_"))
-                ):
-                    # Convert function from openghg_calscales
-                    data[var_name] = convert(
-                        c=data[var_name],
-                        species=species,
-                        scale_original=original_scale,
-                        scale_new=target_scale,
-                    )
-                    data[var_name].attrs["calibration_scale"] = target_scale
-
-            data.attrs["scale"] = target_scale
+        data = update_scale(data, species, calibration_scale)
 
     metadata = retrieved_data.metadata
     metadata["calibration_scale"] = data.attrs["scale"]
     metadata.update(data.attrs)
+
+    data = assign_units(data=data, target_units=target_units, is_dequantified=is_dequantified)
 
     obs_data = ObsData(data=data, metadata=metadata)
 
@@ -258,22 +268,43 @@ def get_obs_column(
     site: str | None = None,
     network: str | None = None,
     instrument: str | None = None,
-    platform: str = "satellite",
+    calibration_scale: str | None = None,
+    platform: str | None = None,
     start_date: str | Timestamp | None = None,
     end_date: str | Timestamp | None = None,
     return_mf: bool = True,
+    average: str | None = None,
+    target_units: dict | None = None,
+    is_dequantified: bool = True,
+    version: str = "latest",
     **kwargs: Any,
 ) -> ObsColumnData:
     """Extract available column data from the object store using keywords.
 
     Args:
         species: Species name
-        source: Source name
+        max_level: Max level to use to recalculate the mole fraction (must be corresponding to the max height of the footprint model if used in ModelScenario)
+        satellite: Satellite name (needed for satellite data)
         domain: Domain e.g. EUROPE
+        selection:
+        site: Site name (needed for site column data)
+        network: Network for the site/instrument e.g. TCCON
+        instrument: Instrument name
+        calibration_scale: Convert to this calibration scale
+        platform:
         start_date: Start date
         end_date: End date
-        time_resolution: One of ["standard", "high"]
         return_mf: Return mole fraction rather than column data. Default=True
+        average: Averaging period for dataset. Value should be a string of
+            the form e.g. "2H", "30min" (should match pandas offset aliases format)
+        target_units: Dictionary specifying the desired units for each variable in the dataset. Keys are variable names, and values are the units to which the data should be converted.
+        Example:
+        {
+            "mf": "ppm",
+            "mf_variability": "ppm"
+        }
+        is_dequantified: To dequantify the dataset after getting assigned with pint units. By default it will dequantify the data upon return. To keep the quantification applied supply `False`.
+        version: Version of data to retrieve. Default = "latest".
         kwargs: Additional search terms
     Returns:
         ObsColumnData: ObsColumnData object
@@ -290,6 +321,7 @@ def get_obs_column(
         start_date=start_date,
         end_date=end_date,
         data_type="column",
+        version=version,
         **kwargs,
     )
 
@@ -305,32 +337,37 @@ def get_obs_column(
 
         prior_factor = (
             obs_data.data.pressure_weights[dict(lev=list(lower_levels))]
-            * (1.0 - obs_data.data.xch4_averaging_kernel[dict(lev=list(lower_levels))])
-            * obs_data.data.ch4_profile_apriori[dict(lev=list(lower_levels))]
+            * (1.0 - obs_data.data[f"x{species}_averaging_kernel"][dict(lev=list(lower_levels))])
+            * obs_data.data[f"{species}_profile_apriori"][dict(lev=list(lower_levels))]
         ).sum(dim="lev")
 
         upper_levels = list(range(max_level, len(obs_data.data.lev.values)))
         prior_upper_level_factor = (
             obs_data.data.pressure_weights[dict(lev=list(upper_levels))]
-            * obs_data.data.ch4_profile_apriori[dict(lev=list(upper_levels))]
+            * obs_data.data[f"{species}_profile_apriori"][dict(lev=list(upper_levels))]
         ).sum(dim="lev")
 
         obs_data.data["mf_prior_factor"] = prior_factor
         obs_data.data["mf_prior_upper_level_factor"] = prior_upper_level_factor
         obs_data.data["mf"] = (
-            obs_data.data.xch4 - obs_data.data.mf_prior_factor - obs_data.data.mf_prior_upper_level_factor
+            obs_data.data[f"x{species}"]
+            - obs_data.data.mf_prior_factor
+            - obs_data.data.mf_prior_upper_level_factor
         )
-        obs_data.data["mf_repeatability"] = obs_data.data.xch4_uncertainty
+        obs_data.data["mf_repeatability"] = obs_data.data[f"x{species}_uncertainty"]
 
-        obs_data.data["mf"].attrs["units"] = obs_data.data.xch4.attrs["units"]
+        obs_data.data["mf"].attrs["units"] = obs_data.data[f"x{species}"].attrs["units"]
         # rt17603: 06/04/2018 Added drop variables to ensure lev and id dimensions are also dropped, Causing problems in footprints_data_merge() function
         drop_data_vars = [
-            "xch4",
-            "xch4_uncertainty",
+            f"x{species}",
+            f"x{species}_uncertainty",
+            f"x{species}_error",
+            f"x{species}_apriori",
             "lon",
             "lat",
-            "ch4_profile_apriori",
-            "xch4_averaging_kernel",
+            "level",
+            f"{species}_profile_apriori",
+            f"x{species}_averaging_kernel",
             "pressure_levels",
             "pressure_weights",
             "exposure_id",
@@ -360,6 +397,17 @@ def get_obs_column(
 
     obs_data.data = obs_data.data.sortby("time")
 
+    if average is not None:
+        obs_data.data = column_obs_resampler(obs_data.data, averaging_period=average, species="mf")
+
+    if "calibration_scale" in obs_data.data.attrs:
+        obs_data.data = update_scale(obs_data.data, species, calibration_scale)
+        obs_data.metadata["scale"] = obs_data.data.attrs["scale"]
+
+    obs_data.data = assign_units(
+        data=obs_data.data, target_units=target_units, is_dequantified=is_dequantified
+    )
+
     return ObsColumnData(data=obs_data.data, metadata=obs_data.metadata)
 
 
@@ -373,6 +421,9 @@ def get_flux(
     start_date: str | Timestamp | None = None,
     end_date: str | Timestamp | None = None,
     time_resolution: str | None = None,
+    target_units: dict | None = None,
+    is_dequantified: bool = True,
+    version: str = "latest",
     **kwargs: Any,
 ) -> FluxData:
     """The flux function reads in all flux files for the domain and species as an xarray Dataset.
@@ -386,6 +437,14 @@ def get_flux(
         start_date: Start date
         end_date: End date
         time_resolution: One of ["standard", "high"]
+        target_units: Dictionary specifying the desired units for each variable in the dataset. Keys are variable names, and values are the units to which the data should be converted.
+        Example:
+        {
+            "mf": "ppm",
+            "mf_variability": "ppm"
+        }
+        is_dequantified: To dequantify the dataset after getting assigned with pint units. By default it will dequantify the data upon return. To keep the quantification applied supply `False`.
+        version: Version of data to retrieve. Default = "latest".
         kwargs: Additional search terms
     Returns:
         FluxData: FluxData object
@@ -401,6 +460,7 @@ def get_flux(
         start_date=start_date,
         end_date=end_date,
         data_type="flux",
+        version=version,
         **kwargs,
     )
 
@@ -412,6 +472,8 @@ def get_flux(
 
         em_ds = em_ds.drop_vars(names="lev")
 
+    em_data.data = assign_units(data=em_data.data, target_units=target_units, is_dequantified=is_dequantified)
+
     return FluxData(data=em_data.data, metadata=em_data.metadata)
 
 
@@ -421,6 +483,9 @@ def get_bc(
     bc_input: str | None = None,
     start_date: str | Timestamp | None = None,
     end_date: str | Timestamp | None = None,
+    target_units: dict | None = None,
+    is_dequantified: bool = True,
+    version: str = "latest",
     **kwargs: Any,
 ) -> BoundaryConditionsData:
     """Get boundary conditions for a given species, domain and bc_input name.
@@ -433,6 +498,14 @@ def get_bc(
         domain: Region for boundary conditions e.g. EUROPE
         start_date: Start date
         end_date: End date
+        target_units: Dictionary specifying the desired units for each variable in the dataset. Keys are variable names, and values are the units to which the data should be converted.
+        Example:
+        {
+            "mf": "ppm",
+            "mf_variability": "ppm"
+        }
+        is_dequantified: To dequantify the dataset after getting assigned with pint units. By default it will dequantify the data upon return. To keep the quantification applied supply `False`.
+        version: Version of data to retrieve. Default = "latest".
     Returns:
         BoundaryConditionsData: BoundaryConditionsData object
     """
@@ -443,9 +516,11 @@ def get_bc(
         start_date=start_date,
         end_date=end_date,
         data_type="boundary_conditions",
+        version=version,
         **kwargs,
     )
 
+    bc_data.data = assign_units(data=bc_data.data, target_units=target_units, is_dequantified=is_dequantified)
     return BoundaryConditionsData(data=bc_data.data, metadata=bc_data.metadata)
 
 
@@ -460,6 +535,9 @@ def get_footprint(
     start_date: str | Timestamp | None = None,
     end_date: str | Timestamp | None = None,
     species: str | None = None,
+    target_units: dict | None = None,
+    is_dequantified: bool = True,
+    version: str = "latest",
     **kwargs: Any,
 ) -> FootprintData:
     """Get footprints from one site.
@@ -482,6 +560,14 @@ def get_footprint(
                  if species needs a modified footprints from the typical 30-day
                  footprints appropriate for a long-lived species (like methane)
                  e.g. for high time resolution (co2) or is a short-lived species.
+        target_units: Dictionary specifying the desired units for each variable in the dataset. Keys are variable names, and values are the units to which the data should be converted.
+        Example:
+        {
+            "mf": "ppm",
+            "mf_variability": "ppm"
+        }
+        is_dequantified: To dequantify the dataset after getting assigned with pint units. By default it will dequantify the data upon return. To keep the quantification applied supply `False`.
+        version: Version of data to retrieve. Default = "latest".
         kwargs: Additional search terms
     Returns:
         FootprintData: FootprintData dataclass
@@ -509,9 +595,11 @@ def get_footprint(
         end_date=end_date,
         species=species,
         data_type="footprints",
+        version=version,
         **kwargs,
     )
 
+    fp_data.data = assign_units(data=fp_data.data, target_units=target_units, is_dequantified=is_dequantified)
     return FootprintData(data=fp_data.data, metadata=fp_data.metadata)
 
     # TODO: Could incorporate this somewhere? Setting species to INERT?

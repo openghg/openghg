@@ -1,4 +1,5 @@
 """Unit tests for the ObjectStore class."""
+
 from typing import Any, ClassVar, TypeVar
 from typing_extensions import Self
 
@@ -9,7 +10,6 @@ from openghg.objectstore.metastore._metastore import TinyDBMetaStore
 from openghg.objectstore._datasource import AbstractDatasource, DatasourceFactory
 from openghg.objectstore._objectstore import ObjectStore
 from openghg.types import ObjectStoreError
-
 
 MetaData = dict[str, Any]
 QueryResults = list[Any]

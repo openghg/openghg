@@ -268,10 +268,8 @@ def read_local_config() -> dict:
     try:
         _ = config["object_store"]["user"]
     except KeyError:
-        raise ConfigFileError(
-            "Invalid config file detected, please please see the installation instructions \
-                or run openghg --quickstart"
-        )
+        raise ConfigFileError("Invalid config file detected, please please see the installation instructions \
+                or run openghg --quickstart")
 
     # Check see is the store uses the new zarr storage format
     # for OpenGHG >= 0.8.0
@@ -376,14 +374,12 @@ def _check_valid_store(store_path: Path) -> bool:
     data_dir = Path(store_path).joinpath("data")
     # Now check if there's a zarr folder in the data directory
     store_dirs = list(data_dir.glob("*"))
-    # Let's take the first data directory and see if there's a zarr folder in it
+
+    # if no store dirs, assume this is an empty zarr store
     if not store_dirs:
-        logger.info(
-            f"No data found in the object store {store_path}, "
-            "so we are treating this empty store as a zarr store."
-        )
         return True
 
+    # Let's take the first data directory and see if there's a zarr folder in it
     store_data_dir = store_dirs[0]
 
     return store_data_dir.joinpath("zarr").exists()

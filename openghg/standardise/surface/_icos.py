@@ -1,5 +1,6 @@
 from pathlib import Path
 import logging
+import pandas as pd
 
 from openghg.standardise.meta import dataset_formatter
 from openghg.types import pathType
@@ -128,10 +129,8 @@ def _read_data_large_header(
         site_fname = filepath.name.split("_")[-3]
         inlet_height_fname = filepath.name.split("_")[-2]
     except IndexError:
-        raise ValueError(
-            "Unable to read metadata from filename. We expect a filename such as \
-            ICOS_ATC_L2_L2-2024.1_RGL_90.0_CTS.CH4"
-        )
+        raise ValueError("Unable to read metadata from filename. We expect a filename such as \
+            ICOS_ATC_L2_L2-2024.1_RGL_90.0_CTS.CH4")
 
     if site_fname.lower() != site:
         raise ValueError("Site mismatch between site argument passed and filename.")
@@ -320,10 +319,23 @@ def _read_data_small_header(
         usecols=use_cols,
         dtype=dtypes,
         na_values="-999.99",
-        parse_dates={"time": datetime_columns},
-        date_format="%Y %m %d %H %M",
-        index_col="time",
+        index_col=False,
     )
+
+    # Combine datetime columns
+    data["time"] = pd.to_datetime(
+        data["Year"].astype(str)
+        + "-"
+        + data["Month"].astype(str).str.zfill(2)
+        + "-"
+        + data["Day"].astype(str).str.zfill(2)
+        + " "
+        + data["Hour"].astype(str).str.zfill(2)
+        + ":"
+        + data["Minute"].astype(str).str.zfill(2),
+        format="%Y-%m-%d %H:%M",
+    )
+    data = data.drop(columns=datetime_columns).set_index("time")
 
     data = data[data[species_fname.lower()] >= 0.0]
 

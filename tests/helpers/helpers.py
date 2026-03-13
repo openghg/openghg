@@ -1,4 +1,5 @@
 """Some helper functions for things we do in tests frequently"""
+
 import getpass
 import shutil
 import tempfile
@@ -18,6 +19,7 @@ def temporary_store_paths() -> Dict[str, Path]:
         "group": base_tmp / f"openghg_testing_group_store",
         "shared": base_tmp / f"openghg_testing_shared_store",
     }
+
 
 def clear_test_store(name: str) -> None:
     """Clear one of the testing object stores
@@ -87,13 +89,30 @@ def get_footprint_datapath(filename: str) -> Path:
     return get_datapath_base(data_type="footprints", filename=filename)
 
 
+def get_met_datapath(filename: str) -> Path:
+    """Return the path to the met test data file"""
+    return get_datapath_base(data_type="met", filename=filename)
+
+
 def get_datapath_base(data_type: str, filename: str) -> Path:
     """Return the path to the footprints test data file"""
     return Path(__file__).parent.parent.joinpath(f"data/{data_type}/{filename}").resolve()
 
 
-def get_retrieval_datapath(filename: str):
-    return Path(__file__).parent.parent.joinpath(f"data/retrieve/{filename}").resolve()
+def get_retrieval_datapath(filename: str, archive: str | None = None) -> Path:
+    """Return the path to the retrieve data file.
+    Args:
+        filename: Name of the file
+        archive: the name of the archive (e.g. ICOS) the retrieved file is related to.
+            If specified, this will look for the file within an additional subfolder layer based on this archive name.
+            Otherwise, this will look in the top level retrieve directory.
+    Returns:
+        Path: Full filepath for the filename
+    """
+    if archive:
+        return Path(__file__).parent.parent.joinpath(f"data/retrieve/{archive.upper()}/{filename}").resolve()
+    else:
+        return Path(__file__).parent.parent.joinpath(f"data/retrieve/{filename}").resolve()
 
 
 def get_info_datapath(filename: str):

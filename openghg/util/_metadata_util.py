@@ -1,8 +1,7 @@
-from typing import Any, Literal
+from typing import Any, cast, Literal
 from collections.abc import Iterable
 import logging
 import math
-
 
 __all__ = [
     "null_metadata_values",
@@ -305,6 +304,16 @@ def merge_dict(
     return merged_dict
 
 
+def _as_list(value: Any) -> list[Any]:
+    if value is None:
+        return []
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, Iterable):
+        return [v for v in value]
+    return [value]
+
+
 def merge_and_extend_dict(left: dict, right: dict) -> dict:
     """
     The merge_and_extend_dict function combined two dictionaries, combining
@@ -325,11 +334,10 @@ def merge_and_extend_dict(left: dict, right: dict) -> dict:
     for key in overlapping_keys:
         if key in right:
             value = right[key]
-            if isinstance(value, str):
-                value = [value]
+            value = _as_list(value)
 
             if key in left:
-                combined_value: str | list = left[key]
+                combined_value: list = _as_list(left[key])
             else:
                 combined_value = []
 
@@ -338,8 +346,50 @@ def merge_and_extend_dict(left: dict, right: dict) -> dict:
 
             for v in value:
                 if v not in combined_value:
-                    combined_value.extend(value)
+                    combined_value.append(v)
 
             merged_dict[key] = combined_value
 
     return merged_dict
+
+
+def get_period(metadata: dict) -> str | None:
+    """Extract period value from metadata. This expects keywords of either "sampling_period" (observation data) or
+    "time_period" (derived or ancillary data). If neither keyword is found, None is returned.
+
+    This is a suitable format to use to create a pandas Timedelta or DataOffset object.
+
+    Returns:
+        str or None: time period in the form of number and time unit e.g. "12s" if found in metadata, else None
+    """
+    # Extract period associated with data from metadata
+    # This will be the "sampling_period" for obs and "time_period" for other
+
+    time_period_attrs = ["sampling_period", "time_period"]
+    for attr in time_period_attrs:
+        # These will always be strings
+        value = cast(str, metadata.get(attr))
+        if value is not None:
+            # For sampling period data, expect this to be in seconds
+            if attr == "sampling_period":
+                if value.endswith("s"):  # Check if str includes "s"
+                    period: str | None = value
+                else:
+                    try:
+                        value_num: int | None = int(value)
+                    except ValueError:
+                        try:
+                            value_num = int(float(value))
+                        except ValueError:
+                            value_num = None
+                            continue
+                    period = f"{value_num}s"
+            else:
+                # Expect period data to include value and time unit
+                period = value
+
+            break
+    else:
+        period = None
+
+    return period

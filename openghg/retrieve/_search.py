@@ -138,12 +138,21 @@ def search_flux(
     if end_date is not None:
         end_date = str(end_date)
 
+    # The clean_string function previously removed '.' characters which impacted
+    # database_version. This optionality is included to ensure both database_version
+    # with and without any "." characters are searched by default.
+    options_database_version = [database_version]
+    if database_version is not None:
+        if "." in database_version:
+            database_version_previous = database_version.replace(".", "")
+            options_database_version.append(database_version_previous)
+
     return search(
         species=species,
         source=source,
         domain=domain,
         database=database,
-        database_version=database_version,
+        database_version=options_database_version,
         model=model,
         start_date=start_date,
         end_date=end_date,
@@ -405,6 +414,21 @@ def search_column(
     )
 
 
+def search_site_met(
+    site: str | None = None,
+    network: str | None = None,
+    met_source: str | None = None,
+    **kwargs: Any,
+) -> SearchResults:
+    return search(
+        site=site,
+        network=network,
+        met_source=met_source,
+        data_type="site_met",
+        **kwargs,
+    )
+
+
 def search(**kwargs: Any) -> SearchResults:
     """Search for observations data. Any keyword arguments may be passed to the
     the function and these keywords will be used to search the metadata associated
@@ -446,6 +470,7 @@ def search(**kwargs: Any) -> SearchResults:
         timestamp_now,
         timestamp_tzaware,
     )
+    from openghg.retrieve._search_helpers import convert_to_slice
     from pandas import Timedelta as pd_Timedelta
     from openghg.util import handle_direct_store_path
 
@@ -456,6 +481,9 @@ def search(**kwargs: Any) -> SearchResults:
     for k, v in kwargs.items():
         if k.lower() in {"inlet", "height", "inlet_height_magl", "station_height_masl"}:
             v = format_inlet(v)
+            # Convert all inlet searches to slice so this completes a value search
+            rel_tolerance = 1e-6
+            v = convert_to_slice(v, rel_tolerance)
         elif isinstance(v, (list, tuple)):
             v = [clean_string(value) for value in v if value is not None]
             if not v:  # Check empty list

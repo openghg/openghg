@@ -65,7 +65,6 @@ from openghg.util import (
     timestamp_now,
 )
 
-
 logger = logging.getLogger("openghg.transform.flux")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
@@ -73,7 +72,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 ArrayType = Optional[ndarray | xr.DataArray]
 
 
-_edgar_known_versions = ("v432", "v50", "v60", "v70", "v80")
+_edgar_known_versions = ("v432", "v4.3.2", "v50", "v5.0", "v60", "v6.0", "v70", "v7.0", "v80", "v8.0")
 
 
 # TODO: make this work for...
@@ -270,7 +269,7 @@ def parse_edgar(
 
     # get dataset
     # using .open("rb") for pathlib.Path and zipfile.Path compatibility
-    edgar_ds = xr.open_dataset(edgar_file.open("rb"))
+    edgar_ds = xr.open_dataset(edgar_file.open("rb"), engine="h5netcdf")
 
     # Expected name e.g. "emi_ch4", "emi_co2" for version <= 7; "fluxes" for version 8
     name = "fluxes" if version.startswith("v8") else f"emi_{species_label}"
@@ -467,7 +466,7 @@ def _check_lat_lon(
         # If domain is specified, attempt to extract lat/lon values from
         # pre-defined definitions.
         try:
-            lat_domain, lon_domain = find_domain(domain)
+            lat_domain, lon_domain = find_domain(domain)[:2]
         except ValueError:
             # If domain cannot be found and lat, lon values have not been
             # defined raise an error.

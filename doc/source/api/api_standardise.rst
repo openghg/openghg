@@ -15,6 +15,11 @@ Surface measurements
 
 .. autofunction:: openghg.standardise.standardise_surface
 
+Column measurements
+^^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: openghg.standardise.standardise_column
+
 Boundary Conditions
 ^^^^^^^^^^^^^^^^^^^
 

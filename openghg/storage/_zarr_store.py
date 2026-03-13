@@ -1,0 +1,478 @@
+from collections.abc import Callable, Iterable
+import logging
+from pathlib import Path
+import re
+from typing import Any, cast, Generic, Literal, TypeVar
+
+import pandas as pd
+import xarray as xr
+import zarr
+import zarr.convenience
+from zarr._storage.store import Store as AbstractZarrStore
+
+from openghg.types import DataOverlapError
+from openghg.util._versioning import SimpleVersioning
+from ._encoding import get_zarr_encoding
+from ._indexing import contiguous_regions, IndexingError, OverlapDeterminer
+from ._store import Store, UpdateError, VersionedStore
+
+logger = logging.getLogger("openghg.storage")
+logger.setLevel(logging.DEBUG)
+
+
+def parse_to_zarr_kwargs(to_zarr_kwargs: dict) -> dict:
+    accepted_keys = ["write_empty_chunks", "zarr_format", "storage_options"]
+    result = {}
+    for k, v in to_zarr_kwargs.items():
+        if k in accepted_keys:
+            result[k] = v
+    return result
+
+
+ZST = TypeVar("ZST", bound=AbstractZarrStore)
+
+
+class ZarrStore(Store, Generic[ZST]):
+    """Zarr store for storing a single dataset."""
+
+    def __init__(
+        self,
+        zarr_store: ZST,
+        append_dim: str = "time",
+        index_options: dict | None = None,
+        compressor: Any | None = None,
+        filters: Any | None = None,
+        encoding: dict | None = None,
+        **to_zarr_kwargs: Any,
+    ) -> None:
+        """Pass an instantiated Zarr Store.
+
+        Note: for commonly used types of ZarrStore, we can create convenience functions
+        to create ZarrStore objects.
+
+        Args:
+            zarr_store: instantiated Zarr Store.
+            append_dim: dimension to insert new data along.
+            index_options: options for index, such as `method = "nearest"`
+            compressor: compressor to use, see https://zarr.readthedocs.io/en/stable/tutorial.html#compressors
+            filters: filters to use, see https://zarr.readthedocs.io/en/stable/tutorial.html#filters
+            encoding: dictionary mapping data variables to encoding dictionary
+            to_zarr_kwargs: arguments that could be passed to `xr.Dataset.to_zarr`.
+              Not all parameters will be passed on. See here for the full description
+              of the parameters: https://docs.xarray.dev/en/latest/generated/xarray.Dataset.to_zarr.html
+
+              Accepted arguments are:
+              - `write_empty_chunks`
+              - `zarr_format` (automatically inferred by default)
+              - `storage_options`: only relevant to cloud storage, see
+                 https://github.com/pydata/xarray/pull/5615
+
+        """
+        super().__init__()
+        self._store = zarr_store
+        self.append_dim = append_dim
+        self.index_options = index_options or {}
+        self.compressor = compressor
+        self.filters = filters
+        self.encoding = encoding or {}
+        self.to_zarr_kwargs = to_zarr_kwargs
+
+    # use property to control assignment of `to_zarr_kwargs`
+    @property
+    def to_zarr_kwargs(self) -> dict:
+        return self._to_zarr_kwargs
+
+    @to_zarr_kwargs.setter
+    def to_zarr_kwargs(self, value: dict) -> None:
+        self._to_zarr_kwargs = parse_to_zarr_kwargs(value)
+
+    @property
+    def store(self) -> ZST:
+        """Underlying Zarr storage."""
+        return self._store
+
+    @property
+    def index(self) -> pd.Index:
+        """Index of append dimension of data.
+
+        This index is in the order of the data as it is stored on disk,
+        which is needed for proper alignment during updates.
+        """
+        return self._get(sort=False).get_index(self.append_dim)
+
+    @property
+    def _overlap_determiner(self) -> OverlapDeterminer:
+        return OverlapDeterminer(index=self.index, **self.index_options)
+
+    def __bool__(self) -> bool:
+        return bool(self.store)
+
+    def clear(self) -> None:
+        self.store.rmdir()
+
+    def bytes_stored(self) -> int:
+        if not hasattr(self.store, "getsize"):
+            return 0
+
+        nbytes = 0
+        for key in self.store:
+            nbytes += self.store.getsize(key)  # type: ignore
+        return nbytes
+
+    def _get(self, sort: bool = True) -> xr.Dataset:
+        if not bool(self):
+            return xr.Dataset()
+
+        # need to sort to be consistent with MemoryStore
+        result = xr.open_zarr(self.store, consolidated=True)
+
+        if sort:
+            result = result.sortby(self.append_dim)
+
+        return cast(xr.Dataset, result)
+
+    def get(self) -> xr.Dataset:
+        return self._get(sort=True)
+
+    def insert(self, data: xr.Dataset, on_overlap: Literal["error", "ignore"] = "error") -> None:
+        if not self.store:
+            encoding = get_zarr_encoding(data.data_vars, self.compressor, self.filters)
+            encoding.update(self.encoding)
+            data.to_zarr(
+                store=self.store,
+                mode="w",
+                consolidated=True,
+                compute=True,
+                synchronizer=zarr.ThreadSynchronizer(),
+                encoding=encoding,
+                **self.to_zarr_kwargs,
+            )
+        else:
+            if self._overlap_determiner.has_overlaps(data.get_index(self.append_dim)):
+                if on_overlap == "error":
+                    raise DataOverlapError("Cannot insert data with overlaps if `on_overlap` == 'error'")
+
+                # otherwise, select non-overlaps
+                data = self._overlap_determiner.select_nonoverlaps(data, self.append_dim)
+
+            data.to_zarr(
+                store=self.store,
+                mode="a",
+                append_dim=self.append_dim,
+                consolidated=True,
+                compute=True,
+                synchronizer=zarr.ThreadSynchronizer(),
+                safe_chunks=False,
+                **self.to_zarr_kwargs,
+            )
+
+    def update(self, data: xr.Dataset, on_nonoverlap: Literal["error", "ignore"] = "error") -> None:
+
+        if not self.store:
+            raise UpdateError("Cannot update empty Store.")
+        else:
+            if self._overlap_determiner.has_nonoverlaps(data.get_index(self.append_dim)):
+                if on_nonoverlap == "error":
+                    raise UpdateError("Cannot add new values with `update`.")
+
+                # otherwise, select conflicts/overlapping values
+                data = self._overlap_determiner.select_overlaps(data, self.append_dim)
+
+            # nothing to update
+            if not bool(data):
+                logger.warning("No data to update with.")
+                return None
+
+            try:
+                data.to_zarr(
+                    store=self.store,
+                    mode="r+",
+                    region="auto",
+                    consolidated=True,
+                    compute=True,
+                    synchronizer=zarr.ThreadSynchronizer(),
+                    safe_chunks=False,
+                )
+            except (ValueError, IndexError):
+                import dask
+
+                kwargs = self.index_options.copy()
+
+                # only allow one source value to align to a given target value; if multiple source values
+                # align to the same target value, an error will be raised by `contiguous_regions` if `limit=1`.
+                if "method" in kwargs:
+                    kwargs["limit"] = 1
+
+                try:
+                    source_regions, target_regions, _ = contiguous_regions(
+                        data.get_index(self.append_dim), self.index, **kwargs
+                    )
+                except IndexingError as e:
+                    raise UpdateError(
+                        f"Multiple input values map to the same stored value with index options {self.index_options}."
+                    ) from e
+
+                # can only write to specified region if data vars have dimension in common with that region
+                # so we will first write the variables without the append dimension (since this is the dim
+                # where we specify regions), then we will write the variables that have the append dim as
+                # a dimension.
+                non_region_vars = [dv for dv in data.data_vars if self.append_dim not in data[dv].dims]
+
+                # don't catch any errors here, since these errors are unrelated to alignment
+                data[non_region_vars].to_zarr(
+                    store=self.store,
+                    mode="r+",
+                    region="auto",
+                    consolidated=True,
+                    compute=True,
+                    synchronizer=zarr.ThreadSynchronizer(),
+                    safe_chunks=False,
+                )
+
+                # now proceed with variables that contain the append dim
+                data = data.drop_vars(non_region_vars)
+
+                # create delayed tasks to write to each region
+                delayed = []
+
+                # We will execute multiple writes with dask, so these writes need to share the
+                # same ThreadSynchronizer, which keeps a lock for each chunk. A chunk can
+                # only be written to while the writer holds this lock. If we create the synchronizers
+                # inside the loop (e.g. inside the call to `to_zarr`, as above) then each chunk would have
+                # multiple locks, and we could have data corruption from competing writes.
+                synchronizer = zarr.ThreadSynchronizer()
+                for sregion, tregion in zip(source_regions, target_regions):
+                    region = {self.append_dim: slice(tregion[0], tregion[-1] + 1)}
+                    res = data.isel({self.append_dim: sregion}).to_zarr(
+                        store=self.store,
+                        mode="r+",
+                        region=region,
+                        consolidated=True,
+                        compute=False,
+                        synchronizer=synchronizer,
+                        safe_chunks=False,
+                    )
+                    delayed.append(res)
+
+                dask.compute(*delayed)  # type: ignore
+
+
+def get_zarr_directory_store(
+    path: Path, append_dim: str = "time", index_options: dict | None = None, **kwargs: Any
+) -> ZarrStore[zarr.DirectoryStore]:
+    """Factory function to create ZarrStore objects based on a zarr.DirectoryStore.
+
+    Args:
+        path: path to Zarr store location.
+        append_dim: dimension to append new data along.
+        index_options: options for index along append dimension; for instance
+          `method = "nearest"`.
+        kwargs: `compressor`, `filters`, `encoding`, or arguments that could be
+          passed to `xr.Dataset.to_zarr`.
+
+    Returns:
+        ZarrStore based on zarr.DirectoryStore.
+
+    """
+    store = zarr.DirectoryStore(path)
+    return ZarrStore[zarr.DirectoryStore](store, append_dim=append_dim, index_options=index_options, **kwargs)
+
+
+def get_zarr_memory_store(
+    append_dim: str = "time", index_options: dict | None = None, **kwargs: Any
+) -> ZarrStore[zarr.MemoryStore]:
+    """Factory function to create ZarrStore objects based on a zarr.MemoryStore.
+
+    Args:
+        append_dim: dimension to append new data along.
+        index_options: options for index along append dimension; for instance
+          `method = "nearest"`.
+        kwargs: `compressor`, `filters`, `encoding`, or arguments that could be
+          passed to `xr.Dataset.to_zarr`.
+
+    Returns:
+        ZarrStore based on zarr.MemoryStore.
+
+    """
+    store = zarr.MemoryStore()
+    return ZarrStore[zarr.MemoryStore](store, append_dim=append_dim, index_options=index_options, **kwargs)
+
+
+class VersionedZarrStore(VersionedStore, SimpleVersioning[ZST], ZarrStore[ZST]):
+    """Zarr storage with versions.
+
+    This class uses the methods from `ZarrStore` but overrides the `._store` attribute
+    to point to the current version of the zarr store held by the `SimpleVersioning` class.
+
+    Overriding `._store`
+    """
+
+    def __init__(
+        self,
+        factory: Callable[[str], ZST],
+        versions: Iterable[str] | None = None,
+        append_dim: str = "time",
+        index_options: dict | None = None,
+        compressor: Any | None = None,
+        filters: Any | None = None,
+        encoding: dict | None = None,
+        **to_zarr_kwargs: Any,
+    ) -> None:
+        """Create VersionedZarrStore object.
+
+        The `factory` and `versions` arguments are used to set up the
+        versioning, and the remaining arguments are passed to `ZarrStore`.
+
+        Args:
+            factory: function that produces a zarr store, given a version. For
+              instance, "v1" might map to a zarr directory store with path
+              `root_path / "v1"`.
+            versions: Versions to instantiate; these are loaded using the
+              `factory` function.
+            append_dim: dimension to append new data along.
+            index_options: options for the index used to resolve overlaps/conflicts when
+              adding data to the store.
+            compressor: compressor to use, see https://zarr.readthedocs.io/en/stable/tutorial.html#compressors
+            filters: filters to use, see https://zarr.readthedocs.io/en/stable/tutorial.html#filters
+            encoding: dictionary mapping data variables to encoding dictionary
+            to_zarr_kwargs: arguments that could be passed to `xr.Dataset.to_zarr`.
+              Not all parameters will be passed on. See here for the full description
+              of the parameters: https://docs.xarray.dev/en/latest/generated/xarray.Dataset.to_zarr.html
+
+              Accepted arguments are:
+              - `write_empty_chunks`
+              - `zarr_format` (automatically inferred by default)
+              - `storage_options`: only relevant to cloud storage, see
+                 https://github.com/pydata/xarray/pull/5615
+
+        """
+        super().__init__(
+            factory=factory,
+            versions=versions,
+        )
+
+        # manually set attributes for underlying ZarrStore (except for `self._store`,
+        # which is delegated to the current version).
+        self.append_dim = append_dim
+        self.index_options = index_options or {}
+        self.compressor = compressor
+        self.filters = filters
+        self.encoding = encoding or {}
+        self.to_zarr_kwargs = parse_to_zarr_kwargs(to_zarr_kwargs)
+
+    # make ._store an alias for ._current
+    @property
+    def _store(self) -> ZST:
+        return self._current
+
+    @_store.setter
+    def _store(self, value: ZST) -> None:
+        self._current = value
+
+    def copy_to_version(self, v: str) -> None:
+        """Copy current version to specified version.
+
+        The version "v" is created if it doesn't exist, and is overwritten otherwise.
+
+        This overrides the default method using `.deepcopy` to use Zarr's built in
+        copying method.
+
+        Args:
+            v: version to copy to
+
+        Raises:
+            VersionError if no version is currently checked out.
+
+        """
+        source = self._current  # will raise VersionError if no version checked out
+
+        if v not in self.versions:
+            self._versions[v] = self.factory(v)
+        dest = self._versions[v]
+        zarr.convenience.copy_store(source, dest)
+
+
+def get_versioned_zarr_directory_store(
+    path: Path,
+    versions: Iterable[str] | None = None,
+    append_dim: str = "time",
+    index_options: dict | None = None,
+    version_pat: str = r"v\d+",
+    **kwargs: Any,
+) -> VersionedZarrStore[zarr.DirectoryStore]:
+    """Factory function to create VersionedZarrStore objects based on a zarr.DirectoryStore.
+
+    Args:
+        path: root path where zarr `DirectoryStore`s will be based.
+        versions: list of versions to load.
+        append_dim: dimension to append new data along.
+        index_options: options for the index used to resolve overlaps/conflicts when
+            adding data to the store.
+        version_pat: regex pattern to match existing versions
+        kwargs: `compressor`, `filters`, `encoding`, or arguments that could be
+          passed to `xr.Dataset.to_zarr`.
+
+    Returns:
+        VersionedZarrStore object with zarr.DirectoryStore as the underlying
+        storage.
+
+    """
+    versions = set([]) if versions is None else set(versions)
+
+    # make path or look for versions if it already exists
+    if not path.exists():
+        path.mkdir(parents=True)
+    else:
+        # look for existing versions
+        compiled_reg = re.compile(version_pat)
+        for f in sorted(path.iterdir()):
+            if compiled_reg.match(str(f.name)):
+                versions.add(f.name)
+
+    # factory function to create a Directory Stores corresponding to versions
+    def factory(v: str) -> zarr.DirectoryStore:
+        """Factory function to create a Directory Store corresponding to version."""
+        return zarr.DirectoryStore(path / v)
+
+    return VersionedZarrStore[zarr.DirectoryStore](
+        factory=factory,
+        versions=versions,
+        append_dim=append_dim,
+        index_options=index_options,
+        **kwargs,
+    )
+
+
+def get_versioned_zarr_memory_store(
+    versions: Iterable[str] | None = None,
+    append_dim: str = "time",
+    index_options: dict | None = None,
+    **kwargs: Any,
+) -> VersionedZarrStore[zarr.MemoryStore]:
+    """Factory function to create VersionedZarrStore objects based on a zarr.MemoryStore.
+
+    Args:
+        versions: list of versions to load.
+        append_dim: dimension to append new data along.
+        index_options: options for the index used to resolve overlaps/conflicts when
+          adding data to the store.
+        kwargs: `compressor`, `filters`, `encoding`, or arguments that could be
+          passed to `xr.Dataset.to_zarr`.
+
+    Returns:
+        VersionedZarrStore object with zarr.MemoryStore as the underlying
+        storage.
+
+    """
+
+    def factory(_: str) -> zarr.MemoryStore:
+        """Factory for versioning."""
+        return zarr.MemoryStore()
+
+    return VersionedZarrStore[zarr.MemoryStore](
+        factory=factory,
+        versions=versions,
+        append_dim=append_dim,
+        index_options=index_options,
+        **kwargs,
+    )

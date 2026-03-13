@@ -27,9 +27,10 @@ possible using `surface_obs_resampler` as a base.
 from collections import defaultdict
 from collections.abc import Callable, Sequence
 from functools import partial, wraps
+import logging
 from typing import Any, Concatenate, Literal
 
-import logging
+import numpy as np
 import pandas as pd
 import xarray as xr
 from openghg.util import Registry
@@ -37,7 +38,6 @@ from typing_extensions import ParamSpec
 
 from ._attrs import rename, update_attrs
 from ._xarray_helpers import xr_sqrt
-
 
 registry = Registry(suffix="resample")
 register = registry.register
@@ -81,6 +81,63 @@ def mean_resample(ds: xr.Dataset, averaging_period: str) -> xr.Dataset:
     ds_resampled = ds.resample(time=averaging_period).mean(skipna=False, keep_attrs=True)
 
     return ds_resampled
+
+
+def _is_numeric_dtype(var: xr.DataArray) -> bool:
+    """Check if a DataArray's dtype can be used in numeric aggregations like mean().
+
+    This includes:
+    - Numeric types (int, float, complex)
+    - Boolean type
+    - Datetime types (datetime64, timedelta64)
+
+    This is based on xarray.core.common._is_numeric_aggregatable_dtype, but reproduced
+    here to avoid using a private function.
+
+    """
+    return bool(
+        np.issubdtype(var.dtype, np.number)
+        or (var.dtype == np.bool_)
+        or np.issubdtype(var.dtype, np.datetime64)
+        or np.issubdtype(var.dtype, np.timedelta64)
+    )
+
+
+@register
+@add_averaging_attrs
+def default_resample(ds: xr.Dataset, averaging_period: str) -> xr.Dataset:
+    """Resample numeric data to mean over averaging period, other data to first value.
+
+    This is meant to be a safe default resampling function. Using `mean_resample` as a
+    default would drop non-numeric data.
+
+    Args:
+        ds: xr.Dataset to resample
+        averaging_period: period to resample to; should be a valid pandas "offset alias"
+
+    Returns:
+        xr.Dataset with all numeric data variables mean resampled over averaging period
+          and the first value in each averaging period of non-numeric data variables
+    """
+    numeric_vars = []
+    non_numeric_vars = []
+    for dv in ds.data_vars:
+        if _is_numeric_dtype(ds[dv]):
+            numeric_vars.append(dv)
+        else:
+            non_numeric_vars.append(dv)
+
+    to_merge = []
+
+    if numeric_vars:
+        to_merge.append(ds[numeric_vars].resample(time=averaging_period).mean(skipna=False, keep_attrs=True))
+
+    if non_numeric_vars:
+        to_merge.append(
+            ds[non_numeric_vars].resample(time=averaging_period).first(skipna=False, keep_attrs=True)
+        )
+
+    return xr.merge(to_merge)
 
 
 @register
@@ -252,7 +309,7 @@ def uncorrelated_errors_resample(
 
 @register
 @add_averaging_attrs
-def variability_resample(ds: xr.Dataset, averaging_period: str, fill_zero: bool = True) -> xr.Dataset:
+def variability_resample(ds: xr.Dataset, averaging_period: str, fill_zero: bool = False) -> xr.Dataset:
     """Compute variability as stdev of observed mole fraction over averaging periods.
 
     Args:
@@ -271,7 +328,7 @@ def variability_resample(ds: xr.Dataset, averaging_period: str, fill_zero: bool 
     if fill_zero:
         # we can't filter by a dask array, so we need to call compute
         result = result.compute()
-        result = result.where(result == 0.0, result.median(dim="time"))
+        result = result.where(result != 0.0, result.median(dim="time"))
 
     result = update_attrs(result, (lambda x: x + "_variability", ["long_name"]))
 
@@ -286,7 +343,7 @@ def apply_funcs(
     ds: xr.Dataset,
     funcs: Sequence[DatasetOpType],
     func_vars: Sequence[list[str]],
-    remainder: Callable | Literal["pass", "drop"] = "pass",
+    remainder: DatasetOpType | Literal["pass", "drop"] = "pass",
     keep_attrs: bool | Literal["default"] = True,
 ) -> xr.Dataset:
     """Apply functions to the data variables of a dataset.
@@ -337,10 +394,11 @@ def apply_funcs(
             all_func_vars = [x for y in func_vars for x in y]
             remaining_vars = [str(dv) for dv in ds.data_vars if dv not in all_func_vars]
 
-            if remainder == "pass":
-                results.append(ds[remaining_vars])
-            else:
-                results.append(ds[remaining_vars].map(remainder))
+            if remaining_vars:
+                if remainder == "pass":
+                    results.append(ds[remaining_vars])
+                else:
+                    results.append(remainder(ds[remaining_vars]))
 
         return xr.merge(results)
 
@@ -399,8 +457,21 @@ def resampler(
 
     apply_func_kwargs = apply_func_kwargs or {"keep_attrs": True}
 
-    if "remainder" not in apply_func_kwargs:
-        apply_func_kwargs["remainder"] = partial(mean_resample, averaging_period=averaging_period)
+    # check for remainder and set default if None, otherwise, if string, try to interpret
+    # as resampling function
+    remainder = apply_func_kwargs.get("remainder")
+    if remainder is None:
+        apply_func_kwargs["remainder"] = partial(default_resample, averaging_period=averaging_period)
+    elif isinstance(remainder, str) and remainder not in ("drop", "pass"):
+        try:
+            func = registry.functions[remainder]
+        except KeyError as e:
+            raise ValueError(
+                f"Value {remainder} for apply_func_kwargs['remainder'] not recognised as a resampling function."
+            ) from e
+        else:
+            func_kwargs = registry.select_params(remainder, kwargs)
+            apply_func_kwargs["remainder"] = partial(func, **func_kwargs)
 
     result = apply_funcs(ds, funcs, func_vars, **apply_func_kwargs)
 
@@ -415,10 +486,10 @@ def resampler(
     return result
 
 
-def _surface_obs_resampler_dict(ds: xr.Dataset, species: str) -> dict[str, list[str]]:
+def _obs_resampler_dict(ds: xr.Dataset, species: str) -> dict[str, list[str]]:
     """Make dictionary mapping resampling functions to variables they will be applied to.
 
-    This is a helper function used by `surface_obs_resampler`.
+    This is a helper function used by `surface_obs_resampler` and `column_obs_resampler`.
 
     Args:
         ds: surface obs. data that resampler will be applied to
@@ -451,8 +522,9 @@ def _surface_obs_resampler_dict(ds: xr.Dataset, species: str) -> dict[str, list[
     elif n_obs in data_vars and species in data_vars:
         weighted_vars = [species, n_obs]
 
-        if variability in data_vars:
-            weighted_vars.append(variability)
+        for var_name in [variability, f"{species}_prior_factor", f"{species}_prior_upper_level_factor"]:
+            if var_name in data_vars:
+                weighted_vars.append(var_name)
 
         func_dict["weighted"] = weighted_vars
 
@@ -466,15 +538,15 @@ def _surface_obs_resampler_dict(ds: xr.Dataset, species: str) -> dict[str, list[
         # default, so set this explicitly
         if species not in func_dict.get("weighted", []):
             func_dict["mean"].append(species)
+            for var_name in [f"{species}_prior_factor", f"{species}_prior_upper_level_factor"]:
+                if var_name in data_vars:
+                    func_dict["mean"].append(var_name)
 
     return func_dict
 
 
 def surface_obs_resampler(
-    ds: xr.Dataset,
-    averaging_period: str,
-    species: str,
-    drop_na: bool = True,
+    ds: xr.Dataset, averaging_period: str, species: str, drop_na: bool = True, **kwargs: Any
 ) -> xr.Dataset:
     """Apply default resampling options for surface obs. data.
 
@@ -502,7 +574,7 @@ def surface_obs_resampler(
     Returns:
         xr.Dataset resampled according to default specification.
     """
-    resampler_dict = _surface_obs_resampler_dict(ds, species)
+    resampler_dict = _obs_resampler_dict(ds, species)
 
     if drop_na:
         check_any = [str(dv) for dv in ds.data_vars if str(dv) in [species, "inlet"]]
@@ -510,6 +582,49 @@ def surface_obs_resampler(
     else:
         drop_na_kwargs = False  # type: ignore
 
-    result = resampler(ds, averaging_period, resampler_dict, species=species, drop_na=drop_na_kwargs)
+    result = resampler(
+        ds, averaging_period, resampler_dict, species=species, drop_na=drop_na_kwargs, **kwargs
+    )
+
+    return result
+
+
+def column_obs_resampler(ds: xr.Dataset, averaging_period: str, species: str, **kwargs: Any) -> xr.Dataset:
+    """Apply default resampling options for surface obs. data.
+
+    If the data contains the number of observations as a data variable, the
+    this data variable and the species mole fraction will be resampling using
+    a weighted average. Additionally, if "variability" is present, it will be
+    resampled using weights as well.
+
+    Otherwise, the species mole fraction is resampled to the mean.
+
+    If "repeatability" is present, it is resampled using the "uncorrelated_errors" method.
+
+    If "variability" is not present, it is added by taking the standard deviation of the obs.
+
+    Any remaining variables are mean resampled.
+
+    Keeps attributes from original dataset.
+
+    Args:
+        ds: surface obs. data that resampler will be applied to
+        averaging_period: period to resample to; should be a valid pandas "offset alias"
+        species: species of the obs. data
+        drop_na: if True, drop NaNs along "time" dimension if any of [species, "inlet"] has nan.
+
+    Returns:
+        xr.Dataset resampled according to default specification.
+    """
+    resampler_dict = _obs_resampler_dict(ds, species)
+
+    result = resampler(
+        ds,
+        averaging_period,
+        resampler_dict,
+        species=species,
+        apply_func_kwargs={"remainder": "pass"},
+        **kwargs,
+    )
 
     return result

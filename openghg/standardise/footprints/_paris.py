@@ -19,7 +19,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_paris(
-    filepath: str | Path | list[str | Path],
+    filepath: str | Path | list[str] | list[Path],
     domain: str,
     model: str,
     inlet: str,
@@ -35,6 +35,7 @@ def parse_paris(
     time_resolved: bool = False,
     high_time_resolution: bool = False,
     short_lifetime: bool = False,
+    inner_domain: str | None = None,
 ) -> dict:
     """
     Read and parse input footprints data in "paris" format.
@@ -58,6 +59,7 @@ def parse_paris(
         high_time_resolution:  This argument is deprecated and will be replaced in future versions with time_resolved.
         short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
             Note this will be set to True if species has an associated lifetime.
+        inner_domain: If the footprints are for an inner domain. This will affect the expected dimensions of the data and how these are stored in the output Dataset.
     Returns:
         dict: Dictionary of data
     """
@@ -69,6 +71,8 @@ def parse_paris(
         )
         time_resolved = high_time_resolution
 
+    if inner_domain:
+        domain = f"{domain}-{inner_domain}"
     xr_open_fn, filepath = open_time_nc_fn(filepath, domain)
 
     fp_data = xr_open_fn(filepath)
@@ -86,7 +90,10 @@ def parse_paris(
 
     dim_rename = {"latitude": "lat", "longitude": "lon"}
 
-    dim_reorder = ("time", "height", "lat", "lon")
+    if inner_domain:
+        dim_reorder: tuple[str, ...] = ("time", "lat", "lon")
+    else:
+        dim_reorder = ("time", "height", "lat", "lon")
 
     if time_resolved is True:
         dv_rename["srr_time_resolved"] = "fp_time_resolved"
@@ -130,6 +137,7 @@ def parse_paris(
         "inlet": inlet,
         "height": inlet,
         "species": species,
+        "inner_domain": inner_domain,
     }
 
     metadata = {key: value for key, value in default_metadata.items() if value is not None}
@@ -139,6 +147,10 @@ def parse_paris(
 
     if network is not None:
         metadata["network"] = network
+
+    if site is not None and inlet == "column":
+        metadata["max_level"] = str(fp_data.attrs.get("max_level", "unknown"))
+        metadata["obs_openghg_uuid"] = fp_data.attrs.get("obs_openghg_uuid", None)
 
     # Check if time has 0-dimensions and, if so, expand this so time is 1D
     if "time" in fp_data.coords:
@@ -185,10 +197,10 @@ def parse_paris(
     metadata["high_spatial_resolution"] = str(high_spatial_resolution)
     metadata["short_lifetime"] = str(short_lifetime)
 
-    metadata["heights"] = [float(h) for h in fp_data.height.values]
+    if not inner_domain:
+        metadata["heights"] = [float(h) for h in fp_data.height.values]
     # Do we also need to save all the variables we have available in this footprints?
     metadata["variables"] = list(fp_data.data_vars)
-
     # if model_params is not None:
     #     metadata["model_parameters"] = model_params
 

@@ -21,6 +21,7 @@ class ColumnTypes(Enum):
     """Types of column data files that can be standardised"""
 
     OPENGHG = "OPENGHG"
+    TCCON = "TCCON"
 
 
 class ColumnSources(Enum):
@@ -70,6 +71,12 @@ class EulerianModelTypes(Enum):
     OPENGHG = "OPENGHG"
 
 
+class MetTypes(Enum):
+    """For standardising meteorological data"""
+
+    ECMWF = "ECMWF"
+
+
 class DataTypes(Enum):
     CRDS = "CRDS"
     GCWERKS = "GCWERKS"
@@ -85,3 +92,4 @@ class DataTypes(Enum):
 
 class BoundaryConditions(Enum):
     OPENGHG = "OPENGHG"
+    CAMS = "CAMS"

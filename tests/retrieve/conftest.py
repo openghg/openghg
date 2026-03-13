@@ -93,6 +93,7 @@ def data_read():
         site="tac",
         network="DECC",
         instrument="picarro",
+        inlet="185.0m",
         sampling_period="1h",
         update_mismatch="metadata",
     )
@@ -109,11 +110,11 @@ def data_read():
         site="tac",
         network="DECC",
         instrument="picarro",
+        inlet="185.0m",
         sampling_period="1h",
         tag=["ceda_v1", "gemma_v1"],
         update_mismatch="metadata",
     )
-
 
     # Obs Column data
     column_datapath = get_column_datapath("gosat-fts_gosat_20170318_ch4-column.nc")

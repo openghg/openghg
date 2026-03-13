@@ -62,17 +62,13 @@ We'll first install and update some installation tools
 
    pip install --upgrade pip wheel setuptools
 
-Now, making sure we're in the root of the OpenGHG repository we just cloned, install OpenGHG's requirements and its developer requirements.
+Now, making sure we're in the root of the OpenGHG repository we just cloned, install OpenGHG's development dependencies.
 
 .. code-block:: bash
 
-   pip install -r requirements.txt -r requirements-dev.txt
+   pip install -e ".[dev]"
 
-Finally install OpenGHG itself. The ``-e`` / ``--editable`` flag here tells ``pip`` to install the OpenGHG repo in develop mode.
-
-.. code-block:: bash
-
-   pip install -e .
+This installs OpenGHG in editable mode (``-e`` / ``--editable`` flag) with all development dependencies defined in ``pyproject.toml``.
 
 OpenGHG should now be installed, you can check this by opening ``ipython`` and running
 
@@ -378,12 +374,12 @@ Google `style docstrings <https://sphinxcontrib-napoleon.readthedocs.io/en/lates
 for details. The documentation is automatically built using `Sphinx <http://sphinx-doc.org>`__. Whenever a commit is pushed to devel the
 documentation is automatically rebuilt and updated.
 
-To build the documentation locally you will first need to install some
-additional packages. If you haven't yet installed the documentation requirements please do so by running
+To build the documentation locally you will first need to install the
+documentation dependencies. If you haven't yet installed the documentation dependencies please do so by running
 
 .. code-block:: bash
 
-   pip install -r requirements-doc.txt
+   pip install -e ".[doc]"
 
 Next ensure you have `pandoc <https://pandoc.org/>`__ installed. Installation instructions
 can be `found here <https://pandoc.org/installing.html>`__

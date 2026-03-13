@@ -4,13 +4,12 @@ from pandas import Timestamp as pd_Timestamp
 
 from openghg.util import clean_string, timestamp_now, timestamp_tzaware, open_time_nc_fn
 
-
 logger = logging.getLogger("openghg.standardise.eulerian_model")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def parse_openghg(
-    filepath: str | Path | list[str | Path],
+    filepath: str | Path | list[str] | list[Path],
     model: str,
     species: str,
     start_date: str | None = None,
@@ -45,7 +44,7 @@ def parse_openghg(
     end_date = clean_string(end_date)
     setup = clean_string(setup)
 
-    with xr_open_fn(filepath).chunk(chunks) as em_data:
+    with xr_open_fn(filepath).chunk(chunks if chunks is not None else {}) as em_data:
         # Check necessary 4D coordinates are present and rename if necessary (for consistency)
         check_coords = {
             "time": ["time"],

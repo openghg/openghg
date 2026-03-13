@@ -110,7 +110,7 @@ def regrid_uniform_cc(
         ndarray / DataArray : Regridded data using specified method
     """
     try:
-        import xesmf  # type:ignore
+        import xesmf  # type: ignore
     except ImportError as e:
         raise ImportError(construct_xesmf_import_error(e))
 
@@ -141,7 +141,7 @@ def regrid_uniform_cc(
     lat_in = cast(ArrayLike, lat_in)
     lon_in = cast(ArrayLike, lon_in)
 
-    if data.shape != (lat_in.size, lon_in.size):
+    if data.shape[-2:] != (lat_in.size, lon_in.size):
         raise ValueError(
             f"Shape of input 'data' {data.shape}"
             f"does not match 'lat_in' and 'lon_in' lengths: {len(lat_in)}, {len(lon_in)}"
