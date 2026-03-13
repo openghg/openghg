@@ -461,3 +461,129 @@ def test_parse_edgar_monthly_v8_2024(edgar_v8_monthly_dir):
     assert metadata["start_date"].startswith("2001-01-15")
     # end_date = last timestamp (Dec 15) + 1 month - 1 second = Jan 14 2002 23:59:59
     assert metadata["end_date"].startswith("2002-01-14")
+
+
+@pytest.fixture(scope="module")
+def edgar_v8_monthly_global_dir(tmp_path_factory):
+    """
+    Create a temporary directory with a synthetic monthly EDGAR v8 (2024) file
+    on a global grid, suitable for regridding to a regional domain (e.g. EUROPE).
+
+    The lat/lon covers the full globe at ~1 degree resolution so that regridding
+    with xesmf to a pre-defined domain (e.g. EUROPE) works correctly. The file
+    structure and variable names match real EDGAR 2024 monthly sectoral files:
+        EDGAR_2024_GHG_CH4_2001_AGRICULTURE_flx.nc
+    """
+    tmpdir = tmp_path_factory.mktemp("edgar_monthly_global")
+    edgar_dir = tmpdir / "monthly_sectoral" / "AGRICULTURE"
+    edgar_dir.mkdir(parents=True)
+
+    # Global lat/lon at ~1 degree resolution (small enough for tests, large enough for regridding)
+    lat = np.round(np.arange(-89.5, 90.0, 1.0), 2)
+    lon = np.round(np.arange(-179.5, 180.0, 1.0), 2)
+
+    # Time values from real EDGAR 2024 file (ncdump: time units = "days since 2001-01-01 00:00:00")
+    # These are mid-month offsets: day 14 = Jan 15, day 45 = Feb 15, etc.
+    time_days = np.array([14, 45, 73, 104, 134, 165, 195, 226, 257, 287, 318, 348], dtype=np.float32)
+    base_date = np.datetime64("2001-01-01")
+    time_dates = base_date + time_days.astype("timedelta64[D]")
+
+    rng = np.random.default_rng(123)
+    # Scale factor ~1e-10 is representative of real EDGAR CH4 flux magnitudes (kg m-2 s-1)
+    fluxes_data = rng.random((12, len(lat), len(lon))).astype(np.float32) * 1e-10
+
+    ds = xr.Dataset(
+        {
+            "fluxes": xr.DataArray(
+                fluxes_data,
+                dims=["time", "lat", "lon"],
+                attrs={
+                    "units": "kg m-2 s-1",
+                    "substance": "CH4",
+                    "year": "2001",
+                    "release": "EDGARv2024ghg",
+                    "long_name": "Agriculture",
+                    "description": "Agriculture",
+                },
+            )
+        },
+        coords={
+            "lat": xr.DataArray(
+                lat,
+                dims=["lat"],
+                attrs={"units": "degrees_north", "standard_name": "latitude", "long_name": "latitude"},
+            ),
+            "lon": xr.DataArray(
+                lon,
+                dims=["lon"],
+                attrs={"units": "degrees_east", "standard_name": "longitude", "long_name": "longitude"},
+            ),
+            "time": xr.DataArray(
+                time_dates,
+                dims=["time"],
+                attrs={"long_name": "time", "standard_name": "time"},
+            ),
+        },
+        attrs={
+            "description": "Agriculture",
+            "institution": "European Commission, Joint Research Centre",
+            "source": "https://edgar.jrc.ec.europa.eu/dataset_ghg2024",
+            "how_to_cite": "https://edgar.jrc.ec.europa.eu/dataset_ghg2024#howtocite",
+            "copyright_notice": "https://edgar.jrc.ec.europa.eu/dataset_ghg2024#conditions",
+            "contacts": "https://edgar.jrc.ec.europa.eu/dataset_ghg2024#info JRC-EDGAR@ec.europa.eu",
+            "units": "kg m-2 s-1",
+        },
+    )
+
+    filepath = edgar_dir / "EDGAR_2024_GHG_CH4_2001_AGRICULTURE_flx.nc"
+    ds.to_netcdf(filepath, encoding={"time": {"units": "days since 2001-01-01 00:00:00"}})
+
+    return edgar_dir
+
+
+@pytest.mark.xesmf
+def test_parse_edgar_monthly_v8_2024_europe_domain(edgar_v8_monthly_global_dir):
+    """
+    Test parse_edgar with a synthetic monthly EDGAR v8 (2024) file, regridding to the EUROPE domain.
+
+    Uses a synthetic global grid so that xesmf can conservatively regrid the monthly
+    fluxes to the EUROPE domain. Verifies:
+    - Output is on the EUROPE lat/lon grid
+    - Flux variable is present with mol/m2/s units
+    - Time dimension has 12 monthly steps
+    - Metadata domain, source, time_period are set correctly
+    """
+    xesmf = pytest.importorskip("xesmf")
+
+    edgar_dir = edgar_v8_monthly_global_dir
+    domain = "EUROPE"
+
+    result = parse_edgar(edgar_dir, date="2001", species="ch4", edgar_version="v8.0", domain=domain)
+
+    assert len(result) == 1
+    data_values = list(result.values())[0]
+    data = data_values["data"]
+
+    # Check the output is on the EUROPE grid
+    from openghg.util import find_domain
+
+    domain_lat, domain_lon = find_domain(domain)[:2]
+    np.testing.assert_array_equal(data["lat"].values, domain_lat)
+    np.testing.assert_array_equal(data["lon"].values, domain_lon)
+
+    # Check flux variable
+    assert "flux" in data
+    assert data["flux"].attrs["units"] == "mol/m2/s"
+
+    # Check time dimension has 12 monthly steps
+    assert "time" in data.dims
+    assert data.sizes["time"] == 12
+
+    # Check metadata
+    metadata = data_values["metadata"]
+    assert metadata["species"] == "ch4"
+    assert metadata["domain"] == domain
+    assert metadata["source"] == "agriculture"
+    assert metadata["database"] == "EDGAR"
+    assert metadata["database_version"] == "v8.0"
+    assert metadata["time_period"] == "1 month"
