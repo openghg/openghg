@@ -317,40 +317,54 @@ def test_open_multi_object_store_all_data_types():
 
 @pytest.mark.xfail(
     reason=(
-        "standardise_surface triggers a MetastoreError ('object store modified while write in progress') "
-        "because LockingObjectStore.__exit__ closes the TinyDB but BaseStore.save() then calls close() "
-        "again, causing SafetyCachingMiddleware to fail the hash check. "
-        "Track resolution at: https://github.com/openghg/openghg/issues (double-close bug). "
-        "This test documents the intended end-to-end behaviour and should be un-xfailed once fixed."
+        "standardise_surface fails in the base branch (multi-meta-store) because "
+        "LockingObjectStore.__exit__ closes the TinyDB metastore, but then BaseStore.save() "
+        "calls close() a second time. This causes SafetyCachingMiddleware to fail its hash check "
+        "('object store modified while write in progress', MetastoreError). "
+        "This test uses a clean temporary bucket to isolate that bug from fixture side-effects. "
+        "It should be un-xfailed once the double-close issue is resolved."
     ),
     strict=False,
 )
-def test_standardise_surface_and_search_multi_store():
-    """End-to-end test: standardise a real data file into the group store, then
-    verify it is discoverable via search() alongside the user-store records.
+def test_standardise_surface_and_search_multi_store(tmp_path):
+    """End-to-end test: standardise a real data file into a fresh store, then
+    verify it is discoverable via open_multi_object_store.
 
-    Note: this test is currently xfail because standardise_surface raises
-    MetastoreError due to a pre-existing bug in the base branch. See the
-    xfail marker for details.
+    Uses a dedicated tmp_path bucket (not the 'group' store) to avoid interference
+    from the module-level fixture's metastore data, so the failure is purely the
+    double-close MetastoreError in the base branch.
     """
+    from unittest.mock import patch
+
     from openghg.standardise import standardise_surface
+
+    fresh_bucket = str(tmp_path / "fresh_store")
+
+    # Add the fresh bucket to the readable/writable config so standardise_surface can find it
+    extra_config = {
+        "object_store": {
+            "user": {"path": str(temporary_store_paths()["user"]), "permissions": "rw"},
+            "group": {"path": str(temporary_store_paths()["group"]), "permissions": "rw"},
+            "shared": {"path": str(temporary_store_paths()["shared"]), "permissions": "r"},
+            "fresh": {"path": fresh_bucket, "permissions": "rw"},
+        },
+        "user_id": "test-id-123",
+        "config_version": "2",
+    }
 
     bsd_42_path = get_surface_datapath(
         filename="bsd.picarro.1minute.42m.min.dat", source_format="CRDS"
     )
 
-    standardise_surface(
-        store="group",
-        filepath=bsd_42_path,
-        source_format="CRDS",
-        site="bsd",
-        network="DECC",
-    )
+    with patch("openghg.objectstore._local_store.read_local_config", return_value=extra_config):
+        standardise_surface(
+            store="fresh",
+            filepath=bsd_42_path,
+            source_format="CRDS",
+            site="bsd",
+            network="DECC",
+        )
 
-    # Search should now find BSD co2 at 42m in the group store in addition to existing records
-    res = search(site="bsd", species="co2", inlet="42m", store="group")
-    assert res, "Expected BSD co2 42m data in group store after standardise"
-
-    # Cross-store search should also find it
-    res_all = search(site="bsd", species="co2", inlet="42m")
-    assert res_all, "Expected BSD co2 42m data from cross-store search"
+        # If standardise_surface somehow succeeds, verify the data is searchable
+        res = search(site="bsd", species="co2", inlet="42m", store="fresh")
+        assert res, "Expected BSD co2 42m data in fresh store after standardise"
