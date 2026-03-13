@@ -75,7 +75,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 ArrayType = Optional[Union[ndarray, xr.DataArray]]
 
 
-_edgar_known_versions = ("v432", "v50", "v60", "v70", "v80")
+_edgar_known_versions = ("v432", "v4.3.2", "v50", "v5.0", "v60", "v6.0", "v70", "v7.0", "v80", "v8.0")
 
 
 # TODO: make this work for...
@@ -266,7 +266,7 @@ def parse_edgar(
 
     # get dataset
     # using .open("rb") for pathlib.Path and zipfile.Path compatibility
-    edgar_ds = xr.open_dataset(edgar_file.open("rb"))
+    edgar_ds = xr.open_dataset(edgar_file.open("rb"), engine="h5netcdf")
 
     # Expected name e.g. "emi_ch4", "emi_co2" for version <= 7; "fluxes" for version 8
     name = "fluxes" if version.startswith("v8") else f"emi_{species_label}"
@@ -297,7 +297,7 @@ def parse_edgar(
 
     # TODO: some options for f-gases (.emi files) have different units...
     # need to catch this
-    flux_da = regrid_to_domain(flux_da, domain).rename("flux")
+    flux_da = regrid_to_domain(flux_da, domain, lat_out=lat_out, lon_out=lon_out).rename("flux")
     em_data = flux_da.to_dataset()
     em_data.attrs = edgar_ds.attrs
 
@@ -420,7 +420,7 @@ def _check_lat_lon(
         # If domain is specified, attempt to extract lat/lon values from
         # pre-defined definitions.
         try:
-            lat_domain, lon_domain = find_domain(domain)
+            lat_domain, lon_domain = find_domain(domain)[:2]
         except ValueError:
             # If domain cannot be found and lat, lon values have not been
             # defined raise an error.
@@ -513,7 +513,7 @@ def _parse_edgar_filename(file_name: str) -> dict:
     )
 
     monthly_sectoral_info_pat = re.compile(
-        r"(?P<species>[a-zA-Z\d-])_" r"(?P<year>(19|20)\d{2})_" r"(?P<sector>\w+)"
+        r"(?P<species>[a-zA-Z\d-]+)_" r"(?P<year>(19|20)\d{2})_" r"(?P<sector>\w+)"
     )
 
     if m := info_pat.search(filename_clean):
@@ -568,6 +568,8 @@ def _extract_file_info(edgar_file: Union[pathlib.Path, zipfile.Path, str]) -> Di
     # monthly sectoral regex doesn't have co2_options...
     try:
         co2_options = file_info.pop("co2_options")
+        if co2_options is None:
+            co2_options = ""
     except KeyError:
         co2_options = ""
 
@@ -599,7 +601,9 @@ def _extract_file_info(edgar_file: Union[pathlib.Path, zipfile.Path, str]) -> Di
     return file_info
 
 
-def regrid_to_domain(flux_da: xr.DataArray, domain: str | None = None) -> xr.DataArray:
+def regrid_to_domain(
+    flux_da: xr.DataArray, domain: str | None = None, lat_out: ArrayType = None, lon_out: ArrayType = None
+) -> xr.DataArray:
     lat_name = find_coord_name(flux_da, options=["lat", "latitude"])
     lon_name = find_coord_name(flux_da, options=["lon", "longitude"])
 
@@ -614,7 +618,7 @@ def regrid_to_domain(flux_da: xr.DataArray, domain: str | None = None) -> xr.Dat
         flux_da, lon_name=lon_name
     )  # TODO is this creating NaNs for East Asia domain?
 
-    lat_out, lon_out = _check_lat_lon(domain)
+    lat_out, lon_out = _check_lat_lon(domain, lat_out=lat_out, lon_out=lon_out)
 
     if lat_out is not None and lon_out is not None and domain is not None:
         # To improve performance of regridding algorithm cut down the data
