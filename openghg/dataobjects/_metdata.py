@@ -1,10 +1,11 @@
 from dataclasses import dataclass
-from typing import Dict
 
 from xarray import Dataset
+
+__all__ = ["METData"]
 
 
 @dataclass(frozen=True)
 class METData:
     data: Dataset
-    metadata: Dict
+    metadata: dict

@@ -1,0 +1,42 @@
+name: Build Documentation
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Install project with doc extras
+        run: uv sync --extra doc
+
+
+      - name: Setup default config
+        run: uv run openghg --default-config
+
+      - name: Install pandoc
+        run: sudo apt-get install -y pandoc
+
+      - name: Build documentation
+        run: |
+          cd doc
+          uv run make html
+
+      - name: Upload documentation artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: documentation-html
+          path: doc/build/html

@@ -1,20 +1,20 @@
 from pathlib import Path
-from typing import DefaultDict, Dict, Optional, Union
-
 from pandas import DataFrame
+
+from openghg.types import pathType
 
 __all__ = ["parse_beaco2n"]
 
 
 def parse_beaco2n(
-    filepath: Union[str, Path],
+    filepath: pathType,
     site: str,
     network: str,
     inlet: str,
-    instrument: Optional[str] = "shinyei",
-    sampling_period: Optional[str] = None,
-    **kwargs: Dict,
-) -> Dict:
+    instrument: str | None = "shinyei",
+    sampling_period: str | None = None,
+    **kwargs: dict,
+) -> dict:
     """Read BEACO2N data files
 
     Args:
@@ -36,7 +36,6 @@ def parse_beaco2n(
         sampling_period = "NOT_SET"
 
     filepath = Path(filepath)
-    datetime_columns = {"time": ["datetime"]}
     use_cols = [1, 5, 6, 7, 8, 9, 10]
     na_values = [-999.0]
 
@@ -45,15 +44,18 @@ def parse_beaco2n(
     try:
         data = pd.read_csv(
             filepath,
-            index_col="time",
+            index_col="datetime",
             usecols=use_cols,
-            parse_dates=datetime_columns,
+            parse_dates=["datetime"],
             na_values=na_values,
         )
     except ValueError as e:
         raise ValueError(
             f"Unable to read data file, please make sure it is in the standard BEACO2N format.\nError: {e}"
         )
+
+    # Rename index to time for consistency
+    data.index.name = "time"
 
     beaco2n_site_data = load_internal_json(filename="beaco2n_site_data.json")
 
@@ -84,7 +86,7 @@ def parse_beaco2n(
 
     units = {"pm": "ug/m3", "co2": "ppm", "co": "ppm"}
 
-    gas_data: DefaultDict[str, Dict[str, Union[DataFrame, Dict]]] = defaultdict(dict)
+    gas_data: defaultdict[str, dict[str, DataFrame | dict]] = defaultdict(dict)
     for mt in measurement_types:
         m_data = data[[mt, f"{mt}_qc"]]
         m_data = m_data.dropna(axis="rows", subset=[mt])

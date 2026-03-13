@@ -13,6 +13,8 @@ from openghg.retrieve import (
 from openghg.dataobjects import data_manager
 from pandas import Timestamp
 
+from tests.helpers.helpers import print_dict_diff
+
 
 @pytest.mark.parametrize(
     "inlet_keyword,inlet_value",
@@ -81,7 +83,7 @@ def test_search_surface_range():
     res = search_surface(
         site="TAC",
         species="co2",
-        inlet="185",
+        inlet="185.0m",
         start_date="2013-02-01",
         end_date="2013-03-01",
     )
@@ -94,11 +96,44 @@ def test_search_surface_range():
         "site": "tac",
         "instrument": "picarro",
         "sampling_period": "3600.0",
-        "inlet": "185m",
+        "inlet": "185.0m",
         "network": "decc",
         "species": "co2",
         "data_type": "surface",
-        "inlet_height_magl": "185",
+        "inlet_height_magl": "185.0",
+    }
+
+    assert res.metadata[key].items() >= partial_metdata.items()
+
+
+def test_search_surface_inlet_format():
+    """
+    Test that the numerical value for inlet is used in search rather than
+    the string match to numerical value.
+    In this case we're checking we can search using inlet="185m" and find
+    data where metadata includes {"inlet": "185.0m"}
+    """
+    res = search_surface(
+        site="TAC",
+        species="co2",
+        inlet="185m",  # No decimal
+        start_date="2013-02-01",
+        end_date="2013-03-01",
+    )
+
+    assert res is not None
+
+    key = next(iter(res.metadata))
+
+    partial_metdata = {
+        "site": "tac",
+        "instrument": "picarro",
+        "sampling_period": "3600.0",
+        "inlet": "185.0m",  # Inlet *value* in string is same but stored to 1 decimal place
+        "network": "decc",
+        "species": "co2",
+        "data_type": "surface",
+        "inlet_height_magl": "185.0",
     }
 
     assert res.metadata[key].items() >= partial_metdata.items()
@@ -143,15 +178,16 @@ def test_search_site():
         "inlet_height_magl": "42",
         "data_owner": "simon o'doherty",
         "data_owner_email": "s.odoherty@bristol.ac.uk",
-        "station_longitude": -1.15033,
-        "station_latitude": 54.35858,
+        "station_longitude": -1.15036,
+        "station_latitude": 54.35861,
         "station_long_name": "bilsdale, uk",
-        "station_height_masl": 380.0,
+        "station_height_masl": 382.0,
     }
 
     key = next(iter(res.metadata))
     metadata = res.metadata[key]
 
+    print_dict_diff(expected, metadata, skip_missing=True)
     assert expected.items() <= metadata.items()
 
     res = search(
@@ -176,15 +212,16 @@ def test_search_site():
         "inlet_height_magl": "108",
         "data_owner": "simon o'doherty",
         "data_owner_email": "s.odoherty@bristol.ac.uk",
-        "station_longitude": -1.15033,
-        "station_latitude": 54.35858,
+        "station_longitude": -1.15036,
+        "station_latitude": 54.35861,
         "station_long_name": "bilsdale, uk",
-        "station_height_masl": 380.0,
+        "station_height_masl": 382.0,
     }
 
     key = next(iter(res.metadata))
     metadata = res.metadata[key]
 
+    print_dict_diff(expected, metadata, skip_missing=True)
     assert expected.items() <= metadata.items()
 
     res = search(site="atlantis")
@@ -263,6 +300,30 @@ def test_optional_term_search():
 
     inlets = set([x["inlet"] for x in res.metadata.values()])
     assert inlets == {"42m"}
+
+
+@pytest.mark.parametrize(
+    "tag",
+    ["gemma_v1", ["ceda_v1"], ["gemma_v1", "ceda_v1"]],
+)
+def test_search_by_tag(tag):
+    """
+    Test to check we can search by tag. Setup
+     - "DECC-picarro_TAC_20130131_co2-185m-20230101_cut.nc" data has been added with:
+       - tag=["ceda_v1", "gemma_v1"]
+
+    1. Check passing a string with a correct tag
+    2. Check passing a list with a correct tag
+    3. Check passing both tags out of order
+    """
+    res = search_surface(tag=tag)
+    assert len(res.metadata) == 1
+
+    partial_metadata = {"site": "tac", "network": "decc", "inlet": "185.0m", "species": "co2"}
+
+    key = next(iter(res.metadata))
+
+    assert res.metadata[key].items() >= partial_metadata.items()
 
 
 def test_nonsense_terms():
@@ -642,6 +703,7 @@ def test_search_for_float_inlet(tmp_path):
 
     bucket = str(tmp_path / "_metastore._data")
 
+    # Just use metastore here because we don't need to mock data.
     with open_metastore(bucket=bucket, data_type="surface", mode="rw") as metastore:
         metastore.insert({"uuid": "abc123", "inlet": "12.3m", "data_type": "surface"})
 
@@ -650,3 +712,30 @@ def test_search_for_float_inlet(tmp_path):
         result = search(inlet="12.3m", data_type="surface", store="temp")
 
     assert result
+
+
+def test_search_footprints_column_inlet(tmp_path):
+    """Test searching for footprints with inlet='column' (satellite data)"""
+    from openghg.objectstore.metastore import open_metastore
+
+    bucket = str(tmp_path / "_metastore._data")
+
+    # Create metastore entry for satellite footprint with inlet="column"
+    with open_metastore(bucket=bucket, data_type="footprints", mode="rw") as metastore:
+        metastore.insert(
+            {
+                "uuid": "sat123",
+                "inlet": "column",
+                "satellite": "GOSAT",
+                "domain": "SOUTHAMERICA",
+                "model": "NAME",
+                "data_type": "footprints",
+            }
+        )
+
+    with mock.patch("openghg.retrieve._search.get_readable_buckets", return_value={"temp": bucket}):
+        # This should not raise ValueError about extracting float from 'column'
+        result = search_footprints(inlet="column", store="temp")
+
+    assert result
+    assert len(result.metadata) == 1

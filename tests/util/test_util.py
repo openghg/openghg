@@ -1,44 +1,17 @@
 import os
+import numpy as np
 from pathlib import Path
 
 import pytest
-from openghg.types import InvalidSiteError
 from openghg.util import (
+    check_unique,
     read_header,
-    read_local_config,
-    running_in_cloud,
-    running_locally,
-    running_on_hub,
     site_code_finder,
     synonyms,
     to_lowercase,
     verify_site,
     sort_by_filenames,
 )
-
-
-def test_running_locally(monkeypatch):
-    monkeypatch.setenv("OPENGHG_PATH", "/tmp/this_that")
-    assert running_locally()
-
-    monkeypatch.setenv("OPENGHG_CLOUD", "1")
-    monkeypatch.setenv("OPENGHG_HUB", "1")
-
-    assert running_in_cloud()
-    assert running_on_hub()
-
-    assert not running_locally()
-
-    monkeypatch.setenv("OPENGHG_CLOUD", "0")
-
-    assert not running_in_cloud()
-    assert not running_locally()
-
-    monkeypatch.setenv("OPENGHG_HUB", "0")
-
-    assert not running_on_hub()
-
-    assert running_locally()
 
 
 def test_read_header():
@@ -138,3 +111,20 @@ def test_sorting_with_str():
     sorted_file = sort_by_filenames(filepaths)
 
     assert isinstance(sorted_file, list)
+
+
+@pytest.mark.parametrize(
+    "input,expected_result",
+    [
+        ([1, 2, 3, 4, 5], True),  # no repeats
+        ([1, 2, 3, 4, 5, 5], False),  # repeats
+        ([1, 2, 3, 4, 5, 5.1, 5.1], False),  # floats
+        (np.array([1, 2, 3, 4, 5, 5.1, 5.1]), False),  # np.array
+    ],
+)
+def test_check_unique(input, expected_result):
+    """
+    Test the check_unique function returns True/False as expected
+    """
+    result = check_unique(input)
+    assert result == expected_result

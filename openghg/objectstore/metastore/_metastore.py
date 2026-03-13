@@ -19,11 +19,13 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from functools import reduce
-from typing import Any, Callable
+from typing import Any
+from collections.abc import Callable, MutableMapping
 
 import tinydb
 from tinydb.operations import delete as tinydb_delete
 
+from openghg.util import merge_and_extend_dict
 from openghg.types import MetastoreError
 
 MetaData = dict[str, Any]
@@ -95,6 +97,7 @@ class MetaStore(ABC):
         where: MetaData,
         to_update: MetaData | None = None,
         to_delete: str | list[str] | None = None,
+        to_extend: dict | None = None,
     ) -> None:
         """Update a single record with given metadata.
 
@@ -103,6 +106,10 @@ class MetaStore(ABC):
                 identify the record.
             to_update: metadata to overwrite or add to the record.
             to_delete: key or list of keys to delete from record.
+            to_extend: dict of values to extend metadata by, meaning that if the key is already
+                present, then the value there is (possibly converted to a list and) extended by the
+                input value. This allows updating values stored as lists by extending them, rather
+                than replacing the values.
 
         Returns:
             None
@@ -137,6 +144,10 @@ class MetaStore(ABC):
         """
         result = self.search(search_terms=metadata)
         return len(result) == 1
+
+    def close(self) -> None:
+        """Clean up any resources used by the Metastore."""
+        pass
 
 
 class TinyDBMetaStore(MetaStore):
@@ -213,11 +224,28 @@ class TinyDBMetaStore(MetaStore):
         queries = [~(tinydb.Query()[k].exists()) for k in negative_lookup_keys]
         return reduce(lambda x, y: (x & y), queries)
 
+    def _get_list_items_query(self, search_list_keys: dict[str, str | list]) -> tinydb.queries.QueryInstance:
+        """Return a TinyDB query for searching list entries in the TinyDB database.
+        For the specified keys and values this finds all records which contain the specified
+        values within a list.
+
+        Args:
+            search_list_keys: Dictionary to describe the key and values to search. Expect the
+             specified key to contain a list entry in the TinyDB database.
+
+        Returns:
+            TinyDB QueryInstance that checks if values are present in lists for given keys
+        """
+        search_list_keys = {k: [v] if not isinstance(v, list) else v for k, v in search_list_keys.items()}
+        queries = [tinydb.Query()[k].all(v) for k, v in search_list_keys.items()]
+        return reduce(lambda x, y: (x & y), queries)
+
     def search(
         self,
         search_terms: MetaData | None = None,
         search_functions: dict[str, Callable] | None = None,
         negative_lookup_keys: list[str] | None = None,
+        search_list_keys: dict | None = None,
     ) -> QueryResults:
         """Search metastore using a dictionary of search terms.
 
@@ -229,6 +257,9 @@ class TinyDBMetaStore(MetaStore):
                 See `_get_function_query` docstring for examples.
             negative_lookup_keys: list of keys that should *not* be present in the
                 results.
+            search_list_keys: dictionary of keys which we expect to be store lists
+                in the database and the values to search. This allows a
+                search for values in those lists rather than exact matches.
 
         Returns:
             list: list of records in the metastore matching the given search terms.
@@ -244,6 +275,10 @@ class TinyDBMetaStore(MetaStore):
         if negative_lookup_keys:
             _neg_query = self._get_negative_lookup_query(negative_lookup_keys)
             _query &= _neg_query
+
+        if search_list_keys:
+            _list_query = self._get_list_items_query(search_list_keys)
+            _query &= _list_query
 
         return list(self._db.search(_query))
 
@@ -263,6 +298,7 @@ class TinyDBMetaStore(MetaStore):
         where: MetaData,
         to_update: MetaData | None = None,
         to_delete: str | list[str] | None = None,
+        to_extend: dict | None = None,
     ) -> None:
         """Update a single record with given metadata.
 
@@ -271,6 +307,10 @@ class TinyDBMetaStore(MetaStore):
                 identify the record.
             to_update: metadata to overwrite or add to the record.
             to_delete: key or list of keys to delete from record.
+            to_extend: dict of values to extend metadata by, meaning that if the key is already
+                present, then the value there is (possibly converted to a list and) extended by the
+                input value. This allows updating values stored as lists by extending them, rather
+                than replacing the values.
 
         Returns:
             None
@@ -287,6 +327,15 @@ class TinyDBMetaStore(MetaStore):
                 to_delete = [to_delete]
             for key in to_delete:
                 self._db.update(tinydb_delete(key), _query)
+        if to_extend:
+
+            def extender(doc: MutableMapping) -> None:
+                # NOTE: type hints for TinyDB.Table.update are incorrect, so we have to
+                # suppress Mypy below
+                result = merge_and_extend_dict(dict(doc), to_extend)
+                doc.update(result)
+
+            self._db.update(extender, _query)  # type: ignore
 
     def delete(self, metadata: MetaData, delete_one: bool = True) -> None:
         """Delete metadata from the metastore.
@@ -313,3 +362,10 @@ class TinyDBMetaStore(MetaStore):
         super().delete(metadata, delete_one)  # Error handling
         _query = self._get_query(metadata)
         self._db.remove(_query)
+
+    def close(self) -> None:
+        """Clean up any resources used by the Metastore.
+
+        Closes the TinyDB store.
+        """
+        self._db.close()

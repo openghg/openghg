@@ -1,13 +1,19 @@
+import logging
 import bz2
+from functools import partial, wraps
 import json
-import os
-import xarray as xr
 from pathlib import Path
-from functools import partial
-from typing import Any, Callable, Dict, List, Tuple, Optional, Union
+from typing import Any, Iterator
+from collections.abc import Callable
+import numpy as np
+import xarray as xr
+from contextlib import contextmanager
 
-from openghg.types import pathType, multiPathType
+
+from openghg.types import pathType, multiPathType, convert_to_list_of_metadata_and_data, XrDataLikeMatch
 from openghg.util import align_lat_lon
+
+logger = logging.getLogger("openghg.util.file")
 
 __all__ = [
     "load_parser",
@@ -23,6 +29,8 @@ __all__ = [
     "decompress_str",
     "compress_json",
     "decompress_json",
+    "open_nc_fn",
+    "open_time_nc_fn",
 ]
 
 
@@ -47,7 +55,11 @@ def load_parser(data_name: str, module_name: str) -> Callable:
     function_name = f"parse_{data_name.lower()}"
     fn: Callable = getattr(module, function_name)
 
-    return fn
+    @wraps(fn)
+    def wrapped_fn(*args, **kwargs):  # type: ignore
+        return convert_to_list_of_metadata_and_data(fn(*args, **kwargs))
+
+    return wrapped_fn
 
 
 def load_standardise_parser(data_type: str, source_format: str) -> Callable:
@@ -99,7 +111,7 @@ def load_transform_parser(data_type: str, source_format: str) -> Callable:
     return fn
 
 
-def get_datapath(filename: pathType, directory: Optional[str] = None) -> Path:
+def get_datapath(filename: pathType, directory: str | None = None) -> Path:
     """Returns the correct path to data files used for assigning attributes
 
     Args:
@@ -117,7 +129,7 @@ def get_datapath(filename: pathType, directory: Optional[str] = None) -> Path:
         return Path(__file__).resolve().parent.parent.joinpath(f"data/{directory}/{filename}")
 
 
-def load_json(path: Union[str, Path]) -> Dict:
+def load_json(path: str | Path) -> dict:
     """Returns a dictionary deserialised from JSON.
 
     Args:
@@ -125,13 +137,13 @@ def load_json(path: Union[str, Path]) -> Dict:
     Returns:
         dict: Dictionary created from JSON
     """
-    with open(path, "r") as f:
-        data: Dict[str, Any] = json.load(f)
+    with open(path) as f:
+        data: dict[str, Any] = json.load(f)
 
     return data
 
 
-def load_internal_json(filename: str) -> Dict:
+def load_internal_json(filename: str) -> dict:
     """Returns a dictionary deserialised from JSON. Pass filename to load data from JSON files in the
     openghg/data directory or pass a full filepath to path to load from any file.
 
@@ -145,7 +157,7 @@ def load_internal_json(filename: str) -> Dict:
     return load_json(path=file_path)
 
 
-def read_header(filepath: pathType, comment_char: str = "#") -> List:
+def read_header(filepath: pathType, comment_char: str = "#") -> list:
     """Reads the header lines denoted by the comment_char
 
     Args:
@@ -159,7 +171,7 @@ def read_header(filepath: pathType, comment_char: str = "#") -> List:
 
     header = []
     # Get the number of header lines
-    with open(filepath, "r") as f:
+    with open(filepath) as f:
         for line in f:
             if line.startswith(comment_char):
                 header.append(line)
@@ -243,17 +255,88 @@ def get_logfile_path() -> Path:
     Returns:
         Path: Path to logfile
     """
-    from openghg.util import running_locally
-
-    if running_locally():
-        return Path.home().joinpath("openghg.log")
-    else:
-        return Path("/tmp/openghg.log")
+    return Path("/tmp/openghg.log")
 
 
-def check_function_open_nc(
-    filepath: multiPathType, realign_on_domain: Optional[str] = None
-) -> Tuple[Callable, multiPathType]:
+def check_filepath(filepath: multiPathType, source_format: str) -> list[str] | list[Path]:
+    """
+    Check that filepath is of the correct format - this assumes the filepath
+    should be a str, Path or list but not a tuple (this is only needed for gcwerks).
+
+    Args:
+        filepath: Input filepath details
+        source_format: Name of source format to use when standardising this data.
+    Returns:
+        list: List of filepaths
+    """
+    if not isinstance(filepath, list):
+        filepath = [filepath]
+
+    for fp in filepath:
+        if isinstance(fp, tuple):
+            if source_format.lower() == "gcwerks":
+                msg = "The openghg.standardise.surface._check_gcwerks_input() function must be used to extract filepath and precision_filepath"
+                logger.exception(msg)
+                raise ValueError(msg)
+            else:
+                msg = f"Do not expect tuple for filepath for source_format={source_format}. Please provide a str/Path or list of Paths."
+                logger.exception(msg)
+                raise ValueError(msg)
+
+    return filepath
+
+
+def _select_time(x: xr.Dataset) -> xr.Dataset:
+    """
+    WARNING : designed for a specific case where a day from another month was present
+    in a monthly file (concerns file from an old NAME_processing version).
+    This is not designed for a general case.
+    Args:
+        x: xarray data to be checked
+    Returns:
+        xarray.Dataset: Updated dataset
+    """
+    month = x.time.resample(time="M").count().idxmax().values.astype("datetime64[M]")
+    start_date = month.astype("datetime64[D]")
+    end_date = (month + np.timedelta64(1, "M")).astype("datetime64[D]")
+    return x.sel(time=slice(start_date, end_date))
+
+
+def check_coords_nc(data: XrDataLikeMatch, coords: str | list | None = None) -> XrDataLikeMatch:
+    """
+    Check coordinates are present and registering correctly as 1D dimensions within an xarray Dataset. This is to account for cases
+    where a single value is present for a coordinate but this has been squeezed to zero dimensions meaning this is not registering as a dimension.
+    Args:
+        data: xarray data to be checked
+        coords: Name of coordinates to check. This can be a str, list or None.
+    Returns:
+        xr.Dataset / xr.DataArray: data with coordinates registered correctly
+    """
+
+    if coords is None:
+        return data
+    elif isinstance(coords, str):
+        coords = [coords]
+
+    for c in coords:
+        if c in data.dims:
+            continue
+        elif c in data:
+            data = data.expand_dims(c)
+        else:
+            msg = f"Expected coordinate: '{c}' is not present in the input dataset"
+
+            raise ValueError(msg)
+
+    return data
+
+
+def open_nc_fn(
+    filepath: str | Path | list[str] | list[Path],
+    realign_on_domain: str | None = None,
+    sel_month: bool = False,
+    check_coords: str | None = None,
+) -> tuple[Callable, str | Path | list[str] | list[Path]]:
     """
     Check the filepath input to choose which xarray open function to use:
      - Path or single item List - use open_dataset
@@ -262,43 +345,130 @@ def check_function_open_nc(
     Args:
         filepath: Path or list of filepaths
         realign_on_domain: When present, realign the data on the given domain. Option usable
-        when opening footprints or flux data but not observations and boundary conditions.
+            when opening footprints, flux or boundary conditions data but not observations or flux_timeseries.
+        sel_month : when present keep only one month of data
+        check_coords: Check whether expected coordinates are present and registered correctly as 1D dimensions in the netcdf files.
+            Default = None.
     Returns:
         Callable, Union[Path, List[Path]]: function and suitable filepath
             to use with the function.
     """
+
+    def process(x: xr.Dataset) -> xr.Dataset:
+        """
+        Apply appropriate process functions for the provided dataset.
+
+        Returns:
+            xarray.Dataset: updated Dataset with appropriate pre-processing applied.
+        """
+
+        if check_coords:
+            x = check_coords_nc(x, coords=check_coords)
+
+        if realign_on_domain and sel_month:
+            return align_lat_lon(_select_time(x), realign_on_domain)
+        elif realign_on_domain:
+            return align_lat_lon(x, realign_on_domain)
+        elif sel_month:
+            return _select_time(x)
+        else:
+            return x
+
     if isinstance(filepath, list):
         if len(filepath) > 1:
-            if realign_on_domain:
-                xr_open_fn: Callable = partial(
-                    xr.open_mfdataset, preprocess=lambda x: align_lat_lon(x, realign_on_domain)
-                )
-            else:
-                xr_open_fn = xr.open_mfdataset
-            return xr_open_fn, filepath
+            xr_open_fn_1: Callable = partial(xr.open_mfdataset, preprocess=process)
+            return xr_open_fn_1, filepath
 
         else:
             filepath = filepath[0]
 
-    if realign_on_domain:
+    def xr_open_fn_2(x: pathType) -> xr.DataArray | xr.Dataset:
+        return process(xr.open_dataset(x))
 
-        def xr_open_fn(x: pathType) -> Union[xr.DataArray, xr.Dataset]:
-            return align_lat_lon(xr.open_dataset(x), realign_on_domain)
+    return xr_open_fn_2, filepath
 
+
+def open_time_nc_fn(
+    filepath: str | Path | list[str] | list[Path],
+    realign_on_domain: str | None = None,
+    sel_month: bool = False,
+    check_coords: str | None = "time",
+) -> tuple[Callable, str | Path | list[str] | list[Path]]:
+    """
+    Check the filepath input to choose which xarray open function to use:
+     - Path or single item List - use open_dataset
+     - multiple item List - use open_mfdataset
+
+    This function is a wrapper for open_nc_fn() to include appropriate default checks for data which contains a time axis. See open_nc_fn() for full details.
+    """
+    return open_nc_fn(
+        filepath=filepath,
+        realign_on_domain=realign_on_domain,
+        sel_month=sel_month,
+        check_coords=check_coords,
+    )
+
+
+@contextmanager
+def open_netcdfs(
+    filepath: str | Path | list[str] | list[Path],
+    chunks: dict | None = None,
+    realign_on_domain: str | None = None,
+    sel_month: bool = False,
+    check_coords: str | None = "time",
+) -> Iterator[xr.Dataset]:
+    """
+    Context manager for safely opening NetCDF files in openghg.
+
+    Ensures datasets are closed after use, regardless of errors.
+    Works for single or multiple netCDF files across different networks.
+    """
+    #  Avoid UnboundLocalError if exception occurs before ds is assigned
+    if filepath is not None:
+        if isinstance(filepath, list):
+            filepath = [Path(f) for f in filepath]
+        elif isinstance(filepath, str):
+            filepath = Path(filepath)
+
+    xr_open_fn, filepath = open_time_nc_fn(
+        filepath=filepath,
+        realign_on_domain=realign_on_domain,
+        sel_month=sel_month,
+        check_coords=check_coords,
+    )
+    ds = xr_open_fn(filepath)
+
+    try:
+        ds = ds.chunk(chunks)
+        yield ds
+    finally:
+        ds.close()
+
+
+@contextmanager
+def get_data(  # type: ignore
+    dataset: xr.Dataset | None = None,
+    filepath: str | Path | list[str] | list[Path] | None = None,
+    **kwargs,
+) -> Iterator[xr.Dataset]:
+    """
+    Context manager to return a dataset from either an existing xarray.Dataset
+    or by opening from filepath.
+    Args:
+        dataset: Xarray dataset
+        filepath: Filepath of the data
+    Yields:
+        xr.Dataset:
+            The opened or provided dataset. If opened from file(s), the dataset
+            is automatically closed when leaving the context manager.
+    Raises:
+        ValueError:
+            If both ``dataset`` and ``filepath`` are ``None``.
+    """
+    if dataset is not None:
+        yield dataset
     else:
-        xr_open_fn = xr.open_dataset
-
-    return xr_open_fn, filepath
-
-
-def permissions(file_path: Union[str, Path]) -> tuple[str, str, str]:
-    """Return r, w, and/or x permissions for user, group, and other."""
-    perms = oct(os.stat(file_path).st_mode)
-    user, group, other = perms[-3], perms[-2], perms[-1]
-
-    def bits_to_perms(bit_str: str) -> str:
-        bits = [int(b) for b in bin(int(bit_str))[-3:]]
-        perms = "r" * bits[0] + "w" * bits[1] + "x" * bits[2]
-        return perms
-
-    return bits_to_perms(user), bits_to_perms(group), bits_to_perms(other)
+        if filepath is None:
+            raise ValueError("filepath must be provided if dataset is None")
+        with open_netcdfs(filepath, **kwargs) as ds:
+            yield ds

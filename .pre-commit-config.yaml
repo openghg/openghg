@@ -7,7 +7,7 @@ repos:
       - id: debug-statements
       - id: mixed-line-ending
   - repo: https://github.com/psf/black
-    rev: 24.4.2
+    rev: 26.1.0
     hooks:
       - id: black
         exclude: tests
@@ -24,6 +24,7 @@ repos:
         # Copied from setup.cfg
         exclude: "tests/"
         additional_dependencies: [
+            numpy,
             # Type stubs
             types-paramiko,
             types-PyYAML,

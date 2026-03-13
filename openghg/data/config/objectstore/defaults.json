@@ -49,7 +49,7 @@
             "platform": {
                 "type": [
                     "platform"
-                ]                
+                ]
             }
         },
         "optional": {
@@ -77,17 +77,22 @@
                 "type": [
                     "str"
                 ]
+            },
+            "obs_region": {
+                "type": [
+                    "str"
+                ]
             }
         }
     },
     "footprints": {
         "required": {
-            "site": {
+            "model": {
                 "type": [
                     "str"
                 ]
             },
-            "model": {
+            "domain": {
                 "type": [
                     "str"
                 ]
@@ -95,11 +100,6 @@
             "inlet": {
                 "type": [
                     "height"
-                ]
-            },
-            "domain": {
-                "type": [
-                    "str"
                 ]
             },
             "time_resolved": {
@@ -129,7 +129,28 @@
                 ]
             }
         },
-        "optional": {}
+        "optional": {
+            "site": {
+                "type": [
+                    "str"
+                ]
+            },
+            "satellite": {
+                "type": [
+                    "str"
+            ]
+            },
+            "obs_region": {
+                "type": [
+                    "str"
+            ]
+            },
+            "selection": {
+                "type": [
+                    "str"
+            ]
+            }
+        }
     },
     "flux": {
         "required": {
@@ -215,11 +236,6 @@
                     "str"
                 ]
             },
-            "sampling_period": {
-                "type": [
-                    "str"
-                ]
-            },
             "inlet": {
                 "type": [
                     "str"
@@ -235,7 +251,7 @@
                     "str"
                 ]
             },
-            "source_format": {
+            "platform": {
                 "type": [
                     "str"
                 ]
@@ -253,9 +269,39 @@
             "dataset_source": {
                 "type": [
                     "str"
-                ]                
+                ]
             },
             "data_source": {
+                "type": [
+                    "str"
+                ]
+            },
+            "sampling_period": {
+                "type": [
+                    "str"
+                ]
+            },
+            "source_format": {
+                "type": [
+                    "str"
+                ]
+            }
+        },
+        "optional": {}
+    },
+    "site_met": {
+        "required": {
+            "site": {
+                "type": [
+                    "str"
+                ]
+            },
+            "network": {
+                "type": [
+                    "str"
+                ]
+            },
+            "met_source": {
                 "type": [
                     "str"
                 ]

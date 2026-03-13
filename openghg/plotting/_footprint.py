@@ -1,11 +1,10 @@
-from typing import Optional
 from xarray import Dataset
 
 __all__ = ["plot_footprint"]
 
 
 def plot_footprint(
-    data: Dataset, label: Optional[str] = None, vmin: Optional[float] = None, vmax: Optional[float] = None
+    data: Dataset, label: str | None = None, vmin: float | None = None, vmax: float | None = None
 ) -> None:
     """Plot a footprint
 

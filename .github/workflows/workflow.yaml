@@ -26,27 +26,32 @@ jobs:
         python-version: ["3.10", "3.11", "3.12"]
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "latest"
+          enable-cache: true
+
+      - name: Install project (including dev dependencies)
+        run: uv sync --extra dev
+
       - name: Format code with black
         run: |
-          python -m pip install black
-          black --check openghg/
+          uv run black --check openghg/
+
       - name: Lint with flake8
         run: |
-          python -m pip install --upgrade pip wheel setuptools flake8
-          flake8 openghg/ --count --statistics
-      - name: Install openghg
-        run: |
-          pip install -r requirements-dev.txt
-          pip install .
+          uv run flake8 openghg/ --count --statistics
+
       - name: Run mypy
-        run: |
-          mypy --python-version ${{ matrix.python-version }} openghg/
+        run: uv run mypy --python-version ${{ matrix.python-version }} openghg/
+
       - name: Create mock cdsapi config file
         run: |
           echo $'url: https://www.openghg.org\nkey: 00000:f5690ad7-test-test-test-6fb0573991ca\n' > ~/.cdsapirc
@@ -55,67 +60,102 @@ jobs:
           sudo apt-get install libudunits2-0
       - name: Test with pytest
         run: |
-          pip install --upgrade pytest
-          pytest -v --run-cfchecks
+          uv run pytest --run-cfchecks
   docs:
     name: Build and deploy the documentation
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags') && !contains(github.ref_name, '-') && contains(github.ref_name, '.')
     runs-on: ubuntu-latest
     needs: ["test"]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
-          python-version: "3.10"
+          python-version: "3.12"
           cache: "pip"
-      - name: Install openghg
-        run: |
-          pip install --upgrade pip wheel setuptools
-          pip install .
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Install project with doc extras
+        run: uv sync --extra doc
+
       - name: Setup default config
-        run: openghg --default-config
-      - name: Install pandoc and requirements
-        run: |
-          sudo apt-get install -yq pandoc
-          pip install -r requirements-doc.txt
+        run: uv run openghg --default-config
+
+      - name: Install pandoc
+        run: sudo apt-get install -y pandoc
+
       - name: Build documentation
         run: |
           cd doc
-          make
+          uv run make html
       - name: Deploy to GitHub pages
-        uses: JamesIves/github-pages-deploy-action@v4.4.1
+        uses: JamesIves/github-pages-deploy-action@v4.8.0
         with:
           branch: gh-pages
           folder: "doc/build/html"
           clean: true
-  release_pypi:
-    name: Build and publish Python distributions 📦 to PyPI and TestPyPI
-    runs-on: ubuntu-latest
+
+  release_testpypi:
+    name: TestPyPI Build and publish Python distributions (PEP 621, Trusted Publishing)
     needs: ["test", "docs"]
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags') && !contains(github.ref_name, '-') && contains(github.ref_name, '.')
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && !contains(github.ref_name, '-') && contains(github.ref_name, '.')
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/openghg
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v4
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
         with:
-          python-version: "3.10"
-          cache: "pip"
-      - name: Install pypa/build
-        run: |
-          pip install --upgrade build
-      - name: Build a binary wheel and a source tarball
-        run: |
-          python -m build --sdist --wheel --outdir dist/
-      - name: Publish distribution 📦 to Test PyPI
-        uses: pypa/gh-action-pypi-publish@f8c70e705ffc13c3b4d1221169b84f12a75d6ca8
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
         with:
-          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-          repository_url: https://test.pypi.org/legacy/
-      - name: Publish distribution 📦 to PyPI
-        uses: pypa/gh-action-pypi-publish@f8c70e705ffc13c3b4d1221169b84f12a75d6ca8
+          version: "latest"
+
+      - name: Build distributions with uv
+        run: uv build
+
+      - name: Publish to TestPyPI
+        run: uv publish --publish-url https://test.pypi.org/legacy/ --trusted-publishing always
+
+  release_pypi:
+    name: PyPI Build and publish Python distributions (PEP 621, Trusted Publishing)
+    runs-on: ubuntu-latest
+    needs: ["test", "docs", "release_testpypi"]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && !contains(github.ref_name, '-') && contains(github.ref_name, '.')
+    environment:
+      name: pypi
+      url: https://pypi.org/p/openghg
+    permissions:
+      id-token: write  # Required for Trusted Publishing
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
         with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "latest"
+
+      - name: Build distributions with uv
+        run: uv build
+
+      - name: Publish
+        run: uv publish --trusted-publishing always
+
   release_conda:
     name: Build and publish conda package
     runs-on: ubuntu-latest
@@ -125,8 +165,8 @@ jobs:
       run:
         shell: bash -el {0}
     steps:
-      - uses: actions/checkout@v3
-      - uses: mamba-org/setup-micromamba@875557da4ee020f18df03b8910a42203fbf02da1
+      - uses: actions/checkout@v6
+      - uses: mamba-org/setup-micromamba@v2
         with:
           init-shell: bash
       - name: Build and push the conda package
@@ -145,5 +185,5 @@ jobs:
           BUILD=$(find "$BUILD_DIR" -name '*.tar.bz2')
           anaconda --token "$ANACONDA_TOKEN" upload --user openghg --label main "$BUILD"
         env:
-          ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN_EXP_2025_08_14 }}
+          ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN_EXP_2030_08_29 }}
           GIT_TAG: ${{ github.ref_name }}

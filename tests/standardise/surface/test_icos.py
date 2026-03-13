@@ -3,6 +3,7 @@ import logging
 import pytest
 from helpers import get_surface_datapath
 from openghg.standardise.surface import parse_icos
+from tests.helpers.helpers import print_dict_diff
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
@@ -101,12 +102,13 @@ def test_read_icos_small_header_file():
         "inlet_height_magl": "222m",
         "calibration_scale": "unknown",
         "data_owner": "NOT_SET",
-        "station_height_masl": 300.0,
-        "station_latitude": 56.55511,
+        "station_height_masl": 315.0,
+        "station_latitude": 56.55519,
         "station_long_name": "Angus Tower, UK",
-        "station_longitude": -2.98598,
+        "station_longitude": -2.98604,
     }
 
+    print_dict_diff(attrs, expected_attrs)
     assert attrs == expected_attrs
 
     co2_data = data["co2"]["data"]

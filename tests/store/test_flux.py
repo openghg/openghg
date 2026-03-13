@@ -1,7 +1,6 @@
 import pytest
 import os
-from helpers import clear_test_stores, get_flux_datapath
-from openghg.objectstore import get_metakey_defaults
+from helpers import clear_test_stores, get_flux_datapath, filt
 from openghg.retrieve import search, search_flux
 from openghg.store import Flux
 from openghg.standardise import standardise_flux, standardise_from_binary_data
@@ -10,7 +9,6 @@ from openghg.util import hash_bytes
 from pandas import Timestamp
 from xarray import open_dataset
 from typing import Any, Union
-from unittest.mock import patch
 
 
 @pytest.fixture
@@ -45,10 +43,13 @@ def test_read_binary_data(mocker, clear_stores):
         file_metadata=file_metadata,
     )
 
-    assert results["co2_gpp-cardamom_europe"]["new"] is True
+    assert results is not None
+
+    assert filt(results, species="co2", source="gpp-cardamom", domain="europe")[0]["new"] is True
 
 
-def test_read_file():
+def test_read_file(caplog):
+    clear_test_stores()
     test_datapath = get_flux_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
 
     proc_results = standardise_flux(
@@ -61,7 +62,13 @@ def test_read_file():
         force=True,  # For ease, make sure we can add the same data.
     )
 
-    assert "co2_gpp-cardamom_europe" in proc_results
+    assert len(proc_results) == 1
+
+    assert "Rechunking with chunks" in caplog.text
+    assert "'time': 336" in caplog.text
+
+    expected_info = {"species": "co2", "source": "gpp-cardamom", "domain": "europe"}
+    assert expected_info.items() <= proc_results[0].items()
 
     search_results = search(
         species="co2",
@@ -156,13 +163,17 @@ def test_read_file_additional_keys(clear_stores, load_edgar):
 
     Should produce 2 search results.
     """
+    expected_info = {"species": "ch4", "source": "anthro", "domain": "globaledgar"}
+
     # load 2014, v5
     proc_results1 = load_edgar("ch4", "v5.0", 2014)
-    assert "ch4_anthro_globaledgar" in proc_results1
+    assert len(proc_results1) == 1
+    assert expected_info.items() <= proc_results1[0].items()
 
     # load 2015, v6
     proc_results2 = load_edgar("ch4", "v6.0", 2015)
-    assert "ch4_anthro_globaledgar" in proc_results2
+    assert len(proc_results2) == 1
+    assert expected_info.items() <= proc_results2[0].items()
 
     search_results_all = search_flux(species="ch4", source="anthro", domain="globaledgar", database="EDGAR")
 
@@ -271,8 +282,9 @@ def test_add_edgar_database(clear_stores):
     species = "ch4"
     default_source = "anthro"
 
-    output_key = f"{species}_{default_source}_{default_domain}_{date}"
-    assert output_key in proc_results
+    expected_info = {"species": species, "source": default_source, "domain": default_domain, "date": date}
+    assert len(proc_results) == 1
+    assert expected_info.items() <= proc_results[0].items()
 
     search_results = search_flux(
         species=species,
@@ -290,7 +302,7 @@ def test_add_edgar_database(clear_stores):
         "domain": default_domain,
         "source": default_source,
         "database": database.lower(),
-        "database_version": version.replace(".", ""),
+        "database_version": version,
         "author": "OpenGHG Cloud".lower(),
         "start_date": "2015-01-01 00:00:00+00:00",
         "end_date": "2015-12-31 23:59:59+00:00",
@@ -326,8 +338,9 @@ def test_add_edgar_v8_database(clear_stores, source):
     version = "v8.0"
     species = "ch4"
 
-    output_key = f"{species}_{expected_source}_{default_domain}_{date}"
-    assert output_key in proc_results
+    expected_info = {"species": species, "source": expected_source, "domain": default_domain, "date": date}
+    assert len(proc_results) == 1
+    assert expected_info.items() <= proc_results[0].items()
 
     search_results = search_flux(
         species=species,
@@ -345,7 +358,7 @@ def test_add_edgar_v8_database(clear_stores, source):
         "domain": default_domain,
         "source": expected_source,
         "database": database.lower(),
-        "database_version": version.replace(".", ""),
+        "database_version": version,
         "author": "openghg cloud",
         "start_date": "1970-01-01 00:00:00+00:00",
         "end_date": "1970-12-31 23:59:59+00:00",
@@ -400,8 +413,9 @@ def test_transform_and_add_edgar_database(clear_stores):
     species = "ch4"
     default_source = "anthro"
 
-    output_key = f"{species}_{default_source}_{domain}_{date}"
-    assert output_key in proc_results
+    expected_info = {"species": species, "source": default_source, "domain": domain, "date": date}
+    assert len(proc_results) == 1
+    assert expected_info.items() <= proc_results[0].items()
 
     search_results = search(
         species=species,
@@ -422,7 +436,7 @@ def test_transform_and_add_edgar_database(clear_stores):
         "domain": domain.lower(),
         "source": "anthro",
         "database": "edgar",
-        "database_version": version.replace(".", ""),
+        "database_version": version,
         "author": "openghg cloud",
         "start_date": "2015-01-01 00:00:00+00:00",
         "end_date": "2015-12-31 23:59:59+00:00",
@@ -451,7 +465,7 @@ def test_flux_schema():
     # TODO: Could also add checks for dims and dtypes?
 
 
-def test_optional_metadata_raise_error(clear_stores):
+def test_info_metadata_raise_error(clear_stores):
     """
     Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
     """
@@ -467,11 +481,11 @@ def test_optional_metadata_raise_error(clear_stores):
             datapath=test_datapath,
             database=database,
             date=date,
-            optional_metadata={"domain": "openghg_tests"},
+            info_metadata={"domain": "openghg_tests"},
         )
 
 
-def test_optional_metadata():
+def test_info_metadata():
     """
     Test to verify optional metadata supplied as dictionary gets stored as metadata
     """
@@ -486,7 +500,7 @@ def test_optional_metadata():
         datapath=test_datapath,
         database=database,
         date=date,
-        optional_metadata={"project": "openghg_tests", "tag": "tests"},
+        info_metadata={"project": "openghg_tests", "tag": "tests"},
     )
 
     version = "v6.0"

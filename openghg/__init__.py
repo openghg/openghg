@@ -1,14 +1,13 @@
 import logging
-import os as _os
 import sys as _sys
 from pathlib import Path as _Path
 
 from rich.logging import RichHandler as _RichHandler
 from . import (
     analyse,
-    cloud,
     dataobjects,
     objectstore,
+    datapack,
     retrieve,
     plotting,
     standardise,
@@ -17,13 +16,12 @@ from . import (
     tutorial,
     util,
 )
-from ._version import get_versions  # type: ignore
 
 __all__ = [
     "analyse",
-    "cloud",
     "dataobjects",
     "objectstore",
+    "datapack",
     "retrieve",
     "plotting",
     "standardise",
@@ -36,27 +34,27 @@ __all__ = [
 if _sys.version_info < (3, 10):
     raise ImportError("openghg requires Python >= 3.10")
 
-v = get_versions()
+# Use importlib.metadata for version information at runtime
+from importlib.metadata import version as _version, PackageNotFoundError
 
-__version__ = v.get("version")
-__branch__ = v.get("branch")
-__repository__ = v.get("repository")
-__revisionid__ = v.get("full-revisionid")
+try:
+    __version__ = _version("openghg")
+except PackageNotFoundError:
+    # Fallback version if package metadata is not available
+    __version__ = "unknown"
 
-del v, get_versions
-
-cloud_env = _os.environ.get("OPENGHG_CLOUD", False)
-hub_env = _os.environ.get("OPENGHG_HUB", False)
+# These attributes are no longer available with the new versioning approach
+# Set to None for backward compatibility
+__branch__ = None
+__repository__ = None
+__revisionid__ = None
 
 # Start module level logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("openghg")
 logger.setLevel(logging.DEBUG)
 logging.captureWarnings(capture=True)
 
-if cloud_env or hub_env:
-    logfile_path = "/tmp/openghg.log"
-else:
-    logfile_path = str(_Path.home().joinpath("openghg.log"))
+logfile_path = str(_Path.home().joinpath("openghg.log"))
 
 # Create file handler for log file - set to DEBUG (maximum detail)
 fileHandler = logging.FileHandler(logfile_path)  # May want to update this to user area
@@ -74,4 +72,4 @@ consoleHandler.setFormatter(consoleFormatter)
 consoleHandler.setLevel(logging.INFO)
 logger.addHandler(consoleHandler)
 
-del logfile_path, hub_env, cloud_env
+del logfile_path

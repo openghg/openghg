@@ -1,39 +1,74 @@
 import math
-
 import pytest
 
 from openghg.util import clean_string, extract_float, is_number
 
 
-def test_clean_string():
-    dirty_string = "tacol?neston"
+@pytest.mark.parametrize(
+    "input_string,cleaned_string",
+    [
+        ("tacol?neston", "tacolneston"),  # non-alphanumeric characters
+        ("top_rated-parrot!!!", "top_rated-parrot"),  # messy string
+        ("eulerian_model", "eulerian_model"),  # model name with underscore
+        ("10.0", "10.0"),  # number with decimal
+        ("10.0magl", "10.0magl"),  # number with decimal and characters
+        ("10.0 m agl", "10.0magl"),  # number with decimal, characters and spaces
+        (60.0, "60.0"),  # float
+        (-90.0, "-90.0"),  # negative float
+        (True, "true"),  # bool
+        ("на берегу пустынных волн", "наберегупустынныхволн"),  # unicode
+    ],
+)
+def test_clean_string(input_string, cleaned_string):
+    """
+    Check clean_string produces expected output. By default this should keep
+    all alphanumeric characters and additionally underscores, dashes and full stops
+    but removes spaces and other non-alphanumeric characters.
 
-    assert clean_string(dirty_string) == "tacolneston"
+    Included checks:
+     - Removes unexpected non-alphanumeric characters
+     - Can handle decimal and character combinations in a string
+     - Can handle floats
+     - Can handle booleans as expected (lowercase and string)
+     - Can handle unicode characters (not just ascii)
+    """
+    assert clean_string(input_string) == cleaned_string
 
-    number = 60.0
 
-    assert clean_string(number) == "60.0"
+@pytest.mark.parametrize(
+    "input_string,cleaned_string,keep_special_characters",
+    [
+        ("-12.0_magl", "-12.0_magl", "default"),
+        ("-12.0_magl", "120magl", None),
+        ("necessary?", "necessary", "default"),
+        ("necessary?", "necessary?", ["?"]),
+        ("  \\[--..]  ", "\\[--..]", ["\\", "-", ".", "[", "]"]),
+        ("  \\[--..]  ", "", None),
+    ],
+)
+def test_clean_string_keep(input_string, cleaned_string, keep_special_characters):
+    """
+    Check the keep_special_characters input for clean_string. This defines the non-alphanumeric
+    characters which are allowed (check function for default - prev ["_", "-", "."])
 
-    negative = -90.0
-
-    assert clean_string(negative) == "-90.0"
-
-    messy_string = "top_rated-parrot!!!"
-
-    assert clean_string(messy_string) == "top_rated-parrot"
-
-    model_type = "eulerian_model"
-
-    assert clean_string(model_type) == "eulerian_model"
+    Included checks:
+     - Impact of keep_special_characters on string with the default characters
+     - Check different special characters can be included
+     - Check of regex special characters (internally need to be escaped for regex substitution)
+    """
+    if keep_special_characters == "default":
+        assert clean_string(input_string) == cleaned_string
+    else:
+        assert clean_string(input_string, keep_special_characters) == cleaned_string
 
 
 def test_is_number():
-    from numpy import NaN
+    from numpy import nan
 
     assert is_number(99)
     assert is_number("-9999.999")
     assert not is_number("sparrow")
-    assert is_number(NaN)
+    assert is_number(nan)
     assert is_number("NaN")
 
     assert not is_number(False)

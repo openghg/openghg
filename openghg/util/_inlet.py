@@ -1,6 +1,6 @@
-from typing import Optional, Union, cast, overload
+from typing import cast, overload
 import logging
-from openghg.types import optionalPathType
+from openghg.types import pathType
 
 __all__ = ["format_inlet", "extract_height_name"]
 
@@ -12,8 +12,8 @@ logger.setLevel(logging.INFO)  # Have to set level for logger as well as handler
 def format_inlet(
     inlet: str,
     units: str = "m",
-    key_name: Optional[str] = None,
-    special_keywords: Optional[list] = None,
+    key_name: str | None = None,
+    special_keywords: list | None = None,
 ) -> str: ...
 
 
@@ -21,8 +21,8 @@ def format_inlet(
 def format_inlet(
     inlet: None,
     units: str = "m",
-    key_name: Optional[str] = None,
-    special_keywords: Optional[list] = None,
+    key_name: str | None = None,
+    special_keywords: list | None = None,
 ) -> None: ...
 
 
@@ -30,26 +30,26 @@ def format_inlet(
 def format_inlet(
     inlet: slice,
     units: str = "m",
-    key_name: Optional[str] = None,
-    special_keywords: Optional[list] = None,
+    key_name: str | None = None,
+    special_keywords: list | None = None,
 ) -> slice: ...
 
 
 @overload
 def format_inlet(
-    inlet: list[Union[str, slice, None]],
+    inlet: list[str | slice | None],
     units: str = "m",
-    key_name: Optional[str] = None,
-    special_keywords: Optional[list] = None,
-) -> list[Union[str, slice, None]]: ...
+    key_name: str | None = None,
+    special_keywords: list | None = None,
+) -> list[str | slice | None]: ...
 
 
 def format_inlet(
-    inlet: Union[str, slice, None, list[Union[str, slice, None]]],
+    inlet: str | slice | None | list[str | slice | None],
     units: str = "m",
-    key_name: Optional[str] = None,
-    special_keywords: Optional[list] = None,
-) -> Union[str, slice, None, list[Union[str, slice, None]]]:
+    key_name: str | None = None,
+    special_keywords: list | None = None,
+) -> str | slice | None | list[str | slice | None]:
     """
     Make sure inlet / height name conforms to standard. The standard
     imposed can depend on the associated key_name itself (can
@@ -151,12 +151,12 @@ def format_inlet(
     # If we were unable to cast inlet as a float
     # check if inlet ends with unit or unit derivative
     # e.g. "magl" and "masl" would need to replaced with "m" or be removed
-    for value in unit_options:
-        if inlet.endswith(value):
+    for unit_option in unit_options:
+        if inlet.endswith(unit_option):
             if unit_needed:
-                inlet = inlet.replace(value, units)
+                inlet = inlet.replace(unit_option, units)
             else:
-                inlet = inlet.rstrip(value)
+                inlet = inlet.rstrip(unit_option)
             break
     # else:
     #     raise ValueError(f"Did not recognise input for inlet: {inlet}")
@@ -164,12 +164,37 @@ def format_inlet(
     return str(inlet)
 
 
+def extract_inlet_value(
+    inlet: str,
+    units: str = "m",
+) -> float:
+    """
+    Extract the numerical inlet value from an inlet string. This checks this is in
+    the correct format first (using format_inlet) and then extracts the number.
+
+    Args:
+        inlet: Inlet / Height value in the specified units
+        units: Units for the inlet value ("m" by default)
+    Returns:
+        float: Numerical value for the inlet
+    """
+
+    inlet = format_inlet(inlet, units, special_keywords=None)
+
+    try:
+        inlet_value = float(inlet)
+    except ValueError:
+        inlet_value = float(inlet.strip(units))
+
+    return inlet_value
+
+
 def extract_height_name(
     site: str,
-    network: Optional[str] = None,
-    inlet: Optional[str] = None,
-    site_filepath: optionalPathType = None,
-) -> Optional[Union[str, list]]:
+    network: str | None = None,
+    inlet: str | None = None,
+    site_filepath: pathType | None = None,
+) -> str | list | None:
     """
     Extract the relevant height associated with NAME from the
     "height_name" variable, if present from site_info data.
@@ -193,8 +218,7 @@ def extract_height_name(
 
     site_data = get_site_info(site_filepath=site_filepath)
 
-    if site:
-        site_upper = site.upper()
+    site_upper = site.upper()
 
     if network is None:
         network = next(iter(site_data[site_upper]))
@@ -213,7 +237,7 @@ def extract_height_name(
             if isinstance(height_name_extracted, list):
                 # Check if multiple values for height_name_extracted are present (list > 1)
                 if len(height_name_extracted) == 1:
-                    height_name: Optional[str] = height_name_extracted[0]
+                    height_name: str | None = height_name_extracted[0]
                 else:
                     # If this is ambiguous, check "height" attr to match against site inlet value
                     # This assumes two lists of the same length map to each other with translating values

@@ -1,6 +1,3 @@
-from pathlib import Path
-from typing import Dict, Optional, Union
-
 import pandas as pd
 import re
 import xarray as xr
@@ -11,21 +8,21 @@ from openghg.standardise.meta import (
     attributes_default_keys,
     dataset_formatter,
 )
-from openghg.types import optionalPathType
-from openghg.util import clean_string, format_inlet
+from openghg.types import pathType
+from openghg.util import clean_string, format_inlet, get_data
 
 
 def parse_agage(
-    filepath: Union[str, Path],
     site: str,
     network: str,
-    inlet: Optional[str] = None,
-    instrument: Optional[str] = None,
-    sampling_period: Optional[str] = None,
-    measurement_type: Optional[str] = None,
+    filepath: pathType | None = None,
+    data: xr.Dataset | None = None,
+    inlet: str | None = None,
+    instrument: str | None = None,
+    sampling_period: str | None = None,
     update_mismatch: str = "from_source",
-    site_filepath: optionalPathType = None,
-) -> Dict:
+    site_filepath: pathType | None = None,
+) -> dict:
     """Reads a GC data file by creating a GC object and associated datasources
 
     Args:
@@ -35,7 +32,6 @@ def parse_agage(
         network: Network name
         inlet: inlet name (optional)
         sampling_period: sampling period for this instrument. If not supplied, will be read from the file.
-        measurement_type: measurement type
         update_mismatch: This determines how mismatches between the internal data
             "attributes" and the supplied / derived "metadata" are handled.
             This includes the options:
@@ -47,74 +43,68 @@ def parse_agage(
     Returns:
         dict: Dictionary of source_name : UUIDs
     """
-    filepath = Path(filepath)
 
     network = clean_string(network)
     instrument = clean_string(instrument)
 
-    # get the parameters from the file metadata, as opposed to from the .json file
-
-    with xr.load_dataset(filepath) as ds:
-        file_params = ds.attrs
-
-    # if we're not passed the instrument name, get it from the file:
-
     file_instrument = None
 
-    if "instrument_type" in file_params.keys():
-        # For multiple values in instrument_type of file updating the instrument metadata to multiple
-        instrument_number = len(file_params["instrument_type"].split("/"))
-        if instrument_number > 1:
-            file_instrument = "multiple"
-            instrument = file_instrument
-        else:
-            file_instrument = clean_string(file_params["instrument_type"])
-            if instrument is None:
+    with get_data(dataset=data, filepath=filepath) as dataset:
+        file_attributes = dataset.attrs
+
+        if "instrument_type" in file_attributes:
+            # For multiple values in instrument_type of file updating the instrument metadata to multiple
+            instrument_number = len(file_attributes["instrument_type"].split("/"))
+            if instrument_number > 1:
+                file_instrument = "multiple"
                 instrument = file_instrument
+            else:
+                file_instrument = clean_string(file_attributes["instrument_type"])
+                if instrument is None:
+                    instrument = file_instrument
 
-    elif instrument is None:
-        raise ValueError("No instrument found in file metadata. Please pass explicity as argument.")
+        elif instrument is None:
+            raise ValueError("No instrument found in file metadata. Please pass explicity as argument.")
 
-    if instrument != "multiple":
-        if file_instrument and instrument:
-            if file_instrument != instrument:
-                raise ValueError(
-                    f"Instrument {instrument} passed does not match instrument {file_instrument} in file."
-                )
+        if instrument != "multiple":
+            if file_instrument and instrument:
+                if file_instrument != instrument:
+                    raise ValueError(
+                        f"Instrument {instrument} passed does not match instrument {file_instrument} in file."
+                    )
 
-    instrument = str(instrument)
+        instrument = str(instrument)
 
-    species = str(filepath).split(sep="_")[-2]
-    species = define_species_label(species)[0]
+        species = file_attributes.get("species", None)
+        species = define_species_label(species)[0]
 
-    with xr.open_dataset(filepath) as dataset:
-        data = dataset.to_dataframe()
+        dataframe = dataset.to_dataframe()
 
-        if data.empty:
+        if dataframe.empty:
             raise ValueError("Cannot process empty file.")
 
         # This metadata will be added to when species are split and attributes are written
-        metadata: Dict[str, str] = {
+        metadata: dict[str, str] = {
             "instrument": instrument,
             "site": site,
             "network": network,
         }
 
-        metadata["instrument_name_0"] = clean_string(file_params["instrument"])
+        metadata["instrument_name_0"] = clean_string(file_attributes["instrument"])
 
         # fetching all instrument_n values from the file
         pattern = re.compile(r"^instrument_(\d+)$")
 
-        for key in file_params:
+        for key in file_attributes:
             match = pattern.match(key)
             if match:
                 number = match.group(1)
                 new_key = f"instrument_name_{number}"
-                metadata[new_key] = file_params[key]
+                metadata[new_key] = file_attributes[key]
 
         # sampling period should be in the metadata of the openghg datasource as a single value.
 
-        extracted_sampling_periods = data["sampling_period"].unique()
+        extracted_sampling_periods = dataframe["sampling_period"].unique()
         if len(extracted_sampling_periods) == 1:
             extracted_sampling_period = extracted_sampling_periods[0]
             single_sampling_period = True
@@ -141,17 +131,19 @@ def parse_agage(
         scale = dataset.calibration_scale
 
         # These .nc files do not have flags attached to them.
-        # The precisions are a variable in the xarray dataset, and so a column in the dataframe.
+        # The precisions are a variable in the xarray data, and so a column in the dataframe.
         # Note that there is only one species per netCDF file here as well.
-        data["mf_repeatability"] = data["mf_repeatability"].astype(float)
+        dataframe["mf_repeatability"] = dataframe["mf_repeatability"].astype(float)
+        if "mf_variability" in dataframe.columns:
+            dataframe["mf_variability"] = dataframe["mf_variability"].astype(float)
 
         gas_data = _format_species(
-            data=data,
+            data=dataframe,
             species=species,
             metadata=metadata,
             units=units,
             scale=scale,
-            file_params=file_params,
+            file_params=file_attributes,
         )
 
         gas_data = dataset_formatter(data=gas_data)
@@ -167,11 +159,11 @@ def parse_agage(
 def _format_species(
     data: pd.DataFrame,
     species: str,
-    metadata: Dict,
+    metadata: dict,
     units: str,
     scale: str,
-    file_params: Dict,
-) -> Dict:
+    file_params: dict,
+) -> dict:
     """Formats the dataframes and splits up by species_inlet combination to be stored within individual Datasources.
     Note that because .nc files contain only a single species, this function is no longer called _split_species
 
@@ -215,7 +207,10 @@ def _format_species(
         # want to select the data corresponding to each inlet
 
         inlet_data = data.loc[data["inlet_height"] == inlet]
-        species_data = inlet_data[["mf", "mf_repeatability"]]
+        if "mf_variability" in inlet_data.columns:
+            species_data = inlet_data[["mf", "mf_repeatability", "mf_variability"]]
+        else:
+            species_data = inlet_data[["mf", "mf_repeatability"]]
         species_data = species_data.dropna(axis="index", how="any")
 
         # Check that the Dataframe has something in it
@@ -227,7 +222,7 @@ def _format_species(
         if "instrument" in attributes.keys():
             attributes["instrument_name"] = attributes.pop("instrument")
 
-        attribute_keys = attributes_default_keys()
+        attribute_keys = attributes_default_keys(data_type="surface")
 
         # JP hack to stop instrument getting overwritten for multi-instrument files
         # instrument = metadata["instrument"]
@@ -243,7 +238,11 @@ def _format_species(
 
         # change the column names to {species} and {species} repeatability, which is what the get_obs_surface function expects
         species_data = species_data.rename(
-            columns={"mf": f"{comp_species}", "mf_repeatability": f"{comp_species} repeatability"}
+            columns={
+                "mf": f"{comp_species}",
+                "mf_repeatability": f"{comp_species} repeatability",
+                "mf_variability": f"{comp_species} variability",
+            }
         )
 
         # We want an xarray Dataset
@@ -274,6 +273,6 @@ def _format_species(
         combined_data[data_key]["data"] = species_data
         combined_data[data_key]["attributes"] = attributes
 
-    to_return: Dict = combined_data.to_dict()
+    to_return: dict = combined_data.to_dict()
 
     return to_return

@@ -1,10 +1,15 @@
 from datetime import date
-from typing import Dict, List, Optional, Tuple, Union
-from pandas import DataFrame, DateOffset, DatetimeIndex, Timedelta, Timestamp
-from xarray import Dataset
+import logging
+from math import isnan
 import re
 
+import numpy as np
+import pandas as pd
+from pandas import DataFrame, DateOffset, DatetimeIndex, Timedelta, Timestamp
+from xarray import Dataset
+
 from openghg.types import TimePeriod
+from ._util import pairwise
 
 __all__ = [
     "timestamp_tzaware",
@@ -35,12 +40,14 @@ __all__ = [
     "find_duplicate_timestamps",
     "in_daterange",
     "evaluate_sampling_period",
+    "get_representative_daterange_str",
+    "get_dataset_daterange",
 ]
 
 # TupleTimeType = Tuple[Union[int, float], str]
 
 
-def find_duplicate_timestamps(data: Union[Dataset, DataFrame]) -> List:
+def find_duplicate_timestamps(data: Dataset | DataFrame) -> list:
     """Check for duplicates
 
     Args:
@@ -48,8 +55,6 @@ def find_duplicate_timestamps(data: Union[Dataset, DataFrame]) -> List:
     Returns:
         list: A list of duplicates
     """
-    from numpy import unique
-
     try:
         time_data = data.time
     except AttributeError:
@@ -58,13 +63,13 @@ def find_duplicate_timestamps(data: Union[Dataset, DataFrame]) -> List:
         except AttributeError:
             raise ValueError("Unable to read time data")
 
-    uniq, count = unique(time_data, return_counts=True)
+    uniq, count = np.unique(time_data, return_counts=True)
     dupes = uniq[count > 1]
 
     return list(dupes)
 
 
-def timestamp_tzaware(timestamp: Union[str, Timestamp]) -> Timestamp:
+def timestamp_tzaware(timestamp: str | Timestamp) -> Timestamp:
     """Returns the pandas Timestamp passed as a timezone (UTC) aware
     Timestamp.
 
@@ -89,8 +94,6 @@ def timestamp_now() -> Timestamp:
     Returns:
         pandas.Timestamp: Timestamp at current time
     """
-    from pandas import Timestamp
-
     return timestamp_tzaware(Timestamp.now())
 
 
@@ -101,8 +104,6 @@ def timestamp_epoch() -> Timestamp:
     Returns:
         pandas.Timestamp: Timestamp object at epoch
     """
-    from pandas import Timestamp
-
     return timestamp_tzaware(Timestamp("1970-1-1 00:00:00"))
 
 
@@ -116,8 +117,6 @@ def daterange_overlap(daterange_a: str, daterange_b: str) -> bool:
     Returns:
         bool: True if daterange included
     """
-    from pandas import Timestamp
-
     split_a = daterange_a.split("_")
     split_b = daterange_b.split("_")
 
@@ -132,7 +131,7 @@ def daterange_overlap(daterange_a: str, daterange_b: str) -> bool:
     return bool(start_a <= end_b and end_a >= start_b)
 
 
-def create_daterange(start: Timestamp, end: Timestamp, freq: Optional[str] = "D") -> DatetimeIndex:
+def create_daterange(start: Timestamp, end: Timestamp, freq: str | None = "D") -> DatetimeIndex:
     """Create a minute aligned daterange
 
     Args:
@@ -141,18 +140,16 @@ def create_daterange(start: Timestamp, end: Timestamp, freq: Optional[str] = "D"
     Returns:
         pandas.DatetimeIndex
     """
-    from pandas import date_range
-
     if start > end:
         raise ValueError("Start date is after end date")
 
     start = timestamp_tzaware(start)
     end = timestamp_tzaware(end)
 
-    return date_range(start=start, end=end, freq=freq)
+    return pd.date_range(start=start, end=end, freq=freq)
 
 
-def create_daterange_str(start: Union[str, Timestamp], end: Union[str, Timestamp]) -> str:
+def create_daterange_str(start: str | Timestamp, end: str | Timestamp) -> str:
     """Convert the passed datetimes into a daterange string
     for use in searches and Datasource interactions
 
@@ -174,7 +171,7 @@ def create_daterange_str(start: Union[str, Timestamp], end: Union[str, Timestamp
     return "_".join((start, end))
 
 
-def daterange_from_str(daterange_str: str, freq: Optional[str] = "D") -> DatetimeIndex:
+def daterange_from_str(daterange_str: str, freq: str | None = "D") -> DatetimeIndex:
     """Get a Pandas DatetimeIndex from a string. The created
     DatetimeIndex has minute frequency.
 
@@ -184,15 +181,13 @@ def daterange_from_str(daterange_str: str, freq: Optional[str] = "D") -> Datetim
     Returns:
         pandas.DatetimeIndex: DatetimeIndex covering daterange
     """
-    from pandas import date_range
-
     split = daterange_str.split("_")
 
     # Align the seconds
     start = timestamp_tzaware(split[0])
     end = timestamp_tzaware(split[1])
 
-    return date_range(start=start, end=end, freq=freq)
+    return pd.date_range(start=start, end=end, freq=freq)
 
 
 def daterange_to_str(daterange: DatetimeIndex) -> str:
@@ -210,7 +205,7 @@ def daterange_to_str(daterange: DatetimeIndex) -> str:
     return "_".join([start, end])
 
 
-def combine_dateranges(dateranges: List[str]) -> List[str]:
+def combine_dateranges(dateranges: list[str]) -> list[str]:
     """Combine dateranges
 
     Args:
@@ -224,13 +219,13 @@ def combine_dateranges(dateranges: List[str]) -> List[str]:
     if len(dateranges) == 1:
         return dateranges
 
-    def sort_key(tup: Tuple) -> Timestamp:
+    def sort_key(tup: tuple) -> Timestamp:
         return tup[0]
 
     intervals = [split_daterange_str(x) for x in dateranges]
     sorted_by_lower_bound = sorted(intervals, key=sort_key)
 
-    combined: List[Timestamp] = []
+    combined: list[Timestamp] = []
 
     for higher in sorted_by_lower_bound:
         if not combined:
@@ -253,7 +248,7 @@ def combine_dateranges(dateranges: List[str]) -> List[str]:
 
 def split_daterange_str(
     daterange_str: str, date_only: bool = False
-) -> Tuple[Union[Timestamp, date], Union[Timestamp, date]]:
+) -> tuple[Timestamp | date, Timestamp | date]:
     """Split a daterange string to the component start and end
     Timestamps
 
@@ -286,17 +281,11 @@ def valid_daterange(daterange: str) -> bool:
     Returns:
         bool: True if valid
     """
-    from openghg.util import split_daterange_str
-
     start, end = split_daterange_str(daterange)
-
-    if start >= end:
-        return False
-
-    return True
+    return start < end
 
 
-def closest_daterange(to_compare: str, dateranges: Union[str, List[str]]) -> str:
+def closest_daterange(to_compare: str, dateranges: str | list[str]) -> str:
     """Finds the closest daterange in a list of dateranges
 
     Args:
@@ -305,9 +294,6 @@ def closest_daterange(to_compare: str, dateranges: Union[str, List[str]]) -> str
     Returns:
         str: Daterange from dateranges that's the closest in time to to_compare
     """
-    from openghg.util import split_daterange_str
-    from pandas import Timedelta
-
     min_start = Timedelta("3650days")
     min_end = Timedelta("3650days")
 
@@ -345,7 +331,7 @@ def closest_daterange(to_compare: str, dateranges: Union[str, List[str]]) -> str
         return closest_daterange_end
 
 
-def find_daterange_gaps(start_search: Timestamp, end_search: Timestamp, dateranges: List[str]) -> List[str]:
+def find_daterange_gaps(start_search: Timestamp, end_search: Timestamp, dateranges: list[str]) -> list[str]:
     """Given a start and end date and a list of dateranges find the gaps.
 
     For example given a list of dateranges
@@ -368,9 +354,6 @@ def find_daterange_gaps(start_search: Timestamp, end_search: Timestamp, daterang
     Returns:
         list: List of dateranges
     """
-    from openghg.util import pairwise
-    from pandas import Timedelta
-
     if not dateranges:
         return []
 
@@ -453,8 +436,6 @@ def trim_daterange(to_trim: str, overlapping: str) -> str:
     Returns:
         str: Trimmed daterange
     """
-    from pandas import Timedelta
-
     if not daterange_overlap(daterange_a=to_trim, daterange_b=overlapping):
         raise ValueError(f"Dateranges {to_trim} and {overlapping} do not overlap")
 
@@ -473,7 +454,7 @@ def trim_daterange(to_trim: str, overlapping: str) -> str:
         return create_daterange_str(start=new_start_trim, end=end_trim)
 
 
-def split_encompassed_daterange(container: str, contained: str) -> Dict:
+def split_encompassed_daterange(container: str, contained: str) -> dict:
     """Checks if one of the passed dateranges contains the other, if so, then
     split the larger daterange into three sections.
 
@@ -572,11 +553,9 @@ def check_date(date: str) -> str:
     Returns:
         str: Returns NA if not a date, otherwise date string
     """
-    from pandas import Timestamp, isnull
-
     try:
         d = Timestamp(date)
-        if isnull(d):
+        if pd.isna(d):
             return "NA"
 
         return date
@@ -584,7 +563,7 @@ def check_date(date: str) -> str:
         return "NA"
 
 
-def check_nan(data: Union[int, float]) -> Union[str, float, int]:
+def check_nan(data: int | float) -> str | float | int:
     """Check if a number is Nan.
 
     Returns a string that can be JSON serialised.
@@ -594,15 +573,13 @@ def check_nan(data: Union[int, float]) -> Union[str, float, int]:
     Returns:
         str, float, int: Returns NA if not a number else number
     """
-    from math import isnan
-
     if isnan(data):
         return "NA"
     else:
         return round(data, 3)
 
 
-def first_last_dates(keys: List) -> Tuple[Timestamp, Timestamp]:
+def first_last_dates(keys: list) -> tuple[Timestamp, Timestamp]:
     """Find the first and last timestamp from a list of keys
 
     Args:
@@ -628,7 +605,7 @@ def first_last_dates(keys: List) -> Tuple[Timestamp, Timestamp]:
     return first, last
 
 
-def time_offset_definition() -> Dict[str, List]:
+def time_offset_definition() -> dict[str, list]:
     """
     Returns synonym definition for time offset inputs.
 
@@ -660,7 +637,7 @@ def time_offset_definition() -> Dict[str, List]:
     return offset_naming
 
 
-def parse_period(period: Union[str, tuple]) -> TimePeriod:
+def parse_period(period: str | tuple) -> TimePeriod:
     """
     Parses period input and converts to a value, unit pair.
 
@@ -686,8 +663,6 @@ def parse_period(period: Union[str, tuple]) -> TimePeriod:
         >>> parse_period((1, "minute"))
             TimePeriod(1, "minutes")
     """
-    import re
-
     if isinstance(period, tuple):
         if len(period) != 2:
             raise ValueError(
@@ -697,7 +672,7 @@ def parse_period(period: Union[str, tuple]) -> TimePeriod:
             value_in = period[0]
             if isinstance(value_in, str):
                 try:
-                    value: Union[int, float] = int(value_in)
+                    value: int | float = int(value_in)
                 except ValueError:
                     value = float(value_in)
             else:
@@ -715,6 +690,9 @@ def parse_period(period: Union[str, tuple]) -> TimePeriod:
         else:
             value = 1
             unit = period
+            if period == "varies":
+                unit = "s"
+                logging.warning("For time period 'varies' value is set `1` and unit is set to `seconds`")
 
     offset_naming = time_offset_definition()
 
@@ -727,9 +705,9 @@ def parse_period(period: Union[str, tuple]) -> TimePeriod:
 
 
 def create_frequency_str(
-    value: Optional[Union[int, float]] = None,
-    unit: Optional[str] = None,
-    period: Optional[Union[str, tuple]] = None,
+    value: int | float | None = None,
+    unit: str | None = None,
+    period: str | tuple | None = None,
     include_units: bool = True,
 ) -> str:
     """
@@ -769,9 +747,9 @@ def create_frequency_str(
 
 
 def time_offset(
-    value: Optional[Union[int, float]] = None,
-    unit: Optional[str] = None,
-    period: Optional[Union[str, tuple]] = None,
+    value: int | float | None = None,
+    unit: str | None = None,
+    period: str | tuple | None = None,
 ) -> Timedelta:
     """
     Create time offset based on inputs. This will return a Timedelta object
@@ -801,10 +779,10 @@ def time_offset(
 
 
 def relative_time_offset(
-    value: Optional[Union[int, float]] = None,
-    unit: Optional[str] = None,
-    period: Optional[Union[str, tuple]] = None,
-) -> Union[DateOffset, Timedelta]:
+    value: int | float | None = None,
+    unit: str | None = None,
+    period: str | tuple | None = None,
+) -> DateOffset | Timedelta:
     """
     Create relative time offset based on inputs. This is based on the pandas
     DateOffset and Timedelta functions.
@@ -841,11 +819,80 @@ def relative_time_offset(
     return time_delta
 
 
+def infer_frequency(timestamps: DatetimeIndex) -> str | None:
+    """
+    For a series of timestamps, see if we can infer a consistent frequency. Must contain >= 2 time points.
+
+    For timestamps containing more than 2 values, this uses the pandas.infer_freq function.
+    For timestamps containing 2 values, the pandas.infer_freq function cannot be used and so this
+    is inferred manually as follows:
+        - If < 1 hour - returned as "{INT}s"
+        - If > 1 hour but < 1 day - returned as "{INT}h"
+        - If > 1 day but <~ 1 month - returned as "{1DP}D"
+        - If ~= 1 month in days (i.e. 28, 30 or 31 days) - returned as "MS"
+        - If ~= 1 year in days (i.e. 365, 366) - returned as "YS"
+        - Otherwise returns as "{1DP}D"
+
+    Args:
+        timestamps: DatetimeIndex of timestamp values
+    Returns:
+        str: A pandas frequency string for the inferred frequency
+        None: if no consistent frequency can be inferred a None will be returns
+    Raises:
+        ValueError: Less than 2 time points are present
+    """
+
+    timestamps = timestamps.sort_values()
+
+    if len(timestamps) < 2:
+        raise ValueError("Unable to infer frequency from <2 data points")
+    elif len(timestamps) == 2:
+        time_point_difference = timestamps[1] - timestamps[0]
+        total_seconds = time_point_difference.total_seconds()
+
+        hour = 3600.0
+        day = hour * 24.0
+
+        month_options = [28, 30, 31]
+        min_month = min(month_options) * day
+        year_options = [365, 366]
+        min_year = min(year_options) * day
+
+        if total_seconds < hour:
+            inferred_period: str | None = f"{int(total_seconds)}s"
+        elif total_seconds >= hour and total_seconds < day:
+            inferred_period = f"{int(total_seconds / hour)}h"
+        elif total_seconds >= day and total_seconds < min_month:
+            inferred_period = f"{(total_seconds / day):.1f}D"
+        elif total_seconds >= min_month and total_seconds <= min_year:
+            for month in month_options:
+                month_seconds = month * day
+                rounded_seconds = total_seconds / month_seconds
+                if np.isclose(rounded_seconds, 1):
+                    inferred_period = "MS"
+                    break
+            else:
+                inferred_period = f"{(total_seconds / day):.1f}D"
+        elif total_seconds >= min_year:
+            for year in year_options:
+                year_seconds = year * day
+                rounded_seconds = total_seconds / year_seconds
+                if np.isclose(rounded_seconds, 1):
+                    inferred_period = "YS"
+                    break
+            else:
+                inferred_period = f"{(total_seconds / day):.1f}D"
+    else:
+        inferred_period = pd.infer_freq(timestamps)
+
+    return inferred_period
+
+
 def in_daterange(
-    start_a: Union[str, Timestamp],
-    end_a: Union[str, Timestamp],
-    start_b: Union[str, Timestamp],
-    end_b: Union[str, Timestamp],
+    start_a: str | Timestamp,
+    end_a: str | Timestamp,
+    start_b: str | Timestamp,
+    end_b: str | Timestamp,
 ) -> bool:
     """Check if two dateranges overlap.
 
@@ -855,8 +902,6 @@ def in_daterange(
     Returns:
         bool: True if overlap
     """
-    from openghg.util import timestamp_tzaware
-
     start_a = timestamp_tzaware(start_a)
     end_a = timestamp_tzaware(end_a)
 
@@ -867,10 +912,10 @@ def in_daterange(
 
 
 def dates_overlap(
-    start_a: Union[str, Timestamp],
-    end_a: Union[str, Timestamp],
-    start_b: Union[str, Timestamp],
-    end_b: Union[str, Timestamp],
+    start_a: str | Timestamp,
+    end_a: str | Timestamp,
+    start_b: str | Timestamp,
+    end_b: str | Timestamp,
 ) -> bool:
     """Check if two dateranges overlap.
 
@@ -880,8 +925,6 @@ def dates_overlap(
     Returns:
         bool: True if overlap
     """
-    from openghg.util import timestamp_tzaware
-
     start_a = timestamp_tzaware(start_a)
     end_a = timestamp_tzaware(end_a)
 
@@ -891,9 +934,7 @@ def dates_overlap(
     return bool((start_a <= end_b) and (end_a >= start_b))
 
 
-def dates_in_range(
-    keys: List[str], start_date: Union[Timestamp, str], end_date: Union[Timestamp, str]
-) -> List[str]:
+def dates_in_range(keys: list[str], start_date: Timestamp | str, end_date: Timestamp | str) -> list[str]:
     """Returns the keys in the key list that are between the given dates
 
     Args:
@@ -916,7 +957,7 @@ def dates_in_range(
     return in_date
 
 
-def evaluate_sampling_period(sampling_period: Optional[Union[Timedelta, str]]) -> Optional[str]:
+def evaluate_sampling_period(sampling_period: Timedelta | str | None) -> str | None:
     """
     Check the sampling period input and convert this into a string containing the
     sampling period in seconds.
@@ -931,7 +972,6 @@ def evaluate_sampling_period(sampling_period: Optional[Union[Timedelta, str]]) -
     """
     # If we have a sampling period passed we want the number of seconds
     if sampling_period is not None:
-
         # Check format of input string matches expected
         sampling_period = str(sampling_period)
         re_sampling_period = re.compile(r"\d+[.]?\d*\s*[a-zA-Z]+")
@@ -962,3 +1002,60 @@ def evaluate_sampling_period(sampling_period: Optional[Union[Timedelta, str]]) -
         # TODO: May want to add check for NaT or NaN
 
     return sampling_period
+
+
+def get_dataset_daterange(dataset: Dataset) -> tuple[Timestamp, Timestamp]:
+    """Get the daterange for the passed Dataset
+
+    Args:
+        dataset (xarray.DataSet): Dataset to parse
+    Returns:
+        tuple (Timestamp, Timestamp): Start and end datetimes for DataSet
+
+    """
+    try:
+        start = timestamp_tzaware(dataset.time.min().values)
+        end = timestamp_tzaware(dataset.time.max().values)
+
+        return start, end
+    except AttributeError:
+        raise AttributeError("This dataset does not have a time attribute, unable to read date range")
+
+
+def get_representative_daterange_str(dataset: Dataset, period: str | None = None) -> str:
+    """Get representative daterange which incorporates any period the data covers.
+
+    A representative daterange covers the start - end time + any additional period that is covered
+    by each time point. The start and end times can be extracted from the input dataset and
+    any supplied period used to extend the end of the date range to cover the representative period.
+
+    If there is only one time point (i.e. start and end datetimes are the same) and no period is
+    supplied 1 additional second will be added to ensure these values are not identical.
+
+    Args:
+        dataset: Data containing (at least) a time dimension. Used to extract start and end datetimes.
+        period: Value representing a time period e.g. "12H", "1AS" "3MS". Should be suitable for
+            creation of a pandas Timedelta or DataOffset object.
+
+    Returns:
+        str : Date string covering representative date range e.g. "YYYY-MM-DD hh:mm:ss_YYYY-MM-DD hh:mm:ss"
+    """
+
+    # Extract start and end dates from grouped data
+    start_date, end_date = get_dataset_daterange(dataset)
+
+    # If period is defined add this to the end date
+    # This ensure start-end range includes time period covered by data
+    if period is not None:
+        period_td = relative_time_offset(period=period)
+        end_date = (
+            end_date + period_td - Timedelta(seconds=1)
+        )  # Subtract 1 second to make this exclusive end.
+
+    # If start and end times are identical add 1 second to ensure the range duration is > 0 seconds
+    if start_date == end_date:
+        end_date += Timedelta(seconds=1)
+
+    daterange_str = create_daterange_str(start=start_date, end=end_date)
+
+    return daterange_str

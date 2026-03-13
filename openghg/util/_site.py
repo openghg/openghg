@@ -1,11 +1,12 @@
-from typing import Dict, Any
+from typing import Any
 from openghg.util import load_json
-from openghg.types import optionalPathType
+from openghg.util._inlet import format_inlet
+from openghg.types import pathType
 
-__all__ = ["get_site_info", "sites_in_network"]
+__all__ = ["get_site_info", "sites_in_network", "_get_site_data"]
 
 
-def get_site_info(site_filepath: optionalPathType = None) -> Dict[str, Any]:
+def get_site_info(site_filepath: pathType | None = None) -> dict[str, Any]:
     """Extract data from site info JSON file as a dictionary.
 
     This uses the data stored within openghg_defs/data/site_info JSON file by default.
@@ -25,7 +26,35 @@ def get_site_info(site_filepath: optionalPathType = None) -> Dict[str, Any]:
     return site_info_json
 
 
-def sites_in_network(network: str, site_filepath: optionalPathType = None) -> list:
+def _get_site_data(site: str, network: str) -> tuple[float, float, float, list]:
+    """Extract site location data from site attributes file.
+
+    Args:
+        site: Site code
+    Returns:
+        dict: Dictionary of site data
+    """
+
+    network = network.upper()
+    site = site.upper()
+
+    site_info = get_site_info()
+
+    try:
+        site_data = site_info[site][network]
+        latitude = float(site_data["latitude"])
+        longitute = float(site_data["longitude"])
+        site_height = float(site_data["height_station_masl"])
+        inlet_heights = site_data["height_name"]
+    except KeyError as e:
+        raise KeyError(f"Incorrect site or network : {e}")
+
+    inlet_heights = [format_inlet(inlet, units="m") for inlet in inlet_heights]
+
+    return latitude, longitute, site_height, inlet_heights
+
+
+def sites_in_network(network: str, site_filepath: pathType | None = None) -> list:
     """Extract details of all the sites within a network.
     Note: this will assume the network is stored in upper case.
 

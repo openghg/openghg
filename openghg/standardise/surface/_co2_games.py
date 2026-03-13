@@ -1,10 +1,10 @@
 import logging
 from pathlib import Path
 import copy
-from typing import Dict, Optional, Union
 import xarray as xr
 
-from openghg.types import optionalPathType
+from openghg.types import pathType
+from openghg.util import get_data
 from openghg.standardise.meta import (
     assign_attributes,
     dataset_formatter,
@@ -15,18 +15,19 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_co2_games(
-    filepath: Union[str, Path],
     site: str,
     measurement_type: str,
-    inlet: Optional[str] = None,
+    filepath: str | Path | list[str] | list[Path] | None = None,
+    data: xr.Dataset | None = None,
+    inlet: str | None = None,
     network: str = "icos",
-    instrument: Optional[str] = None,
-    sampling_period: Optional[str] = None,
+    instrument: str | None = None,
+    sampling_period: str | None = None,
     update_mismatch: str = "never",
-    site_filepath: optionalPathType = None,
+    site_filepath: pathType | None = None,
     units: str = "mol/mol",
-    **kwarg: Dict,
-) -> Dict:
+    **kwarg: dict,
+) -> dict:
     """Read co2 verification games files.
        Current scope is for Paris required by Eric
     Args:
@@ -52,18 +53,18 @@ def parse_co2_games(
 
     list_of_models = ["BASE", "PTEN", "ATEN", "HGER", "HFRA", "DFIN"]
 
-    gas_data: Dict = {}
+    gas_data: dict = {}
 
-    with xr.open_dataset(filepath) as dataset:
+    with get_data(dataset=data, filepath=filepath) as data:
         # Use dictionary comprehension to split data variables into individual datasets
-        attributes = dataset.attrs
+        attributes = data.attrs
         metadata = {
             "site": attributes["site_code"],
             "species": "co2",
             "inlet": attributes["dataset_intake_ht"],
             "inlet_height_magl": attributes["dataset_intake_ht"],
             "network": network,
-            "instrument": "NOT_SET",
+            "instrument": "surface-insitu" if "insitu" in attributes["dataset_project"] else "NOT_SET",
             "sampling_period": attributes["dataset_data_frequency_unit"],
             "calibration_scale": attributes["dataset_calibration_scale"],
             "data_owner": "NOT_SET",
@@ -76,7 +77,7 @@ def parse_co2_games(
             "units": units,
         }
 
-        gas_dataset = {f"co2_{model}": dataset[[model]] for model in list_of_models}
+        gas_dataset = {f"co2_{model}": data[[model]] for model in list_of_models}
         for model in gas_dataset.keys():
             data_var = list(gas_dataset[model].data_vars.keys())[0]
             gas_data[model] = {}

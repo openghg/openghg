@@ -1,9 +1,8 @@
 # This holds store metadata for now
-from typing import Dict
 from openghg.store.base import BaseStore
 
 
-def data_class_info() -> Dict:
+def data_class_info() -> dict:
     """Return storage class information for each data type.
 
     Returns:
@@ -22,6 +21,7 @@ def data_class_info() -> Dict:
         },
         "eulerian_model": {"_root": "EulerianModel", "_uuid": "63ff2365-3ba2-452a-a53d-110140805d06"},
         "flux_timeseries": {"_root": "FluxTimeseries", "_uuid": "099b597b-0598-4efa-87dd-472dfe027f5d8"},
+        "site_met": {"_root": "SiteMet", "_uuid": "dbb725a1-4102-4804-b732-9e2159fe04f1"},
     }
 
 
@@ -34,7 +34,7 @@ def get_data_class(data_type: str) -> type[BaseStore]:
 
     Returns:
         Data class, one of `ObsSurface`, `ObsColumn`, `Flux`, `EulerianModel`,
-    `Footprints`, `BoundaryConditions`, `FluxTimeseries`.
+    `Footprints`, `BoundaryConditions`, `FluxTimeseries`, `SiteMet`.
     """
     try:
         data_class = BaseStore._registry[data_type]

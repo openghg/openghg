@@ -3,10 +3,10 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, TYPE_CHECKING, Dict, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any
+from openghg.types import pathType, TransformError
+from openghg.util import load_transform_parser, check_if_need_new_version, split_function_inputs
 import numpy as np
-from xarray import Dataset
-from openghg.util import synonyms
 
 if TYPE_CHECKING:
     from openghg.store import DataSchema
@@ -27,13 +27,21 @@ class BoundaryConditions(BaseStore):
     _uuid = "4e787366-be91-4fc5-ad1b-4adcb213d478"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    def read_data(self, binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[Dict]:
+    def read_raw_data(
+        self,
+        binary_data: bytes,
+        metadata: dict,
+        file_metadata: dict,
+        source_format: str,
+    ) -> list[dict] | None:
         """Ready a footprint from binary data
 
         Args:
             binary_data: Footprint data
             metadata: Dictionary of metadata
             file_metadat: File metadata
+            source_format : Type of data being input e.g. openghg (internal format)
+
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
@@ -48,224 +56,42 @@ class BoundaryConditions(BaseStore):
             filepath = tmpdir_path.joinpath(filename)
             filepath.write_bytes(binary_data)
 
-            return self.read_file(filepath=filepath, **metadata)
+            return self.standardise_and_store(filepath=filepath, source_format=source_format, **metadata)
 
-    def read_file(
-        self,
-        filepath: Union[str, Path],
-        species: str,
-        bc_input: str,
-        domain: str,
-        period: Optional[Union[str, tuple]] = None,
-        continuous: bool = True,
-        if_exists: str = "auto",
-        save_current: str = "auto",
-        overwrite: bool = False,
-        force: bool = False,
-        compressor: Optional[Any] = None,
-        filters: Optional[Any] = None,
-        chunks: Optional[Dict] = None,
-        optional_metadata: Optional[Dict] = None,
-    ) -> dict:
-        """Read boundary conditions file
+    def format_inputs(self, **kwargs: Any) -> dict:
+        """
+        Apply appropriate formatting for expected inputs for BoundaryConditions. Expected
+        inputs will typically be defined within the openghg.standardse.standardise_bc()
+        function.
 
         Args:
-            filepath: Path of boundary conditions file
-            species: Species name
-            bc_input: Input used to create boundary conditions. For example:
-              - a model name such as "MOZART" or "CAMS"
-              - a description such as "UniformAGAGE" (uniform values based on AGAGE average)
-            domain: Region for boundary conditions
-            period: Period of measurements. Only needed if this can not be inferred from the time coords
-                    If specified, should be one of:
-                     - "yearly", "monthly"
-                     - suitable pandas Offset Alias
-                     - tuple of (value, unit) as would be passed to pandas.Timedelta function
-            continuous: Whether time stamps have to be continuous.
-            if_exists: What to do if existing data is present.
-                - "auto" - checks new and current data for timeseries overlap
-                   - adds data if no overlap
-                   - raises DataOverlapError if there is an overlap
-                - "new" - just include new data and ignore previous
-                - "combine" - replace and insert new data into current timeseries
-            save_current: Whether to save data in current form and create a new version.
-                - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
-                - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
-                - "n" / "no" - Allow current data to updated / deleted
-            overwrite: Deprecated. This will use options for if_exists="new".
-            force: Force adding of data even if this is identical to data stored.
-            compressor: A custom compressor to use. If None, this will default to
-                `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
-                See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
-            filters: Filters to apply to the data on storage, this defaults to no filtering. See
-                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
-            chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
-                for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
-                See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
-                To disable chunking pass in an empty dictionary.
-            optional_metadata: Allows to pass in additional tags to distinguish added data. e.g {"project":"paris", "baseline":"Intem"}
+            kwargs: Set of keyword arguments. Selected keywords will be
+                appropriately formatted.
         Returns:
-            dict: Dictionary of datasource UUIDs data assigned to
+            dict: Formatted parameters for this data type.
+
+        TODO: Decide if we can phase out additional_metadata or if this could be
+            added to params.
         """
-        # Get initial values which exist within this function scope using locals
-        # MUST be at the top of the function
-        fn_input_parameters = locals().copy()
+        from openghg.util import clean_string, synonyms
 
-        from openghg.store import (
-            infer_date_range,
-            update_zero_dim,
-        )
-        from openghg.util import (
-            clean_string,
-            timestamp_now,
-            check_if_need_new_version,
-        )
+        params = kwargs.copy()
 
-        from xarray import open_dataset
+        # Apply clean string formatting
+        params["species"] = clean_string(params.get("species"))
+        params["bc_input"] = clean_string(params.get("bc_input"))
+        params["domain"] = clean_string(params.get("domain"))
 
-        species = clean_string(species)
-        species = synonyms(species)
-        bc_input = clean_string(bc_input)
-        domain = clean_string(domain)
+        # Apply individual formatting as appropriate
+        # - apply synonyms substitution for species
+        species = params.get("species")
+        if species is not None:
+            params["species"] = synonyms(species)
 
-        # Specify any additional metadata to be added
-        additional_metadata = {}
-
-        if overwrite and if_exists == "auto":
-            logger.warning(
-                "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
-                "See documentation for details of these inputs and options."
-            )
-            if_exists = "new"
-
-        # Making sure new version will be created by default if force keyword is included.
-        if force and if_exists == "auto":
-            if_exists = "new"
-
-        new_version = check_if_need_new_version(if_exists, save_current)
-
-        filepath = Path(filepath)
-
-        _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
-
-        if not unseen_hashes:
-            return {}
-
-        filepath = next(iter(unseen_hashes.values()))
-
-        if chunks is None:
-            chunks = {}
-
-        # Get current parameter values and filter to only include function inputs
-        fn_current_parameters = locals().copy()  # Make a copy of parameters passed to function
-        fn_input_parameters = {key: fn_current_parameters[key] for key in fn_input_parameters}
-
-        with open_dataset(filepath).chunk(chunks) as bc_data:
-            # Some attributes are numpy types we can't serialise to JSON so convert them
-            # to their native types here
-            attrs = {}
-            for key, value in bc_data.attrs.items():
-                try:
-                    attrs[key] = value.item()
-                except AttributeError:
-                    attrs[key] = value
-
-            author_name = "OpenGHG Cloud"
-            bc_data.attrs["author"] = author_name
-
-            metadata = {}
-            metadata.update(attrs)
-
-            metadata["species"] = species
-            metadata["domain"] = domain
-            metadata["bc_input"] = bc_input
-            metadata["author"] = author_name
-            metadata["processed"] = str(timestamp_now())
-
-            # Check if time has 0-dimensions and, if so, expand this so time is 1D
-            if "time" in bc_data.coords:
-                bc_data = update_zero_dim(bc_data, dim="time")
-
-            # Currently ACRG boundary conditions are split by month or year
-            bc_time = bc_data["time"]
-
-            start_date, end_date, period_str = infer_date_range(
-                bc_time, filepath=filepath, period=period, continuous=continuous
-            )
-
-            # Checking against expected format for boundary conditions
-            BoundaryConditions.validate_data(bc_data)
-            data_type = "boundary_conditions"
-
-            metadata["start_date"] = str(start_date)
-            metadata["end_date"] = str(end_date)
-            metadata["data_type"] = data_type
-
-            metadata["max_longitude"] = round(float(bc_data["lon"].max()), 5)
-            metadata["min_longitude"] = round(float(bc_data["lon"].min()), 5)
-            metadata["max_latitude"] = round(float(bc_data["lat"].max()), 5)
-            metadata["min_latitude"] = round(float(bc_data["lat"].min()), 5)
-            metadata["min_height"] = round(float(bc_data["height"].min()), 5)
-            metadata["max_height"] = round(float(bc_data["height"].max()), 5)
-
-            metadata["input_filename"] = filepath.name
-
-            metadata["time_period"] = period_str
-
-            key = "_".join((species, bc_input, domain))
-
-            boundary_conditions_data: dict[str, dict] = {}
-            boundary_conditions_data[key] = {}
-            boundary_conditions_data[key]["data"] = bc_data
-            boundary_conditions_data[key]["metadata"] = metadata
-
-            matched_keys = set(metadata) & set(fn_input_parameters)
-            additional_input_parameters = {
-                key: value for key, value in fn_input_parameters.items() if key not in matched_keys
-            }
-
-            # Check to ensure no required keys are being passed through optional_metadata dict
-            self.check_info_keys(optional_metadata)
-
-            if optional_metadata is not None:
-                additional_metadata.update(optional_metadata)
-
-            # Mop up and add additional keys to metadata which weren't passed to the parser
-            boundary_conditions_data = self.update_metadata(
-                boundary_conditions_data, additional_input_parameters, additional_metadata
-            )
-
-            # This performs the lookup and assignment of data to new or
-            # existing Datasources
-            datasource_uuids = self.assign_data(
-                data=boundary_conditions_data,
-                if_exists=if_exists,
-                new_version=new_version,
-                data_type=data_type,
-                compressor=compressor,
-                filters=filters,
-            )
-
-            # TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
-            # update_keys = ["start_date", "end_date", "latest_version"]
-            # boundary_conditions_data = update_metadata(
-            #     data_dict=boundary_conditions_data, uuid_dict=datasource_uuids, update_keys=update_keys
-            # )
-
-            # bc_store.add_datasources(
-            #     uuids=datasource_uuids,
-            #     data=boundary_conditions_data,
-            #     metastore=metastore,
-            #     update_keys=update_keys,
-            # )
-
-            # Record the file hash in case we see this file again
-            self.store_hashes(unseen_hashes)
-
-            return datasource_uuids
+        return params
 
     @staticmethod
-    def schema() -> DataSchema:
+    def schema() -> DataSchema:  # type: ignore[override]
         """
         Define schema for boundary conditions Dataset.
 
@@ -282,7 +108,7 @@ class BoundaryConditions(BaseStore):
         """
         from openghg.store import DataSchema
 
-        data_vars: Dict[str, Tuple[str, ...]] = {
+        data_vars: dict[str, tuple[str, ...]] = {
             "vmr_n": ("time", "height", "lon"),
             "vmr_e": ("time", "height", "lat"),
             "vmr_s": ("time", "height", "lon"),
@@ -303,20 +129,91 @@ class BoundaryConditions(BaseStore):
 
         return data_format
 
-    @staticmethod
-    def validate_data(data: Dataset) -> None:
-        """
-        Validate input data against BoundaryConditions schema - definition from
-        BoundaryConditions.schema() method.
+    def transform_data(
+        self,
+        datapath: pathType,
+        database: str,
+        if_exists: str = "auto",
+        save_current: str = "auto",
+        overwrite: bool = False,
+        compressor: Any | None = None,
+        filters: Any | None = None,
+        info_metadata: dict | None = None,
+        **kwargs: dict,
+    ) -> list[dict]:
+        """Read and transform a cams boundary conditions data. This will find the appropriate parser function to use for the database specified. The necessary inputs are determined by which database is being used.
+        The underlying parser functions will be of the form:
+            - openghg.transform.boundary_conditions.parse_{database.lower()}
+                - e.g. openghg.transform.boundary_conditions.parse_cams()"""
 
-        Args:
-            data : xarray Dataset in expected format
+        from openghg.store.spec import define_transform_parsers
 
-        Returns:
-            None
+        if overwrite and if_exists == "auto":
+            logger.warning(
+                "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
+                "See documentation for details of these inputs and options."
+            )
+            if_exists = "new"
 
-            Raises a ValueError with details if the input data does not adhere
-            to the BoundaryConditions schema.
-        """
-        data_schema = BoundaryConditions.schema()
-        data_schema.validate_data(data)
+        # Format input parameters (specific to data_type)
+        fn_input_parameters = self.format_inputs(**kwargs)
+
+        new_version = check_if_need_new_version(if_exists, save_current)
+
+        fn_input_parameters["datapath"] = Path(datapath)
+
+        transform_parsers = define_transform_parsers()[self._data_type]
+
+        try:
+            transform_parsers[database.upper()].value
+        except KeyError:
+            raise ValueError(f"Unable to transform '{database}' selected.")
+
+        # Load the data retrieve object
+        parser_fn = load_transform_parser(data_type=self._data_type, source_format=database)
+
+        # Define parameters to pass to the parser function and remaining keys
+        parser_input_parameters, additional_input_parameters = split_function_inputs(
+            fn_input_parameters, parser_fn
+        )
+
+        # Call appropriate standardisation function with input parameters
+        try:
+            bc_data = parser_fn(**parser_input_parameters)
+        except (TypeError, ValueError) as err:
+            msg = f"Error during transformation of data(s): {datapath}. Error: {err}"
+            logger.exception(msg)
+            raise TransformError(msg)
+
+        # Checking against expected format for Flux
+        for mdd in bc_data:
+            BoundaryConditions.validate_data(mdd.data)
+
+        required_keys = ("species", "bc_input", "domain")
+
+        if info_metadata:
+            common_keys = set(required_keys) & set(info_metadata.keys())
+
+            if common_keys:
+                raise ValueError(
+                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
+                )
+            else:
+                for parsed_data in bc_data:
+                    parsed_data.metadata.update(info_metadata)
+
+        # Mop up and add additional keys to metadata which weren't passed to the parser
+        bc_data = self.update_metadata(
+            bc_data, additional_input_parameters, additional_metadata=info_metadata
+        )
+
+        datasource_uuids = self.assign_data(
+            data=bc_data,
+            if_exists=if_exists,
+            new_version=new_version,
+            required_keys=required_keys,
+            compressor=compressor,
+            filters=filters,
+        )
+
+        return datasource_uuids

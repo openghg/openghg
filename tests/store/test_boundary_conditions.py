@@ -4,13 +4,39 @@ from helpers import get_bc_datapath, clear_test_store
 from openghg.retrieve import search
 from openghg.standardise import standardise_bc, standardise_from_binary_data
 from openghg.store import BoundaryConditions
+from openghg.transform import transform_bc_data
 from openghg.util import hash_bytes
 from xarray import open_dataset
 
 
 def test_read_data_monthly(mocker):
-    fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
-    # mocker.patch("uuid.uuid4", side_effect=fake_uuids)
+    class FakeUUID:
+        """A class that mocks `uuid.uuid4`.
+
+        It has a `hex` property, which is used by some of our code.
+        The values returned by `hex` are 0, 1, 2, ... (as strings).
+
+        It only returns one uuid, but could be changed to return a different UUID
+        each time.
+        """
+
+        hex_num = 0
+        uuid_num = 0
+
+        def __init__(self) -> None:
+            pass
+
+        def __str__(self) -> str:
+            return "test-uuid-1"
+
+        @property
+        def hex(self) -> str:
+            self.hex_num += 1
+            return str(self.hex_num)
+
+    fake_uuid = FakeUUID()
+    mocker.patch("uuid.uuid4", side_effect=lambda: fake_uuid)
+    mocker.patch("openghg.objectstore._objectstore.uuid4", side_effect=lambda: fake_uuid)
 
     test_datapath = get_bc_datapath("ch4_EUROPE_201208.nc")
 
@@ -34,10 +60,19 @@ def test_read_data_monthly(mocker):
         binary_data=binary_data,
         metadata=metadata,
         file_metadata=file_metadata,
+        source_format="openghg",
     )
 
-    # assert proc_results == {"ch4_mozart_europe": {"uuid": "test-uuid-1", "new": True}}
-    assert proc_results["ch4_mozart_europe"]["new"] is True
+    assert proc_results is not None and len(proc_results) == 1
+
+    expected_info = {
+        "uuid": "test-uuid-1",
+        "new": True,
+        "species": "ch4",
+        "bc_input": "mozart",
+        "domain": "europe",
+    }
+    assert expected_info.items() <= proc_results[0].items()
 
 
 def test_read_file_monthly():
@@ -53,7 +88,10 @@ def test_read_file_monthly():
         force=True,
     )
 
-    assert "ch4_mozart_europe" in proc_results
+    assert len(proc_results) == 1
+
+    expected_info = {"species": "ch4", "bc_input": "mozart", "domain": "europe"}
+    assert expected_info.items() <= proc_results[0].items()
 
     search_results = search(
         species="ch4", bc_input="MOZART", domain="europe", data_type="boundary_conditions"
@@ -230,7 +268,7 @@ def test_bc_schema():
     # TODO: Could also add checks for dims and dtypes?
 
 
-def test_optional_metadata_raise_error():
+def test_info_metadata_raise_error():
     """
     Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
     """
@@ -249,11 +287,11 @@ def test_optional_metadata_raise_error():
             species=species,
             bc_input=bc_input,
             domain=domain,
-            optional_metadata={"purpose": "openghg_tests", "species": "co2"},
+            info_metadata={"purpose": "openghg_tests", "species": "co2"},
         )
 
 
-def test_optional_metadata():
+def test_info_metadata():
     """
     Test to verify optional metadata supplied as dictionary gets stored as metadata
     """
@@ -269,7 +307,7 @@ def test_optional_metadata():
         species=species,
         bc_input=bc_input,
         domain=domain,
-        optional_metadata={"project": "openghg_test", "tag": "tests"},
+        info_metadata={"project": "openghg_test", "tag": "tests"},
     )
 
     search_results = search(
@@ -281,3 +319,31 @@ def test_optional_metadata():
 
     assert "project" in metadata
     assert "tag" in metadata
+
+
+def test_transform_cams_n2o_bc():
+    "Test CAMS parser for transform_boundary_conditions"
+    bc_input = "cams_test"
+    cams_version = "v22r1"
+    domain = "europe"
+    species = "n2o"
+    period = "daily"
+    filename = "cams73_v22r1_n2o_test_202201.nc"
+    data_path = get_bc_datapath(filename=filename)
+
+    results = transform_bc_data(
+        datapath=data_path,
+        database="CAMS",
+        species=species,
+        bc_input=bc_input,
+        period=period,
+        cams_version=cams_version,
+        domain=domain,
+        source_format="cams",
+        store="user",
+    )
+
+    expected_metadata = {"species": species, "domain": domain, "bc_input": bc_input}
+
+    for k, v in expected_metadata.items():
+        assert results[0][k].lower() == v.lower()

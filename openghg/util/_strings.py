@@ -1,5 +1,6 @@
 import re
-from typing import Any, Dict, List, Optional, Set, Tuple, Union, Iterable, overload
+from typing import Any, overload
+from collections.abc import Iterable
 
 from openghg.util import not_set_metadata_values, null_metadata_values
 
@@ -7,19 +8,25 @@ __all__ = ["clean_string", "to_lowercase"]
 
 
 @overload
-def clean_string(to_clean: str) -> str: ...
+def clean_string(
+    to_clean: str | float | bool, keep_special_characters: str | list | None = ["_", "-", "."]
+) -> str: ...
 
 
 @overload
-def clean_string(to_clean: None) -> None: ...
+def clean_string(to_clean: None, keep_special_characters: str | list | None = ["_", "-", "."]) -> None: ...
 
 
-def clean_string(to_clean: Optional[str]) -> Union[str, None]:
+def clean_string(
+    to_clean: str | float | bool | None, keep_special_characters: str | list | None = ["_", "-", "."]
+) -> str | None:
     """Returns a lowercase string with only alphanumeric
-    characters and underscores.
+    characters and any other characters specified by the keep_special_characters input.
 
     Args:
         to_clean: String to clean
+        keep_special_characters: Additional non-alphanumeric characters to keep.
+            Default = ["_", "-", "."] (underscores, dashes and full stops)
     Returns:
         str or None: Clean string
     """
@@ -31,16 +38,42 @@ def clean_string(to_clean: Optional[str]) -> Union[str, None]:
     if isinstance(to_clean, bool):
         return str(to_clean).lower()
 
-    try:
-        # This might be used with numbers
-        if is_number(to_clean):
-            return str(to_clean)
+    if is_number(to_clean):
+        return str(to_clean)
 
+    # From this point make sure to_clean is a string
+    to_clean = str(to_clean)
+
+    if keep_special_characters is None:
+        special_characters = [""]
+    elif isinstance(keep_special_characters, str):
+        special_characters = [keep_special_characters]
+    else:
+        special_characters = keep_special_characters.copy()
+
+    # Check if "_" is included in the list of `keep_special_characters`
+    # This needs a special case because `\w` being used in our main
+    # regex substitution already includes an underscore - "A-Za-z0-9_"
+    underscore = "_"
+    if underscore in special_characters:
+        keep_underscore = True
+        special_characters.remove(underscore)
+    else:
+        keep_underscore = False
+
+    keep_regex = re.escape("".join(special_characters))
+
+    try:
         # Removes all whitespace
         cleaner = re.sub(r"\s+", "", to_clean, flags=re.UNICODE).lower()
-        # Removes non-alphanumeric characters but keep underscores
-        # cleanest = re.sub(r"\W+", "", cleaner)
-        cleanest = re.sub(r"[^\w-]+", "", cleaner)
+
+        # Keep unicode alphanumeric, _, and keep additional special chars
+        to_keep = rf"[^\w{keep_regex}]+"
+        cleanest = re.sub(to_keep, "", cleaner)
+
+        # Explicitly remove underscores if not keeping
+        if not keep_underscore:
+            cleanest = cleanest.replace(underscore, "")
     except TypeError:
         return to_clean
 
@@ -48,28 +81,28 @@ def clean_string(to_clean: Optional[str]) -> Union[str, None]:
 
 
 @overload
-def to_lowercase(d: Dict, skip_keys: Optional[List] = None) -> Dict: ...
+def to_lowercase(d: dict, skip_keys: list | None = None) -> dict: ...
 
 
 @overload
-def to_lowercase(d: List, skip_keys: Optional[List] = None) -> List: ...
+def to_lowercase(d: list, skip_keys: list | None = None) -> list: ...
 
 
 @overload
-def to_lowercase(d: Tuple, skip_keys: Optional[List] = None) -> Tuple: ...
+def to_lowercase(d: tuple, skip_keys: list | None = None) -> tuple: ...
 
 
 @overload
-def to_lowercase(d: Set, skip_keys: Optional[List] = None) -> Set: ...
+def to_lowercase(d: set, skip_keys: list | None = None) -> set: ...
 
 
 @overload
-def to_lowercase(d: str, skip_keys: Optional[List] = None) -> str: ...
+def to_lowercase(d: str, skip_keys: list | None = None) -> str: ...
 
 
 def to_lowercase(
-    d: Union[Dict, List, Tuple, Set, str], skip_keys: Optional[List] = None
-) -> Union[Dict, List, Tuple, Set, str]:
+    d: dict | list | tuple | set | str, skip_keys: list | None = None
+) -> dict | list | tuple | set | str:
     """Convert an object to lowercase. All keys and values in a dictionary will be converted
     to lowercase as will all objects in a list, tuple or set. You can optionally pass in a list of keys to
     skip when lowercasing a dictionary.
@@ -175,10 +208,10 @@ def extract_float(s: str) -> float:
 
 
 def check_and_set_null_variable(
-    param: Union[str, None],
-    not_set_value: Optional[str] = None,
+    param: str | None,
+    not_set_value: str | None = None,
     null_values: Iterable = null_metadata_values(),
-) -> Union[str, None]:
+) -> str | None:
     """
     Check whether a variable is set to a null value (e.g. None) and if so replace this with
     a defined string used to indicate the variable has not been set.

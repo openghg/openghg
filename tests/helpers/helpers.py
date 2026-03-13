@@ -1,6 +1,6 @@
-""" Some helper functions for things we do in tests frequently
-"""
+"""Some helper functions for things we do in tests frequently"""
 
+import getpass
 import shutil
 import tempfile
 from pathlib import Path
@@ -10,10 +10,14 @@ from typing import Dict, List, Union
 def temporary_store_paths() -> Dict[str, Path]:
     # Add some uppercasing and numbers here to enusure paths work
     # with other characters - see https://github.com/openghg/openghg/issues/701
+    user = getpass.getuser()  # get current system user
+
+    base_tmp = Path(tempfile.gettempdir()) / f"openghg-testing-{user}"
+
     return {
-        "user": Path(tempfile.gettempdir(), "openghg_testing-STORE_123"),
-        "group": Path(tempfile.gettempdir(), "openghg_testing_group_store"),
-        "shared": Path(tempfile.gettempdir(), "openghg_testing_shared_store"),
+        "user": base_tmp / f"openghg_testing-STORE_123",
+        "group": base_tmp / f"openghg_testing_group_store",
+        "shared": base_tmp / f"openghg_testing_shared_store",
     }
 
 
@@ -85,17 +89,38 @@ def get_footprint_datapath(filename: str) -> Path:
     return get_datapath_base(data_type="footprints", filename=filename)
 
 
+def get_met_datapath(filename: str) -> Path:
+    """Return the path to the met test data file"""
+    return get_datapath_base(data_type="met", filename=filename)
+
+
 def get_datapath_base(data_type: str, filename: str) -> Path:
     """Return the path to the footprints test data file"""
     return Path(__file__).parent.parent.joinpath(f"data/{data_type}/{filename}").resolve()
 
 
-def get_retrieval_datapath(filename: str):
-    return Path(__file__).parent.parent.joinpath(f"data/retrieve/{filename}").resolve()
+def get_retrieval_datapath(filename: str, archive: str | None = None) -> Path:
+    """Return the path to the retrieve data file.
+    Args:
+        filename: Name of the file
+        archive: the name of the archive (e.g. ICOS) the retrieved file is related to.
+            If specified, this will look for the file within an additional subfolder layer based on this archive name.
+            Otherwise, this will look in the top level retrieve directory.
+    Returns:
+        Path: Full filepath for the filename
+    """
+    if archive:
+        return Path(__file__).parent.parent.joinpath(f"data/retrieve/{archive.upper()}/{filename}").resolve()
+    else:
+        return Path(__file__).parent.parent.joinpath(f"data/retrieve/{filename}").resolve()
 
 
 def get_info_datapath(filename: str):
     return Path(__file__).parent.parent.joinpath(f"data/info/{filename}").resolve()
+
+
+def get_obspack_datapath(filename: str):
+    return Path(__file__).parent.parent.joinpath(f"data/obspack/{filename}").resolve()
 
 
 def glob_files(search_str: str, data_type: str) -> List:
@@ -158,3 +183,25 @@ def all_datasource_keys(keys: Dict) -> List[str]:
 def get_flux_timeseries_datapath(filename: str) -> Path:
     """Return the path to the flux_timeseries test data file"""
     return get_datapath_base(data_type="flux_timeseries", filename=filename)
+
+
+def print_dict_diff(dict1: dict, dict2: dict, skip_missing: bool = False) -> None:
+    all_keys = set(dict1.keys()).union(set(dict2.keys()))
+
+    print("\nDiff of dicts:\n")
+    print(f"{'key':<20}{'dict1':<20}{'dict2':<20}")
+
+    for key in all_keys:
+        val1 = dict1.get(key, "Missing")
+        val2 = dict2.get(key, "Missing")
+
+        if skip_missing and "Missing" in (val1, val2):
+            continue
+
+        if val1 != val2:
+            try:
+                print_val1 = ", ".join(val1) if isinstance(val1, list) else val1
+                print_val2 = ", ".join(val2) if isinstance(val2, list) else val2
+                print(f"{key:<20}{print_val1:<20}{print_val2:<20}")
+            except TypeError:
+                print(key, val1, val2)

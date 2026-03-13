@@ -7,6 +7,9 @@ from ._enum import (
     FluxTypes,
     FluxDatabases,
     FootprintTypes,
+    BoundaryConditions,
+    EulerianModelTypes,
+    MetTypes,
     DataTypes,
 )
 from ._errors import (
@@ -29,19 +32,26 @@ from ._errors import (
     MetastoreError,
     ZarrStoreError,
     KeyExistsError,
+    MetadataMissingError,
+    StandardiseError,
+    TransformError,
+    ValidationError,
     construct_xesmf_import_error,
+    StorageError,
+    UpdateError,
 )
 from ._types import (
     multiPathType,
     pathType,
-    optionalPathType,
     resultsType,
     ArrayLike,
     ArrayLikeMatch,
     XrDataLike,
     XrDataLikeMatch,
+    ReindexMethod,
     TimePeriod,
     HasMetadataAndData,
     MetadataAndData,
     Comparable,
+    convert_to_list_of_metadata_and_data,
 )

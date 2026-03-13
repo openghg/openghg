@@ -17,13 +17,14 @@ def test_find_domain():
     """Test find_domain function can be used to find correct lat, lon values"""
     domain = "EUROPE"
 
-    latitude, longitude = find_domain(domain)
+    latitude, longitude, lat_increment, lon_increment = find_domain(domain)
 
     assert latitude[0] == 1.072900009155273438e01
     assert latitude[-1] == 7.905699920654296875e01
     assert longitude[0] == -9.790000152587890625e01
     assert longitude[-1] == 3.938000106811523438e01
-
+    assert lat_increment == 0.234
+    assert lon_increment == 0.352
 
 def test_find_domain_missing():
     """Test find_domain function returns an error if domain is not present"""
@@ -184,7 +185,7 @@ def test_align_lat_lon():
     Check that the align_lat_lon function functions as expected.
     """
 
-    true_lats, true_lons = find_domain("europe")
+    true_lats, true_lons = find_domain("europe")[:2]
 
     # if the domain is known, assert that the output is aligned to the correct coordinates
     input_datapath = get_footprint_datapath("footprint_align_test.nc")

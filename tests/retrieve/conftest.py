@@ -83,17 +83,37 @@ def data_read():
 
     # Obs Surface - openghg pre-formatted data
     # - This shouldn't conflict with TAC data above as this is for 185m rather than 100m
-    openghg_path = get_surface_datapath(
+    openghg_path_1 = get_surface_datapath(
         filename="DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc", source_format="OPENGHG"
     )
     standardise_surface(
         store="user",
-        filepath=openghg_path,
+        filepath=openghg_path_1,
         source_format="OPENGHG",
         site="tac",
         network="DECC",
         instrument="picarro",
+        inlet="185.0m",
         sampling_period="1h",
+        update_mismatch="metadata",
+    )
+
+    # Adding additional data which doesn't overlap data above
+    # but adding "tag" keyword for this
+    openghg_path_2 = get_surface_datapath(
+        filename="DECC-picarro_TAC_20130131_co2-185m-20230101_cut.nc", source_format="OPENGHG"
+    )
+    standardise_surface(
+        store="user",
+        filepath=openghg_path_2,
+        source_format="OPENGHG",
+        site="tac",
+        network="DECC",
+        instrument="picarro",
+        inlet="185.0m",
+        sampling_period="1h",
+        tag=["ceda_v1", "gemma_v1"],
+        update_mismatch="metadata",
     )
 
     # Obs Column data
