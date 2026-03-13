@@ -6,7 +6,7 @@ import re
 import numpy as np
 import pandas as pd
 from pandas import DataFrame, DateOffset, DatetimeIndex, Timedelta, Timestamp
-from xarray import Dataset
+from xarray import DataArray, Dataset
 
 from openghg.types import TimePeriod
 from ._util import pairwise
@@ -42,6 +42,7 @@ __all__ = [
     "evaluate_sampling_period",
     "get_representative_daterange_str",
     "get_dataset_daterange",
+    "has_monthly_period",
 ]
 
 # TupleTimeType = Tuple[Union[int, float], str]
@@ -886,6 +887,32 @@ def infer_frequency(timestamps: DatetimeIndex) -> str | None:
         inferred_period = pd.infer_freq(timestamps)
 
     return inferred_period
+
+
+def has_monthly_period(time: DataArray) -> bool:
+    """Check whether a time DataArray has approximately monthly time intervals.
+
+    Checks whether all consecutive time differences fall within the range of
+    calendar month durations (28 to 31 days inclusive). This correctly identifies
+    monthly data even when timestamps fall on irregular day-of-month positions
+    (e.g. the 15th of each month), which ``pd.infer_freq`` cannot handle.
+
+    This check works for both single-year (12 steps) and multi-year monthly data.
+
+    Args:
+        time: xarray DataArray containing time coordinate values
+
+    Returns:
+        bool: True if all consecutive time differences are consistent with
+              monthly data (each step is 28-31 days), False otherwise.
+              Returns False if fewer than 2 time points are present.
+    """
+    if time.size < 2:
+        return False
+    time_ns = time.values.astype("datetime64[ns]")
+    delta_ns = np.diff(time_ns.view("int64"))
+    delta_days = delta_ns / 8.64e13  # nanoseconds to days (1e9 ns/s * 86400 s/day)
+    return bool(len(delta_days) > 0 and all(28 <= d <= 31 for d in delta_days))
 
 
 def in_daterange(
