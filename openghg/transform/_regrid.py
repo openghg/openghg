@@ -158,6 +158,18 @@ def regrid_uniform_cc(
     output_grid = _create_uniform_coords(lat_out, lon_out)
 
     regridder = xesmf.Regridder(input_grid, output_grid, method)
+
+    # xesmf sparse matrix multiplication warns if the input array is not C-contiguous.
+    # This can happen after xarray slicing operations (e.g. .sel()) which produce views,
+    # or when the data uses Fortran memory ordering. Ensure C-contiguous layout to avoid
+    # the performance warning.
+    if isinstance(data, xr.DataArray):
+        values = data.values
+        if not values.flags["C_CONTIGUOUS"]:
+            data = data.copy(data=np.ascontiguousarray(values))
+    elif isinstance(data, np.ndarray):
+        data = np.ascontiguousarray(data)
+
     regridded: ArrayLikeMatch = regridder(data)
 
     # # 09/03/2023: Don't need this for uniform grid anymore due to changes above
