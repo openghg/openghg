@@ -89,11 +89,17 @@ class SearchResults:
             ObsData / List[ObsData]: ObsData object(s)
         """
         if dataframe is not None:
-            uuids = (
-                dataframe[["object_store_name", "data_type", "uuid"]]
-                .apply(lambda x: "__".join(x), axis=1)
-                .to_list()
-            )
+            # Build compound keys for multi-store disambiguation if the required columns exist;
+            # fall back to plain UUIDs for single-store searches where those columns are absent.
+            required_cols = ["object_store_name", "data_type", "uuid"]
+            if all(col in dataframe.columns for col in required_cols):
+                uuids = (
+                    dataframe[required_cols]
+                    .apply(lambda x: "__".join(x), axis=1)
+                    .to_list()
+                )
+            else:
+                uuids = dataframe["uuid"].to_list()
             return self._retrieve_by_uuid(uuids=uuids, version=version, sort=sort)
         else:
             return self._retrieve_by_term(version=version, sort=sort, **kwargs)

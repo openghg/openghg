@@ -7,8 +7,7 @@ import logging
 import pandas as pd
 from typing import Any
 import warnings
-from openghg.objectstore import get_readable_buckets
-from openghg.objectstore.metastore._classic_metastore import open_multi_metastore
+from openghg.objectstore import get_readable_buckets, open_multi_object_store
 from openghg.dataobjects import SearchResults
 from ._search_helpers import process_search_kwargs, define_list_search
 
@@ -518,12 +517,11 @@ def search(**kwargs: Any) -> SearchResults:
 
     metastore_records = []
 
-    # TODO: use object store here
-    with open_multi_metastore(
+    with open_multi_object_store(
         buckets=store, data_types=data_type, suppress_object_store_errors=True
-    ) as metastore:
+    ) as objstore:
         for v in expanded_search:
-            res = metastore.search(**v)
+            res = objstore.search(**v)
             if res:
                 metastore_records.extend(res)
 
