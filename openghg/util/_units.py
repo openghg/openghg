@@ -34,6 +34,8 @@ cf_ureg.define("degrees_east = degree")
 # Now you can safely add aliases
 cf_ureg.define("@alias degrees_north = Degrees_north")
 cf_ureg.define("@alias degrees_east = Degrees_east")
+cf_ureg.define("@alias degrees_north = latitude = Latitude = LATITUDE")
+cf_ureg.define("@alias degrees_east = longitude = Longitude = LONGITUDE")
 
 cf_ureg.define(
     "degrees_west = degree = degrees_west = Degrees_west = degrees_W = degreesW = degree_west = degree_W = degreeW"
@@ -62,7 +64,7 @@ def openghg_format(unit, registry):  # type: ignore
 
 
 cf_ureg.formatter.default_format = "openghg"
-cf_ureg.case_sensitive = False
+cf_ureg.case_sensitive = True
 
 
 def convert_units(ds: xr.Dataset, target_units: dict) -> None:

@@ -83,3 +83,24 @@ def test_parts_per(number, abbrev, long):
 
     # "cf" formatting will use long name
     assert long == f"{converted:cf}"
+
+
+@pytest.mark.parametrize("unit", ["kg", "Mg", "mg"])
+def test_parse_unit_name_mass_uses_gram(unit):
+    """Mass abbreviations should resolve to gram, not gauss."""
+    parsed = cf_ureg.parse_unit_name(unit)
+
+    assert parsed == (parsed[0],)
+    assert parsed[0][1] == "gram"
+
+
+@pytest.mark.parametrize("unit", ["latitude", "Latitude", "LATITUDE"])
+def test_latitude_aliases(unit):
+    """Coordinate word aliases should accept common case variants."""
+    assert cf_ureg.parse_units(unit) == "degrees_north"
+
+
+@pytest.mark.parametrize("unit", ["longitude", "Longitude", "LONGITUDE"])
+def test_longitude_aliases(unit):
+    """Coordinate word aliases should accept common case variants."""
+    assert cf_ureg.parse_units(unit) == "degrees_east"
