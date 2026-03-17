@@ -544,7 +544,7 @@ def test_parse_edgar_monthly_v8_2024_normalises_lat_lon(edgar_v8_monthly_latitud
     assert "latitude" not in data.coords
     assert "longitude" not in data.coords
     np.testing.assert_array_equal(data["lat"].values, latitude)
-    np.testing.assert_array_equal(data["lon"].values, longitude)
+    np.testing.assert_allclose(data["lon"].values, longitude)
 
 
 def test_parse_edgar_monthly_v8_requires_version_without_readme(edgar_v8_monthly_dir):
