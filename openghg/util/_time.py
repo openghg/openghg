@@ -909,10 +909,16 @@ def has_monthly_period(time: DataArray) -> bool:
     """
     if time.size < 2:
         return False
-    time_ns = time.values.astype("datetime64[ns]")
-    delta_ns = np.diff(time_ns.view("int64"))
-    delta_days = delta_ns / 8.64e13  # nanoseconds to days (1e9 ns/s * 86400 s/day)
-    return bool(len(delta_days) > 0 and all(28 <= d <= 31 for d in delta_days))
+    try:
+        time_ns = np.asarray(time.values, dtype="datetime64[ns]")
+    except (TypeError, ValueError):
+        return False
+
+    delta_ns = np.diff(time_ns.astype("int64"))
+    min_month_ns = 28 * 24 * 60 * 60 * 1_000_000_000
+    max_month_ns = 31 * 24 * 60 * 60 * 1_000_000_000
+
+    return bool(delta_ns.size > 0 and np.all((delta_ns >= min_month_ns) & (delta_ns <= max_month_ns)))
 
 
 def in_daterange(

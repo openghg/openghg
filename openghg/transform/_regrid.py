@@ -164,8 +164,8 @@ def regrid_uniform_cc(
     # or when the data uses Fortran memory ordering. Ensure C-contiguous layout to avoid
     # the performance warning.
     if isinstance(data, xr.DataArray):
-        values = data.values
-        if not values.flags["C_CONTIGUOUS"]:
+        values = data.data
+        if isinstance(values, np.ndarray) and not values.flags["C_CONTIGUOUS"]:
             data = data.copy(data=np.ascontiguousarray(values))
     elif isinstance(data, np.ndarray):
         data = np.ascontiguousarray(data)
