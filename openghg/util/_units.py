@@ -34,8 +34,14 @@ cf_ureg.define("degrees_east = degree")
 # Now you can safely add aliases
 cf_ureg.define("@alias degrees_north = Degrees_north")
 cf_ureg.define("@alias degrees_east = Degrees_east")
-cf_ureg.define("@alias degrees_north = latitude = Latitude = LATITUDE")
-cf_ureg.define("@alias degrees_east = longitude = Longitude = LONGITUDE")
+cf_ureg.define("@alias degrees_north = Degrees_North = DEGREES_NORTH")
+cf_ureg.define("@alias degrees_north = degree_north = Degree_north = DEGREE_NORTH")
+cf_ureg.define("@alias degrees_north = Degrees_N = DEGREES_N")
+cf_ureg.define("@alias degrees_north = Degree_N = DEGREE_N")
+cf_ureg.define("@alias degrees_east = Degrees_East = DEGREES_EAST")
+cf_ureg.define("@alias degrees_east = degree_east = Degree_east = DEGREE_EAST")
+cf_ureg.define("@alias degrees_east = Degrees_E = DEGREES_E")
+cf_ureg.define("@alias degrees_east = Degree_E = DEGREE_E")
 
 cf_ureg.define(
     "degrees_west = degree = degrees_west = Degrees_west = degrees_W = degreesW = degree_west = degree_W = degreeW"
