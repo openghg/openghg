@@ -127,7 +127,14 @@ def assemble_edgar_metadata(
         if valid_version:
             metadata["version"] = version
         else:
-            if clean_string(metadata["version"]) not in known_versions:
+            metadata_version = metadata.get("version")
+            if metadata_version is None:
+                raise ValueError(
+                    "Unable to infer EDGAR version from filename."
+                    " Please pass `edgar_version` as an argument or include a readable `_readme.html`."
+                )
+
+            if clean_string(metadata_version) not in known_versions:
                 if version is not None:
                     raise ValueError(
                         f"Unable to infer EDGAR version ({version})."
@@ -139,7 +146,7 @@ def assemble_edgar_metadata(
                         f" Please pass as an argument (one of {known_versions})"
                     )
             else:
-                metadata["version"] = clean_string(metadata["version"])
+                metadata["version"] = clean_string(metadata_version)
 
         source_from_file = metadata["source"]
         if source_from_file in ("TOTALS", ""):
@@ -238,15 +245,19 @@ def parse_edgar(
 
     FileInfo = namedtuple("FileInfo", "path metadata")
     files_by_year: dict[int, FileInfo] = {}
+    file_info_errors: list[ValueError] = []
     for data_file in data_files:
         try:
             metadata = assemble_edgar_metadata(data_file, species, edgar_version)
-        except ValueError:
+        except ValueError as exc:
+            file_info_errors.append(exc)
             continue
         else:
             files_by_year[metadata["year"]] = FileInfo(data_file, metadata)
 
     if not files_by_year:
+        if file_info_errors:
+            raise file_info_errors[0]
         raise ValueError(f"Unable to extract EDGAR file info from any files in {datapath}.")
 
     try:
@@ -297,7 +308,7 @@ def parse_edgar(
 
     # TODO: some options for f-gases (.emi files) have different units...
     # need to catch this
-    flux_da = regrid_to_domain(flux_da, domain, lat_out=lat_out, lon_out=lon_out).rename("flux")
+    flux_da = _regrid_edgar_to_domain(flux_da, domain, lat_out=lat_out, lon_out=lon_out).rename("flux")
     em_data = flux_da.to_dataset()
     em_data.attrs = edgar_ds.attrs
 
@@ -612,22 +623,50 @@ def _extract_file_info(edgar_file: pathlib.Path | zipfile.Path | str) -> dict:
     return file_info
 
 
-def regrid_to_domain(
+def _normalise_lat_lon_coords(flux_da: xr.DataArray) -> xr.DataArray:
+    """Rename supported latitude/longitude coordinates to canonical lat/lon names."""
+    lat_name = find_coord_name(flux_da, options=["lat", "latitude"])
+    lon_name = find_coord_name(flux_da, options=["lon", "longitude"])
+
+    if lat_name is None or lon_name is None:
+        coords_present = ", ".join(map(str, flux_da.coords)) or "<none>"
+        raise ValueError(
+            "Could not find latitude/longitude coordinates in EDGAR file."
+            " Expected `lat`/`latitude` and `lon`/`longitude`."
+            f" Coordinates present: {coords_present}."
+        )
+
+    rename_dims = {}
+    if lat_name != "lat":
+        rename_dims[lat_name] = "lat"
+    if lon_name != "lon":
+        rename_dims[lon_name] = "lon"
+
+    if rename_dims:
+        flux_da = flux_da.rename(rename_dims)
+
+    return flux_da
+
+
+def _regrid_edgar_to_domain(
     flux_da: xr.DataArray, domain: str | None = None, lat_out: ArrayType = None, lon_out: ArrayType = None
 ) -> xr.DataArray:
     lat_name = find_coord_name(flux_da, options=["lat", "latitude"])
     lon_name = find_coord_name(flux_da, options=["lon", "longitude"])
 
     if lat_name is None or lon_name is None:
+        coords_present = ", ".join(map(str, flux_da.coords)) or "<none>"
         raise ValueError(
-            f"Could not find '{lat_name}' or '{lon_name}' in EDGAR file.\n"
-            " Please check this is a 2D grid map."
+            "Could not find latitude/longitude coordinates in EDGAR file."
+            " Expected `lat`/`latitude` and `lon`/`longitude`."
+            f" Coordinates present: {coords_present}."
         )
 
     # Check range of longitude values and convert to -180 - +180
     flux_da = convert_internal_longitude(
         flux_da, lon_name=lon_name
     )  # TODO is this creating NaNs for East Asia domain?
+    flux_da = _normalise_lat_lon_coords(flux_da)
 
     lat_out, lon_out = _check_lat_lon(domain, lat_out=lat_out, lon_out=lon_out)
 

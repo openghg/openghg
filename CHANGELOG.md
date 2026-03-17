@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Updated the value of `atol` and removed `rtol` from `check_coord_alignment` to process 6km file. [PR #1588](https://github.com/openghg/openghg/pull/1588)
+- Fixed EDGAR parsing for monthly sectoral files by normalising `latitude`/`longitude` coordinates to `lat`/`lon` and raising a clear error when the EDGAR version cannot be inferred from the filename. [PR #1187](https://github.com/openghg/openghg/pull/1187)
 ## [0.18.0] - 2026-02-18
 
 ### Added

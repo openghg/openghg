@@ -464,6 +464,103 @@ def test_parse_edgar_monthly_v8_2024(edgar_v8_monthly_dir):
 
 
 @pytest.fixture(scope="module")
+def edgar_v8_monthly_latitude_longitude_dir(tmp_path_factory):
+    """
+    Create a temporary EDGAR-style monthly file using latitude/longitude coordinate names.
+    """
+    tmpdir = tmp_path_factory.mktemp("edgar_monthly_latitude_longitude")
+    edgar_dir = tmpdir / "monthly_sectoral" / "AGRICULTURE"
+    edgar_dir.mkdir(parents=True)
+
+    latitude = np.round(np.arange(-89.95, 90.0, 0.1)[:10], 2)
+    longitude = np.round(np.arange(-179.95, 180.0, 0.1)[:10], 2)
+    time_days = np.array([14, 45, 73, 104, 134, 165, 195, 226, 257, 287, 318, 348], dtype=np.float32)
+    base_date = np.datetime64("2001-01-01")
+    time_dates = base_date + time_days.astype("timedelta64[D]")
+
+    rng = np.random.default_rng(7)
+    fluxes_data = rng.random((12, len(latitude), len(longitude))).astype(np.float32) * 1e-10
+
+    ds = xr.Dataset(
+        {
+            "fluxes": xr.DataArray(
+                fluxes_data,
+                dims=["time", "latitude", "longitude"],
+                attrs={
+                    "units": "kg m-2 s-1",
+                    "substance": "CH4",
+                    "year": "2001",
+                    "release": "EDGARv2024ghg",
+                    "long_name": "Agriculture",
+                    "description": "Agriculture",
+                },
+            )
+        },
+        coords={
+            "latitude": xr.DataArray(
+                latitude,
+                dims=["latitude"],
+                attrs={"units": "degrees_north", "standard_name": "latitude", "long_name": "latitude"},
+            ),
+            "longitude": xr.DataArray(
+                longitude,
+                dims=["longitude"],
+                attrs={"units": "degrees_east", "standard_name": "longitude", "long_name": "longitude"},
+            ),
+            "time": xr.DataArray(
+                time_dates,
+                dims=["time"],
+                attrs={"long_name": "time", "standard_name": "time"},
+            ),
+        },
+        attrs={
+            "description": "Agriculture",
+            "institution": "European Commission, Joint Research Centre",
+            "source": "https://edgar.jrc.ec.europa.eu/dataset_ghg2024",
+            "how_to_cite": "https://edgar.jrc.ec.europa.eu/dataset_ghg2024#howtocite",
+            "copyright_notice": "https://edgar.jrc.ec.europa.eu/dataset_ghg2024#conditions",
+            "contacts": "https://edgar.jrc.ec.europa.eu/dataset_ghg2024#info JRC-EDGAR@ec.europa.eu",
+            "units": "kg m-2 s-1",
+        },
+    )
+
+    filepath = edgar_dir / "EDGAR_2024_GHG_CH4_2001_AGRICULTURE_flx.nc"
+    ds.to_netcdf(filepath, encoding={"time": {"units": "days since 2001-01-01 00:00:00"}})
+
+    return edgar_dir, latitude, longitude
+
+
+def test_parse_edgar_monthly_v8_2024_normalises_lat_lon(edgar_v8_monthly_latitude_longitude_dir):
+    """
+    Test parse_edgar normalises latitude/longitude coordinates to lat/lon.
+    """
+    edgar_dir, latitude, longitude = edgar_v8_monthly_latitude_longitude_dir
+
+    result = parse_edgar(edgar_dir, date="2001", species="ch4", edgar_version="v8.0")
+    data = result["ch4_agriculture_globaledgar_2001"]["data"]
+
+    assert "lat" in data.coords
+    assert "lon" in data.coords
+    assert "latitude" not in data.coords
+    assert "longitude" not in data.coords
+    np.testing.assert_array_equal(data["lat"].values, latitude)
+    np.testing.assert_array_equal(data["lon"].values, longitude)
+
+
+def test_parse_edgar_monthly_v8_requires_version_without_readme(edgar_v8_monthly_dir):
+    """
+    Test monthly-sectoral EDGAR files raise a clear error when version cannot be inferred.
+    """
+    edgar_dir, _ = edgar_v8_monthly_dir
+
+    with pytest.raises(
+        ValueError,
+        match="Unable to infer EDGAR version from filename.*Please pass `edgar_version` as an argument",
+    ):
+        parse_edgar(edgar_dir, date="2001", species="ch4")
+
+
+@pytest.fixture(scope="module")
 def edgar_v8_monthly_global_dir(tmp_path_factory):
     """
     Create a temporary directory with a synthetic monthly EDGAR v8 (2024) file
@@ -553,7 +650,7 @@ def test_parse_edgar_monthly_v8_2024_europe_domain(edgar_v8_monthly_global_dir):
     - Time dimension has 12 monthly steps
     - Metadata domain, source, time_period are set correctly
     """
-    xesmf = pytest.importorskip("xesmf")
+    pytest.importorskip("xesmf")
 
     edgar_dir = edgar_v8_monthly_global_dir
     domain = "EUROPE"
