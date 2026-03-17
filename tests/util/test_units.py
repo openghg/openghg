@@ -90,7 +90,7 @@ def test_parse_unit_name_mass_uses_gram(unit):
     """Mass abbreviations should resolve to gram, not gauss."""
     parsed = cf_ureg.parse_unit_name(unit)
 
-    assert parsed == (parsed[0],)
+    assert len(parsed) == 1
     assert parsed[0][1] == "gram"
 
 
