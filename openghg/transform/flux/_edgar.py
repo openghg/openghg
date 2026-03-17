@@ -588,12 +588,7 @@ def _extract_file_info(edgar_file: pathlib.Path | zipfile.Path | str) -> dict:
 
     # make "source" string
     # monthly sectoral regex doesn't have co2_options...
-    try:
-        co2_options = file_info.pop("co2_options")
-        if co2_options is None:
-            co2_options = ""
-    except KeyError:
-        co2_options = ""
+    co2_options = file_info.pop("co2_options", "") or ""
 
     sector = file_info.pop("sector") or ""
     sector = sector.replace("_", "-")
