@@ -248,3 +248,13 @@ def test_check_and_set_params_for_co2_surface_inst_filename():
     assert cams_version == "v23r1"
     assert species == "co2"
     assert input_observations == "surface_inst"
+
+
+def test_check_and_set_params_for_legacy_filename():
+    filepath = [get_bc_datapath(filename="cams73_v22r1_n2o_test_202201.nc")]
+
+    cams_version, species, input_observations = _check_and_set_params(filepath)
+
+    assert cams_version == "v22r1"
+    assert species == "n2o"
+    assert input_observations == "test"

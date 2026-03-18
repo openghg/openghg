@@ -232,16 +232,14 @@ def _check_and_set_params(
 
     for file in filepath:
         file_keywords = file.name.split("_")
-        if (
-            len(file_keywords) < 5
-            or file_keywords[0] != "cams73"
-            or file_keywords[3] != "conc"
-            or not file.name.endswith(".nc")
-        ):
+        if len(file_keywords) < 4 or file_keywords[0] != "cams73" or not file.name.endswith(".nc"):
             raise ValueError(
                 "Filenames not in a proper format: expected something like cams73_*_*_conc_*.nc. Please don't alter the names from the unzipped CAMS files."
             )
-        detected_input_observations = ("_").join(file_keywords[4:-1])
+        if len(file_keywords) > 4 and file_keywords[3] == "conc":
+            detected_input_observations = ("_").join(file_keywords[4:-1])
+        else:
+            detected_input_observations = ("_").join(file_keywords[3:-1])
 
         if species and species.lower() != file_keywords[2]:
             raise ValueError(
