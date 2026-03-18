@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Updated the value of `atol` and removed `rtol` from `check_coord_alignment` to process 6km file. [PR #1588](https://github.com/openghg/openghg/pull/1588)
+- Fixed unit parsing ambiguities by keeping the Pint registry case-sensitive for SI abbreviations and adding explicit case-variant aliases for coordinate and time units (e.g. `Degrees_North`, `Hours`). [PR #1599](https://github.com/openghg/openghg/pull/1599)
 ## [0.18.0] - 2026-02-18
 
 ### Added

@@ -83,3 +83,64 @@ def test_parts_per(number, abbrev, long):
 
     # "cf" formatting will use long name
     assert long == f"{converted:cf}"
+
+
+@pytest.mark.parametrize("unit", ["kg", "Mg", "mg"])
+def test_parse_unit_name_mass_uses_gram(unit):
+    """Mass abbreviations should resolve to gram, not gauss."""
+    parsed = cf_ureg.parse_unit_name(unit)
+
+    assert len(parsed) == 1
+    assert parsed[0][1] == "gram"
+
+
+@pytest.mark.parametrize("unit", ["hour", "hours", "Hour", "Hours", "HOUR", "HOURS"])
+def test_hour_aliases(unit):
+    """Hour unit aliases should accept common case variants."""
+    assert cf_ureg.parse_units(unit) == cf_ureg.hour
+
+
+@pytest.mark.parametrize(
+    "unit, expected",
+    [
+        ("degrees_north", "degrees_north"),
+        ("Degrees_north", "degrees_north"),
+        ("Degrees_North", "degrees_north"),
+        ("DEGREES_NORTH", "degrees_north"),
+        ("degree_north", "degrees_north"),
+        ("Degree_north", "degrees_north"),
+        ("DEGREE_NORTH", "degrees_north"),
+        ("degrees_N", "degrees_north"),
+        ("Degrees_N", "degrees_north"),
+        ("DEGREES_N", "degrees_north"),
+        ("degree_N", "degrees_north"),
+        ("Degree_N", "degrees_north"),
+        ("DEGREE_N", "degrees_north"),
+    ],
+)
+def test_degrees_north_aliases(unit, expected):
+    """Case variants of valid latitude units should resolve to degrees_north."""
+    assert cf_ureg.parse_units(unit) == expected
+
+
+@pytest.mark.parametrize(
+    "unit, expected",
+    [
+        ("degrees_east", "degrees_east"),
+        ("Degrees_east", "degrees_east"),
+        ("Degrees_East", "degrees_east"),
+        ("DEGREES_EAST", "degrees_east"),
+        ("degree_east", "degrees_east"),
+        ("Degree_east", "degrees_east"),
+        ("DEGREE_EAST", "degrees_east"),
+        ("degrees_E", "degrees_east"),
+        ("Degrees_E", "degrees_east"),
+        ("DEGREES_E", "degrees_east"),
+        ("degree_E", "degrees_east"),
+        ("Degree_E", "degrees_east"),
+        ("DEGREE_E", "degrees_east"),
+    ],
+)
+def test_degrees_east_aliases(unit, expected):
+    """Case variants of valid longitude units should resolve to degrees_east."""
+    assert cf_ureg.parse_units(unit) == expected
