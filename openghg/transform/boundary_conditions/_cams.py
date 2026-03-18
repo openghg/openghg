@@ -134,7 +134,18 @@ def cams_to_domain(
 
 
 def get_vertical_interface_height(ds: xr.Dataset) -> xr.DataArray:
-    """Return the vertical interface height variable used by CAMS files."""
+    """Return the vertical interface height variable used by CAMS files.
+
+    Args:
+        ds: CAMS dataset containing either ``altitude`` or
+            ``height_above_reference_ellipsoid``.
+
+    Returns:
+        Vertical interface heights for the CAMS dataset.
+
+    Raises:
+        ValueError: If neither supported vertical interface height variable is present.
+    """
     if "altitude" in ds:
         return ds["altitude"]
     if "height_above_reference_ellipsoid" in ds:
@@ -221,7 +232,12 @@ def _check_and_set_params(
 
     for file in filepath:
         file_keywords = file.name.split("_")
-        if file_keywords[0] != "cams73" or file_keywords[3] != "conc" and file_keywords[-1][-3:] != ".nc":
+        if (
+            len(file_keywords) < 5
+            or file_keywords[0] != "cams73"
+            or file_keywords[3] != "conc"
+            or not file.name.endswith(".nc")
+        ):
             raise ValueError(
                 "Filenames not in a proper format: expected something like cams73_*_*_conc_*.nc. Please don't alter the names from the unzipped CAMS files."
             )

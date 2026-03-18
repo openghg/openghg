@@ -69,6 +69,14 @@ def test_parse_cams():
 
 
 def _make_cams_dataset(vertical_coord_name: str) -> xr.Dataset:
+    """Create a minimal in-memory CAMS-like dataset for vertical interpolation tests.
+
+    Args:
+        vertical_coord_name: Name of the vertical interface height variable to include.
+
+    Returns:
+        Dataset containing ``species`` and the requested vertical coordinate.
+    """
     time = np.array(["2022-01-01T00:00"], dtype="datetime64[ns]")
     lat = np.array([-1.0, 0.0, 1.0, 2.0], dtype=float)
     lon = np.array([-1.0, 0.0, 1.0, 2.0], dtype=float)
@@ -93,7 +101,15 @@ def _make_cams_dataset(vertical_coord_name: str) -> xr.Dataset:
 
 
 def _write_mock_co2_cams_file(tmp_path, filename: str) -> xr.Dataset:
-    """Write a minimal mock CO2 CAMS file based on cams73_v23r1_co2_conc_surface_inst_202101.cdl."""
+    """Write a minimal mock CO2 CAMS file based on cams73_v23r1_co2_conc_surface_inst_202101.cdl.
+
+    Args:
+        tmp_path: Temporary directory where the NetCDF file will be written.
+        filename: Output filename for the mock CAMS CO2 file.
+
+    Returns:
+        Dataset that was written to disk.
+    """
     time = np.array(
         ["2022-01-01T00:00", "2022-01-01T03:00", "2022-01-01T06:00"], dtype="datetime64[ns]"
     )
