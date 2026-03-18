@@ -22,6 +22,7 @@ cf_ureg.define("@alias ppm = parts_per_million")  # this works for converting, b
 cf_ureg.define("ppb = 1e-9 mol/mol = parts_per_billion")
 cf_ureg.define("ppt = 1e-12 mol/mol = parts_per_trillion")
 cf_ureg.define("ppq = 1e-15 mol/mol = parts_per_quadrillion")
+cf_ureg.define("@alias hour = Hour = HOUR = Hours = HOURS")
 cf_ureg.define("@alias permille = permil = per_mil = per_mille")
 cf_ureg.define("permeg = 0.001 permille = per_meg")
 cf_ureg.define("hpa = 100.0 Pa = hectopascal = hPa")

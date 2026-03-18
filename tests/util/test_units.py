@@ -94,6 +94,12 @@ def test_parse_unit_name_mass_uses_gram(unit):
     assert parsed[0][1] == "gram"
 
 
+@pytest.mark.parametrize("unit", ["hour", "hours", "Hour", "Hours", "HOUR", "HOURS"])
+def test_hour_aliases(unit):
+    """Hour unit aliases should accept common case variants."""
+    assert cf_ureg.parse_units(unit) == cf_ureg.hour
+
+
 @pytest.mark.parametrize(
     "unit, expected",
     [
