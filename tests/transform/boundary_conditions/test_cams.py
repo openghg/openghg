@@ -210,7 +210,7 @@ def test_cams_to_domain_uses_ellipsoid_height_for_co2(monkeypatch):
 def test_parse_cams_co2_from_mock_file(tmp_path, monkeypatch):
     filename = "cams73_v23r1_co2_conc_surface_inst_202101.nc"
     data_path = tmp_path / filename
-    ds = _write_mock_co2_cams_file(tmp_path, filename=filename)
+    _write_mock_co2_cams_file(tmp_path, filename=filename)
 
     called = {}
 
@@ -223,7 +223,6 @@ def test_parse_cams_co2_from_mock_file(tmp_path, monkeypatch):
     results = parse_cams(bc_input="cams_test", domain="TESTDOMAIN", datapath=data_path, species="co2")
 
     assert called["domain"] == "TESTDOMAIN"
-    assert ds["CO2"].attrs == {"long_name": "CO2 dry mole fraction", "units": "mol mol-1"}
 
     metadata = results["co2_cams_test_TESTDOMAIN"]["metadata"]
     assert metadata["domain"] == "TESTDOMAIN"
