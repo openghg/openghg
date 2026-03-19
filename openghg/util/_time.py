@@ -914,9 +914,9 @@ def has_monthly_period(time: DataArray) -> bool:
     except (TypeError, ValueError):
         return False
 
-    delta_ns = np.diff(time_ns.astype("int64"))
-    min_month_ns = 28 * 24 * 60 * 60 * 1_000_000_000
-    max_month_ns = 31 * 24 * 60 * 60 * 1_000_000_000
+    delta_ns = np.diff(time_ns)
+    min_month_ns = np.timedelta64(28, "D").astype("timedelta64[ns]")
+    max_month_ns = np.timedelta64(31, "D").astype("timedelta64[ns]")
 
     return bool(delta_ns.size > 0 and np.all((delta_ns >= min_month_ns) & (delta_ns <= max_month_ns)))
 
