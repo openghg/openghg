@@ -48,7 +48,7 @@ import pathlib
 import re
 import zipfile
 from collections import namedtuple
-from typing import Any, Optional, cast
+from typing import Any, cast, TypeAlias
 import logging
 import numpy as np
 import xarray as xr
@@ -72,7 +72,7 @@ logger = logging.getLogger("openghg.transform.flux")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-ArrayType = Optional[ndarray | xr.DataArray]
+ArrayType: TypeAlias = ndarray | xr.DataArray | None
 
 
 _edgar_known_versions = ("v432", "v4.3.2", "v50", "v5.0", "v60", "v6.0", "v70", "v7.0", "v80", "v8.0")
