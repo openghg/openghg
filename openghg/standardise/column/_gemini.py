@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import cast
 from collections.abc import MutableMapping
 import numpy as np
@@ -5,31 +6,18 @@ import xarray as xr
 import pandas as pd
 
 from openghg.types import pathType
+from openghg.util import open_nc_fn
 
 import logging
 
 logger = logging.getLogger("openghg.standardise.column._gemini")
 
-
-def _sort_filepath(filepath: pathType | list[pathType]) -> list[pathType]:
-    """
-    Makes sure that the filepaths are sorted in time ascending order. Sorting is based on the filename
-    as it reads the last character of the filename that are supposed to indicate the month of the obs.
-    Args:
-        filepath: (list of) filepath to sort
-    Returns:
-        sorted filepath(s)
-    """
-    if not isinstance(filepath, list):
-        filepath = [
-            filepath,
-        ]
-
-    files = pd.DataFrame(dict(files=filepath))
-    files["date"] = files.files.apply(lambda x: x.name.split("_")[-1][:-3])
-    files.sort_values(by="date", ignore_index=True, inplace=True)
-    return files.files.to_list()
-
+def _preprocess(ds):
+    ds["time"] = pd.to_datetime(ds.time, unit="s")
+    for var in ds.data_vars:
+        if "time" not in ds[var].dims and var not in ["longitude", "latitude", "obs_height"]:
+            ds[var] = ds[var].expand_dims(time=ds.time.values)
+    return ds
 
 def _filter_and_resample(ds: xr.Dataset, species: str, quality_filt: bool, resample: bool) -> xr.Dataset:
     """
@@ -66,11 +54,18 @@ def _filter_and_resample(ds: xr.Dataset, species: str, quality_filt: bool, resam
 
 
 def parse_gemini(
-    filepath: pathType | list[pathType],
     species: str,
+    filepath: str | Path | list[str] | list[Path],
     domain: str | None = None,
+    selection: str | None = None,
+    site: str | None = None,
+    network: str | None = None,
+    instrument: str | None = None,
+    platform: str = "sicolumn",
+    chunks: dict | None = None,
     quality_filt: bool = True,
     resample: bool = True,
+    **kwargs: str,
 ) -> dict:
     """
     Parse and extract data from netcdf provided by Neil Humpage and downloadable on JASMIN in /gws/nopw/j04/geminiuk/ (soon to be migrated..).
@@ -95,7 +90,14 @@ def parse_gemini(
         Dict : Dictionary of source_name : data, metadata, attributes
 
     """
-    filepath = _sort_filepath(filepath)
+
+    if not isinstance(filepath, list):
+        filepath = Path(filepath).expanduser().resolve()
+    else:
+        filepath = sorted(
+        filepath,
+        key=lambda x: Path(x).stem.split("_")[-1]
+    )
 
     var_to_read = [
         f"X{species.upper()}",
@@ -111,19 +113,13 @@ def parse_gemini(
         "obs_height",
     ]
 
-    # open datasets
-    ds_list = list()
-    for file in filepath:
-        tmp = xr.open_dataset(file, decode_times=False)[var_to_read]
-        tmp["time"] = pd.to_datetime(tmp.time, unit="s")
-
-        for var in tmp.data_vars:
-            if "time" not in tmp[var].dims and var not in ["longitude", "latitude", "obs_height"]:
-                tmp[var] = tmp[var].expand_dims(time=tmp.time.values)
-
-        ds_list.append(tmp)
-
-    data = xr.merge(ds_list, join="outer")
+    # Here we assume that all the files have the same variables and that they are in the same order, which is the case for the data we have 
+    data = xr.open_mfdataset(
+        filepath,
+        combine="by_coords",
+        preprocess=_preprocess,
+        decode_times=False,
+    )[var_to_read].chunk(chunks if chunks is not None else {})
 
     # Create metadata #
     attributes = cast(MutableMapping, data.attrs)
@@ -131,10 +127,10 @@ def parse_gemini(
     attributes["file_start_date"] = str(data.time.values.min())
     attributes["file_end_date"] = str(data.time.values.max())
 
-    site_gemini_shortname = np.unique(file.name.split("_")[-2])
-    if len(site_gemini_shortname) > 1:
-        raise ValueError("Seems like there is more than one site here.")
-    site_gemini_shortname = site_gemini_shortname[0]
+    if site.lower() in filepath.lower():
+        site_gemini_shortname = site
+    else:
+        raise ValueError("The site name: {site} provided does not match with the filepath: {filepath}. Please check the site name and the filepath.")
 
     attributes["species"] = species
     attributes["domain"] = domain
