@@ -348,7 +348,6 @@ To demonstrate this we will retrieve some example data (pre-processed methane co
 Now we add this data to the object store using ``standardise_column``, passing the below arguments:
 
 .. note::
-    For column-site data, the arguments shift slightly: satellite becomes site, platform becomes source_format="gemini", obs_region becomes domain. So the essential inputs are simply: species, site, domain, and source_format
     For column site data the `satellite` argument is replaced with the `site` argument and `platform` is set to "site-column".
 
     (Inversions check the platform value to determine whether the data is satellite or site-column data)
@@ -412,7 +411,7 @@ The details of the added can be viewed in the returned results dictionary.
 
     decc_results
 
-2. Searching for data
+1. Searching for data
 ---------------------
 
 Searching the object store
