@@ -1207,3 +1207,25 @@ def test_standardise_6km_footprints():
     assert retrieved_data.metadata["height"] == "26m"
     assert retrieved_data.metadata["domain"] == "europe-6km"
     assert retrieved_data.metadata["inner_domain"] == "6km"
+
+
+def test_negative_inlet_standardisation():
+    """Test standardisation of data with negative inlet value and associated metadata keys."""
+
+    datapath = get_surface_datapath("cmn_hfc143a_negative_inlet.nc", source_format="openghg")
+    results = standardise_surface(filepath=datapath,            source_format="openghg", 
+                    network="agage-private",
+                    site="CMN", 
+                    instrument="multiple", 
+                    inlet="-20m",
+                    calibration_scale="SIO-07", 
+                    store="user", 
+                    if_exists="new", 
+                    force=True, 
+                    update_mismatch="from_definition",
+                    chunks={"time": 600})
+    
+    metadata = get_obs_surface(site="cmn", species="hfc143a", inlet="-20m", network="agage-private", store="user").metadata
+
+    assert "hfc143a" in results[0]["species"]
+    metadata["inlet"] == "-20m"

@@ -256,8 +256,8 @@ def convert_to_slice(
 
         input = extract_float(input)
 
-    lower = input - input * rel_tolerance / 2
-    upper = input + input * rel_tolerance / 2
+    lower = input - abs(input) * rel_tolerance / 2
+    upper = input + abs(input) * rel_tolerance / 2
 
     s = slice(lower, upper)
 
