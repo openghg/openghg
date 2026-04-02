@@ -10,7 +10,7 @@ from openghg.retrieve.icos import retrieve_atmospheric
 from openghg.types import AttrMismatchError, MetadataAndData
 
 
-# @pytest.mark.icos
+@pytest.mark.icos
 def test_icos_retrieve_skips_datalevel_1_csv_files():
     '''Check level 1 data retrieved data using icoscp_core as expected'''
     clear_test_stores()
@@ -372,7 +372,7 @@ def test_retrieve_icos_eye_ave_par():
 # These tests can be removed if this option is fully deprecated and no longer supported.
 
 
-# @pytest.mark.icos
+@pytest.mark.icos
 def test_retrieve_icos_standard_compare():
     """
     Compare icoscp_core and previous dobj method for standard text file download.
@@ -463,7 +463,7 @@ def test_retrieve_icos_standard_compare():
                 assert metadata_dobj[md].lower() == metadata[md], f"Metadata {md} mismatch: {metadata_dobj[md].lower()} != {metadata[md]}"
 
 
-# @pytest.mark.icos
+@pytest.mark.icos
 def test_retrieve_icos_obspack_compare():
     """
     Compare icoscp_core and previous dobj method for ICOS Combined (ObsPack) retrieval
@@ -518,7 +518,7 @@ def test_retrieve_icos_obspack_compare():
 
     # again similar to attribites the metadata dobj station_long_name is short and now long
 
-# @pytest.mark.icos
+@pytest.mark.icos
 def test_retrieve_fast_track_compare():
     """
     Compare icoscp_core and previous dobj method for ICOS FastTrack data
@@ -609,7 +609,7 @@ def test_retrieve_fast_track_compare():
             assert str(retrieved_data_dobj_co.metadata[md]) + " e" == retrieved_data.metadata[md], f"Attribute {md} mismatch: {str(retrieved_data_dobj_co.metadata[md]) + ' e' } != {retrieved_data.metadata[md]}"
 
 
-# @pytest.mark.icos
+@pytest.mark.icos
 def test_retrieve_eye_ave_par_compare():
     """
     Compare icoscp_core and previous dobj method for "EYE-AVE-PAR" corner case
