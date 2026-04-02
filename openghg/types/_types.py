@@ -5,8 +5,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import (
     Any,
+    cast,
+    DefaultDict,
+    Dict,
+    Optional,
     Union,
     Literal,
+    Tuple,
     TypeVar,
     NamedTuple,
     Protocol,
@@ -15,6 +20,7 @@ from typing import (
 from collections import defaultdict
 
 import numpy as np
+import pandas as pd
 import xarray as xr
 
 pathType = Union[str, Path]
@@ -32,9 +38,28 @@ XrDataLikeMatch = TypeVar("XrDataLikeMatch", xr.DataArray, xr.Dataset)
 ReindexMethod = Literal["nearest", "pad", "ffill", "backfill", "bfill"]
 
 
-class TimePeriod(NamedTuple):
-    value: int | float | None = None
-    unit: str | None = None
+@dataclass(frozen=True, eq=True)
+class TimePeriod:
+    value: Union[int, float, None] = None
+    unit: Optional[str] = None
+
+    def to_date_offset(self) -> pd.DateOffset:
+        """Convert TimePeriod object to pd.DateOffset
+
+        Returns:
+            pandas DateOffset of `self.value` many `self.unit`s.
+
+        TODO: what should default behavior be? Empty DateOffset is 1 day.
+        """
+        if self.value is None or self.unit is None:
+            return pd.DateOffset()
+        else:
+            offset = pd.tseries.frequencies.to_offset(f"{self.value}{self.unit}")
+            return cast(pd.DateOffset, offset)
+
+    def __iter__(self) -> Iterator:
+        """Unpack TimePeriod objects via `value, unit = TimePeriod(...)`"""
+        return iter((self.value, self.unit))
 
 
 @dataclass
