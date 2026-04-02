@@ -310,7 +310,9 @@ def parse_icos_obspack_nc_file(data_info: dict | pd.Series) -> tuple[xr.Dataset,
     return dataset, attrs
 
 
-def retrieve_and_parse_icos_data(data_info: dict | pd.Series, dataset_source: str | None = None) -> tuple[xr.Dataset, dict]:
+def retrieve_and_parse_icos_data(
+    data_info: dict | pd.Series, dataset_source: str | None = None
+) -> tuple[xr.Dataset, dict]:
     """
     Based on known formats we want to be able to retrieve from ICOS, call
     the correct parsing function (mainly based on dataset_source and derived data_format)
