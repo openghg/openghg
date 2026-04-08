@@ -34,16 +34,15 @@ def get_default_objectstore_path() -> Path:
     return Path.home().joinpath("openghg_store").absolute()
 
 
-# @lru_cache
-def get_user_config_path() -> Path:
-    """Returns path to user config file.
+def get_dot_openghg_path() -> Path:
+    """Returns path to the user OpenGHG configuration directory.
 
-    This file is created in the user's home directory
-    in  ~/.ghgconfig/openghg/user.conf on Linux / macOS or
-    in LOCALAPPDATA/openghg/openghg.conf on Windows.
+    This directory is created in the user's home directory
+    as ~/.openghg on Linux / macOS or in LOCALAPPDATA/openghg
+    on Windows.
 
     Returns:
-        pathlib.Path: Path to user config file
+        pathlib.Path: Path to the user OpenGHG configuration directory
     """
     user_platform = platform.system()
 
@@ -52,13 +51,26 @@ def get_user_config_path() -> Path:
         if appdata_path is None:
             raise ValueError("Unable to read LOCALAPPDATA environment variable.")
 
-        config_path = Path(appdata_path).joinpath("openghg", openghg_config_filename)
+        config_dir = Path(appdata_path).joinpath("openghg")
     elif user_platform in ("Linux", "Darwin"):
-        config_path = Path.home().joinpath(".openghg", openghg_config_filename)
+        config_dir = Path.home().joinpath(".openghg")
     else:
         raise ValueError(f"Unknown platform: {user_platform}")
 
-    return config_path
+    return config_dir
+
+
+def get_user_config_path() -> Path:
+    """Returns path to user config file.
+
+    This file is created in the user's home directory
+    in ~/.openghg/openghg.conf on Linux / macOS or
+    in LOCALAPPDATA/openghg/openghg.conf on Windows.
+
+    Returns:
+        pathlib.Path: Path to user config file
+    """
+    return get_dot_openghg_path().joinpath(openghg_config_filename)
 
 
 def create_config(silent: bool = False) -> None:
