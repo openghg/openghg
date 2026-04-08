@@ -1,8 +1,5 @@
-import logging
 import sys as _sys
-from pathlib import Path as _Path
 
-from rich.logging import RichHandler as _RichHandler
 from . import (
     analyse,
     dataobjects,
@@ -16,6 +13,8 @@ from . import (
     tutorial,
     util,
 )
+from openghg.util._logging import configure_logger
+from openghg.util._user import get_dot_openghg_path
 
 __all__ = [
     "analyse",
@@ -49,27 +48,8 @@ __branch__ = None
 __repository__ = None
 __revisionid__ = None
 
-# Start module level logging
-logger = logging.getLogger("openghg")
-logger.setLevel(logging.DEBUG)
-logging.captureWarnings(capture=True)
-
-logfile_path = str(_Path.home().joinpath("openghg.log"))
-
-# Create file handler for log file - set to DEBUG (maximum detail)
-fileHandler = logging.FileHandler(logfile_path)  # May want to update this to user area
-fileFormatter = logging.Formatter(
-    "%(asctime)s:%(levelname)s:%(name)s:%(message)s", datefmt="%Y-%m-%dT%H:%M:%S%z"
-)
-fileHandler.setFormatter(fileFormatter)
-fileHandler.setLevel(logging.DEBUG)
-logger.addHandler(fileHandler)
-
-# Create console handler - set to WARNING (lower level)
-consoleHandler = _RichHandler()
-consoleFormatter = logging.Formatter("%(levelname)s:%(name)s:%(message)s", datefmt="%Y-%m-%dT%H:%M:%S%z")
-consoleHandler.setFormatter(consoleFormatter)
-consoleHandler.setLevel(logging.INFO)
-logger.addHandler(consoleHandler)
-
-del logfile_path
+# Configure the logger
+# the log files live in subdir "logs" of the path where
+# the OpenGHG config is stored.
+default_log_path = get_dot_openghg_path() / "logs"
+logger = configure_logger(default_log_path)
