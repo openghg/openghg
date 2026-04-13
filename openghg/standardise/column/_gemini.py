@@ -5,8 +5,6 @@ import numpy as np
 import xarray as xr
 import pandas as pd
 
-from openghg.types import pathType
-from openghg.util import open_nc_fn
 
 import logging
 
