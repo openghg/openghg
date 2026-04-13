@@ -12,12 +12,14 @@ import logging
 
 logger = logging.getLogger("openghg.standardise.column._gemini")
 
+
 def _preprocess(ds):
     ds["time"] = pd.to_datetime(ds.time, unit="s")
     for var in ds.data_vars:
         if "time" not in ds[var].dims and var not in ["longitude", "latitude", "obs_height"]:
             ds[var] = ds[var].expand_dims(time=ds.time.values)
     return ds
+
 
 def _filter_and_resample(ds: xr.Dataset, species: str, quality_filt: bool, resample: bool) -> xr.Dataset:
     """
@@ -94,10 +96,7 @@ def parse_gemini(
     if not isinstance(filepath, list):
         filepath = Path(filepath).expanduser().resolve()
     else:
-        filepath = sorted(
-        filepath,
-        key=lambda x: Path(x).stem.split("_")[-1]
-    )
+        filepath = sorted(filepath, key=lambda x: Path(x).stem.split("_")[-1])
 
     var_to_read = [
         f"X{species.upper()}",
@@ -113,13 +112,15 @@ def parse_gemini(
         "obs_height",
     ]
 
-    # Here we assume that all the files have the same variables and that they are in the same order, which is the case for the data we have 
+    # Here we assume that all the files have the same variables and that they are in the same order, which is the case for the data we have
     data = xr.open_mfdataset(
         filepath,
         combine="by_coords",
         preprocess=_preprocess,
         decode_times=False,
-    )[var_to_read].chunk(chunks if chunks is not None else {})
+    )[
+        var_to_read
+    ].chunk(chunks if chunks is not None else {})
 
     # Create metadata #
     attributes = cast(MutableMapping, data.attrs)
@@ -130,7 +131,9 @@ def parse_gemini(
     if site.lower() in filepath.lower():
         site_gemini_shortname = site
     else:
-        raise ValueError("The site name: {site} provided does not match with the filepath: {filepath}. Please check the site name and the filepath.")
+        raise ValueError(
+            "The site name: {site} provided does not match with the filepath: {filepath}. Please check the site name and the filepath."
+        )
 
     attributes["species"] = species
     attributes["domain"] = domain
