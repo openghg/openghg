@@ -336,7 +336,6 @@ def open_nc_fn(
     realign_on_domain: str | None = None,
     sel_month: bool = False,
     check_coords: str | None = None,
-    *args,
     **kwargs,
 ) -> tuple[Callable, str | Path | list[str] | list[Path]]:
     """
@@ -378,14 +377,14 @@ def open_nc_fn(
 
     if isinstance(filepath, list):
         if len(filepath) > 1:
-            xr_open_fn_1: Callable = partial(xr.open_mfdataset, preprocess=process, *args, **kwargs)
+            xr_open_fn_1: Callable = partial(xr.open_mfdataset, preprocess=process, **kwargs)
             return xr_open_fn_1, filepath
 
         else:
             filepath = filepath[0]
 
     def xr_open_fn_2(x: pathType) -> xr.DataArray | xr.Dataset:
-        return process(xr.open_dataset(x, *args, **kwargs))
+        return process(xr.open_dataset(x,**kwargs))
 
     return xr_open_fn_2, filepath
 
@@ -395,7 +394,6 @@ def open_time_nc_fn(
     realign_on_domain: str | None = None,
     sel_month: bool = False,
     check_coords: str | None = "time",
-    *args,
     **kwargs,
 ) -> tuple[Callable, str | Path | list[str] | list[Path]]:
     """
@@ -410,7 +408,6 @@ def open_time_nc_fn(
         realign_on_domain=realign_on_domain,
         sel_month=sel_month,
         check_coords=check_coords,
-        *args,
         **kwargs,
     )
 
