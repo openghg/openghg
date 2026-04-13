@@ -14,11 +14,11 @@ logger = logging.getLogger("openghg.standardise.column._gemini")
 
 def _preprocess(ds: xr.Dataset, quality_filt: bool = False) -> xr.Dataset:
     """Preprocess the dataset by converting time to datetime and expanding dimensions if needed.
-    
+
     Args:
         ds: dataset to preprocess
         quality_filt: if True, filters data keeping data with qual_flag==1.
-        
+
     Returns: xr,Dataset: preprocessed dataset
     """
     ds["time"] = pd.to_datetime(ds.time, unit="s")
@@ -129,9 +129,7 @@ def parse_gemini(
         combine="by_coords",
         preprocess=partial(_preprocess, quality_filt=quality_filt),
         decode_times=False,
-    )[
-        var_to_read
-    ].chunk(chunks if chunks is not None else {})
+    )[var_to_read].chunk(chunks if chunks is not None else {})
 
     # Create metadata #
     attributes = cast(MutableMapping, data.attrs)
