@@ -336,7 +336,7 @@ def open_nc_fn(
     realign_on_domain: str | None = None,
     sel_month: bool = False,
     check_coords: str | None = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> tuple[Callable, str | Path | list[str] | list[Path]]:
     """
     Check the filepath input to choose which xarray open function to use:
@@ -394,7 +394,7 @@ def open_time_nc_fn(
     realign_on_domain: str | None = None,
     sel_month: bool = False,
     check_coords: str | None = "time",
-    **kwargs,
+    **kwargs: Any,
 ) -> tuple[Callable, str | Path | list[str] | list[Path]]:
     """
     Check the filepath input to choose which xarray open function to use:
