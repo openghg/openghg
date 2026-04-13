@@ -28,7 +28,8 @@ def _filter_and_resample(ds: xr.Dataset, species: str, quality_filt: bool, resam
     if quality_filt:
         logger.info(f"Applying filter based on variable 'extrapolation_flags_ak_x{species}'.")
         ds = ds.where(abs(ds[f"extrapolation_flags_ak_x{species}"]) != 2)
-    ds.dropna("time").sortby("time")
+    ds = ds.dropna("time").sortby("time")
+
 
     if not resample:
         ds[f"x{species}_uncertainty"] = ds[f"x{species}_error"]
@@ -216,7 +217,8 @@ def parse_tccon(
         "prior_gravity",
     ]
 
-    data = xr.open_dataset(filepath, decode_times=False)[var_to_read].chunk(
+    raw_data = xr.open_dataset(filepath, decode_times=False)
+    data = xr.decode_cf(raw_data)[var_to_read].chunk(
         chunks if chunks is not None else {}
     )
 
