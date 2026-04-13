@@ -10,7 +10,7 @@ from pandas import Timestamp
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
 
-def test_parse_tccon():
+def test_parse_gemini():
     """
     Test file in TCCON format (variables and attributes) can be
     correctly parsed.
@@ -50,8 +50,8 @@ def test_parse_tccon():
         "domain": domain,
         "inlet": "column",
         "site": "THW",
-        "network": "TCCON",
-        "platform": "site",
+        "network": "GEMINI",
+        "platform": "site-column",
         "longitude": "-1.320",
         "latitude": "51.570",
         "data_owner": "Damien Weidmann",

@@ -54,14 +54,12 @@ def _filter_and_resample(ds: xr.Dataset, species: str, quality_filt: bool, resam
 
 
 def parse_gemini(
-    species: str,
     filepath: str | Path | list[str] | list[Path],
+    species: str,
     domain: str | None = None,
-    selection: str | None = None,
     site: str | None = None,
-    network: str | None = None,
-    instrument: str | None = None,
-    platform: str = "sicolumn",
+    network: str | None = "GEMINI",
+    platform: str = "site-column",
     chunks: dict | None = None,
     quality_filt: bool = True,
     resample: bool = True,
@@ -95,7 +93,8 @@ def parse_gemini(
         filepath = Path(filepath).expanduser().resolve()
     else:
         filepath = cast(
-            list[str] | list[Path], sorted(filepath, key=lambda x: Path(str(x)).stem.split("_")[-1])
+            list[str] | list[Path],
+            sorted(filepath, key=lambda x: Path(str(x)).stem.split("_")[-1])
         )
 
     var_to_read = [
@@ -144,8 +143,8 @@ def parse_gemini(
     attributes["species"] = species
     attributes["domain"] = domain
     attributes["site"] = "G" + site_gemini_shortname.upper()[:2]
-    attributes["network"] = "GEMINI"
-    attributes["platform"] = "site"
+    attributes["network"] = network
+    attributes["platform"] = platform
     attributes["inlet"] = "column"
     attributes["calibration_scale"] = "unknown"
 
