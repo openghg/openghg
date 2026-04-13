@@ -333,6 +333,7 @@ The column data can comprise of 2 platforms - "site-colum" and "satellite" data.
 The input formats supported for standardise_column are:
 
     - "tccon", which can be used to standardise `TCCON data <https://tccondata.org/>`_.
+    - "gemini", which can be used to standardise GEMINI site-based column observations.
     - "openghg", which can be used to standardise data that matches the internal "openghg" specification (see `ObsColumn.schema <https://docs.openghg.org/api/devapi_store.html#openghg.store.ObsColumn.schema>`_ for details of the expected data). See the tutorial on :ref:`Adding ancillary spatial data <Adding_ancillary_data>` to learn about schema for different data types.
 
 The raw `GOSAT data from University of Leicester <https://catalogue.ceda.ac.uk/uuid/18ef8247f52a4cb6a14013f8235cc1eb/>`_  can be pre-processed to match to our expected internal "openghg" format using the `ACRG repository <https://github.com/ACRG-Bristol/acrg/blob/develop/acrg/satellite/gosat.py>`_ and added to an object store as the "openghg" source_format. These routines also allow satellite data points to be selected within a specific area, downsampled onto a specific grid or filtered based on criteria or flags.
@@ -348,9 +349,21 @@ To demonstrate this we will retrieve some example data (pre-processed methane co
 Now we add this data to the object store using ``standardise_column``, passing the below arguments:
 
 .. note::
-    For column site data the `satellite` argument is replaced with the `site` argument and `platform` is set to "site-column".
+    For GEMINI site-column data, use ``source_format="gemini"`` with ``platform="site-column"``,
+    and provide the required ``site`` and ``species`` arguments. Use ``domain`` or ``obs_region``
+    to specify the geographic area covered by the data. For example::
 
-    (Inversions check the platform value to determine whether the data is satellite or site-column data)
+        standardise_column(
+            filepath=...,
+            species="ch4",
+            source_format="gemini",
+            platform="site-column",
+            site="wao",
+            domain="europe",
+        )
+
+    Inversions check the ``platform`` value to determine whether the data is satellite or
+    site-column data.
 
 .. jupyter-execute::
 
