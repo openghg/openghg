@@ -1,10 +1,8 @@
 import logging
 
 import numpy as np
-import pytest
 from helpers import get_column_datapath  # , parsed_surface_metachecker, check_cf_compliance
 from openghg.standardise.column import parse_gemini
-from openghg.standardise.meta import attributes_default_keys
 from pandas import Timestamp
 
 mpl_logger = logging.getLogger("matplotlib")
