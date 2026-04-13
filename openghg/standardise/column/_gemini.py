@@ -40,6 +40,13 @@ def _filter_and_resample(ds: xr.Dataset, species: str, quality_filt: bool, resam
         raise ValueError("All the data have been filtered by quality flag and/or by `xr.Dataset.dropna()`.")
 
     if not resample:
+        # Mirror TCCON behavior by ensuring an uncertainty variable is present
+        sigma_name = f"sigma_X{species.upper()}"
+        uncertainty_name = f"x{species}_uncertainty"
+        if sigma_name in ds:
+            # Avoid mutating the original dataset in-place
+            ds = ds.copy()
+            ds[uncertainty_name] = ds[sigma_name]
         return ds
 
     output = ds.resample(time="h").mean(dim="time")
