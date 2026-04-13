@@ -216,7 +216,7 @@ def parse_tccon(
         "prior_gravity",
     ]
 
-    data = xr.open_dataset(filepath)[var_to_read].chunk(chunks if chunks is not None else {})
+    data = xr.open_dataset(filepath, decode_times=False)[var_to_read].chunk(chunks if chunks is not None else {})
 
     # Create metadata #
     attributes = cast(MutableMapping, data.attrs)
