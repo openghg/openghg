@@ -349,7 +349,7 @@ To demonstrate this we will retrieve some example data (pre-processed methane co
 Now we add this data to the object store using ``standardise_column``, passing the below arguments:
 
 .. note::
-    For GEMINI site-column data, use ``source_format="gemini"`` with ``platform="site-column"``,
+    For GEMINI site-column data, use ``source_format="gemini"`` with ``platform="column"``,
     and provide the required ``site`` and ``species`` arguments. Use ``domain`` or ``obs_region``
     to specify the geographic area covered by the data. For example::
 
@@ -357,7 +357,7 @@ Now we add this data to the object store using ``standardise_column``, passing t
             filepath=...,
             species="ch4",
             source_format="gemini",
-            platform="site-column",
+            platform="column",
             site="wao",
             domain="europe",
         )
