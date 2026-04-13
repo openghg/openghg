@@ -57,7 +57,6 @@ def test_parse_gemini():
         "latitude": "52.951",
         "data_owner": "Neil Humpage",
         "data_owner_email": "nh58@leicester.ac.uk",
-
     }
 
     metadata = output_ch4["metadata"]

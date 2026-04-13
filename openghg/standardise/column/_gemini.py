@@ -67,7 +67,7 @@ def parse_gemini(
     domain: str | None = None,
     site: str | None = None,
     network: str | None = "GEMINI",
-    platform: str = "site-column",
+    platform: str = "column",
     chunks: dict | None = None,
     quality_filt: bool = True,
     resample: bool = True,
