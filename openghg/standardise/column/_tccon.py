@@ -234,7 +234,7 @@ def parse_tccon(
     attributes["domain"] = domain
     attributes["site"] = "T" + site_tccon_shortname.upper()
     attributes["network"] = "TCCON"
-    attributes["platform"] = "site-column"
+    attributes["platform"] = "column"
     attributes["inlet"] = "column"
     attributes["pressure_weights_method"] = pressure_weights_method
 

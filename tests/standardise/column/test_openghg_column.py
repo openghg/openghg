@@ -103,7 +103,7 @@ def test_parse_tccon():
         "inlet": "column",
         "site": "THW",
         "network": "TCCON",
-        "platform": "site-column",
+        "platform": "column",
         "longitude": "-1.320",
         "latitude": "51.570",
         "data_owner": "Damien Weidmann",
