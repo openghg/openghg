@@ -146,7 +146,7 @@ def parse_gemini(
 
     attributes["longitude"] = f"{data.longitude.values:.3f}"
     attributes["latitude"] = f"{data.latitude.values:.3f}"
-    logger.warning("Add a check here that the site is really in the domain")
+    # TODO: Add a check here that the site is really in the domain
 
     # Prepare data #
     # Align units
