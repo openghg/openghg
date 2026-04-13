@@ -33,7 +33,7 @@ def _filter_and_resample(ds: xr.Dataset, species: str, quality_filt: bool, resam
     """
     if quality_filt:
         logger.info("Applying filter based on variable 'qual_flag'.")
-        mask = (ds.qual_flag == 1).compute() 
+        mask = (ds.qual_flag == 1).compute()
         ds = ds.where(mask, drop=True)
     ds = ds.dropna("time").sortby("time")
 
