@@ -1,3 +1,4 @@
+from functools import partial
 from pathlib import Path
 from typing import cast
 from collections.abc import MutableMapping
@@ -11,31 +12,41 @@ import logging
 logger = logging.getLogger("openghg.standardise.column._gemini")
 
 
-def _preprocess(ds: xr.Dataset) -> xr.Dataset:
+def _preprocess(ds: xr.Dataset, quality_filt: bool = False) -> xr.Dataset:
+    """Preprocess the dataset by converting time to datetime and expanding dimensions if needed.
+    
+    Args:
+        ds: dataset to preprocess
+        quality_filt: if True, filters data keeping data with qual_flag==1.
+        
+    Returns: xr,Dataset: preprocessed dataset
+    """
     ds["time"] = pd.to_datetime(ds.time, unit="s")
     for var in ds.data_vars:
         if "time" not in ds[var].dims and var not in ["longitude", "latitude", "obs_height"]:
             ds[var] = ds[var].expand_dims(time=ds.time.values)
+
+    if quality_filt:
+        source = ds.encoding.get("source", "unknown file")
+        mask = (ds.qual_flag == 1).values
+        if mask.sum() == 0:
+            logger.warning(f"No data with qual_flag==1 in file: {source}")
+
     return ds
 
 
-def _filter_and_resample(ds: xr.Dataset, species: str, quality_filt: bool, resample: bool) -> xr.Dataset:
+def _filter_and_resample(ds: xr.Dataset, species: str, resample: bool) -> xr.Dataset:
     """
     Filter (if quality_filt = True) the data keeping those for which "qual_flag" is equal to 1.
     Then resample the data on an hourly scale.
     Args:
         ds: dataset with column concentrations
         species: species name e.g. "ch4"
-        quality_filt: if True, filters the data keeping those for which "qual_flag" is equal to 1.
         resample: if True resamples the data at hourly scale.
     Returns:
         dataset resampled and filtered (if asked)
     """
-    if quality_filt:
-        logger.info("Applying filter based on variable 'qual_flag'.")
-        mask = ds.qual_flag == 1
-        mask = mask.compute()  # Forces computation if dask-backed, safe for numpy arrays too
-        ds = ds.where(mask, drop=True)
+
     ds = ds.dropna("time").sortby("time")
 
     if ds[f"X{species.upper()}"].size == 0:
@@ -116,7 +127,7 @@ def parse_gemini(
     data = xr.open_mfdataset(
         filepath,
         combine="by_coords",
-        preprocess=_preprocess,
+        preprocess=partial(_preprocess, quality_filt=quality_filt),
         decode_times=False,
     )[
         var_to_read
@@ -210,7 +221,7 @@ def parse_gemini(
     data = data.drop_vars(["dpj", "hj", "gravity"])
 
     # Filter the data and resample to hourly
-    data = _filter_and_resample(data, species, quality_filt, resample)
+    data = _filter_and_resample(data, species, resample)
 
     # Rename variables
     data = data.rename(
