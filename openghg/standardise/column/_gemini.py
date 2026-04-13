@@ -52,7 +52,7 @@ def _filter_and_resample(ds: xr.Dataset, species: str, quality_filt: bool, resam
     output = ds.resample(time="h").mean(dim="time")
     output[f"x{species}_uncertainty"] = ds[f"sigma_X{species.upper()}"].resample(time="h").max(dim="time")
 
-    logger.warning(
+    logger.debug(
         "Not sure that we should resample at this stage (and also resample the uncertainty like that)."
     )
     output = output.dropna("time")
