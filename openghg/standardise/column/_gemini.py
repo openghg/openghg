@@ -172,7 +172,7 @@ def parse_gemini(
                 raise ValueError("The units are not those expected.")
         else:
             var_unit_check = [f"X{species.upper()}", f"{species}_apriori", f"sigma_X{species.upper()}"]
-            unit_check = {data[v].units for v in var_unit_check}
+            unit_check = {data[v].attrs.get("units") for v in var_unit_check}
             if len(unit_check) != 1:
                 raise ValueError(
                     f"'X{species.upper()}', '{species}_apriori' and 'sigma_X{species.upper()}' have different units, please update this part of code to correct that."
