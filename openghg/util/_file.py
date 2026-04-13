@@ -384,7 +384,7 @@ def open_nc_fn(
             filepath = filepath[0]
 
     def xr_open_fn_2(x: pathType) -> xr.DataArray | xr.Dataset:
-        return process(xr.open_dataset(x,**kwargs))
+        return process(xr.open_dataset(x, **kwargs))
 
     return xr_open_fn_2, filepath
 

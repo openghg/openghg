@@ -95,8 +95,7 @@ def parse_gemini(
         filepath = Path(filepath).expanduser().resolve()
     else:
         filepath = cast(
-            list[str] | list[Path],
-            sorted(filepath, key=lambda x: Path(str(x)).stem.split("_")[-1])
+            list[str] | list[Path], sorted(filepath, key=lambda x: Path(str(x)).stem.split("_")[-1])
         )
 
     var_to_read = [
