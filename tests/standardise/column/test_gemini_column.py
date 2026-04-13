@@ -10,7 +10,7 @@ mpl_logger.setLevel(logging.WARNING)
 
 def test_parse_gemini():
     """
-    Test file in TCCON format (variables and attributes) can be
+    Test file in GEMINI format (variables and attributes) can be
     correctly parsed.
     """
     filepath = get_column_datapath(filename="gemini_uk_SN196_wey_241122.nc")
