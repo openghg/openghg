@@ -39,8 +39,8 @@ def test_parse_gemini():
     data_ch4 = output_ch4["data"]
 
     time = data_ch4["time"]
-    assert time[0] == Timestamp("2023-04-02T15:00:00")
-    assert time[1] == Timestamp("2023-04-02T16:00:00")
+    assert time[0] == Timestamp("2023-04-02 15:00:00")
+    assert time[1] == Timestamp("2023-04-02 16:00:00")
 
     xch4 = data_ch4["xch4"].values
     assert np.isclose(xch4[0], 1888.025)
