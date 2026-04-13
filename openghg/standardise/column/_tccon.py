@@ -30,7 +30,6 @@ def _filter_and_resample(ds: xr.Dataset, species: str, quality_filt: bool, resam
         ds = ds.where(abs(ds[f"extrapolation_flags_ak_x{species}"]) != 2)
     ds = ds.dropna("time").sortby("time")
 
-
     if not resample:
         ds[f"x{species}_uncertainty"] = ds[f"x{species}_error"]
         return ds
@@ -218,9 +217,7 @@ def parse_tccon(
     ]
 
     raw_data = xr.open_dataset(filepath, decode_times=False)
-    data = xr.decode_cf(raw_data)[var_to_read].chunk(
-        chunks if chunks is not None else {}
-    )
+    data = xr.decode_cf(raw_data)[var_to_read].chunk(chunks if chunks is not None else {})
 
     # Create metadata #
     attributes = cast(MutableMapping, data.attrs)
