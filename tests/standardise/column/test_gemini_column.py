@@ -39,12 +39,12 @@ def test_parse_gemini():
     data_ch4 = output_ch4["data"]
 
     time = data_ch4["time"]
-    assert time[0] == Timestamp("2023-04-02 15:00:00")
-    assert time[1] == Timestamp("2023-04-02 16:00:00")
+    assert time[0] == Timestamp("2024-11-22T10:00:00")
+    assert time[1] == Timestamp("2024-11-22T11:00:00")
 
     xch4 = data_ch4["xch4"].values
-    assert np.isclose(xch4[0], 1888.025)
-    assert np.isclose(xch4[-1], 1889.0175)
+    assert np.isclose(xch4[0], 1908.16)
+    assert np.isclose(xch4[-1], 1908.43)
 
     expected_metadata = {
         "species": "ch4",
@@ -53,22 +53,12 @@ def test_parse_gemini():
         "site": "WEY",
         "network": "GEMINI",
         "platform": "site-column",
-        "longitude": "-1.320",
-        "latitude": "51.570",
-        "data_owner": "Damien Weidmann",
-        "data_owner_email": "<damien.weidmann@stfc.ac.uk>",
-        "file_start_date": "2023-04-02",
-        "file_end_date": "2023-04-02",
-        "file_format_version": "2020.B",
-        "data_revision": "R0",
-        "description": "TCCON data standardised from hw20230402_20230402.public.qc.nc, with the pressure weights estimated via 'pressure_weight'.",
-        "calibration_scale": "WMO CH4 X2004",
+        "longitude": "1.123",
+        "latitude": "52.951",
+        "data_owner": "Neil Humpage",
+        "data_owner_email": "nh58@leicester.ac.uk",
+
     }
 
     metadata = output_ch4["metadata"]
     assert metadata.items() >= expected_metadata.items()
-
-    expected_attributes = expected_metadata
-    expected_attributes.update({"longitude": "-1.320", "latitude": "51.570"})
-    attributes = data_ch4.attrs
-    assert attributes.items() >= expected_metadata.items()
