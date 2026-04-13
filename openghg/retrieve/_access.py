@@ -324,10 +324,6 @@ def get_obs_column(
         version=version,
         **kwargs,
     )
-    # column_keywords.update(kwargs)
-
-    # obs_data = _get_generic(**column_keywords)
-
     # check if data set is empty
     if obs_data.data.sizes["time"] == 0:
         raise SearchError("Dataset is empty for obs. Please check the supplied args.")
