@@ -170,7 +170,7 @@ def parse_gemini(
                 raise ValueError(
                     f"'X{species.upper()}', '{species}_apriori' and 'sigma_X{species.upper()}' have different units, please update this part of code to correct that."
                 )
-            logging.warning(f"No unit conversion is implemented for {species}.")
+            logger.warning(f"No unit conversion is implemented for {species}.")
 
     # Derive pressure thickness
     press = -data["pressure_grid"].diff(dim="altitude", n=1)
