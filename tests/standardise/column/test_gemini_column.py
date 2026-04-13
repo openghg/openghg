@@ -23,6 +23,7 @@ def test_parse_gemini():
 
     data = parse_gemini(
         filepath,
+        site="wey",
         pressure_weights_method=pressure_weights_method,
         domain=domain,
         species=species,
@@ -49,7 +50,7 @@ def test_parse_gemini():
         "species": "ch4",
         "domain": domain,
         "inlet": "column",
-        "site": "THW",
+        "site": "WEY",
         "network": "GEMINI",
         "platform": "site-column",
         "longitude": "-1.320",
