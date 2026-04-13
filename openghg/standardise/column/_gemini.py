@@ -149,7 +149,7 @@ def parse_gemini(
 
     attributes["species"] = species
     attributes["domain"] = domain
-    attributes["site"] = "G" + site_gemini_shortname.upper()[:2]
+    attributes["site"] = site_gemini_shortname.upper()
     attributes["network"] = network
     attributes["platform"] = platform
     attributes["inlet"] = "column"

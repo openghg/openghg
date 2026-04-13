@@ -52,7 +52,7 @@ def test_parse_gemini():
         "inlet": "column",
         "site": "WEY",
         "network": "GEMINI",
-        "platform": "site-column",
+        "platform": "column",
         "longitude": "1.123",
         "latitude": "52.951",
         "data_owner": "Neil Humpage",
