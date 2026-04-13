@@ -328,7 +328,7 @@ Adding and standardising column data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Similar to the surface data, we can also add column data to the object store.
-The column data can comprise of 2 platforms - "site-colum" and "satellite" data.
+The column data can comprise of 2 platforms - "site-column" and "satellite" data.
 
 The input formats supported for standardise_column are:
 
