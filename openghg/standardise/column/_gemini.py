@@ -12,30 +12,21 @@ import logging
 logger = logging.getLogger("openghg.standardise.column._gemini")
 
 
-def _preprocess(ds: xr.Dataset, quality_filt: bool = False) -> xr.Dataset:
+def _preprocess(ds: xr.Dataset) -> xr.Dataset:
     """Preprocess the dataset by converting time to datetime and expanding dimensions if needed.
 
     Args:
         ds: dataset to preprocess
-        quality_filt: if True, filters data keeping data with qual_flag==1.
-
     Returns: xr,Dataset: preprocessed dataset
     """
     ds["time"] = pd.to_datetime(ds.time, unit="s")
     for var in ds.data_vars:
         if "time" not in ds[var].dims and var not in ["longitude", "latitude", "obs_height"]:
             ds[var] = ds[var].expand_dims(time=ds.time.values)
-
-    if quality_filt:
-        source = ds.encoding.get("source", "unknown file")
-        mask = (ds.qual_flag == 1).values
-        if mask.sum() == 0:
-            logger.warning(f"No data with qual_flag==1 in file: {source}")
-
     return ds
 
 
-def _filter_and_resample(ds: xr.Dataset, species: str, resample: bool) -> xr.Dataset:
+def _filter_and_resample(ds: xr.Dataset, species: str, quality_filt: bool, resample: bool) -> xr.Dataset:
     """
     Filter (if quality_filt = True) the data keeping those for which "qual_flag" is equal to 1.
     Then resample the data on an hourly scale.
@@ -47,6 +38,11 @@ def _filter_and_resample(ds: xr.Dataset, species: str, resample: bool) -> xr.Dat
         dataset resampled and filtered (if asked)
     """
 
+    # Mask qual_flag == 1 and drop the other data
+        ds=ds.compute()
+        ds = ds.where(ds["qual_flag"] == 1, drop=True)
+
+    # Drop NaN values along time and sort
     ds = ds.dropna("time").sortby("time")
 
     if ds[f"X{species.upper()}"].size == 0:
@@ -57,12 +53,7 @@ def _filter_and_resample(ds: xr.Dataset, species: str, resample: bool) -> xr.Dat
 
     output = ds.resample(time="h").mean(dim="time")
     output[f"x{species}_uncertainty"] = ds[f"sigma_X{species.upper()}"].resample(time="h").max(dim="time")
-
-    logger.debug(
-        "Not sure that we should resample at this stage (and also resample the uncertainty like that)."
-    )
     output = output.dropna("time")
-
     return output
 
 
@@ -123,13 +114,17 @@ def parse_gemini(
         "obs_height",
     ]
 
-    # Here we assume that all the files have the same variables and that they are in the same order, which is the case for the data we have
+    # Here we assume that all the files have the same variables and that they are in the same order
     data = xr.open_mfdataset(
         filepath,
         combine="by_coords",
-        preprocess=partial(_preprocess, quality_filt=quality_filt),
+        preprocess=_preprocess,
         decode_times=False,
     )[var_to_read].chunk(chunks if chunks is not None else {})
+
+    decode_times = pd.to_datetime(data.time.values, unit='s', origin='unix', utc=True)
+    
+    data = data.assign_coords(time=decode_times.values.astype('datetime64[ns]'))
 
     # Create metadata #
     attributes = cast(MutableMapping, data.attrs)
@@ -161,8 +156,8 @@ def parse_gemini(
     attributes["data_owner"] = "Neil Humpage"
     attributes["data_owner_email"] = "nh58@leicester.ac.uk"
 
-    attributes["longitude"] = f"{data.longitude.values:.3f}"
-    attributes["latitude"] = f"{data.latitude.values:.3f}"
+    attributes["longitude"] = f"{float(data.longitude.values):.3f}"
+    attributes["latitude"] = f"{float(data.latitude.values):.3f}"
     # TODO: Add a check here that the site is really in the domain
 
     # Prepare data #
@@ -219,7 +214,7 @@ def parse_gemini(
     data = data.drop_vars(["dpj", "hj", "gravity"])
 
     # Filter the data and resample to hourly
-    data = _filter_and_resample(data, species, resample)
+    data = _filter_and_resample(ds=data, species=species, quality_filt=quality_filt, resample=resample)
 
     # Rename variables
     data = data.rename(
