@@ -39,8 +39,8 @@ def _filter_and_resample(ds: xr.Dataset, species: str, quality_filt: bool, resam
     """
 
     # Mask qual_flag == 1 and drop the other data
-        ds=ds.compute()
-        ds = ds.where(ds["qual_flag"] == 1, drop=True)
+    ds=ds.compute()
+    ds = ds.where(ds["qual_flag"] == 1, drop=True)
 
     # Drop NaN values along time and sort
     ds = ds.dropna("time").sortby("time")
