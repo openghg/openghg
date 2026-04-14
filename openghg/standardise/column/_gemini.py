@@ -1,3 +1,4 @@
+from functools import partial
 from pathlib import Path
 from typing import cast
 from collections.abc import MutableMapping
@@ -11,50 +12,58 @@ import logging
 logger = logging.getLogger("openghg.standardise.column._gemini")
 
 
-def _preprocess(ds: xr.Dataset) -> xr.Dataset:
-    """Preprocess the dataset by converting time to datetime and expanding dimensions if needed.
+def _preprocess(ds: xr.Dataset, quality_filter: bool) -> xr.Dataset:
+    """Preprocess a single dataset file by:
+    - Converting epoch seconds to UTC datetime64
+    - Filtering to keep only qual_flag == 1 timesteps
+    - Dropping timesteps where all variables are NaN
+    - Expanding altitude-only variables to include time dimension
 
     Args:
-        ds: dataset to preprocess
-    Returns: xr,Dataset: preprocessed dataset
+        ds: raw dataset from a single file
+    Returns:
+        xr.Dataset: preprocessed dataset
     """
-    decode_times = pd.to_datetime(ds.time.values, unit="s", origin="unix", utc=True)
+    # Convert to UTC datetime64 and sort
+    utc_times = pd.to_datetime(ds.time.values, unit="s", origin="unix", utc=True)
+    ds = ds.assign_coords(time=utc_times.values.astype("datetime64[ns]")).sortby("time")
+    ds = ds.compute()
 
-    ds = ds.assign_coords(time=decode_times.values.astype("datetime64[ns]"))
+    if not quality_filter:
+        logger.warning("It is preferred to use the quality filter (qual_flag == 1). Returning unfiltered data.")
+    else:
+        # Filter to qual_flag == 1 and drop timesteps where all vars are NaN
+        ds = ds.where(ds["qual_flag"] == 1, drop=True).dropna(dim="time", how="all")
+
     for var in ds.data_vars:
         if "time" not in ds[var].dims and var not in ["longitude", "latitude", "obs_height"]:
             ds[var] = ds[var].expand_dims(time=ds.time.values)
+
     return ds
 
 
-def _filter_and_resample(ds: xr.Dataset, species: str, resample: bool) -> xr.Dataset:
-    """
-    Filter the data keeping those for which "qual_flag" is equal to 1.
-    Then resample the data on an hourly scale.
+def _resample(ds: xr.Dataset, species: str, resample: bool) -> xr.Dataset | None:
+    """Resample the merged dataset to hourly scale.
+    Note: filtering is already applied per file in _preprocess.
+
     Args:
-        ds: dataset with column concentrations
+        ds: merged dataset with qual_flag==1 data only
         species: species name e.g. "ch4"
-        resample: if True resamples the data at hourly scale.
+        resample: if True, resamples data to hourly scale
     Returns:
-        dataset resampled and filtered (if asked)
+        xr.Dataset | None: resampled dataset, or None if empty
     """
-
-    # Mask qual_flag == 1 and drop the other data
-    ds = ds.compute()
-    ds = ds.where(ds["qual_flag"] == 1, drop=True)
-
-    # Drop NaN values along time and sort
-    ds = ds.dropna("time").sortby("time")
-
-    if ds[f"X{species.upper()}"].size == 0:
-        raise ValueError("All the data have been filtered by quality flag and/or by `xr.Dataset.dropna()`.")
+    if ds.time.size == 0:
+        logger.warning("Dataset is empty after filtering. Nothing to store.")
+        return None
 
     if not resample:
         return ds
 
     output = ds.resample(time="h").mean(dim="time")
     output[f"x{species}_uncertainty"] = ds[f"sigma_X{species.upper()}"].resample(time="h").max(dim="time")
-    output = output.dropna("time")
+    output = output.dropna("time", how="all")
+
     return output
 
 
@@ -66,7 +75,7 @@ def parse_gemini(
     network: str | None = "GEMINI",
     platform: str = "column",
     chunks: dict | None = None,
-    quality_filt: bool = True,
+    quality_filter: bool = True,
     resample: bool = True,
     **kwargs: str,
 ) -> dict:
@@ -119,7 +128,7 @@ def parse_gemini(
     data = xr.open_mfdataset(
         filepath,
         combine="by_coords",
-        preprocess=_preprocess,
+        preprocess=partial(_preprocess,quality_filter=quality_filter),
         decode_times=False,
     )[
         var_to_read
@@ -212,7 +221,7 @@ def parse_gemini(
 
     # Filter the data and resample to hourly
 
-    data = _filter_and_resample(ds=data, species=species, resample=resample)
+    data = _resample(ds=data, species=species, resample=resample)
 
     # Rename variables
     data = data.rename(
