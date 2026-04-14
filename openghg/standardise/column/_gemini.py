@@ -247,8 +247,6 @@ def parse_gemini(
         "network",
         "platform",
         "calibration_scale",
-        "longitude",
-        "latitude",
         "data_owner",
         "data_owner_email",
         "file_start_date",
