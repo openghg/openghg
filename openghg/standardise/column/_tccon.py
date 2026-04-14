@@ -217,8 +217,10 @@ def parse_tccon(
         "prior_gravity",
     ]
 
-    data = xr.open_dataset(filepath, decode_times=False)[var_to_read].chunk(chunks if chunks is not None else {})
-    
+    data = xr.open_dataset(filepath, decode_times=False)[var_to_read].chunk(
+        chunks if chunks is not None else {}
+    )
+
     decode_times = pd.to_datetime(data.time.values, unit="s", origin="unix", utc=True)
 
     data = data.assign_coords(time=decode_times.values.astype("datetime64[ns]"))
