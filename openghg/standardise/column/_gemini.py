@@ -44,7 +44,7 @@ def _filter_and_resample(ds: xr.Dataset, species: str, resample: bool) -> xr.Dat
     ds = ds.where(ds["qual_flag"] == 1, drop=True)
 
     # Drop NaN values along time and sort
-    # ds = ds.dropna("time").sortby("time")
+    ds = ds.dropna("time").sortby("time")
 
     if ds[f"X{species.upper()}"].size == 0:
         raise ValueError("All the data have been filtered by quality flag and/or by `xr.Dataset.dropna()`.")
