@@ -18,7 +18,9 @@ def _preprocess(ds: xr.Dataset) -> xr.Dataset:
         ds: dataset to preprocess
     Returns: xr,Dataset: preprocessed dataset
     """
-    ds["time"] = pd.to_datetime(ds.time, unit="s")
+    decode_times = pd.to_datetime(ds.time.values, unit="s", origin="unix", utc=True)
+
+    ds = ds.assign_coords(time=decode_times.values.astype("datetime64[ns]"))
     for var in ds.data_vars:
         if "time" not in ds[var].dims and var not in ["longitude", "latitude", "obs_height"]:
             ds[var] = ds[var].expand_dims(time=ds.time.values)
@@ -42,7 +44,7 @@ def _filter_and_resample(ds: xr.Dataset, species: str, resample: bool) -> xr.Dat
     ds = ds.where(ds["qual_flag"] == 1, drop=True)
 
     # Drop NaN values along time and sort
-    ds = ds.dropna("time").sortby("time")
+    # ds = ds.dropna("time").sortby("time")
 
     if ds[f"X{species.upper()}"].size == 0:
         raise ValueError("All the data have been filtered by quality flag and/or by `xr.Dataset.dropna()`.")
@@ -122,10 +124,6 @@ def parse_gemini(
     )[
         var_to_read
     ].chunk(chunks if chunks is not None else {})
-
-    decode_times = pd.to_datetime(data.time.values, unit="s", origin="unix", utc=True)
-
-    data = data.assign_coords(time=decode_times.values.astype("datetime64[ns]"))
 
     # Create metadata #
     attributes = cast(MutableMapping, data.attrs)
