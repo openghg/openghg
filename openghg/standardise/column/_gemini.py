@@ -158,9 +158,7 @@ def parse_gemini(
     attributes["data_owner"] = "Neil Humpage"
     attributes["data_owner_email"] = "nh58@leicester.ac.uk"
 
-    attributes["longitude"] = f"{float(data.longitude.values[0]):.3f}"
-    attributes["latitude"] = f"{float(data.latitude.values[0]):.3f}"
-    # TODO: Add a check here that the site is really in the domain
+# TODO: Add a check here that the site is really in the domain
 
     # Prepare data #
     # Align units
