@@ -17,7 +17,6 @@ def _preprocess(ds: xr.Dataset, quality_filter: bool) -> xr.Dataset:
     - Converting epoch seconds to UTC datetime64
     - Filtering to keep only qual_flag == 1 timesteps
     - Dropping timesteps where all variables are NaN
-    - Expanding altitude-only variables to include time dimension
 
     Args:
         ds: raw dataset from a single file
