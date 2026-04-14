@@ -26,9 +26,9 @@ def _preprocess(ds: xr.Dataset) -> xr.Dataset:
     return ds
 
 
-def _filter_and_resample(ds: xr.Dataset, species: str, quality_filt: bool, resample: bool) -> xr.Dataset:
+def _filter_and_resample(ds: xr.Dataset, species: str, resample: bool) -> xr.Dataset:
     """
-    Filter (if quality_filt = True) the data keeping those for which "qual_flag" is equal to 1.
+    Filter the data keeping those for which "qual_flag" is equal to 1.
     Then resample the data on an hourly scale.
     Args:
         ds: dataset with column concentrations
@@ -158,8 +158,8 @@ def parse_gemini(
     attributes["data_owner"] = "Neil Humpage"
     attributes["data_owner_email"] = "nh58@leicester.ac.uk"
 
-    attributes["longitude"] = f"{float(data.longitude.values):.3f}"
-    attributes["latitude"] = f"{float(data.latitude.values):.3f}"
+    attributes["longitude"] = f"{float(data.longitude.values[0]):.3f}"
+    attributes["latitude"] = f"{float(data.latitude.values[0]):.3f}"
     # TODO: Add a check here that the site is really in the domain
 
     # Prepare data #
@@ -217,7 +217,7 @@ def parse_gemini(
 
     # Filter the data and resample to hourly
 
-    data = _filter_and_resample(ds=data, species=species, quality_filt=quality_filt, resample=resample)
+    data = _filter_and_resample(ds=data, species=species, resample=resample)
 
     # Rename variables
     data = data.rename(
