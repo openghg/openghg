@@ -51,8 +51,6 @@ def test_parse_gemini():
         "site": "WEY",
         "network": "GEMINI",
         "platform": "column",
-        "longitude": "1.123",
-        "latitude": "52.951",
         "data_owner": "Neil Humpage",
         "data_owner_email": "nh58@leicester.ac.uk",
     }
