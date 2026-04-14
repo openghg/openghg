@@ -1,4 +1,3 @@
-from functools import partial
 from pathlib import Path
 from typing import cast
 from collections.abc import MutableMapping
