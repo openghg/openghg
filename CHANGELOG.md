@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Option to set location of openghg log via an environment variable `OPENGHG_LOG_PATH`. [PR #1607](https://github.com/openghg/openghg/pull/1607)
+- Added the ability to standardise GEMINI data using standardise_column.[PR #1501](https://github.com/openghg/openghg/pull/1501)
 
 ## [0.18.0] - 2026-02-18
 
