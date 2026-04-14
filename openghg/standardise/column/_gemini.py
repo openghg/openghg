@@ -39,7 +39,7 @@ def _filter_and_resample(ds: xr.Dataset, species: str, quality_filt: bool, resam
     """
 
     # Mask qual_flag == 1 and drop the other data
-    ds=ds.compute()
+    ds = ds.compute()
     ds = ds.where(ds["qual_flag"] == 1, drop=True)
 
     # Drop NaN values along time and sort
@@ -120,11 +120,13 @@ def parse_gemini(
         combine="by_coords",
         preprocess=_preprocess,
         decode_times=False,
-    )[var_to_read].chunk(chunks if chunks is not None else {})
+    )[
+        var_to_read
+    ].chunk(chunks if chunks is not None else {})
 
-    decode_times = pd.to_datetime(data.time.values, unit='s', origin='unix', utc=True)
-    
-    data = data.assign_coords(time=decode_times.values.astype('datetime64[ns]'))
+    decode_times = pd.to_datetime(data.time.values, unit="s", origin="unix", utc=True)
+
+    data = data.assign_coords(time=decode_times.values.astype("datetime64[ns]"))
 
     # Create metadata #
     attributes = cast(MutableMapping, data.attrs)
@@ -214,6 +216,7 @@ def parse_gemini(
     data = data.drop_vars(["dpj", "hj", "gravity"])
 
     # Filter the data and resample to hourly
+
     data = _filter_and_resample(ds=data, species=species, quality_filt=quality_filt, resample=resample)
 
     # Rename variables
