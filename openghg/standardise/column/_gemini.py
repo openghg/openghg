@@ -47,7 +47,7 @@ def _preprocess(ds: xr.Dataset, quality_filter: bool) -> xr.Dataset:
     return ds
 
 
-def _resample(ds: xr.Dataset, species: str, resample: bool) -> xr.Dataset | None:
+def _resample(ds: xr.Dataset, species: str, resample: bool) -> xr.Dataset:
     """Resample the merged dataset to hourly scale.
     Note: filtering is already applied per file in _preprocess.
 
@@ -56,7 +56,7 @@ def _resample(ds: xr.Dataset, species: str, resample: bool) -> xr.Dataset | None
         species: species name e.g. "ch4"
         resample: if True, resamples data to hourly scale
     Returns:
-        xr.Dataset | None: resampled dataset, or None if empty
+        xr.Dataset : resampled dataset, or None if empty
     """
 
     if not resample:
