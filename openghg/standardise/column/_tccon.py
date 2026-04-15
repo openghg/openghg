@@ -3,6 +3,7 @@ from typing import cast
 from collections.abc import MutableMapping
 from datetime import datetime
 import numpy as np
+import pandas as pd
 import xarray as xr
 
 from openghg.util import load_internal_json
@@ -216,9 +217,13 @@ def parse_tccon(
         "prior_gravity",
     ]
 
-    raw_data = xr.open_dataset(filepath, decode_times=False)
-    data = xr.decode_cf(raw_data)[var_to_read].chunk(chunks if chunks is not None else {})
+    data = xr.open_dataset(filepath, decode_times=False)[var_to_read].chunk(
+        chunks if chunks is not None else {}
+    )
 
+    decode_times = pd.to_datetime(data.time.values, unit="s", origin="unix", utc=True)
+
+    data = data.assign_coords(time=decode_times.values.astype("datetime64[ns]"))
     # Create metadata #
     attributes = cast(MutableMapping, data.attrs)
 
