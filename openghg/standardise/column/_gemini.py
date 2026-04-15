@@ -33,6 +33,8 @@ def _preprocess(ds: xr.Dataset, quality_filter: bool) -> xr.Dataset:
     else:
         # Filter to qual_flag == 1 and drop timesteps where all vars are NaN
         ds = ds.where(ds["qual_flag"] == 1, drop=True).dropna(dim="time", how="all")
+        if ds.time.size == 0:
+            raise ValueError("Dataset is empty after filtering. Nothing to store. Possibly all the data have qual_flag != 1.")
 
     for var in ds.data_vars:
         if "time" not in ds[var].dims and var not in ["longitude", "latitude", "obs_height"]:
@@ -52,9 +54,6 @@ def _resample(ds: xr.Dataset, species: str, resample: bool) -> xr.Dataset | None
     Returns:
         xr.Dataset | None: resampled dataset, or None if empty
     """
-    if ds.time.size == 0:
-        logger.warning("Dataset is empty after filtering. Nothing to store.")
-        return None
 
     if not resample:
         return ds
@@ -124,14 +123,15 @@ def parse_gemini(
     ]
 
     # Here we assume that all the files have the same variables and that they are in the same order
+
     data = xr.open_mfdataset(
-        filepath,
-        combine="by_coords",
-        preprocess=partial(_preprocess,quality_filter=quality_filter),
-        decode_times=False,
-    )[
-        var_to_read
-    ].chunk(chunks if chunks is not None else {})
+            filepath,
+            combine="by_coords",
+            preprocess=partial(_preprocess,quality_filter=quality_filter),
+            decode_times=False,
+        )[
+            var_to_read
+        ].chunk(chunks if chunks is not None else {})
 
     # Create metadata #
     attributes = cast(MutableMapping, data.attrs)
