@@ -108,7 +108,8 @@ def _sanitise_negative_uncertainties(data: Any, surface_keywords: dict) -> Any:
         dv for dv in data.data_vars if str(dv).endswith("repeatability") or str(dv).endswith("variability")
     ]
     for dv in uncertainty_data_vars:
-        data[dv] = data[dv].where(data[dv] >= 0.0)
+        cond = (data[dv] >= 0.0).compute()
+        data[dv] = data[dv].where(cond)
 
     vars_to_delete = [var for var in data if data[var].isnull().all().values.item()]
     if vars_to_delete:
