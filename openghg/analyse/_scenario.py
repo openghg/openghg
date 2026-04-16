@@ -976,6 +976,7 @@ class ModelScenario:
         Ignores resample_to keywords of ("coarsest", "obs", "footprint") as this is
         for comparison with observation data but uses pandas frequencies to resample.
         """
+        self._check_data_is_present(need="footprint")
         footprint = cast(FootprintData, self.footprint)
 
         if resample_to in ("coarsest", "obs", "footprint") or resample_to is None:
@@ -1406,13 +1407,14 @@ class ModelScenario:
         Returns:
             xarray.Dataset: Combined dataset containing footprint and observation data
         """
-        if self.obs is not None or self.obs_column is not None:
+        if self.obs is not None:
             combined_dataset = self.combine_obs_footprint(
                 resample_to=resample_to, platform=platform, cache=cache, recalculate=recalculate
             )
         else:
-            combined_dataset = self._check_footprint_resample(resample_to).copy()
-            combined_dataset.attrs["resample_to"] = str(resample_to)
+            combined_dataset = self._check_footprint_resample(resample_to).assign_attrs(
+                resample_to=str(resample_to)
+            )
 
         if calc_timeseries or calc_fp_x_flux:
             modelled_obs = self.calc_modelled_obs(
