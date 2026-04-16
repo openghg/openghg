@@ -110,12 +110,12 @@ def _sanitise_negative_uncertainties(data: Any, surface_keywords: dict) -> Any:
     for dv in uncertainty_data_vars:
         data[dv] = data[dv].where(data[dv] >= 0.0)
 
-    var_to_delete = [var for var in data if data[var].isnull().all().values.item()]
-    if var_to_delete:
+    vars_to_delete = [var for var in data if data[var].isnull().all().values.item()]
+    if vars_to_delete:
         logger.info(
-            f"{var_to_delete} contain only NaN values for obs. in {surface_keywords}. They are thus deleted."
+            f"{vars_to_delete} contain only NaN values for obs. in {surface_keywords}. They are thus deleted."
         )
-        data = data.drop_vars(var_to_delete)
+        data = data.drop_vars(vars_to_delete)
 
     return data
 

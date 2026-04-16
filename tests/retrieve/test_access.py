@@ -521,9 +521,9 @@ def test_sanitise_negative_uncertainties_converts_negative_to_nan():
         },
         coords={"time": times},
     )
-    keywords: dict = {}
+    surface_keywords: dict = {}
 
-    result = _sanitise_negative_uncertainties(ds, keywords)
+    result = _sanitise_negative_uncertainties(ds, surface_keywords)
 
     # Negative repeatability value replaced with NaN; positive values kept
     assert np.isnan(result["ch4_repeatability"].values[0])
@@ -547,9 +547,9 @@ def test_sanitise_negative_uncertainties_no_negative_values():
         },
         coords={"time": times},
     )
-    keywords: dict = {}
+    surface_keywords: dict = {}
 
-    result = _sanitise_negative_uncertainties(ds, keywords)
+    result = _sanitise_negative_uncertainties(ds, surface_keywords)
 
     # All values should be unchanged (no negatives to replace)
     np.testing.assert_array_equal(result["ch4_repeatability"].values, ds["ch4_repeatability"].values)
