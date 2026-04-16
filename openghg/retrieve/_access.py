@@ -88,6 +88,38 @@ def _get_generic(
     return result
 
 
+def _sanitise_negative_uncertainties(data: Any, surface_keywords: dict) -> Any:
+    """Set negative uncertainty values to NaN and drop variables that are entirely NaN.
+
+    Negative values in repeatability/variability variables are fill-value flags
+    (e.g. -9.99) used in flask and other measurement data.  This function
+    replaces them with NaN and then removes any variable whose values are all NaN
+    after that replacement.
+
+    Args:
+        data: xarray Dataset with observation data.
+        surface_keywords: Keyword arguments used to retrieve the data (used in log messages).
+
+    Returns:
+        xarray Dataset with negative uncertainty values replaced by NaN and
+        entirely-NaN variables removed.
+    """
+    uncertainty_data_vars = [
+        dv for dv in data.data_vars if str(dv).endswith("repeatability") or str(dv).endswith("variability")
+    ]
+    for dv in uncertainty_data_vars:
+        data[dv] = data[dv].where(data[dv] >= 0.0)
+
+    var_to_delete = [var for var in data if data[var].isnull().all().values.item()]
+    if var_to_delete:
+        logger.info(
+            f"{var_to_delete} contain only NaN values for obs. in {surface_keywords}. They are thus deleted."
+        )
+        data = data.drop_vars(var_to_delete)
+
+    return data
+
+
 def get_obs_surface(
     site: str,
     species: str,
@@ -202,6 +234,10 @@ def get_obs_surface(
         if "inlet_height" in data.data_vars and "inlet" not in data.data_vars:
             data["inlet"] = data["inlet_height"]
 
+    # Set negative uncertainty values to NaN and drop variables that are entirely NaN.
+    # This handles fill values (e.g. -9.99) used in flask and other data.
+    data = _sanitise_negative_uncertainties(data, surface_keywords)
+
     if average is not None:
         # TODO: if https://github.com/dask/dask/issues/11693#issuecomment-2610235428 is resolved
         # then it may be possible to avoid calling `.compute()`
@@ -210,50 +246,9 @@ def get_obs_surface(
         logger.info("Loading obs data into memory for resampling.")
         data = data.compute()
 
-        # check for negative uncertainties and set to NaN
-        uncertainty_data_vars = [
-            dv
-            for dv in data.data_vars
-            if str(dv).endswith("repeatability") or str(dv).endswith("variability")
-        ]
-        for dv in uncertainty_data_vars:
-            data[dv] = data[dv].where(data[dv] >= 0.0)  # keep data non-negative values, others set to NaN
-
-        var_to_delete = []
-        for var in data:
-            if data[var].isnull().all():
-                var_to_delete.append(var)
-        if var_to_delete:
-            logger.info(
-                f"{var_to_delete} contain only nan for obs. in {surface_keywords}. They are thus deleted."
-            )
-            data = data.drop_vars(var_to_delete)
-
         data = surface_obs_resampler(
             data, averaging_period=average, species=species, drop_na=(not keep_missing)
         )
-    else:
-        # temporary fix for nan values 1) set negative uncertainties to NaN
-        # 2) drop variables that are entirely NaN
-
-        uncertainty_data_vars = [
-            dv
-            for dv in data.data_vars
-            if str(dv).endswith("repeatability") or str(dv).endswith("variability")
-        ]
-        for dv in uncertainty_data_vars:
-            # works with dask or in-memory xarray
-            data[dv] = data[dv].where(data[dv] >= 0.0)
-
-        var_to_delete = []
-        for var in data:
-            if data[var].isnull().all():
-                var_to_delete.append(var)
-        if var_to_delete:
-            logger.info(
-                f"{var_to_delete} contain only nan for obs. in {surface_keywords}. They are thus deleted."
-            )
-            data = data.drop_vars(var_to_delete)
 
     # Rename variables
     if rename_vars:
