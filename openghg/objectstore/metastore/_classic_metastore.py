@@ -23,20 +23,21 @@ These methods are only needed by `store.BaseStore`.
 
 from __future__ import annotations
 
-import json
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 from contextlib import contextmanager
+import contextlib
+from pathlib import Path
 from types import TracebackType
-from typing import Any, Literal, cast
+from typing import Literal
+from typing_extensions import Self
+import warnings
 
 import tinydb
 from filelock import FileLock as _FileLock
-from openghg.objectstore import exists, get_object, get_object_lock_path, set_object_from_json
+from openghg.objectstore import get_object_lock_path, get_readable_buckets
 from openghg.objectstore.metastore import TinyDBMetaStore
-from openghg.types import MetastoreError
-from openghg.util import hash_string
-from tinydb.middlewares import Middleware
-from typing_extensions import Self
+from openghg.objectstore.metastore._tiny_db import BucketKeyStorage, MultiJSONStorage, SafetyCachingMiddleware
+from openghg.types._errors import ObjectStoreError
 
 
 def get_metakey(data_type: str) -> str:
@@ -59,168 +60,149 @@ def get_metakey(data_type: str) -> str:
     return f"{result['_root']}/uuid/{result['_uuid']}/metastore"
 
 
-class BucketKeyStorage(tinydb.Storage):
-    """Custom TinyDB storage class.
+def get_metastore_path(bucket: str, data_type: str) -> Path:
+    from openghg.objectstore import get_object_data_path, get_readable_buckets
 
-    Uses methods in `_local_store` module to read/write files via bucket and key.
+    key = get_metakey(data_type)
+
+    bucket = get_readable_buckets().get(bucket, bucket)
+
+    try:
+        path = get_object_data_path(bucket, key)
+    except ObjectStoreError as e:
+        raise ObjectStoreError(f"No data of type {data_type} in store {bucket}.") from e
+    else:
+        return path
+
+
+def get_metastore_paths(
+    *bucket_data_type_pairs: tuple[str, str],
+    suppress_object_store_errors: bool = False,
+) -> dict[str, Path]:
+    if not bucket_data_type_pairs:
+        return {}
+
+    def make_key(pair: tuple[str, str]) -> str:
+        return "__".join(pair)
+
+    if not suppress_object_store_errors:
+        return {make_key(pair): get_metastore_path(*pair) for pair in bucket_data_type_pairs}
+
+    result = {}
+    for pair in bucket_data_type_pairs:
+        with contextlib.suppress(ObjectStoreError):
+            result[make_key(pair)] = get_metastore_path(*pair)
+    return result
+
+
+@contextmanager
+def _open_metastores(
+    updater: Callable[[str, int, dict], None] | None = None, **json_info: str | bytes | Path
+) -> Generator[TinyDBMetaStore, None, None]:
+    """Context manager for TinyDBMetaStore based on OpenGHG v<=6.2 set-up for keys
+    and TinyDB.
+
+    Args:
+        **json_info: mapping of source names to json path or json str/bytes.
+
+    Yields:
+        ClassicMetaStore instance.
     """
-
-    def __init__(self, bucket: str, key: str, mode: Literal["r", "rw"]) -> None:
-        """Create BucketKeyStorage object.
-
-        Args:
-            bucket: path to object store bucket (as string)
-            key: metastore key
-            mode: "r" for read-only, "rw" for read/write
-
-        Returns:
-            None
-        """
-        valid_modes = ("r", "rw")
-        if mode not in valid_modes:
-            raise ValueError(f"Invalid mode, please choose one of {valid_modes}.")
-
-        self._key = key
-        self._bucket = bucket
-        self._mode = mode
-
-    def read(self) -> dict | None:
-        """Read data from database.
-
-        Returns:
-            Dictionary version of JSON database, or None if database has
-            not been initialised. (Returning None is required by the TinyDB
-            interface.)
-        """
-        key = self._key
-
-        if not exists(bucket=self._bucket, key=key):
-            return None
-
-        data = get_object(bucket=self._bucket, key=self._key)
-
-        try:
-            json_data: dict = json.loads(data)
-            return json_data
-        except json.JSONDecodeError:
-            return None
-
-    def write(self, data: dict) -> None:
-        """Write data to metastore.
-
-        Args:
-            data: dictonary of data to add
-
-        Returns:
-            None
-
-        Raises:
-            MetastoreError if metastore opened in read-only mode.
-        """
-        if self._mode == "r":
-            raise MetastoreError("Cannot write to metastore in read-only mode.")
-
-        key = self._key
-        set_object_from_json(bucket=self._bucket, key=key, data=data)
-
-    def close(self) -> None:
-        pass
+    with tinydb.TinyDB(storage=MultiJSONStorage, updater=updater, **json_info) as db:
+        metastore = TinyDBMetaStore(database=db)
+        yield metastore
 
 
-class SafetyCachingMiddleware(Middleware):
-    """Middleware that caches changes to the database, and writes
-    these changes when the database is closed. Changes are only written
-    if the underlying file has not changed. (The underlying file is the
-    persistent record of the database that is read in by the storage class.)
+@contextmanager
+def open_multi_metastore(
+    buckets: str | list[str] | None = None,
+    data_types: str | list[str] | None = None,
+    bucket_data_type_pairs: tuple[str, str] | list[tuple[str, str]] | None = None,
+    suppress_object_store_errors: bool = False,
+) -> Generator[TinyDBMetaStore, None, None]:
+    # if given specific pairs, use these
+    if bucket_data_type_pairs is not None:
+        if not isinstance(bucket_data_type_pairs, list):
+            bucket_data_type_pairs = [bucket_data_type_pairs]
+    else:
+        if buckets is None:
+            buckets = list(get_readable_buckets().keys())
+        elif isinstance(buckets, str):
+            buckets = [buckets]
 
-    This differs from CachingMiddleware in two ways:
-    1) changes are never written before closing the database, whereas
-    CachingMiddleware will write after 1000 changes by default.
+        if data_types is None:
+            from openghg.store.spec._specification import define_data_types
 
-    2) CachingMiddleware does not check if the underlying file
-    has changed since it was first accessed by the storage class.
-    """
+            data_types = list(define_data_types())
+        elif isinstance(data_types, str):
+            data_types = [data_types]
 
-    def __init__(self, storage_cls: type[tinydb.Storage]) -> None:
-        """Follows the standard pattern for middleware.
+        bucket_data_type_pairs = [(bucket, dtype) for bucket in buckets for dtype in data_types]
 
-        Args:
-            storage_cls: tinydb storage class to wrap with Middleware
-        Returns:
-            None
-        """
-        super().__init__(storage_cls)
-        self.cache = None  # in-memory version of database
-        self.database_hash = None  # hash taken when database first read
-        self.writes_made = False  # flag to check if writes made
+    json_info = get_metastore_paths(
+        *bucket_data_type_pairs, suppress_object_store_errors=suppress_object_store_errors
+    )
 
-    def read(self):
-        """Read the database from the cache, if present, otherwise load
-        the database from the underlying storage and save a hash of the result.
-        """
-        if self.cache is None:
-            self.cache = self.storage.read()
-            self.database_hash = hash_string(str(self.cache))
+    def updater(name: str, doc_id: int, doc: dict) -> None:
+        bucket_name, dtype = name.split("__")
+        bucket = get_readable_buckets().get(bucket_name, bucket_name)  # try to get path
 
-        return self.cache
+        if len(bucket_data_type_pairs) == 1:
+            doc.update({"object_store": bucket})
+        else:
+            # make unique identifier
+            multi_uuid = f"{name}__{doc['uuid']}"
+            doc.update(
+                {
+                    "object_store": bucket,
+                    "data_type": dtype,
+                    "object_store_name": bucket_name,
+                    "multi_uuid": multi_uuid,
+                }
+            )
 
-    def write(self, data):
-        """Store data in the cache.
-
-        Args:
-            data: data to store (this is used internally by TinyDB)
-        """
-        self.cache = data
-        self.writes_made = True
-
-    def close(self):
-        """Close the database. If writes have been made, and the underlying
-        file has not changed, writes will be saved to disk at this point.
-
-        Raises: MetaStoreError if writes have been made and the underlying file *has* been changed.
-        """
-        if self.writes_made:
-            # we know that the cache is a dictionary of dictionaries
-            self.cache = cast(dict[str, dict[str, Any]], self.cache)
-
-            # check if stored hash matches current hash
-            if self.database_hash == hash_string(str(self.storage.read())):
-                # if underlying file not changed, write data
-                self.storage.write(self.cache)
-            else:
-                raise MetastoreError(
-                    "Could not write to object store: object store modified while write in progress."
-                )
-
-        # if close is called explicitly, rather than through a context manager,
-        # then the cache should be empty, otherwise if the metastore instance is reused
-        # it won't reflect the actual state of the metastore. (This is an edge case.)
-        self.cache = None
-        self.writes_made = False
-
-        # let underlying storage clean up
-        self.storage.close()
+    with _open_metastores(updater=updater, **json_info) as metastore:
+        yield metastore
 
 
 @contextmanager
 def open_metastore(
-    bucket: str, data_type: str, mode: Literal["r", "rw"] = "rw"
+    bucket: str, data_type: str | None = None, mode: Literal["r", "rw"] = "rw"
 ) -> Generator[TinyDBMetaStore, None, None]:
     """Context manager for TinyDBMetaStore based on OpenGHG v<=6.2 set-up for keys
     and TinyDB.
 
     Args:
         bucket: path to object store
-        data_type: data type of metastore to open
+        data_type: data type of metastore to open; if None, then mode must be read-only.
         mode: 'rw' for read/write, 'r' for read only
 
     Yields:
         ClassicMetaStore instance.
     """
-    key = get_metakey(data_type)
-    with tinydb.TinyDB(bucket, key, mode, storage=SafetyCachingMiddleware(BucketKeyStorage)) as db:
-        metastore = TinyDBMetaStore(database=db)
-        yield metastore
+    if data_type is None:
+        from openghg.objectstore import get_object
+        from openghg.store.spec import define_data_types
+
+        if mode != "r":
+            warnings.warn("Metastore cannot be opened to write without data type; opening as read-only.")
+
+        json_info = {}
+        for dtype in define_data_types():
+            try:
+                path = get_object(bucket, get_metakey(dtype))
+            except ObjectStoreError:
+                pass
+            else:
+                json_info[dtype] = path
+
+        with _open_metastores(**json_info) as metastore:
+            yield metastore
+    else:
+        key = get_metakey(data_type)
+        with tinydb.TinyDB(bucket, key, mode, storage=SafetyCachingMiddleware(BucketKeyStorage)) as db:
+            metastore = TinyDBMetaStore(database=db)
+            yield metastore
 
 
 class LockingError(Exception): ...
