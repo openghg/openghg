@@ -989,6 +989,63 @@ def test_modelled_baseline_ch4(model_scenario_ch4_dummy, footprint_dummy, bc_ch4
     assert np.allclose(modelled_baseline, expected_modelled_baseline)
 
 
+def test_plot_comparison_boundary_conditions_reindex_and_dequantify(model_scenario_ch4_dummy, monkeypatch):
+    """Check boundary-condition baseline is aligned and plotted as plain numeric values."""
+    from pint import Quantity
+    import plotly.graph_objects as go
+
+    mf_time = pd.date_range("2012-01-01T00:00:00", periods=2, freq="h")
+    bc_time = pd.date_range("2012-01-01T00:20:00", periods=2, freq="h")
+
+    modelled_obs = xr.Dataset({"mf_mod": ("time", [1.0, 2.0])}, coords={"time": mf_time})
+    modelled_obs["mf_mod"].attrs["units"] = "1e-9"
+
+    modelled_baseline = xr.Dataset({"bc_mod": ("time", [100.0, 1000.0])}, coords={"time": bc_time})
+    modelled_baseline["bc_mod"].attrs["units"] = "1e-9"
+
+    monkeypatch.setattr(model_scenario_ch4_dummy, "calc_modelled_obs", lambda *args, **kwargs: modelled_obs)
+    monkeypatch.setattr(
+        model_scenario_ch4_dummy, "calc_modelled_baseline", lambda *args, **kwargs: modelled_baseline
+    )
+    monkeypatch.setattr(model_scenario_ch4_dummy.obs, "plot_timeseries", lambda *args, **kwargs: go.Figure())
+
+    fig = model_scenario_ch4_dummy.plot_comparison(baseline="boundary_conditions")
+    model_trace = fig.data[-1]
+    reindexed_baseline = modelled_baseline["bc_mod"].reindex(time=modelled_obs["time"], method="nearest")
+
+    np.testing.assert_array_equal(reindexed_baseline.time.values, mf_time.values)
+    np.testing.assert_allclose(reindexed_baseline.values, [100.0, 1000.0])
+    np.testing.assert_allclose(model_trace.y, modelled_obs["mf_mod"].values + reindexed_baseline.values)
+    assert not isinstance(model_trace.y, Quantity)
+    assert isinstance(np.asarray(model_trace.y)[0], np.number)
+    assert not hasattr(model_trace.y[0], "units")
+
+
+def test_plot_comparison_percentile_dequantifies_for_plotly(model_scenario_ch4_dummy, monkeypatch):
+    """Check percentile baseline path provides plain numeric values to Plotly."""
+    from pint import Quantity
+    import plotly.graph_objects as go
+
+    time = pd.date_range("2012-01-01T00:00:00", periods=2, freq="h")
+    modelled_obs = xr.Dataset({"mf_mod": ("time", [1.0, 2.0])}, coords={"time": time})
+    modelled_obs["mf_mod"].attrs["units"] = "1e-9"
+
+    monkeypatch.setattr(model_scenario_ch4_dummy, "calc_modelled_obs", lambda *args, **kwargs: modelled_obs)
+    monkeypatch.setattr(model_scenario_ch4_dummy.obs, "plot_timeseries", lambda *args, **kwargs: go.Figure())
+
+    fig = model_scenario_ch4_dummy.plot_comparison(baseline="percentile")
+    model_trace = fig.data[-1]
+    percentile_value = model_scenario_ch4_dummy.obs.data["mf"].quantile(1.0, dim="time").item()
+
+    assert np.all(np.isfinite(model_trace.y))
+    assert percentile_value == np.max(model_scenario_ch4_dummy.obs.data["mf"].values)
+    assert np.all(np.asarray(model_trace.y) >= percentile_value)
+    assert np.all(np.asarray(model_trace.y) > modelled_obs["mf_mod"].values)
+    assert not isinstance(model_trace.y, Quantity)
+    assert isinstance(np.asarray(model_trace.y)[0], np.number)
+    assert not hasattr(model_trace.y[0], "units")
+
+
 def test_bc_sensitivity_ch4(model_scenario_ch4_dummy):
     """Check that bc sensitivity for each NESW curtain is available."""
     bc_sensitivity = model_scenario_ch4_dummy.calc_modelled_baseline(output_sensitivity=True)

@@ -1534,16 +1534,20 @@ class ModelScenario:
                 y_baseline = self.calc_modelled_baseline(
                     resample_to=resample_to, platform=platform, cache=cache, recalculate=recalculate
                 ).bc_mod
+                # Align baseline timestamps to modelled observation timestamps before addition.
+                y_baseline = y_baseline.reindex(time=y_data.time, method="nearest")
                 y_data = (
                     y_data.pint.quantify() + y_baseline.pint.quantify()
                 )  # quantify to do unit aware calculation
-                y_data = y_data.pint.to(self.units)  # convert to same units as obs
+                # Dequantify after unit conversion so Plotly receives plain numeric values.
+                y_data = y_data.pint.to(self.units).pint.dequantify()  # convert to same units as obs
             else:
                 logger.warning("Unable to calculate baseline from boundary conditions")
         elif baseline == "percentile":
             mf = obs.data["mf"]
             y_baseline = mf.quantile(1.0, dim="time")
-            y_data = y_data.pint.quantify() + y_baseline.pint.quantify()
+            # Dequantify after unit-aware calculation so Plotly receives plain numeric values.
+            y_data = (y_data.pint.quantify() + y_baseline.pint.quantify()).pint.dequantify()
 
         fig.add_trace(go.Scatter(x=x_data, y=y_data, mode="lines", name=label))
 
