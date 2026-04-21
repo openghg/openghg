@@ -238,5 +238,5 @@ def fp_x_flux_time_resolved(
     fp_x_flux = (flux_high_freq.pint.quantify() * fp_time_resolved.pint.quantify()).sum(
         "H_back"
     ) + fp_x_flux_residual
-    
+
     return cast(xr.DataArray, fp_x_flux.pint.dequantify())

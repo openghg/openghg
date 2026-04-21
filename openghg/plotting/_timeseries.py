@@ -160,7 +160,7 @@ def _plot_single_timeseries(
         logger.warning("'calibration_scale' not found in metadata.")
         existing_calibration_scale = ""
         metadata["calibration_scale"] = existing_calibration_scale
-        
+
     if "satellite" in metadata:
         satellite = metadata["satellite"]
         inlet = "column"
