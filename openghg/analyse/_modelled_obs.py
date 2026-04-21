@@ -234,9 +234,9 @@ def fp_x_flux_time_resolved(
 
     # create high frequency flux (resampled to gcd of footprint time and H_back frequencies) with H_back dim
     flux_high_freq = _make_high_freq_flux(flux, fp)
-
+    flux_high_freq = flux_high_freq.reindex({"time": fp_time_resolved.time}, method="ffill")
     fp_x_flux = (flux_high_freq.pint.quantify() * fp_time_resolved.pint.quantify()).sum(
         "H_back"
     ) + fp_x_flux_residual
-
+    
     return cast(xr.DataArray, fp_x_flux.pint.dequantify())
