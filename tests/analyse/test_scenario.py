@@ -238,6 +238,26 @@ def test_plot_comparison(model_scenario_co2):
     assert fig.data[1].name == "Modelled CO2: natural-rtot"
 
 
+def test_plot_comparison_uses_mf_mod_high_res(model_scenario_co2, monkeypatch):
+    """plot_comparison should use mf_mod_high_res data when available."""
+    model_scenario = model_scenario_co2.get("scenario_co2")
+    time = pd.date_range("2014-07-01", periods=3, freq="h")
+    modelled_obs = xr.Dataset(
+        {
+            "mf_mod_high_res": ("time", np.array([100.0, 200.0, 300.0])),
+        },
+        coords={"time": time},
+    )
+
+    monkeypatch.setattr(model_scenario, "calc_modelled_obs", lambda **kwargs: modelled_obs)
+
+    fig = model_scenario.plot_comparison(baseline=None)
+
+    assert fig is not None
+    modelled_trace = next(trace for trace in fig.data if trace.name == "Modelled CO2: natural-rtot")
+    np.testing.assert_allclose(np.asarray(modelled_trace.y), modelled_obs["mf_mod_high_res"].values)
+
+
 def test_scenario_flux_extend_co2():
     """
     Check ModelScenario can extract full date range of flux values for a given
