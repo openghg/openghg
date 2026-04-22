@@ -254,7 +254,9 @@ def test_plot_comparison_uses_mf_mod_high_res(model_scenario_co2, monkeypatch):
     fig = model_scenario.plot_comparison(baseline=None)
 
     assert fig is not None
-    modelled_trace = next(trace for trace in fig.data if trace.name == "Modelled CO2: natural-rtot")
+    modelled_traces = [trace for trace in fig.data if trace.name == "Modelled CO2: natural-rtot"]
+    assert modelled_traces, "Expected modelled CO2 trace was not found in plot output."
+    modelled_trace = modelled_traces[0]
     np.testing.assert_allclose(np.asarray(modelled_trace.y), modelled_obs["mf_mod_high_res"].values)
 
 
