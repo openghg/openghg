@@ -184,8 +184,8 @@ def _make_high_freq_flux(flux: xr.DataArray, fp: xr.DataArray | xr.Dataset) -> x
     flux_high_freq = _make_hf_flux_rolling_avg_array(flux_high_freq, fp)
 
     # reindex to align with fp time coordinates (after creating rolling windows to avoid NaN values at start of time series)
-    flux_high_freq = flux_high_freq.reindex({"time": fp.time}, method="ffill")
-    
+    flux_high_freq = flux_high_freq.reindex({"time": fp.time}, method=None)
+
     flux_high_freq.attrs["units"] = flux.attrs.get("units")
 
     return flux_high_freq
@@ -237,7 +237,7 @@ def fp_x_flux_time_resolved(
 
     # create high frequency flux (resampled to gcd of footprint time and H_back frequencies) with H_back dim
     flux_high_freq = _make_high_freq_flux(flux, fp)
-    
+
     fp_x_flux = (flux_high_freq.pint.quantify() * fp_time_resolved.pint.quantify()).sum(
         "H_back"
     ) + fp_x_flux_residual
