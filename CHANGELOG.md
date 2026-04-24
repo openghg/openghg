@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed unit parsing ambiguities by keeping the Pint registry case-sensitive for SI abbreviations and adding explicit case-variant aliases for coordinate and time units (e.g. `Degrees_North`, `Hours`). [PR #1599](https://github.com/openghg/openghg/pull/1599)
 - Fixed `convert_to_slice` to use `abs(input)` when computing the relative tolerance range, ensuring that negative inlet values (eg. for sites below sea level) are correctly matched during data retrieval. [PR #1605](https://github.com/openghg/openghg/pull/1605)
 -Fixed "xarray fails to decode time" by using pandas datetime conversion and storing as np.datetime64[ns].[PR #1608](https://github.com/openghg/openghg/pull/1608)
+- Fixed handling of irregular fp time reindexing and missing "calibration_scale", also added the ability to detect "mf_mod_high_res"  for plot_comparison.[PR #1611](https://github.com/openghg/openghg/pull/1611)
 
 ### Added
 
