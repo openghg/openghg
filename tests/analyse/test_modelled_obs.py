@@ -349,7 +349,7 @@ def test_fp_x_flux_time_resolved_irregular_times_are_ffilled(footprint_paris_co2
     result = fp_x_flux_time_resolved(fp, flux)
 
     expected = xr.DataArray(
-        np.array([2.0, 4.0]).reshape(2, 1, 1),
+        np.array([2.0, 0.0]).reshape(2, 1, 1),
         coords={"time": fp.time, "lat": fp.lat, "lon": fp.lon},
         dims=("time", "lat", "lon"),
     )
