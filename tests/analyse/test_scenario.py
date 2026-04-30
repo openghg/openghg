@@ -918,13 +918,10 @@ def test_footprints_data_merge_without_obs_resample_invalidates_cache(
 ):
     """Changing resample_to without obs should recalculate cached modelled outputs."""
     model_scenario = ModelScenario(obs=None, footprint=footprint_dummy, flux=flux_ch4_dummy, bc=bc_ch4_dummy)
-    expected_scenario = ModelScenario(
-        obs=None, footprint=footprint_dummy, flux=flux_ch4_dummy, bc=bc_ch4_dummy
-    )
 
     model_scenario.footprints_data_merge(resample_to="coarsest")
     resampled_dataset = model_scenario.footprints_data_merge(resample_to="12H")
-    expected_dataset = expected_scenario.footprints_data_merge(resample_to="12H", recalculate=True)
+    expected_dataset = model_scenario.footprints_data_merge(resample_to="12H", recalculate=True)
 
     assert model_scenario.modelled_obs is not None
     assert model_scenario.modelled_baseline is not None

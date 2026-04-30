@@ -1026,8 +1026,6 @@ class ModelScenario:
         except AttributeError:
             raise ValueError(f"Did not recognise input for {param}")
 
-        prev_resample_to = parameter.attrs.get("resample_to") if parameter is not None else None
-
         # Check if cached modelled observations exist
         # if self.modelled_obs is None or recalculate:
         if parameter is None or recalculate:
@@ -1038,7 +1036,7 @@ class ModelScenario:
                 )
             else:
                 self.scenario = self._check_footprint_resample(resample_to)
-        elif prev_resample_to != str(resample_to):
+        elif parameter.attrs.get("resample_to") != str(resample_to):
             # Check if this previous resample period matches input value
             # - if not (or explicit recalculation requested), recreate scenario
             # - if so return cached modelled observations
