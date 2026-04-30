@@ -1026,6 +1026,8 @@ class ModelScenario:
         except AttributeError:
             raise ValueError(f"Did not recognise input for {param}")
 
+        prev_resample_to = parameter.attrs.get("resample_to") if parameter is not None else None
+
         # Check if cached modelled observations exist
         # if self.modelled_obs is None or recalculate:
         if parameter is None or recalculate:
@@ -1036,24 +1038,14 @@ class ModelScenario:
                 )
             else:
                 self.scenario = self._check_footprint_resample(resample_to)
-        elif self.obs is not None:
-            # Check previous resample_to input for cached data
-            # prev_resample_to = self.modelled_obs.attrs.get("resample_to")
-            prev_resample_to = parameter.attrs.get("resample_to")
-
+        elif prev_resample_to != str(resample_to):
             # Check if this previous resample period matches input value
             # - if not (or explicit recalculation requested), recreate scenario
             # - if so return cached modelled observations
-            if prev_resample_to != str(resample_to) or recalculate:
+            if self.obs is not None:
                 self.combine_obs_footprint(resample_to, platform=platform, cache=True)
             else:
-                # return self.modelled_obs
-                return False
-        elif recalculate:
-            # Recalculate based on footprint data if obs not present
-            self.scenario = self._check_footprint_resample(resample_to)
-
-        # TODO: Add check for matching sources and recalculate otherwise
+                self.scenario = self._check_footprint_resample(resample_to)
         else:
             # Return cached modelled observations if explicit recalculation not requested
             # return self.modelled_obs
