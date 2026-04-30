@@ -22,6 +22,7 @@ class ColumnTypes(Enum):
 
     OPENGHG = "OPENGHG"
     TCCON = "TCCON"
+    GEMINI = "GEMINI"
 
 
 class ColumnSources(Enum):
