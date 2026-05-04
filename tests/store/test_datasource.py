@@ -535,6 +535,24 @@ def test_auto_overlap_does_not_create_orphan_version(datasource, datasets_with_o
     assert not d._store.version_exists("v2")
 
 
+def test_combine_overlapping_new_version_uses_new_version_date_keys(datasource, datasets_with_overlap):
+    data_a, data_b, _ = datasets_with_overlap
+    attributes = create_attributes()
+
+    d = datasource
+
+    d.add_data(metadata=attributes, data=data_a, data_type="surface", new_version=False)
+    d.add_data(metadata=attributes, data=data_b, data_type="surface", if_exists="combine")
+
+    assert d.latest_version == "v2"
+    assert d.all_data_keys()["v1"] == [
+        "2012-01-01-00:00:00+00:00_2012-01-31-00:00:59+00:00",
+    ]
+    assert d.all_data_keys()["v2"] == [
+        "2012-01-01-00:00:00+00:00_2012-04-30-00:00:00+00:00",
+    ]
+
+
 def test_add_data_with_overlap_check_stored_dataset(datasource, datasets_with_overlap):
     """Check that we can add data with overlaps."""
     data_a, data_b, data_c = datasets_with_overlap

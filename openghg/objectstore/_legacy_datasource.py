@@ -367,7 +367,7 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         elif plan.action == "upsert":
             logger.info("Updating store by combining new data with existing.")
             self._store.update(version=version_str, dataset=data, compressor=compressor, filters=filters)
-            date_keys = [get_representative_daterange_str(self.get_data())]
+            date_keys = [get_representative_daterange_str(self.get_data(version=version_str))]
         else:
             raise DataOverlapError(
                 "Unable to add new data, because it overlaps with current data and `if_exists` is set to 'auto'. "
