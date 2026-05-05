@@ -24,7 +24,7 @@ from ._datasource import AbstractDatasource, DatasourceFactory
 logger = logging.getLogger("openghg.objectstore")
 logger.setLevel(logging.DEBUG)
 
-__all___ = ["Datasource"]
+__all__ = ["Datasource"]
 
 
 TimedDataAction = Literal["insert", "copy_insert", "replace", "upsert", "error_overlap"]
@@ -330,9 +330,13 @@ class Datasource(AbstractDatasource[xr.Dataset]):
             data = data.drop_duplicates(time_coord, keep="first")
 
         has_existing_data = bool(self._store)
-        overlapping = has_existing_data and self._store._vzds._overlap_determiner.has_overlaps(
-            data.get_index(self._store._vzds.append_dim)
-        )
+        if has_existing_data:
+            self._store._vzds.checkout_version(self._latest_version)
+            overlapping = self._store._vzds._overlap_determiner.has_overlaps(
+                data.get_index(self._store._vzds.append_dim)
+            )
+        else:
+            overlapping = False
         plan = plan_timed_data_update(
             if_exists=if_exists,
             new_version=new_version,
@@ -357,8 +361,13 @@ class Datasource(AbstractDatasource[xr.Dataset]):
             else:
                 date_keys = [*current_date_keys, new_daterange_str]
         elif plan.action == "copy_insert":
-            self._store._vzds.create_version(version_str, checkout=True, copy_current=True)
-            self._store.add(version=version_str, dataset=data, compressor=compressor, filters=filters)
+            self._store.add(
+                version=version_str,
+                dataset=data,
+                compressor=compressor,
+                filters=filters,
+                copy_current=True,
+            )
             date_keys = [*current_date_keys, new_daterange_str]
         elif plan.action == "replace":
             logger.info("Updating store to include new added data only.")

@@ -502,6 +502,25 @@ def test_combine_nonoverlapping_new_version_copies_current_data(datasource, data
         assert ds_latest.equals(xr.concat([data_a, data_b], dim="time"))
 
 
+def test_combine_nonoverlapping_read_only_does_not_create_version(datasource, datasets_with_gaps):
+    data_a, data_b, _ = datasets_with_gaps
+    attributes = create_attributes()
+
+    d = datasource
+
+    d.add_data(metadata=attributes, data=data_a, data_type="surface", new_version=False)
+    d._store._mode = "r"
+
+    try:
+        with pytest.raises(PermissionError):
+            d.add_data(metadata=attributes, data=data_b, data_type="surface", if_exists="combine")
+
+        assert d.latest_version == "v1"
+        assert not d._store.version_exists("v2")
+    finally:
+        d._store._mode = "rw"
+
+
 def test_new_nonoverlapping_version_does_not_mutate_previous_date_keys(datasource, datasets_with_gaps):
     data_a, data_b, _ = datasets_with_gaps
     attributes = create_attributes()
@@ -551,6 +570,24 @@ def test_combine_overlapping_new_version_uses_new_version_date_keys(datasource, 
     assert d.all_data_keys()["v2"] == [
         "2012-01-01-00:00:00+00:00_2012-04-30-00:00:00+00:00",
     ]
+
+
+def test_overlap_detection_uses_latest_version_after_getting_old_version(datasource, datasets_with_gaps):
+    data_a, data_b, data_c = datasets_with_gaps
+    attributes = create_attributes()
+
+    d = datasource
+
+    d.add_data(metadata=attributes, data=data_a, data_type="surface", new_version=False)
+    d.add_data(metadata=attributes, data=data_b, data_type="surface", if_exists="combine")
+
+    d.get_data(version="v1")
+    d.add_data(metadata=attributes, data=data_c, data_type="surface", new_version=False)
+
+    assert d.latest_version == "v2"
+
+    with d.get_data(version="latest").compute() as ds_latest:
+        assert ds_latest.equals(xr.concat([data_a, data_b, data_c], dim="time"))
 
 
 def test_add_data_with_overlap_check_stored_dataset(datasource, datasets_with_overlap):
