@@ -93,8 +93,14 @@ def test_read_invalid_instrument_raises():
         )
 
 
-def test_missing_species_attribute_raises():
-    dataset = xr.Dataset(attrs={"instrument_type": "gcmd", "instrument": "gcmd"})
+@pytest.mark.parametrize(
+    "species_attr", [pytest.param(None, id="missing"), pytest.param(123, id="non-string")]
+)
+def test_missing_species_attribute_raises(species_attr):
+    attrs = {"instrument_type": "gcmd", "instrument": "gcmd"}
+    if species_attr is not None:
+        attrs["species"] = species_attr
+    dataset = xr.Dataset(attrs=attrs)
 
     with pytest.raises(ValueError, match="No 'species' attribute found"):
         parse_agage(data=dataset, site="THD", network="agage")

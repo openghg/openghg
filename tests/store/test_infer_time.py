@@ -125,10 +125,19 @@ def test_use_input_period(time_varies):
 
 def test_infer_period_requires_time_unit(time_varies, monkeypatch):
     """Check a missing time unit raises a clear error before building a DateOffset."""
-    monkeypatch.setattr("openghg.util.parse_period", lambda period: TimePeriod(1, None))
+    called = False
 
-    with pytest.raises(ValueError, match="Unable to infer time unit"):
+    def parse_period_stub(period):
+        nonlocal called
+        called = True
+        return TimePeriod(1, None)
+
+    monkeypatch.setattr("openghg.util.parse_period", parse_period_stub)
+
+    with pytest.raises(ValueError, match="Unable to infer a time unit"):
         infer_date_range(time_varies, continuous=False, period="1 month")
+
+    assert called
 
 
 def test_update_zero_dim():
