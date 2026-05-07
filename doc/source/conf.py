@@ -254,7 +254,7 @@ def setup(app):
             def run(self):
                 clazz = self.arguments[0]
                 try:
-                    (module_name, class_name) = clazz.rsplit(".", 1)
+                    module_name, class_name = clazz.rsplit(".", 1)
                     m = __import__(module_name, globals(), locals(), [class_name])
                     c = getattr(m, class_name)
                     if "methods" in self.options:

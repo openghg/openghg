@@ -8,6 +8,7 @@ from pandas import Timestamp
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
 
+
 def test_parse_gemini():
     """
     Test file in GEMINI format (variables and attributes) can be

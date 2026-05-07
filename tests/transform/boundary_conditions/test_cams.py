@@ -110,9 +110,7 @@ def _write_mock_co2_cams_file(tmp_path, filename: str) -> xr.Dataset:
     Returns:
         Dataset that was written to disk.
     """
-    time = np.array(
-        ["2022-01-01T00:00", "2022-01-01T03:00", "2022-01-01T06:00"], dtype="datetime64[ns]"
-    )
+    time = np.array(["2022-01-01T00:00", "2022-01-01T03:00", "2022-01-01T06:00"], dtype="datetime64[ns]")
     lat = np.array([-1.0, 0.0, 1.0, 2.0], dtype=float)
     lon = np.array([-1.0, 0.0, 1.0, 2.0], dtype=float)
     level = np.array([0, 1], dtype=int)
