@@ -179,6 +179,8 @@ def infer_date_range(
         # Create time offset, using inferred offset
         start_date = timestamp_tzaware(time[0].values)
         if time_value is not None:
+            if time_unit is None:
+                raise ValueError("Unable to infer time unit for a non-null time period value.")
             time_delta = DateOffset(**{time_unit: time_value})
             end_date = timestamp_tzaware(time[-1].values) + time_delta - Timedelta(seconds=1)
         else:

@@ -2,6 +2,7 @@ import logging
 
 import pandas as pd
 import pytest
+import xarray as xr
 from helpers import check_cf_compliance, get_surface_datapath
 from openghg.standardise.surface import parse_agage
 
@@ -90,6 +91,13 @@ def test_read_invalid_instrument_raises():
             instrument="fish",
             network="agage",
         )
+
+
+def test_missing_species_attribute_raises():
+    dataset = xr.Dataset(attrs={"instrument_type": "gcmd", "instrument": "gcmd"})
+
+    with pytest.raises(ValueError, match="No 'species' attribute found"):
+        parse_agage(data=dataset, site="THD", network="agage")
 
 
 def test_read_variabilities():
