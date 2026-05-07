@@ -42,6 +42,7 @@ class BaseStore:
     _data_type = ""
     _root = "root"
     _uuid = "root_uuid"
+    _metakey: str = ""
 
     def __init__(self, bucket: str) -> None:
         # from openghg.objectstore import get_object_from_json, exists
@@ -52,8 +53,6 @@ class BaseStore:
         self._file_hashes: dict[str, str] = {}
         # Hashes of previously stored data from other data platforms
         self._retrieved_hashes: dict[str, dict] = {}
-        # Where we'll store this object's metastore
-        self._metakey = ""
 
         if exists(bucket=bucket, key=self.key()):
             data = get_object_from_json(bucket=bucket, key=self.key())
