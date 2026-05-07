@@ -179,7 +179,7 @@ class ZarrStore(Store, Generic[ZST]):
                 data = self._overlap_determiner.select_overlaps(data, self.append_dim)
 
             # nothing to update
-            if not bool(data):
+            if not bool(data) or data.sizes.get(self.append_dim) == 0:
                 logger.warning("No data to update with.")
                 return None
 
