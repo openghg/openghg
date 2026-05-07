@@ -127,7 +127,7 @@ def test_infer_period_requires_time_unit(time_varies, monkeypatch):
     """Check a missing time unit raises a clear error before building a DateOffset."""
     called = False
 
-    def parse_period_stub(period):
+    def parse_period_stub(_period):
         nonlocal called
         called = True
         return TimePeriod(1, None)
