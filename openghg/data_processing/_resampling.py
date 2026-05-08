@@ -28,12 +28,13 @@ from collections import defaultdict
 from collections.abc import Callable, Sequence
 from functools import partial, wraps
 import logging
-from typing import Any, Literal
+from typing import Any, Concatenate, Literal
 
 import numpy as np
 import pandas as pd
 import xarray as xr
 from openghg.util import Registry
+from typing_extensions import ParamSpec
 
 from ._attrs import rename, update_attrs
 from ._xarray_helpers import xr_sqrt
@@ -45,7 +46,15 @@ logger = logging.getLogger("openghg.data_processing")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-def add_averaging_attrs(func: Callable[..., xr.Dataset]) -> Callable[..., xr.Dataset]:
+# somewhat complicated typing for decorator:
+# we need to use `ParamSpec` to represent *args and **kwargs
+P = ParamSpec("P")
+
+# resampling functions take: a dataset, an averaging period (str), and possibly *args and **kwargs
+ResampleFunctionType = Callable[Concatenate[xr.Dataset, str, P], xr.Dataset]  # type: ignore[valid-type]
+
+
+def add_averaging_attrs(func: ResampleFunctionType) -> ResampleFunctionType:
     """Decorator to add averaging attributes to result of resampling function."""
 
     @wraps(func)
@@ -327,7 +336,7 @@ def variability_resample(ds: xr.Dataset, averaging_period: str, fill_zero: bool 
 
 
 # typing for `apply_funcs`
-DatasetOpType = Callable[..., xr.Dataset]
+DatasetOpType = Callable[Concatenate[xr.Dataset, P], xr.Dataset]  # type: ignore[valid-type]
 
 
 def apply_funcs(
