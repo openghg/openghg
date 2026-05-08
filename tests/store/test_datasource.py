@@ -370,7 +370,7 @@ def test_integrity_check(data, bucket, datasource):
     d = Datasource.load(bucket=bucket, uuid=uid)
     d.integrity_check()
 
-    d._store.delete_all()
+    d._store_delete_all()
 
     with pytest.raises(ObjectStoreError):
         d.integrity_check()
@@ -384,7 +384,7 @@ def test_data_version_deletion(data, datasource):
 
     d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
 
-    zarr_keys = set(d._store.keys(version="v1"))
+    zarr_keys = set(d._store_keys(version="v1"))
 
     partial_expected_keys = {
         "ch4/.zarray",
@@ -400,7 +400,7 @@ def test_data_version_deletion(data, datasource):
     assert "v1" not in d._data_keys
 
     with pytest.raises(ZarrStoreError):
-        d._store.keys(version="v1")
+        d._store_keys(version="v1")
 
 
 def test_surface_data_stored_and_dated_correctly(data, datasource):
@@ -509,16 +509,16 @@ def test_combine_nonoverlapping_read_only_does_not_create_version(datasource, da
     d = datasource
 
     d.add_data(metadata=attributes, data=data_a, data_type="surface", new_version=False)
-    d._store._mode = "r"
+    d._mode = "r"
 
     try:
         with pytest.raises(PermissionError):
             d.add_data(metadata=attributes, data=data_b, data_type="surface", if_exists="combine")
 
         assert d.latest_version == "v1"
-        assert not d._store.version_exists("v2")
+        assert not d._version_exists("v2")
     finally:
-        d._store._mode = "rw"
+        d._mode = "rw"
 
 
 def test_new_nonoverlapping_version_does_not_mutate_previous_date_keys(datasource, datasets_with_gaps):
@@ -551,7 +551,7 @@ def test_auto_overlap_does_not_create_orphan_version(datasource, datasets_with_o
 
     assert d.latest_version == "v1"
     assert list(d.all_data_keys()) == ["v1"]
-    assert not d._store.version_exists("v2")
+    assert not d._version_exists("v2")
 
 
 def test_combine_overlapping_new_version_uses_new_version_date_keys(datasource, datasets_with_overlap):
