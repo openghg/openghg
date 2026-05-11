@@ -1266,8 +1266,12 @@ class ModelScenario:
 
         if "fp_HiTRes" in self.scenario:
             fp = self.scenario.fp_HiTRes
-        else:
+        elif "fp_time_resolved" in self.scenario.data_vars:
             fp = self.scenario[["fp_time_resolved", "fp_residual"]]
+        else:
+            return self._calc_modelled_obs_integrated(
+        sources=sources, output_TS=output_TS, output_fpXflux=output_fpXflux
+    )
 
         flux_ds = self.combine_flux_sources(sources)
 
