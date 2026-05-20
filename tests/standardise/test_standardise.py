@@ -1072,7 +1072,7 @@ def test_standardise_agage_using_filepath():
 
     assert retrieved_data is not None
     assert retrieved_data.metadata["instrument"] == "gcmd"
-    assert retrieved_data.metadata["network"] == "agage-private"
+    assert retrieved_data.metadata["network"] == "agage"
     assert retrieved_data.metadata["source_format"] == "agage"
     assert retrieved_data.metadata["site"] == "thd"
 
@@ -1102,7 +1102,7 @@ def test_standardise_agage_using_dataset():
 
     assert retrieved_data is not None
     assert retrieved_data.metadata["instrument"] == "gcmd"
-    assert retrieved_data.metadata["network"] == "agage-private"
+    assert retrieved_data.metadata["network"] == "agage"
     assert retrieved_data.metadata["source_format"] == "agage"
     assert retrieved_data.metadata["site"] == "thd"
 
