@@ -20,9 +20,6 @@ cf_ureg.preprocessors.append(lambda x: unit_mapping.get(x, x))
 # remove spaces from some non-standard units ("per mil", "per meg", etc.)
 cf_ureg.preprocessors.append(lambda x: x.replace("per m", "per_m"))
 
-# Strip descriptive text in parentheses from unit strings
-cf_ureg.preprocessors.append(lambda x: x.split("(")[0].strip() if "(" in x else x)
-
 cf_ureg.define("masl = metres")
 cf_ureg.define("magl = metres")
 
