@@ -299,28 +299,24 @@ def parse_icos_obspack_nc_file(data_info: dict | pd.Series) -> tuple[xr.Dataset,
 
     # Recast "flag" column to decode bytes and update to same dtype as other data
     dataset["flag"].data = decode(dataset["flag"].astype("bytes_"), "utf-8").astype(object)
-    
+
     if "south" in dataset["latitude"].attrs["units"]:
-        logger.warning("latitude units are in relation to south rathern than north, this may mean the sign on the latitude value should be the opposite.")
+        logger.warning(
+            "latitude units are in relation to south rathern than north, this may mean the sign on the latitude value should be the opposite."
+        )
 
     if "west" in dataset["longitude"].attrs["units"]:
-        logger.warning("longitude units are in relation to west rather than east, this may mean the sign on the latitude value should be the opposite.")
+        logger.warning(
+            "longitude units are in relation to west rather than east, this may mean the sign on the latitude value should be the opposite."
+        )
 
-    dataset["altitude"].attrs["comment"] = dataset["altitude"].attrs["comment"] + ". Units are " + dataset["altitude"].attrs["units"]
-    dataset["latitude"].attrs["comment"]  = dataset["latitude"].attrs["comment"] + ". Units are " + dataset["latitude"].attrs["units"]
-    dataset["longitude"].attrs["comment"] = dataset["longitude"].attrs["comment"] + ". Units are " + dataset["longitude"].attrs["units"]
-    dataset["intake_height"].attrs["comment"] = dataset["intake_height"].attrs["comment"] + ". Units are " + dataset["intake_height"].attrs["units"]
-  
-    
-    #TODO actually just add an additional units_comment attribute below doesn't wor
-    #This might be how to do it use attributes.update(add_attributes)
-    dataset["altitude"].attrs["units_comment"] =  dataset["altitude"].attrs["units"]
-    dataset["latitude"].attrs["units_comment"]  =  dataset["latitude"].attrs["units"]
-    dataset["longitude"].attrs["units_comment"] =  dataset["longitude"].attrs["units"]
-    dataset["intake_height"].attrs["units_comment"] =  dataset["intake_height"].attrs["units"]
+    dataset["altitude"].attrs["units_comment"] = dataset["altitude"].attrs["units"]
+    dataset["latitude"].attrs["units_comment"] = dataset["latitude"].attrs["units"]
+    dataset["longitude"].attrs["units_comment"] = dataset["longitude"].attrs["units"]
+    dataset["intake_height"].attrs["units_comment"] = dataset["intake_height"].attrs["units"]
 
-    dataset["altitude"].attrs["units"] = 'masl'
-    dataset["intake_height"].attrs["units"] = 'magl'
+    dataset["altitude"].attrs["units"] = "masl"
+    dataset["intake_height"].attrs["units"] = "magl"
     dataset["obs_flag"].attrs.pop("units", None)
     dataset["assimilation_concerns"].attrs.pop("units", None)
 
@@ -330,10 +326,6 @@ def parse_icos_obspack_nc_file(data_info: dict | pd.Series) -> tuple[xr.Dataset,
     attrs["instrument_data"] = "NA"
 
     attrs["measurement_unit"] = units
-    
-    #TODO: Add warning: At end of retrieve function add a warning 
-    #saying what was stored, stored these files skipped these files. 
-    #Force = True ion need to create a new version
 
     return dataset, attrs
 
@@ -396,14 +388,14 @@ def attributes_requiring_retrieval(
     # instrument_dict = {key: value.lower() for key, value in instrument_dict.items()}
 
     # Measurement type dict includes 'measurement_type'
-    #measurement_type_dict = _data_parsing.retrieve_dobj_measurement_type(species, dobj_meta=dobj_meta)
-   # measurement_type_dict["measurement_type"] = measurement_type_dict["measurement_type"].lower()
+    # measurement_type_dict = _data_parsing.retrieve_dobj_measurement_type(species, dobj_meta=dobj_meta)
+    # measurement_type_dict["measurement_type"] = measurement_type_dict["measurement_type"].lower()
 
     # Collect together retrieved details
     retrieved_attributes_dict.update(data_owners_dict)
     retrieved_attributes_dict.update(references_dict)
     retrieved_attributes_dict.update(instrument_dict)
-   # retrieved_attributes_dict.update(measurement_type_dict)
+    # retrieved_attributes_dict.update(measurement_type_dict)
 
     return retrieved_attributes_dict
 
@@ -974,7 +966,7 @@ def _retrieve_remote_dobj(
         attributes.update(to_store)
 
         attributes["site"] = station_data["id"]
-       # attributes["measurement_type"] = measurement_type
+        # attributes["measurement_type"] = measurement_type
         # TODO: Remove this from general attributes but make sure this is
         # included as a specific value on the appropriate variable.
         attributes["units"] = units
