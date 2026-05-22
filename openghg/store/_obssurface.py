@@ -454,6 +454,8 @@ class ObsSurface(BaseStore):
             except DataOverlapError:
                 data_info = ", ".join(f"{key}={mdd.metadata.get(key)}" for key in required_metakeys)
                 logger.info(f"Skipping data that overlaps existing data:\n\t{data_info}.")
+                logger.warning(f"Include force=True in input arguments if you wish to overwrite this existing data:\n\t{data_info}. Using force_retrieval=True will not overwrite.")
+                #warning.info()
             else:
                 datasource_uuids.extend(datasource_uuid)
 
