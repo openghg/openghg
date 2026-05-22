@@ -18,10 +18,19 @@ def enable_pint_xarray() -> None:
 # convert scientific notation to volume ratios
 unit_mapping = {"1e-6": "ppm", "1e-9": "ppb", "1e-12": "ppt", "1e-15": "ppq", "1e-09": "ppb", "1e-06": "ppm"}
 
+#TODO: make sure value get's minus sign added if south/east or whatever it was
+cf_ureg.preprocessors.append(lambda x: "degree" if "degree" in x else x)
+
 cf_ureg.preprocessors.append(lambda x: unit_mapping.get(x, x))
 
 # remove spaces from some non-standard units ("per mil", "per meg", etc.)
 cf_ureg.preprocessors.append(lambda x: x.replace("per m", "per_m"))
+
+# Strip descriptive text in parentheses from unit strings
+cf_ureg.preprocessors.append(lambda x: x.split("(")[0].strip() if "(" in x else x)
+
+cf_ureg.define("masl = metres")
+cf_ureg.define("magl = metres")
 
 cf_ureg.define("@alias ppm = parts_per_million")  # this works for converting, but not formatting
 cf_ureg.define("ppb = 1e-9 mol/mol = parts_per_billion")
@@ -55,7 +64,6 @@ cf_ureg.define(
 cf_ureg.define(
     "degrees_south = degree = degrees_south = Degrees_south = degrees_S = degreesS = degree_south = degree_S = degreeS"
 )
-
 
 # Invert the unit_mapping to go from cf_xarray pint units back to original strings
 # note that `getattr(cf_ureg, v)` will get the unit corresponding to the string v,
@@ -111,6 +119,7 @@ def assign_units(
     Returns:
         xr.Dataset
     """
+
     data = data.pint.quantify()
 
     if target_units is not None:
