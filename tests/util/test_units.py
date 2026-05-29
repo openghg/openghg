@@ -84,6 +84,14 @@ def test_parts_per(number, abbrev, long):
     # "cf" formatting will use long name
     assert long == f"{converted:cf}"
 
+@pytest.mark.parametrize("unit", ["kg", "Mg", "mg"])
+def test_parse_unit_name_mass_uses_gram(unit):
+    """Mass abbreviations should resolve to gram, not gauss."""
+    parsed = cf_ureg.parse_unit_name(unit)
+
+    assert len(parsed) == 1
+    assert parsed[0][1] == "gram"
+
 
 @pytest.mark.parametrize("unit", ["hour", "hours", "Hour", "Hours", "HOUR", "HOURS"])
 def test_hour_aliases(unit):
@@ -94,19 +102,19 @@ def test_hour_aliases(unit):
 @pytest.mark.parametrize(
     "unit, expected",
     [
-        ("degrees_north", "degree"),
-        ("Degrees_north", "degree"),
-        ("Degrees_North", "degree"),
-        ("DEGREES_NORTH", "degree"),
-        ("degree_north", "degree"),
-        ("Degree_north", "degree"),
-        ("DEGREE_NORTH", "degree"),
-        ("degrees_N", "degree"),
-        ("Degrees_N", "degree"),
-        ("DEGREES_N", "degree"),
-        ("degree_N", "degree"),
-        ("Degree_N", "degree"),
-        ("DEGREE_N", "degree"),
+        ("degrees_north", "degrees_north"),
+        ("Degrees_north", "degrees_north"),
+        ("Degrees_North", "degrees_north"),
+        ("DEGREES_NORTH", "degrees_north"),
+        ("degree_north", "degrees_north"),
+        ("Degree_north", "degrees_north"),
+        ("DEGREE_NORTH", "degrees_north"),
+        ("degrees_N", "degrees_north"),
+        ("Degrees_N", "degrees_north"),
+        ("DEGREES_N", "degrees_north"),
+        ("degree_N", "degrees_north"),
+        ("Degree_N", "degrees_north"),
+        ("DEGREE_N", "degrees_north"),
     ],
 )
 def test_degrees_north_aliases(unit, expected):
@@ -117,19 +125,19 @@ def test_degrees_north_aliases(unit, expected):
 @pytest.mark.parametrize(
     "unit, expected",
     [
-        ("degrees_east", "degree"),
-        ("Degrees_east", "degree"),
-        ("Degrees_East", "degree"),
-        ("DEGREES_EAST", "degree"),
-        ("degree_east", "degree"),
-        ("Degree_east", "degree"),
-        ("DEGREE_EAST", "degree"),
-        ("degrees_E", "degree"),
-        ("Degrees_E", "degree"),
-        ("DEGREES_E", "degree"),
-        ("degree_E", "degree"),
-        ("Degree_E", "degree"),
-        ("DEGREE_E", "degree"),
+        ("degrees_east", "degrees_east"),
+        ("Degrees_east", "degrees_east"),
+        ("Degrees_East", "degrees_east"),
+        ("DEGREES_EAST", "degrees_east"),
+        ("degree_east", "degrees_east"),
+        ("Degree_east", "degrees_east"),
+        ("DEGREE_EAST", "degrees_east"),
+        ("degrees_E", "degrees_east"),
+        ("Degrees_E", "degrees_east"),
+        ("DEGREES_E", "degrees_east"),
+        ("degree_E", "degrees_east"),
+        ("Degree_E", "degrees_east"),
+        ("DEGREE_E", "degrees_east"),
     ],
 )
 def test_degrees_east_aliases(unit, expected):
