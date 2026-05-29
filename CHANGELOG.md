@@ -23,6 +23,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Option to set location of openghg log via an environment variable `OPENGHG_LOG_PATH`. [PR #1607](https://github.com/openghg/openghg/pull/1607)
 - Added the ability to standardise GEMINI data using standardise_column.[PR #1501](https://github.com/openghg/openghg/pull/1501)
 
+### Updated
+
+- Updated dependency versions: `black` (26.5.1), `mypy` (2.1.0), `pre-commit` (4.6.0), `filelock` (3.29.0), `h5netcdf` (1.8.1), `msgpack-types` (0.7.0), `rapidfuzz` (3.14.5), `nbsphinx` (0.9.8), `sphinxcontrib-bibtex` (2.7.0), `types-paramiko`, `types-requests` (2.33.0.20260518). [PR #1623-1632](https://github.com/openghg/openghg/pulls?q=1623+1624+1625+1626+1627+1628+1629+1630+1631+1632)
+
+
 ## [0.18.0] - 2026-02-18
 
 ### Added
