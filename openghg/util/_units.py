@@ -18,8 +18,7 @@ def enable_pint_xarray() -> None:
 # convert scientific notation to volume ratios
 unit_mapping = {"1e-6": "ppm", "1e-9": "ppb", "1e-12": "ppt", "1e-15": "ppq", "1e-09": "ppb", "1e-06": "ppm"}
 
-# TODO: make sure value get's minus sign added if south/east or whatever it was
-cf_ureg.preprocessors.append(lambda x: "degree" if "degree" in x else x)
+cf_ureg.preprocessors.append(lambda x: "degree" if "degree" in x.lower() else x)
 
 cf_ureg.preprocessors.append(lambda x: unit_mapping.get(x, x))
 
