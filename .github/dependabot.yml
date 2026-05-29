@@ -36,8 +36,13 @@ updates:
       prefix: "deps"
       prefix-development: "deps-dev"
       include: "scope"
-    # Group minor and patch updates to reduce PR volume
+    # Group major and minor/patch updates to reduce PR volume and consolidate changes
     groups:
+      major:
+        patterns:
+          - "*"
+        update-types:
+          - "major"
       minor-and-patch:
         patterns:
           - "*"
@@ -60,3 +65,16 @@ updates:
     commit-message:
       prefix: "ci"
       include: "scope"
+    # Group major and minor/patch updates to reduce PR volume and consolidate changes
+    groups:
+      major:
+        patterns:
+          - "*"
+        update-types:
+          - "major"
+      minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
