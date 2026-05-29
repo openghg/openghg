@@ -85,6 +85,7 @@ def test_parts_per(number, abbrev, long):
     assert long == f"{converted:cf}"
 
 
+<<<<<<< HEAD
 @pytest.mark.parametrize("unit", ["kg", "Mg", "mg"])
 def test_parse_unit_name_mass_uses_gram(unit):
     """Mass abbreviations should resolve to gram, not gauss."""
@@ -94,6 +95,8 @@ def test_parse_unit_name_mass_uses_gram(unit):
     assert parsed[0][1] == "gram"
 
 
+=======
+>>>>>>> 950bc702d (fixing test_units.py to align with edits to units.py)
 @pytest.mark.parametrize("unit", ["hour", "hours", "Hour", "Hours", "HOUR", "HOURS"])
 def test_hour_aliases(unit):
     """Hour unit aliases should accept common case variants."""
@@ -103,6 +106,7 @@ def test_hour_aliases(unit):
 @pytest.mark.parametrize(
     "unit, expected",
     [
+<<<<<<< HEAD
         ("degrees_north", "degrees_north"),
         ("Degrees_north", "degrees_north"),
         ("Degrees_North", "degrees_north"),
@@ -116,6 +120,21 @@ def test_hour_aliases(unit):
         ("degree_N", "degrees_north"),
         ("Degree_N", "degrees_north"),
         ("DEGREE_N", "degrees_north"),
+=======
+        ("degrees_north", "degree"),
+        ("Degrees_north", "degree"),
+        ("Degrees_North", "degree"),
+        ("DEGREES_NORTH", "degree"),
+        ("degree_north", "degree"),
+        ("Degree_north", "degree"),
+        ("DEGREE_NORTH", "degree"),
+        ("degrees_N", "degree"),
+        ("Degrees_N", "degree"),
+        ("DEGREES_N", "degree"),
+        ("degree_N", "degree"),
+        ("Degree_N", "degree"),
+        ("DEGREE_N", "degree"),
+>>>>>>> 950bc702d (fixing test_units.py to align with edits to units.py)
     ],
 )
 def test_degrees_north_aliases(unit, expected):
@@ -126,6 +145,7 @@ def test_degrees_north_aliases(unit, expected):
 @pytest.mark.parametrize(
     "unit, expected",
     [
+<<<<<<< HEAD
         ("degrees_east", "degrees_east"),
         ("Degrees_east", "degrees_east"),
         ("Degrees_East", "degrees_east"),
@@ -139,6 +159,21 @@ def test_degrees_north_aliases(unit, expected):
         ("degree_E", "degrees_east"),
         ("Degree_E", "degrees_east"),
         ("DEGREE_E", "degrees_east"),
+=======
+        ("degrees_east", "degree"),
+        ("Degrees_east", "degree"),
+        ("Degrees_East", "degree"),
+        ("DEGREES_EAST", "degree"),
+        ("degree_east", "degree"),
+        ("Degree_east", "degree"),
+        ("DEGREE_EAST", "degree"),
+        ("degrees_E", "degree"),
+        ("Degrees_E", "degree"),
+        ("DEGREES_E", "degree"),
+        ("degree_E", "degree"),
+        ("Degree_E", "degree"),
+        ("DEGREE_E", "degree"),
+>>>>>>> 950bc702d (fixing test_units.py to align with edits to units.py)
     ],
 )
 def test_degrees_east_aliases(unit, expected):
