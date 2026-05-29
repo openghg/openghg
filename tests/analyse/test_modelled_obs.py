@@ -10,7 +10,11 @@ import pytest
 import xarray as xr
 
 from openghg.analyse import ModelScenario
-from openghg.analyse._modelled_obs import time_resolved_and_residual_footprints, _max_h_back
+from openghg.analyse._modelled_obs import (
+    fp_x_flux_time_resolved,
+    time_resolved_and_residual_footprints,
+    _max_h_back,
+)
 from openghg.dataobjects import ObsData
 from openghg.dataobjects._footprint_data import FootprintData
 
@@ -329,6 +333,27 @@ def test_modelled_obs_co2_consistency(model_scenario_co2_dummy, model_scenario_p
     combined_paris = model_scenario_paris_co2_dummy.footprints_data_merge()
 
     xr.testing.assert_equal(combined.mf_mod_high_res, combined_paris.mf_mod_high_res)
+
+
+def test_fp_x_flux_time_resolved_irregular_times_are_ffilled(footprint_paris_co2_dummy, flux_co2_dummy):
+    """High-frequency flux should be forward-filled to irregular fp_time_resolved timestamps."""
+    fp = footprint_paris_co2_dummy.data.copy(deep=True)
+    fp = fp.isel(time=slice(0, 2), lat=slice(0, 1), lon=slice(0, 1), H_back=slice(0, 2))
+    fp["fp_time_resolved"][:] = 1.0
+    fp["fp_residual"][:] = 0.0
+    fp = fp.assign_coords(time=pd.to_datetime(["2012-01-01 00:37:00", "2012-01-01 14:23:00"]))
+
+    flux = flux_co2_dummy.data.copy(deep=True).isel(lat=slice(0, 1), lon=slice(0, 1))
+    flux["flux"][:] = 2.0
+
+    result = fp_x_flux_time_resolved(fp, flux)
+
+    expected = xr.DataArray(
+        np.array([2.0, 4.0]).reshape(2, 1, 1),
+        coords={"time": fp.time, "lat": fp.lat, "lon": fp.lon},
+        dims=("time", "lat", "lon"),
+    )
+    xr.testing.assert_allclose(result, expected)
 
 
 # TODO: this test could go elsewhere?

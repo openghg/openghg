@@ -110,6 +110,7 @@ class LocalZarrStore(Store):
         compressor: Any | None = None,
         filters: Any | None = None,
         append_dim: str = "time",
+        copy_current: bool = False,
     ) -> None:
         """Add an xr.Dataset to the zarr store.
 
@@ -119,6 +120,8 @@ class LocalZarrStore(Store):
             compressor: Compression for zarr encoding
             filters: Filters for zarr encoding
             append_dim: Dimension to append to
+            copy_current: Copy the current version before inserting if creating
+                a new version.
 
         Returns:
             None
@@ -148,7 +151,9 @@ class LocalZarrStore(Store):
         else:
             if not self._vzds.versions and version != "v1":
                 raise ValueError("First version must be v1")
-            self._vzds.create_version(version, checkout=True)
+            if copy_current and not self._vzds.versions:
+                raise ValueError("Cannot copy current version when creating the first version.")
+            self._vzds.create_version(version, checkout=True, copy_current=copy_current)
 
         self._vzds.insert(dataset)
 

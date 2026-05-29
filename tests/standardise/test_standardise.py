@@ -1171,34 +1171,37 @@ def test_standardise_co2_games_using_dataset():
 
 
 def test_standardise_6km_footprints():
-    """Test standardisation of 6km resolution footprints with associated metadata keys.
-    """
+    """Test standardisation of 6km resolution footprints with associated metadata keys."""
 
     filepath = get_footprint_datapath("IMP-26magl_NAME_UKV_EUROPE-6km_co2_202301.nc")
-    site="IMP"
-    model="NAME"
-    network="UKV"
-    height="26magl"
-    domain="EUROPE"
-    inner_domain="6km"
-    source_format="paris"
-    store="user"
-    results = standardise_footprint(filepath=filepath,
-                                    site=site,
-                                    model=model,
-                                    network=network,
-                                    height=height,
-                                    domain=domain,
-                                    species="co2",
-                                    inner_domain=inner_domain,
-                                    source_format=source_format,
-                                    store=store,
-                                    chunks={"time": 200, "lat": 200, "lon": 200})
-    
+    site = "IMP"
+    model = "NAME"
+    network = "UKV"
+    height = "26magl"
+    domain = "EUROPE"
+    inner_domain = "6km"
+    source_format = "paris"
+    store = "user"
+    results = standardise_footprint(
+        filepath=filepath,
+        site=site,
+        model=model,
+        network=network,
+        height=height,
+        domain=domain,
+        species="co2",
+        inner_domain=inner_domain,
+        source_format=source_format,
+        store=store,
+        chunks={"time": 200, "lat": 200, "lon": 200},
+    )
+
     assert "co2" == results[0].get("species")
     assert "europe-6km" in results[0].get("domain")
 
-    retrieved_data = get_footprint(site=site, model=model, network=network, height=height, domain="EUROPE-6KM", store=store)
+    retrieved_data = get_footprint(
+        site=site, model=model, network=network, height=height, domain="EUROPE-6KM", store=store
+    )
 
     assert retrieved_data is not None
     assert retrieved_data.metadata["model"] == "name"
@@ -1207,3 +1210,30 @@ def test_standardise_6km_footprints():
     assert retrieved_data.metadata["height"] == "26m"
     assert retrieved_data.metadata["domain"] == "europe-6km"
     assert retrieved_data.metadata["inner_domain"] == "6km"
+
+
+def test_negative_inlet_standardisation():
+    """Test standardisation of data with negative inlet value and associated metadata keys."""
+
+    datapath = get_surface_datapath("cmn_hfc143a_negative_inlet.nc", source_format="openghg")
+    results = standardise_surface(
+        filepath=datapath,
+        source_format="openghg",
+        network="agage-private",
+        site="CMN",
+        instrument="multiple",
+        inlet="-20m",
+        calibration_scale="SIO-07",
+        store="user",
+        if_exists="new",
+        force=True,
+        update_mismatch="from_definition",
+        chunks={"time": 600},
+    )
+
+    metadata = get_obs_surface(
+        site="cmn", species="hfc143a", inlet="-20m", network="agage-private", store="user"
+    ).metadata
+
+    assert "hfc143a" in results[0]["species"]
+    metadata["inlet"] == "-20m"

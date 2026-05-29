@@ -96,6 +96,7 @@ from ._time import (
     parse_period,
     dates_in_range,
     relative_time_offset,
+    has_monthly_period,
     infer_frequency,
     sanitise_daterange,
     split_daterange_str,
