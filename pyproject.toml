@@ -103,7 +103,7 @@ classifiers = [
         "sphinx-autobuild<=2021.3.14",
         "nbsphinx<=0.9.8",
         "ipython<=8.24.0",
-        "jupyter_client<=8.6.1",
+        "jupyter_client<=8.8.0",
         "jupyter_core<=5.7.2",
         "jupyter-sphinx",
         "nbconvert<=7.16.4",
