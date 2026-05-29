@@ -12,8 +12,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 # convert scientific notation to volume ratios
 unit_mapping = {"1e-6": "ppm", "1e-9": "ppb", "1e-12": "ppt", "1e-15": "ppq", "1e-09": "ppb", "1e-06": "ppm"}
 
-# TODO: make sure value get's minus sign added if south/east or whatever it was
-cf_ureg.preprocessors.append(lambda x: "degree" if "degree" in x else x)
+cf_ureg.preprocessors.append(lambda x: "degree" if "degree" in x.lower() else x)
 
 cf_ureg.preprocessors.append(lambda x: unit_mapping.get(x, x))
 
@@ -27,6 +26,7 @@ cf_ureg.define("@alias ppm = parts_per_million")  # this works for converting, b
 cf_ureg.define("ppb = 1e-9 mol/mol = parts_per_billion")
 cf_ureg.define("ppt = 1e-12 mol/mol = parts_per_trillion")
 cf_ureg.define("ppq = 1e-15 mol/mol = parts_per_quadrillion")
+cf_ureg.define("@alias hour = Hour = HOUR = Hours = HOURS")
 cf_ureg.define("@alias permille = permil = per_mil = per_mille")
 cf_ureg.define("permeg = 0.001 permille = per_meg")
 cf_ureg.define("hpa = 100.0 Pa = hectopascal = hPa")

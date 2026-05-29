@@ -83,3 +83,55 @@ def test_parts_per(number, abbrev, long):
 
     # "cf" formatting will use long name
     assert long == f"{converted:cf}"
+
+
+@pytest.mark.parametrize("unit", ["hour", "hours", "Hour", "Hours", "HOUR", "HOURS"])
+def test_hour_aliases(unit):
+    """Hour unit aliases should accept common case variants."""
+    assert cf_ureg.parse_units(unit) == cf_ureg.hour
+
+
+@pytest.mark.parametrize(
+    "unit, expected",
+    [
+        ("degrees_north", "degree"),
+        ("Degrees_north", "degree"),
+        ("Degrees_North", "degree"),
+        ("DEGREES_NORTH", "degree"),
+        ("degree_north", "degree"),
+        ("Degree_north", "degree"),
+        ("DEGREE_NORTH", "degree"),
+        ("degrees_N", "degree"),
+        ("Degrees_N", "degree"),
+        ("DEGREES_N", "degree"),
+        ("degree_N", "degree"),
+        ("Degree_N", "degree"),
+        ("DEGREE_N", "degree"),
+    ],
+)
+def test_degrees_north_aliases(unit, expected):
+    """Case variants of valid latitude units should resolve to degrees_north."""
+    assert cf_ureg.parse_units(unit) == expected
+
+
+@pytest.mark.parametrize(
+    "unit, expected",
+    [
+        ("degrees_east", "degree"),
+        ("Degrees_east", "degree"),
+        ("Degrees_East", "degree"),
+        ("DEGREES_EAST", "degree"),
+        ("degree_east", "degree"),
+        ("Degree_east", "degree"),
+        ("DEGREE_EAST", "degree"),
+        ("degrees_E", "degree"),
+        ("Degrees_E", "degree"),
+        ("DEGREES_E", "degree"),
+        ("degree_E", "degree"),
+        ("Degree_E", "degree"),
+        ("DEGREE_E", "degree"),
+    ],
+)
+def test_degrees_east_aliases(unit, expected):
+    """Case variants of valid longitude units should resolve to degrees_east."""
+    assert cf_ureg.parse_units(unit) == expected
