@@ -1,12 +1,15 @@
-from typing import Any
-from openghg.util import load_json
+from __future__ import annotations
+
+import json
+from pathlib import Path
+from typing import Any, cast
+
 from openghg.util._inlet import format_inlet
-from openghg.types import pathType
 
 __all__ = ["get_site_info", "sites_in_network", "_get_site_data"]
 
 
-def get_site_info(site_filepath: pathType | None = None) -> dict[str, Any]:
+def get_site_info(site_filepath: str | Path | None = None) -> dict[str, Any]:
     """Extract data from site info JSON file as a dictionary.
 
     This uses the data stored within openghg_defs/data/site_info JSON file by default.
@@ -18,12 +21,8 @@ def get_site_info(site_filepath: pathType | None = None) -> dict[str, Any]:
     """
     from openghg_defs import site_info_file
 
-    if site_filepath is None:
-        site_info_json = load_json(path=site_info_file)
-    else:
-        site_info_json = load_json(path=site_filepath)
-
-    return site_info_json
+    fpath = site_info_file if site_filepath is None else site_filepath
+    return cast(dict[str, Any], json.loads(Path(fpath).read_text()))
 
 
 def _get_site_data(site: str, network: str) -> tuple[float, float, float, list]:
@@ -54,7 +53,7 @@ def _get_site_data(site: str, network: str) -> tuple[float, float, float, list]:
     return latitude, longitute, site_height, inlet_heights
 
 
-def sites_in_network(network: str, site_filepath: pathType | None = None) -> list:
+def sites_in_network(network: str, site_filepath: str | Path | None = None) -> list:
     """Extract details of all the sites within a network.
     Note: this will assume the network is stored in upper case.
 

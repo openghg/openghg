@@ -1,18 +1,14 @@
 """Helper functions for processing search input into form accepted by `Metastore.search`."""
 
 import itertools
-from typing import Any, cast, TypeVar, overload
+import math
+from typing import Any, cast, overload
 from collections.abc import Callable
 
-import numpy as np
-
 from openghg.util import extract_float
-from openghg.types import Comparable
-
-T = TypeVar("T", bound=Comparable)  # types with <=
 
 
-def _in_interval(x: T, start: T | None, stop: T | None) -> bool:
+def _in_interval(x: Any, start: Any | None, stop: Any | None) -> bool:
     """Return True if start <= x <= stop; if either start or stop is None, omit
     the corresponding bound.
 
@@ -27,12 +23,11 @@ def _in_interval(x: T, start: T | None, stop: T | None) -> bool:
     if start is None and stop is None:
         return True
     elif start is None:
-        stop = cast(T, stop)  # to appease mypy
-        return x <= stop
+        return bool(x <= stop)
     elif stop is None:
-        return x >= start
+        return bool(x >= start)
     else:
-        return start <= x <= stop
+        return bool(start <= x <= stop)
 
 
 def _convert_slice_to_test(s: slice, key: str | None = None) -> Callable:
@@ -71,13 +66,15 @@ def _convert_slice_to_test(s: slice, key: str | None = None) -> Callable:
 def _is_neg_lookup_flag(x: Any) -> bool:
     """Check if x matches the `neg_lookup_flag`."""
     try:
-        result = bool(np.isnan(x))
-    except TypeError:
+        result = math.isnan(x)
+    except (TypeError, ValueError):
         return False
     return result
 
 
-def process_special_queries(search_terms: dict, list_search: list | None = None) -> dict:
+def process_special_queries(
+    search_terms: dict[str, Any], list_search: list[str] | None = None
+) -> dict[str, Any]:
     """Separate 'function queries' and 'negative lookup keys' from normal search terms.
 
     Function queries apply a function to the value stored at a given key.
@@ -92,9 +89,9 @@ def process_special_queries(search_terms: dict, list_search: list | None = None)
         are the parameters for TinyDBMetastore.search
     """
     _search_terms = search_terms.copy()  # copy to avoid mutating search_terms while iterating over items
-    search_functions = {}
-    negative_lookup_keys = []
-    search_list_keys = {}
+    search_functions: dict[str, Callable[[Any], bool]] = {}
+    negative_lookup_keys: list[str] = []
+    search_list_keys: dict[str, Any] = {}
 
     if list_search is None:
         list_search = []
@@ -118,7 +115,9 @@ def process_special_queries(search_terms: dict, list_search: list | None = None)
     }
 
 
-def flatten_search_kwargs(search_kwargs: dict, list_search: list | None = None) -> list[dict]:
+def flatten_search_kwargs(
+    search_kwargs: dict[str, Any], list_search: list[str] | None = None
+) -> list[dict[str, Any]]:
     """Process search kwargs into list of flat dictionaries with the correct combinations of search queries.
 
     To set this up for keywords with multiple options, lists of the (key, value) pair terms are created.
@@ -145,13 +144,13 @@ def flatten_search_kwargs(search_kwargs: dict, list_search: list | None = None) 
     if list_search is None:
         list_search = []
 
-    single_options = {}
+    single_options: dict[str, Any] = {}
 
     # multiple_options will contain tuple pairs for the options we wish to search for. e.g. for
     # species = ["ch4", "methane"], time_resolution = {"time_resolved": "true", "high_time_resolution: "true"}
     # multiple_options is: [[("species", "ch4"), ("species", "methane")],
     #                       [("time_resolved": "true"), ("high_time_resolution": "true")]]
-    multiple_options = []
+    multiple_options: list[list[tuple[str, Any]]] = []
 
     for k, v in search_kwargs.items():
         if isinstance(v, (list, tuple)) and k not in list_search:
@@ -163,7 +162,7 @@ def flatten_search_kwargs(search_kwargs: dict, list_search: list | None = None) 
         else:
             single_options[k] = v
 
-    expanded_search = []
+    expanded_search: list[dict[str, Any]] = []
     if multiple_options:
         # Ensure that all permutations of the search options are created.
         for kv_pair in itertools.product(*multiple_options):
@@ -177,7 +176,9 @@ def flatten_search_kwargs(search_kwargs: dict, list_search: list | None = None) 
     return expanded_search
 
 
-def process_search_kwargs(search_kwargs: dict, list_search: list | None = None) -> list[dict]:
+def process_search_kwargs(
+    search_kwargs: dict[str, Any], list_search: list[str] | None = None
+) -> list[dict[str, Any]]:
     """Flatten search kwargs and process species queries.
 
     Args:
@@ -191,7 +192,7 @@ def process_search_kwargs(search_kwargs: dict, list_search: list | None = None) 
     return [process_special_queries(x, list_search=list_search) for x in expanded_search]
 
 
-def define_list_search() -> list:
+def define_list_search() -> list[str]:
     """
     Define the metakeys we would expect to perform a list search for.
 
@@ -204,7 +205,7 @@ def define_list_search() -> list:
     from openghg.store import find_info_list_metakeys
 
     list_search = find_info_list_metakeys()
-    return list_search
+    return cast(list[str], list_search)
 
 
 @overload
@@ -254,10 +255,12 @@ def convert_to_slice(
         if input in special_keywords:
             return input
 
-        input = extract_float(input)
+        value: int | float = extract_float(input)
+    else:
+        value = input
 
-    lower = input - abs(input) * rel_tolerance / 2
-    upper = input + abs(input) * rel_tolerance / 2
+    lower = value - abs(value) * rel_tolerance / 2
+    upper = value + abs(value) * rel_tolerance / 2
 
     s = slice(lower, upper)
 

@@ -1,21 +1,30 @@
-"""Generic search functions that can be used to find data in
-the object store.
+"""Generic search functions that can be used to find data in the object store."""
 
-"""
+from __future__ import annotations
 
 import logging
-import pandas as pd
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
 import warnings
-from openghg.objectstore import open_object_store
-from openghg.store.spec import define_data_types
-from openghg.objectstore import get_readable_buckets
-from openghg.types import ObjectStoreError
-from openghg.dataobjects import SearchResults
-from ._search_helpers import process_search_kwargs, define_list_search
+
+if TYPE_CHECKING:
+    from openghg.dataobjects import SearchResults
 
 logger = logging.getLogger("openghg.retrieve")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
+
+
+def get_readable_buckets() -> dict[str, str]:
+    """Return readable object store buckets without importing objectstore at module import time."""
+    from openghg.objectstore import get_readable_buckets as _get_readable_buckets
+
+    return cast(dict[str, str], _get_readable_buckets())
+
+
+def open_object_store(*args: Any, **kwargs: Any) -> Any:
+    """Open an object store without importing objectstore at module import time."""
+    from openghg.objectstore import open_object_store as _open_object_store
+
+    return _open_object_store(*args, **kwargs)
 
 
 def search_bc(
@@ -464,6 +473,12 @@ def search(**kwargs: Any) -> SearchResults:
     Returns:
         SearchResults or None: SearchResults object is results found, otherwise None
     """
+    import pandas as pd
+    from pandas import Timedelta as pd_Timedelta
+
+    from openghg.dataobjects import SearchResults
+    from openghg.store.spec import define_data_types
+    from openghg.types import ObjectStoreError
     from openghg.util import (
         clean_string,
         dates_overlap,
@@ -473,8 +488,11 @@ def search(**kwargs: Any) -> SearchResults:
         timestamp_now,
         timestamp_tzaware,
     )
-    from openghg.retrieve._search_helpers import convert_to_slice
-    from pandas import Timedelta as pd_Timedelta
+    from openghg.retrieve._search_helpers import (
+        convert_to_slice,
+        define_list_search,
+        process_search_kwargs,
+    )
     from openghg.util import handle_direct_store_path
 
     # Select and format the search terms

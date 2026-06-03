@@ -1,25 +1,23 @@
 from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Any, cast, Literal
+from typing import Any, TYPE_CHECKING, cast, Literal
 from typing_extensions import Self
 from types import TracebackType
 import logging
-from pandas import Timestamp, Timedelta
-import xarray as xr
 
 from openghg.objectstore import exists, get_object_from_json
 from openghg.objectstore._local_store import delete_object
-from openghg.util import (
-    create_daterange_str,
-    get_representative_daterange_str,
-    split_daterange_str,
-    timestamp_now,
-    timestamp_tzaware,
-)
 from openghg.types import DataOverlapError, ObjectStoreError
 
 from ._datasource import AbstractDatasource, DatasourceFactory
+
+if TYPE_CHECKING:
+    from pandas import Timestamp
+    import xarray as xr
+    from xarray import Dataset as XrDataset
+else:
+    XrDataset = Any
 
 logger = logging.getLogger("openghg.objectstore")
 logger.setLevel(logging.DEBUG)
@@ -65,7 +63,7 @@ def plan_timed_data_update(
     raise ValueError("Invalid if_exists option. Please use 'auto', 'new', or 'combine'.")
 
 
-class Datasource(AbstractDatasource[xr.Dataset]):
+class Datasource(AbstractDatasource[XrDataset]):
     """A Datasource holds data relating to a single source.
 
     For instance, a specific species at a certain height on a specific
@@ -76,6 +74,7 @@ class Datasource(AbstractDatasource[xr.Dataset]):
 
     def __init__(self, bucket: str, uuid: str, mode: Literal["r", "rw"] = "rw", data_type: str = "") -> None:
         from openghg.store.storage import LocalZarrStore
+        from openghg.util._time import timestamp_now
 
         self._uuid = uuid
         self._creation_datetime = str(timestamp_now())
@@ -315,6 +314,8 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         Returns:
             None
         """
+        from openghg.util._time import get_representative_daterange_str, timestamp_now
+
         # Ensure data is in time order
         time_coord = "time"
         new_daterange_str = get_representative_daterange_str(dataset=data, period=self.period)
@@ -538,6 +539,8 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         Returns:
             None
         """
+        from openghg.util._time import split_daterange_str
+
         if not self._data_keys:
             return
 
@@ -568,6 +571,8 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         Returns:
             str: Daterange covered by this Datasource
         """
+        from openghg.util._time import create_daterange_str
+
         start, end = self.daterange()
 
         return create_daterange_str(start=start, end=end)
@@ -579,6 +584,10 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         Returns:
             None
         """
+        from pandas import Timedelta
+        import xarray as xr
+        from openghg.util._time import split_daterange_str, timestamp_tzaware
+
         for version, dateranges in self._data_keys.items():
             start_date, _ = split_daterange_str(daterange_str=dateranges[0])
             _, end_date = split_daterange_str(daterange_str=dateranges[-1])
