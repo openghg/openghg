@@ -149,6 +149,19 @@ def test_data_type_registry_is_complete_without_store_class_imports():
         """)
 
 
+def test_get_data_class_resolves_imported_custom_store_types():
+    """Custom BaseStore subclasses should still resolve after they register."""
+    _run_python("""
+        from openghg.store import get_data_class
+        from openghg.store.base import BaseStore
+
+        class CustomReviewStore(BaseStore):
+            _data_type = "custom_review_type"
+
+        assert get_data_class("custom_review_type") is CustomReviewStore
+        """)
+
+
 def test_builtin_data_type_names_are_reserved_before_builtin_imports():
     """Custom stores should not claim built-in data type names before lazy imports."""
     _run_python("""

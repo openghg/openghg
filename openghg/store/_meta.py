@@ -47,4 +47,9 @@ def get_data_class(data_type: str) -> type[BaseStore]:
     try:
         return cast("type[BaseStore]", get_data_type_class(data_type))
     except ValueError as exc:
-        raise ValueError(f"No data class for data type {data_type}.") from exc
+        from openghg.store.base import BaseStore
+
+        try:
+            return BaseStore._registry[data_type]
+        except KeyError:
+            raise ValueError(f"No data class for data type {data_type}.") from exc
