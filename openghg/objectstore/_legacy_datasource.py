@@ -1,9 +1,10 @@
 from __future__ import annotations
 from collections import defaultdict
-from collections.abc import Iterator
+from collections.abc import Callable
 from dataclasses import dataclass
+from functools import wraps
 from pathlib import Path
-from typing import Any, cast, Literal
+from typing import Any, cast, Literal, TypeVar
 from typing_extensions import Self
 from types import TracebackType
 import logging
@@ -28,6 +29,20 @@ logger = logging.getLogger("openghg.objectstore")
 logger.setLevel(logging.DEBUG)
 
 __all__ = ["Datasource"]
+
+WriteMethodT = TypeVar("WriteMethodT", bound=Callable[..., Any])
+
+
+def _requires_write(method: WriteMethodT) -> WriteMethodT:
+    """Prevent write methods from running on read-only Datasources."""
+
+    @wraps(method)
+    def wrapped(self: Any, *args: Any, **kwargs: Any) -> Any:
+        if self._mode == "r":
+            raise PermissionError("Cannot modify a read-only datasource")
+        return method(self, *args, **kwargs)
+
+    return cast(WriteMethodT, wrapped)
 
 
 TimedDataAction = Literal["insert", "copy_insert", "replace", "upsert", "error_overlap"]
@@ -101,23 +116,6 @@ class Datasource(AbstractDatasource[xr.Dataset]):
 
         self.update_daterange()
 
-    def _version_exists(self, version: str) -> bool:
-        """Check if a version exists in the zarr store."""
-        return version.lower() in self._store.versions
-
-    def _check_version(self, version: str) -> str:
-        """Check if the given version exists in the store."""
-        version = version.lower()
-        if not self._version_exists(version):
-            raise ZarrStoreError(f"Invalid version: {version}")
-
-        return version
-
-    def _check_writable(self) -> None:
-        """Check if this Datasource can mutate its zarr store."""
-        if self._mode == "r":
-            raise PermissionError("Cannot modify a read-only zarr store")
-
     def _set_store_encoding(self, compressor: Any | None = None, filters: Any | None = None) -> None:
         """Set encoding options used for newly written zarr variables."""
         if compressor:
@@ -132,10 +130,10 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         except ValueError as e:
             raise ZarrStoreError(f"Invalid version: {version}") from e
 
-    def _create_or_checkout_version(self, version: str, *, copy_current: bool = False) -> None:
+    def _ensure_store_version(self, version: str, *, copy_current: bool = False) -> None:
         """Create a zarr version if needed, otherwise check out the existing version."""
         version = version.lower()
-        if self._version_exists(version):
+        if version in self._store.versions:
             self._store.checkout_version(version)
         else:
             if not self._store.versions and version != "v1":
@@ -143,81 +141,6 @@ class Datasource(AbstractDatasource[xr.Dataset]):
             if copy_current and not self._store.versions:
                 raise ValueError("Cannot copy current version when creating the first version.")
             self._store.create_version(version, checkout=True, copy_current=copy_current)
-
-    def _store_insert(
-        self,
-        version: str,
-        data: xr.Dataset,
-        compressor: Any | None = None,
-        filters: Any | None = None,
-        copy_current: bool = False,
-    ) -> None:
-        """Insert data into a zarr store version."""
-        self._check_writable()
-        self._set_store_encoding(compressor=compressor, filters=filters)
-        self._create_or_checkout_version(version, copy_current=copy_current)
-        self._store.insert(data)
-
-    def _store_upsert(
-        self,
-        version: str,
-        data: xr.Dataset,
-        compressor: Any | None = None,
-        filters: Any | None = None,
-    ) -> None:
-        """Upsert data into a zarr store version."""
-        if not self._store.versions:
-            raise ValueError("Cannot update empty Zarr store.")
-
-        self._check_writable()
-        self._set_store_encoding(compressor=compressor, filters=filters)
-        self._create_or_checkout_version(version, copy_current=True)
-        self._store.upsert(data)
-
-    def _store_overwrite(
-        self,
-        version: str,
-        data: xr.Dataset,
-        compressor: Any | None = None,
-        filters: Any | None = None,
-    ) -> None:
-        """Overwrite data in a zarr store version."""
-        self._check_writable()
-        self._set_store_encoding(compressor=compressor, filters=filters)
-        self._checkout_version(version)
-        self._store.overwrite(data)
-
-    def _store_get(self, version: str) -> xr.Dataset:
-        """Get a dataset from a zarr store version."""
-        self._checkout_version(version)
-        return self._store.get()
-
-    def _store_keys(self, version: str) -> Iterator[str]:
-        """Keys of data stored in the zarr store for a version."""
-        version = self._check_version(version)
-        self._store.checkout_version(version)
-        return cast(Iterator[str], self._store.store.keys())
-
-    def _store_path(self, version: str) -> Path:
-        """Return the path of a zarr store version."""
-        version = self._check_version(version)
-        return self._stores_path / version
-
-    def _store_delete_version(self, version: str) -> None:
-        """Delete a zarr store version."""
-        self._check_writable()
-        try:
-            self._store.delete_version(version.lower())
-        except ValueError as e:
-            raise ZarrStoreError(f"Invalid version: {version}") from e
-
-    def _store_delete_all(self) -> None:
-        """Delete all zarr store versions and the empty root directory."""
-        self._check_writable()
-        self._store.delete_all_versions()
-
-        if self._stores_path.exists():
-            self._stores_path.rmdir()
 
     # Methods to satisfy AbstractDatasource ABC
     @classmethod
@@ -260,6 +183,7 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         internal_metadata = {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
         set_object_from_json(bucket=self._bucket, key=self.key, data=internal_metadata)
 
+    @_requires_write
     def add(self, data: xr.Dataset, **kwargs) -> None:
         if (period := kwargs.pop("period", None)) is not None:
             self._metadata["period"] = period
@@ -277,8 +201,10 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         if version == "latest":
             version = self._latest_version
 
-        return self._store_get(version=version)
+        self._checkout_version(version)
+        return self._store.get()
 
+    @_requires_write
     def delete(self) -> None:
         self.delete_all_data()
         delete_object(bucket=self._bucket, key=self.key)
@@ -353,6 +279,7 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         return self._store.bytes_stored()
 
     # Methods related storing, getting, deleting data
+    @_requires_write
     def add_data(
         self,
         metadata: dict,
@@ -406,6 +333,7 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         else:
             raise NotImplementedError()
 
+    @_requires_write
     def add_timed_data(
         self,
         data: xr.Dataset,
@@ -478,34 +406,37 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         # TODO: what does the following comment mean? (BM Jan 2026)
         # We'll only need to sort the new dataset if the data we add comes before the current data
 
+        if plan.action == "error_overlap":
+            raise DataOverlapError(
+                "Unable to add new data, because it overlaps with current data and `if_exists` is set to 'auto'. "
+                "To update current data in object store use `if_exists` input (see options in documentation)."
+            )
+
+        self._set_store_encoding(compressor=compressor, filters=filters)
+
         if plan.action == "insert":
-            self._store_insert(version=version_str, data=data, compressor=compressor, filters=filters)
+            self._ensure_store_version(version_str)
+            self._store.insert(data)
             if has_existing_data and plan.new_version:
                 date_keys = [new_daterange_str]
             else:
                 date_keys = [*current_date_keys, new_daterange_str]
         elif plan.action == "copy_insert":
-            self._store_insert(
-                version=version_str,
-                data=data,
-                compressor=compressor,
-                filters=filters,
-                copy_current=True,
-            )
+            self._ensure_store_version(version_str, copy_current=True)
+            self._store.insert(data)
             date_keys = [*current_date_keys, new_daterange_str]
         elif plan.action == "replace":
             logger.info("Updating store to include new added data only.")
-            self._store_overwrite(version=version_str, data=data, compressor=compressor, filters=filters)
+            self._checkout_version(version_str)
+            self._store.overwrite(data)
             date_keys = [new_daterange_str]
         elif plan.action == "upsert":
             logger.info("Updating store by combining new data with existing.")
-            self._store_upsert(version=version_str, data=data, compressor=compressor, filters=filters)
+            if not self._store.versions:
+                raise ValueError("Cannot update empty Zarr store.")
+            self._ensure_store_version(version_str, copy_current=True)
+            self._store.upsert(data)
             date_keys = [get_representative_daterange_str(self.get_data(version=version_str))]
-        else:
-            raise DataOverlapError(
-                "Unable to add new data, because it overlaps with current data and `if_exists` is set to 'auto'. "
-                "To update current data in object store use `if_exists` input (see options in documentation)."
-            )
 
         self._data_type = data_type
         self.add_metadata_key(key="data_type", value=data_type)
@@ -532,6 +463,7 @@ class Datasource(AbstractDatasource[xr.Dataset]):
 
         self._last_updated = timestamp_str_now
 
+    @_requires_write
     def delete_all_data(self) -> None:
         """Delete datasource entirely.
 
@@ -543,11 +475,14 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         Returns:
             None
         """
-        self._store_delete_all()
+        self._store.delete_all_versions()
+        if self._stores_path.exists():
+            self._stores_path.rmdir()
         self._data_keys.clear()
         self._metadata.clear()
         self._timestamps.clear()
 
+    @_requires_write
     def delete_version(self, version: str) -> None:
         """Delete a specific version of data.
 
@@ -563,7 +498,11 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         if version not in self._data_keys:
             raise KeyError("Invalid version.")
 
-        self._store_delete_version(version=version)
+        try:
+            self._store.delete_version(version.lower())
+        except ValueError as e:
+            raise ZarrStoreError(f"Invalid version: {version}") from e
+
         del self._data_keys[version]
         del self._timestamps[version]
 

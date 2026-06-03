@@ -50,7 +50,9 @@ def test_integrity_check_delete_datasource_keys():
         uid = objstore.uuids[0]
         ds = objstore.get_datasource(uuid=uid)
 
-        ds._store_delete_all()
+        ds._store.delete_all_versions()
+        if ds._stores_path.exists():
+            ds._stores_path.rmdir()
 
     with pytest.raises(ObjectStoreError):
         integrity_check()
