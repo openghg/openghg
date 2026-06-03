@@ -1,6 +1,19 @@
+import importlib
 import subprocess
 import sys
 import textwrap
+
+import pytest
+
+
+LAZY_EXPORT_PACKAGES = [
+    "openghg.dataobjects",
+    "openghg.objectstore",
+    "openghg.retrieve",
+    "openghg.store",
+    "openghg.types",
+    "openghg.util",
+]
 
 
 def _run_python(code: str) -> None:
@@ -11,6 +24,25 @@ def _run_python(code: str) -> None:
         text=True,
         capture_output=True,
     )
+
+
+@pytest.mark.parametrize("package_name", LAZY_EXPORT_PACKAGES)
+def test_lazy_export_manifest_matches_public_api(package_name: str):
+    """Lazy package export manifests should stay aligned with the public API."""
+    module = importlib.import_module(package_name)
+
+    assert set(module.__all__) == set(module._EXPORTS)
+    assert set(module.__all__) <= set(dir(module))
+
+
+@pytest.mark.parametrize("package_name", LAZY_EXPORT_PACKAGES)
+def test_lazy_export_targets_are_valid(package_name: str):
+    """Each lazy export should resolve to an attribute on its target module."""
+    module = importlib.import_module(package_name)
+
+    for public_name, target_module_name in module._EXPORTS.items():
+        target_module = importlib.import_module(target_module_name, package_name)
+        assert hasattr(target_module, public_name), f"{package_name}.{public_name}"
 
 
 def test_retrieve_search_surface_import_stays_light():
@@ -26,6 +58,42 @@ def test_retrieve_search_surface_import_stays_light():
         assert loaded == [], loaded
         """
     )
+
+
+def test_openghg_import_does_not_register_pint_xarray_accessor():
+    """Plain openghg import should keep pint_xarray as an explicit opt-in."""
+    _run_python(
+        """
+        import sys
+        import openghg
+
+        assert "pint_xarray" not in sys.modules
+        assert "xarray" not in sys.modules
+        """
+    )
+
+
+def test_enable_pint_xarray_registers_accessor():
+    """The explicit pint-xarray helper should restore the xarray .pint accessor."""
+    _run_python(
+        """
+        import openghg
+
+        openghg.enable_pint_xarray()
+
+        import xarray as xr
+
+        assert hasattr(xr.DataArray([1]), "pint")
+        """
+    )
+
+
+def test_top_level_submodule_manifest_allows_helpers():
+    """The top-level lazy submodule manifest should exclude function helpers."""
+    import openghg
+
+    assert set(openghg._SUBMODULES) == set(openghg.__all__) - {"enable_pint_xarray"}
+    assert "enable_pint_xarray" in dir(openghg)
 
 
 def test_lazy_dataobject_export_imports_on_access():

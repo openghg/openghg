@@ -19,9 +19,17 @@ __all__ = [
     "types",
     "tutorial",
     "util",
+    "enable_pint_xarray",
 ]
 
-_SUBMODULES = frozenset(__all__)
+_SUBMODULES = frozenset(name for name in __all__ if name != "enable_pint_xarray")
+
+
+def enable_pint_xarray() -> None:
+    """Import pint_xarray to register the xarray ``.pint`` accessor."""
+    from openghg.util._units import enable_pint_xarray as _enable_pint_xarray
+
+    _enable_pint_xarray()
 
 
 def __getattr__(name: str) -> Any:
