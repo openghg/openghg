@@ -272,6 +272,30 @@ def test_save_footprint(bucket, datasource):
     assert datasource_2._data_type == "footprints"
 
 
+def test_read_only_load_cannot_modify_data(bucket, datasource, datasets_with_gaps):
+    data_a, data_b, _ = datasets_with_gaps
+    metadata = create_attributes()
+
+    datasource.add_data(metadata=metadata, data=data_a, data_type="surface")
+    datasource.save()
+
+    read_only = Datasource.load(bucket=bucket, uuid=datasource.uuid, mode="r")
+
+    assert read_only._mode == "r"
+
+    with pytest.raises(PermissionError):
+        read_only.add_data(metadata=metadata, data=data_b, data_type="surface", if_exists="combine")
+
+    with pytest.raises(PermissionError):
+        read_only.delete_version("v1")
+
+    with pytest.raises(PermissionError):
+        read_only.delete_all_data()
+
+    assert read_only.latest_version == "v1"
+    assert not read_only._version_exists("v2")
+
+
 def test_add_metadata_key(datasource):
     datasource.add_metadata_key(key="foo", value=123)
     datasource.add_metadata_key(key="bar", value=456)

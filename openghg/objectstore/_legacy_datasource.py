@@ -230,6 +230,7 @@ class Datasource(AbstractDatasource[xr.Dataset]):
 
         ds = cls(bucket, uuid, mode, data_type)
         ds.__dict__.update(stored_data)
+        ds._mode = mode
         ds._data_keys = defaultdict(list, ds._data_keys)
 
         return ds
@@ -250,6 +251,7 @@ class Datasource(AbstractDatasource[xr.Dataset]):
             "_root_store_key",
             "_stores_path",
             "_bucket",
+            "_mode",
             "_status",
             "_start_date",
             "_end_date",
