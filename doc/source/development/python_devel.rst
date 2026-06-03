@@ -250,6 +250,12 @@ exposed to the Python help system.
 The invariant is ``set(__all__) == set(_EXPORTS)``. Tests should enforce
 this for each package using the lazy export pattern.
 
+Packages using this pattern must also include a sibling ``__init__.pyi``
+stub that re-exports the same public names from their implementation
+modules. The runtime ``__getattr__`` necessarily returns ``Any``, and the
+stub keeps ``mypy`` and other static checkers from losing the real function
+and class types while preserving lazy runtime imports.
+
 * The top-level ``openghg`` package uses the same idea for subpackages:
   subpackages are listed in ``__all__`` and imported only when first
   accessed.

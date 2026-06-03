@@ -1,10 +1,11 @@
 import importlib
+import ast
 import subprocess
 import sys
 import textwrap
+from pathlib import Path
 
 import pytest
-
 
 LAZY_EXPORT_PACKAGES = [
     "openghg.dataobjects",
@@ -45,10 +46,28 @@ def test_lazy_export_targets_are_valid(package_name: str):
         assert hasattr(target_module, public_name), f"{package_name}.{public_name}"
 
 
+@pytest.mark.parametrize("package_name", LAZY_EXPORT_PACKAGES)
+def test_lazy_export_stub_matches_public_api(package_name: str):
+    """Lazy packages should expose typed re-exports for static analysis."""
+    module = importlib.import_module(package_name)
+    stub_path = Path(module.__file__).with_suffix(".pyi")
+
+    assert stub_path.exists(), f"{package_name} is missing {stub_path.name}"
+
+    stub_tree = ast.parse(stub_path.read_text(), filename=str(stub_path))
+    stub_exports = {
+        alias.asname or alias.name
+        for node in stub_tree.body
+        if isinstance(node, ast.ImportFrom)
+        for alias in node.names
+    }
+
+    assert set(module.__all__) <= stub_exports
+
+
 def test_retrieve_search_surface_import_stays_light():
     """Importing a search function should not import array/dataframe stacks."""
-    _run_python(
-        """
+    _run_python("""
         import sys
         from openghg.retrieve import search_surface
 
@@ -56,27 +75,23 @@ def test_retrieve_search_surface_import_stays_light():
         heavy_modules = ["pandas", "xarray", "zarr", "dask", "rich", "matplotlib"]
         loaded = [module for module in heavy_modules if module in sys.modules]
         assert loaded == [], loaded
-        """
-    )
+        """)
 
 
 def test_openghg_import_does_not_register_pint_xarray_accessor():
     """Plain openghg import should keep pint_xarray as an explicit opt-in."""
-    _run_python(
-        """
+    _run_python("""
         import sys
         import openghg
 
         assert "pint_xarray" not in sys.modules
         assert "xarray" not in sys.modules
-        """
-    )
+        """)
 
 
 def test_enable_pint_xarray_registers_accessor():
     """The explicit pint-xarray helper should restore the xarray .pint accessor."""
-    _run_python(
-        """
+    _run_python("""
         import openghg
 
         openghg.enable_pint_xarray()
@@ -84,8 +99,7 @@ def test_enable_pint_xarray_registers_accessor():
         import xarray as xr
 
         assert hasattr(xr.DataArray([1]), "pint")
-        """
-    )
+        """)
 
 
 def test_top_level_submodule_manifest_allows_helpers():
@@ -98,8 +112,7 @@ def test_top_level_submodule_manifest_allows_helpers():
 
 def test_lazy_dataobject_export_imports_on_access():
     """Dataobject package import should be light, but from-import should still work."""
-    _run_python(
-        """
+    _run_python("""
         import sys
         import openghg.dataobjects as dataobjects
 
@@ -111,14 +124,12 @@ def test_lazy_dataobject_export_imports_on_access():
         assert SearchResults.__name__ == "SearchResults"
         assert "openghg.dataobjects._searchresults" in sys.modules
         assert "pandas" not in sys.modules
-        """
-    )
+        """)
 
 
 def test_data_type_registry_is_complete_without_store_class_imports():
     """Data type discovery should not depend on imported BaseStore subclasses."""
-    _run_python(
-        """
+    _run_python("""
         import sys
         from openghg.store.spec import define_data_types
 
@@ -135,14 +146,12 @@ def test_data_type_registry_is_complete_without_store_class_imports():
         mobile_class = get_data_class("mobile")
         assert mobile_class.__name__ == "ObsMobile"
         assert "openghg.store._obsmobile" in sys.modules
-        """
-    )
+        """)
 
 
 def test_builtin_data_type_names_are_reserved_before_builtin_imports():
     """Custom stores should not claim built-in data type names before lazy imports."""
-    _run_python(
-        """
+    _run_python("""
         from openghg.store.base import BaseStore
         from openghg.store.base._base import ClassDefinitionError
 
@@ -153,5 +162,4 @@ def test_builtin_data_type_names_are_reserved_before_builtin_imports():
             pass
         else:
             raise AssertionError("reserved built-in data type was accepted")
-        """
-    )
+        """)
