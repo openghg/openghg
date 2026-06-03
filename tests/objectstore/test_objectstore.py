@@ -8,7 +8,7 @@ import tinydb
 
 from openghg.objectstore.metastore._metastore import TinyDBMetaStore
 from openghg.objectstore._datasource import AbstractDatasource, DatasourceFactory
-from openghg.objectstore._objectstore import ObjectStore
+from openghg.objectstore._objectstore import ObjectStore, make_metadata_updater_fn
 from openghg.types import ObjectStoreError
 
 MetaData = dict[str, Any]
@@ -43,13 +43,21 @@ class InMemoryDatasource(AbstractDatasource):
     """
 
     datasources: ClassVar[dict[UUID, list[Any]]] = {}
+    datasource_metadata: ClassVar[dict[UUID, MetaData]] = {}
 
-    def __init__(self, uuid: UUID, data: list[Any] | None = None, **kwargs: Any) -> None:
+    def __init__(
+        self,
+        uuid: UUID,
+        data: list[Any] | None = None,
+        metadata: MetaData | None = None,
+        **kwargs: Any,
+    ) -> None:
         super().__init__(uuid)
         if data:
             self.data: list[Any] = data
         else:
             self.data: list[Any] = []
+        self.metadata: MetaData = dict(metadata or {})
 
     @classmethod
     def load(cls: type[Self], uuid: UUID) -> Self:
@@ -58,7 +66,7 @@ class InMemoryDatasource(AbstractDatasource):
         except KeyError:
             raise LookupError(f"No datasource with UUID {uuid} found.")
         else:
-            return cls(uuid, data)
+            return cls(uuid, data, metadata=cls.datasource_metadata.get(uuid, {}))
 
     def add(self, data: Any) -> None:
         self.data.append(data)
@@ -69,9 +77,11 @@ class InMemoryDatasource(AbstractDatasource):
     def delete(self) -> None:
         self.data = []
         del InMemoryDatasource.datasources[self.uuid]
+        InMemoryDatasource.datasource_metadata.pop(self.uuid, None)
 
     def save(self) -> None:
         InMemoryDatasource.datasources[self.uuid] = self.data
+        InMemoryDatasource.datasource_metadata[self.uuid] = dict(self.metadata)
 
 
 @pytest.fixture
@@ -87,6 +97,20 @@ def objectstore(metastore):
 
     # Clear datasources after test finishes
     InMemoryDatasource.datasources = {}
+    InMemoryDatasource.datasource_metadata = {}
+
+
+@pytest.fixture
+def merged_objectstore(metastore):
+    """Create ObjectStore that merges in-memory Datasource metadata."""
+    yield ObjectStore[InMemoryDatasource, Any](
+        metastore,
+        DatasourceFactory[InMemoryDatasource](InMemoryDatasource),
+        metadata_updater=make_metadata_updater_fn(extend_keys=["groups"]),
+    )
+
+    InMemoryDatasource.datasources = {}
+    InMemoryDatasource.datasource_metadata = {}
 
 
 @pytest.fixture
@@ -190,3 +214,172 @@ def test_delete(objectstore, fake_metadata, fake_data):
     with pytest.raises(LookupError):
         # LookupError from trying to load data from UUID not found in InMemoryDatasource
         objectstore.get_datasource(uuid)
+
+
+def test_search_uses_datasource_only_metadata_when_metastore_index_lacks_key(merged_objectstore, fake_data):
+    uuid = merged_objectstore.create(
+        {"site": "TAC", "species": "CH4"},
+        fake_data[0],
+    )
+    InMemoryDatasource.datasource_metadata[uuid] = {"source": "displayed-source"}
+
+    assert merged_objectstore.metastore.search({"source": "displayed-source"}) == []
+
+    results = merged_objectstore.search(site="TAC", source="displayed-source")
+    retrieved = merged_objectstore.retrieve(site="TAC", source="displayed-source")
+
+    assert [result["uuid"] for result in results] == [uuid]
+    assert results[0]["source"] == "displayed-source"
+    assert len(retrieved) == 1
+    assert retrieved[0].uuid == uuid
+
+
+def test_search_returns_raw_and_datasource_only_metadata_matches(merged_objectstore, fake_data):
+    raw_match_uuid = merged_objectstore.create(
+        {"site": "TAC", "species": "CH4", "source": "displayed-source"},
+        fake_data[0],
+    )
+    datasource_match_uuid = merged_objectstore.create(
+        {"site": "MHD", "species": "CH4"},
+        fake_data[1],
+    )
+    InMemoryDatasource.datasource_metadata[datasource_match_uuid] = {"source": "displayed-source"}
+
+    results = merged_objectstore.search(source="displayed-source")
+    retrieved = merged_objectstore.retrieve(source="displayed-source")
+
+    assert {result["uuid"] for result in results} == {raw_match_uuid, datasource_match_uuid}
+    assert {datasource.uuid for datasource in retrieved} == {raw_match_uuid, datasource_match_uuid}
+
+
+def test_search_skips_unrelated_missing_datasource_candidate(merged_objectstore, fake_data):
+    uuid = merged_objectstore.create(
+        {"site": "TAC", "species": "CH4"},
+        fake_data[0],
+    )
+    InMemoryDatasource.datasource_metadata[uuid] = {"source": "displayed-source"}
+    merged_objectstore.metastore.insert(
+        {"uuid": "missing-datasource", "site": "MHD", "species": "CH4", "source": "displayed-source"}
+    )
+
+    results = merged_objectstore.search(site="TAC", species="CH4", source="displayed-source")
+    retrieved = merged_objectstore.retrieve(site="TAC", species="CH4", source="displayed-source")
+    uuids = merged_objectstore.get_uuids({"site": "TAC", "species": "CH4", "source": "displayed-source"})
+
+    assert [result["uuid"] for result in results] == [uuid]
+    assert [datasource.uuid for datasource in retrieved] == [uuid]
+    assert uuids == [uuid]
+
+
+def test_merged_metadata_view_applies_function_negative_and_list_searches(merged_objectstore, fake_data):
+    matching_uuid = merged_objectstore.create({"site": "TAC", "species": "CH4"}, fake_data[0])
+    other_uuid = merged_objectstore.create({"site": "MHD", "species": "CH4"}, fake_data[1])
+    InMemoryDatasource.datasource_metadata[matching_uuid] = {
+        "inlet": 200,
+        "groups": ["user", "admin"],
+        "extra_key": "present",
+    }
+    InMemoryDatasource.datasource_metadata[other_uuid] = {
+        "inlet": 50,
+        "groups": ["user"],
+    }
+
+    def inlet_over_100(value):
+        return value > 100
+
+    results = merged_objectstore.search(
+        search_functions={"inlet": inlet_over_100},
+        search_list_keys={"groups": "admin"},
+    )
+    negative_results = merged_objectstore.search(negative_lookup_keys=["extra_key"])
+
+    assert [result["uuid"] for result in results] == [matching_uuid]
+    assert [result["uuid"] for result in negative_results] == [other_uuid]
+
+
+def test_merged_metadata_view_select_uses_raw_value_for_duplicate_keys(merged_objectstore, fake_data):
+    uuid = merged_objectstore.create({"site": "TAC", "source": "raw-source"}, fake_data[0])
+    InMemoryDatasource.datasource_metadata[uuid] = {"source": "displayed-source"}
+
+    assert merged_objectstore._metadata_view.select("source") == ["raw-source"]
+
+
+def test_datasource_managed_metadata_overrides_raw_metastore_metadata(merged_objectstore, fake_data):
+    uuid = merged_objectstore.create(
+        {
+            "site": "TAC",
+            "source": "raw-source",
+            "sampling_period": "12H",
+            "start_date": "2020-01-01 00:00:00+00:00",
+            "tag": "ceda_v1",
+        },
+        fake_data[0],
+    )
+    InMemoryDatasource.datasource_metadata[uuid] = {
+        "sampling_period": "12h",
+        "source": "datasource-source",
+        "start_date": "2019-01-01 00:00:00+00:00",
+        "tag": ["ceda_v1"],
+    }
+
+    result = merged_objectstore.search(site="TAC")[0]
+
+    assert result["sampling_period"] == "12h"
+    assert result["source"] == "raw-source"
+    assert result["start_date"] == "2019-01-01 00:00:00+00:00"
+    assert result["tag"] == ["ceda_v1"]
+
+
+def test_search_does_not_mutate_datasource_metadata(merged_objectstore, fake_data):
+    uuid = merged_objectstore.create(
+        {"site": "TAC", "species": "CH4", "source": "raw-source"},
+        fake_data[0],
+    )
+    datasource_metadata = {"source": "displayed-source"}
+    InMemoryDatasource.datasource_metadata[uuid] = dict(datasource_metadata)
+
+    merged_objectstore.search(site="TAC", source="raw-source")
+    datasource = merged_objectstore.get_datasource(uuid)
+
+    assert datasource.metadata == datasource_metadata
+
+
+def test_retrieve_returns_datasource_with_merged_metadata_without_saving(merged_objectstore, fake_data):
+    uuid = merged_objectstore.create(
+        {"site": "TAC", "species": "CH4", "source": "raw-source"},
+        fake_data[0],
+    )
+    datasource_metadata = {"source": "displayed-source"}
+    InMemoryDatasource.datasource_metadata[uuid] = dict(datasource_metadata)
+
+    datasource = merged_objectstore.retrieve(site="TAC", source="raw-source")[0]
+    reloaded_datasource = merged_objectstore.get_datasource(uuid)
+
+    assert datasource.metadata["site"] == "tac"
+    assert datasource.metadata["species"] == "ch4"
+    assert datasource.metadata["source"] == "raw-source"
+    assert reloaded_datasource.metadata == datasource_metadata
+
+
+def test_create_rejects_duplicate_from_datasource_only_metadata(merged_objectstore, fake_data):
+    uuid = merged_objectstore.create({"site": "TAC"}, fake_data[0])
+    InMemoryDatasource.datasource_metadata[uuid] = {"source": "displayed-source"}
+
+    with pytest.raises(ObjectStoreError):
+        merged_objectstore.create({"site": "TAC", "source": "displayed-source"}, fake_data[1])
+
+
+def test_create_rejects_duplicate_from_raw_metadata_when_datasource_has_duplicate_key(
+    merged_objectstore, fake_data
+):
+    uuid = merged_objectstore.create({"site": "TAC", "source": "raw-source"}, fake_data[0])
+    InMemoryDatasource.datasource_metadata[uuid] = {"source": "displayed-source"}
+
+    with pytest.raises(ObjectStoreError):
+        merged_objectstore.create({"site": "TAC", "source": "raw-source"}, fake_data[1])
+
+
+def test_uuids_uses_raw_metastore_when_unfiltered(merged_objectstore):
+    merged_objectstore.metastore.insert({"uuid": "missing-datasource", "site": "TAC"})
+
+    assert merged_objectstore.uuids == ["missing-datasource"]
