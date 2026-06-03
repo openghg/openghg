@@ -26,6 +26,7 @@ def test_find_domain():
     assert lat_increment == 0.234
     assert lon_increment == 0.352
 
+
 def test_find_domain_missing():
     """Test find_domain function returns an error if domain is not present"""
     domain = "FAKE"

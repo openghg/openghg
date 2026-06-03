@@ -5,7 +5,6 @@ from test_queries import mock_run_query_attrs
 from helpers import get_retrieval_datapath
 from openghg.retrieve.icos._data_parsing import get_data_attrs, get_icos_data
 
-
 current_text_data_dummy_filename = "text_data_lin_sf6_flask.txt"
 
 
@@ -16,8 +15,7 @@ def mock_text_data(dobj_uri):
 
     Note: dobj_uri is not used but is included to map to expected input for get_icos_text_file() function
     """
-    filename = get_retrieval_datapath(filename=current_text_data_dummy_filename,
-                                      archive="ICOS")
+    filename = get_retrieval_datapath(filename=current_text_data_dummy_filename, archive="ICOS")
     text = open(filename, "r").read()
 
     return text
@@ -41,8 +39,7 @@ def icos_format_info_df():
     import pandas as pd
 
     icos_format_info_filename = "icos_format_info.csv"
-    filename = get_retrieval_datapath(filename=icos_format_info_filename,
-                                      archive="ICOS")
+    filename = get_retrieval_datapath(filename=icos_format_info_filename, archive="ICOS")
     df = pd.read_csv(filename, index_col="spec_label")
 
     return df
@@ -53,7 +50,7 @@ def mock_icos_format_info(module_mocker):
     """
     Creates a module mocker which patches the call to our icos_format_info() function.
     This function calls make_query_df() --> meta.sparql_select() with a special format_query()
-    designed to grab specific details about the available ICOS format options.    
+    designed to grab specific details about the available ICOS format options.
 
     Note: this needs to be mocked where this is called so for these tests the functions we want to mock call
         icos_format_info() from within the _data_parsing submodule, rather than _queries directly,
@@ -65,7 +62,7 @@ def mock_icos_format_info(module_mocker):
 @pytest.fixture(scope="module")
 def mock_sparql_query_attrs(module_mocker):
     """
-    Creates a module mocker which patches calls to the meta.sparql_select() 
+    Creates a module mocker which patches calls to the meta.sparql_select()
     to use the mock_run_query_attrs() function instead.
     """
     module_mocker.patch("icoscp_core.icos.meta.sparql_select", new=mock_run_query_attrs)
@@ -83,8 +80,8 @@ def test_get_data_attrs(mock_sparql_query_attrs):
     """
     uri = "1234"  # dummy value
     result = get_data_attrs(uri, species="sf6")
-    
-    expected_keys = ['NbPoints', 'SamplingStart', 'SamplingEnd', 'sf6', 'Flag', 'Stdev']
+
+    expected_keys = ["NbPoints", "SamplingStart", "SamplingEnd", "sf6", "Flag", "Stdev"]
     assert set(expected_keys) >= set(result.keys())
 
     expected_attrs = ["dtype", "long_name"]
@@ -93,7 +90,7 @@ def test_get_data_attrs(mock_sparql_query_attrs):
 
     assert "units" in result["sf6"].keys()
 
-    
+
 def test_get_icos_flask_data(mock_sparql_query_attrs, mock_retrieve_text_data, mock_icos_format_info):
     """
     Check get_icos_data() function can correctly parse flask data.
@@ -107,11 +104,13 @@ def test_get_icos_flask_data(mock_sparql_query_attrs, mock_retrieve_text_data, m
 
     TODO: Decide what other format details we would want to check for the output Dataset of this function.
     """
-    dummy_data_info = {"spec_label": "ICOS ATC/CAL Flask Release",
-                       "dobj_uri": "",
-                       "species": "sf6"}  # minimal details needed
+    dummy_data_info = {
+        "spec_label": "ICOS ATC/CAL Flask Release",
+        "dobj_uri": "",
+        "species": "sf6",
+    }  # minimal details needed
     ds = get_icos_data(dummy_data_info)
-    
+
     assert ds
     assert "time" in ds
 

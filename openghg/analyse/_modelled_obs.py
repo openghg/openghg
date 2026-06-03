@@ -156,7 +156,12 @@ def _make_hf_flux_rolling_avg_array(
     return flux_hf_rolling
 
 
-def _make_high_freq_flux(flux: xr.DataArray, fp: xr.DataArray | xr.Dataset) -> xr.DataArray:
+def _make_high_freq_flux(
+    flux: xr.DataArray,
+    fp: xr.DataArray | xr.Dataset,
+    *,
+    align_to_fp_time: bool = True,
+) -> xr.DataArray:
     fp_highest_res_hours = _fp_time_and_h_back_freq_gcd(fp)
     start, end = _padded_flux_slice_start_and_end(fp)
     offset = time_of_day_offset(start)
@@ -182,6 +187,19 @@ def _make_high_freq_flux(flux: xr.DataArray, fp: xr.DataArray | xr.Dataset) -> x
 
     # create rolling windows
     flux_high_freq = _make_hf_flux_rolling_avg_array(flux_high_freq, fp)
+
+    if align_to_fp_time:
+        # reindex to align with fp time coordinates (after creating rolling windows to avoid NaN values at start of time series)
+        fp_index = pd.DatetimeIndex(fp.time.values)
+        flux_index = pd.DatetimeIndex(flux_high_freq.time.values)
+        need_second_reindex = (flux_index.get_indexer(fp_index) < 0).any()
+
+        if need_second_reindex:
+            flux_high_freq = flux_high_freq.reindex(
+                {"time": fp.time},
+                method="ffill",
+                tolerance=pd.Timedelta(hours=fp_highest_res_hours),
+            )
 
     flux_high_freq.attrs["units"] = flux.attrs.get("units")
 

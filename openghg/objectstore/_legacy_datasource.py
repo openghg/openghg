@@ -1,5 +1,6 @@
 from __future__ import annotations
 from collections import defaultdict
+from dataclasses import dataclass
 from typing import Any, cast, Literal
 from typing_extensions import Self
 from types import TracebackType
@@ -23,7 +24,45 @@ from ._datasource import AbstractDatasource, DatasourceFactory
 logger = logging.getLogger("openghg.objectstore")
 logger.setLevel(logging.DEBUG)
 
-__all___ = ["Datasource"]
+__all__ = ["Datasource"]
+
+
+TimedDataAction = Literal["insert", "copy_insert", "replace", "upsert", "error_overlap"]
+
+
+@dataclass(frozen=True)
+class TimedDataUpdatePlan:
+    """Storage action for adding time-indexed data to a Datasource."""
+
+    action: TimedDataAction
+    new_version: bool
+
+
+def plan_timed_data_update(
+    *,
+    if_exists: str,
+    new_version: bool,
+    has_existing_data: bool,
+    overlapping: bool,
+) -> TimedDataUpdatePlan:
+    """Plan the concrete store operation after overlap detection."""
+    if not has_existing_data:
+        return TimedDataUpdatePlan(action="insert", new_version=True)
+
+    if if_exists == "new":
+        action: TimedDataAction = "insert" if new_version else "replace"
+        return TimedDataUpdatePlan(action=action, new_version=new_version)
+
+    if if_exists == "combine":
+        action = "upsert" if overlapping or not new_version else "copy_insert"
+        return TimedDataUpdatePlan(action=action, new_version=new_version)
+
+    if if_exists == "auto":
+        if overlapping:
+            return TimedDataUpdatePlan(action="error_overlap", new_version=False)
+        return TimedDataUpdatePlan(action="copy_insert" if new_version else "insert", new_version=new_version)
+
+    raise ValueError("Invalid if_exists option. Please use 'auto', 'new', or 'combine'.")
 
 
 class Datasource(AbstractDatasource[xr.Dataset]):
@@ -280,16 +319,8 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         time_coord = "time"
         new_daterange_str = get_representative_daterange_str(dataset=data, period=self.period)
 
-        if self._latest_version and not new_version:
-            version_str = self._latest_version
-        else:
-            version_str = f"v{len(self._data_keys) + 1!s}"
-
         # Save details of current Datasource status
         self._status = {}
-
-        # We'll use this to store the dates covered by this version of the data
-        date_keys = self._data_keys[self._latest_version] if self._data_keys else []
 
         if sort and drop_duplicates:
             data = data.drop_duplicates(time_coord, keep="first").sortby(time_coord)
@@ -298,40 +329,55 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         elif drop_duplicates:
             data = data.drop_duplicates(time_coord, keep="first")
 
-        overlapping = self._store and self._store._vzds._overlap_determiner.has_overlaps(
-            data.get_index(self._store._vzds.append_dim)
+        has_existing_data = bool(self._store)
+        if has_existing_data:
+            self._store._vzds.checkout_version(self._latest_version)
+            overlapping = self._store._vzds._overlap_determiner.has_overlaps(
+                data.get_index(self._store._vzds.append_dim)
+            )
+        else:
+            overlapping = False
+        plan = plan_timed_data_update(
+            if_exists=if_exists,
+            new_version=new_version,
+            has_existing_data=has_existing_data,
+            overlapping=overlapping,
         )
+
+        if self._latest_version and not plan.new_version:
+            version_str = self._latest_version
+        else:
+            version_str = f"v{len(self._data_keys) + 1!s}"
+
+        current_date_keys = list(self._data_keys[self._latest_version]) if self._data_keys else []
 
         # TODO: what does the following comment mean? (BM Jan 2026)
         # We'll only need to sort the new dataset if the data we add comes before the current data
 
-        # If we don't have any data in this Datasource or we have no overlap we'll just add the new data
-        if not self._store or not overlapping:
+        if plan.action == "insert":
             self._store.add(version=version_str, dataset=data, compressor=compressor, filters=filters)
-            date_keys.append(new_daterange_str)
-        # Otherwise if we have data already stored in the Datasource
-        elif if_exists == "new":
-            # If we have existing data we'll just keep the new data
-            # If new_version is True then we create a new version containing just this data
-            # If new_version is False then we delete the current data and replace it with just the new data
-            logger.info("Updating store to include new added data only.")
-
-            if new_version:
-                self._store.add(version=version_str, dataset=data, compressor=compressor, filters=filters)
+            if has_existing_data and plan.new_version:
+                date_keys = [new_daterange_str]
             else:
-                self._store.overwrite(
-                    version=version_str, dataset=data, compressor=compressor, filters=filters
-                )
-            # Only save the current daterange string for this version
+                date_keys = [*current_date_keys, new_daterange_str]
+        elif plan.action == "copy_insert":
+            self._store.add(
+                version=version_str,
+                dataset=data,
+                compressor=compressor,
+                filters=filters,
+                copy_current=True,
+            )
+            date_keys = [*current_date_keys, new_daterange_str]
+        elif plan.action == "replace":
+            logger.info("Updating store to include new added data only.")
+            self._store.overwrite(version=version_str, dataset=data, compressor=compressor, filters=filters)
             date_keys = [new_daterange_str]
-        elif if_exists == "combine":
+        elif plan.action == "upsert":
             logger.info("Updating store by combining new data with existing.")
             self._store.update(version=version_str, dataset=data, compressor=compressor, filters=filters)
-            date_keys = [get_representative_daterange_str(self.get_data())]
-        # If we don't know what (i.e. we've got "auto") to do we'll raise an error
+            date_keys = [get_representative_daterange_str(self.get_data(version=version_str))]
         else:
-            # if_exists == "auto" (or at least... not "new" or "combine"), but we already have data
-            # and the new data overlaps
             raise DataOverlapError(
                 "Unable to add new data, because it overlaps with current data and `if_exists` is set to 'auto'. "
                 "To update current data in object store use `if_exists` input (see options in documentation)."
