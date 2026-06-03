@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Clarified datasource update/versioning behavior for `if_exists`, `save_current`, and overlap handling, including fixes for copied-version metadata and non-overlapping combine updates. [PR #1614](https://github.com/openghg/openghg/pull/1614)
 - Fixed handling of irregular fp time reindexing and missing "calibration_scale", also added the ability to detect "mf_mod_high_res"  for plot_comparison.[PR #1611](https://github.com/openghg/openghg/pull/1611)
 
+### Updated
+
+- Refactored `Datasource` to use `VersionedZarrStore` directly, removed `LocalZarrStore` and `openghg.store.storage`, and moved storage utilities into `openghg.storage`. [PR #1618](https://github.com/openghg/openghg/pull/1618)
+
 ### Added
 
 - Option to set location of openghg log via an environment variable `OPENGHG_LOG_PATH`. [PR #1607](https://github.com/openghg/openghg/pull/1607)

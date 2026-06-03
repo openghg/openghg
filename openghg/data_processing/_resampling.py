@@ -28,13 +28,12 @@ from collections import defaultdict
 from collections.abc import Callable, Sequence
 from functools import partial, wraps
 import logging
-from typing import Any, Concatenate, Literal
+from typing import Any, Concatenate, Literal, ParamSpec
 
 import numpy as np
 import pandas as pd
 import xarray as xr
 from openghg.util import Registry
-from typing_extensions import ParamSpec
 
 from ._attrs import rename, update_attrs
 from ._xarray_helpers import xr_sqrt
@@ -58,7 +57,9 @@ def add_averaging_attrs(func: ResampleFunctionType) -> ResampleFunctionType:
     """Decorator to add averaging attributes to result of resampling function."""
 
     @wraps(func)
-    def wrapper(ds: xr.Dataset, averaging_period: str, *args: P.args, **kwargs: P.kwargs) -> xr.Dataset:
+    def wrapper(
+        ds: xr.Dataset, averaging_period: str, *args: P.args, **kwargs: P.kwargs  # type: ignore[valid-type]
+    ) -> xr.Dataset:
         average_in_seconds = pd.Timedelta(averaging_period).total_seconds()
         avg_attrs = {"averaged_period": average_in_seconds, "averaged_period_str": averaging_period}
         return func(ds, averaging_period, *args, **kwargs).assign_attrs(avg_attrs)
