@@ -395,10 +395,10 @@ class ObjectStore(Generic[DatasourceT, T]):
         params, remainder = split_function_inputs({**metadata, **kwargs}, self._metadata_view.search)
 
         if "search_terms" in params:
+            params["search_terms"] = params["search_terms"] or {}
             params["search_terms"].update(**remainder)
         else:
             params["search_terms"] = remainder
-
         return params
 
     def _search(self, metadata: MetaData | None = None, **kwargs: Any) -> QueryResults:
