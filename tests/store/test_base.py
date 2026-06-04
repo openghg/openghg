@@ -3,6 +3,10 @@ from openghg.objectstore import get_writable_bucket
 from helpers import get_footprint_datapath
 
 
+def test_default_metakey_is_class_attribute():
+    assert BaseStore.metakey() == ""
+
+
 def test_files_checked_and_hashed():
     file1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
     file2 = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")

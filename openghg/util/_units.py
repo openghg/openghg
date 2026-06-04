@@ -1,8 +1,9 @@
 import logging
+import pint
+
 import cf_xarray.units  # noqa: F401  # Needed to register units
 from cf_xarray.units import units as cf_ureg
 import pint_xarray  # noqa: F401  # Needed to activate xarray pint accessor
-import pint
 import xarray as xr
 
 logger = logging.getLogger("openghg.util")
@@ -10,7 +11,8 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 # convert scientific notation to volume ratios
-unit_mapping = {"1e-6": "ppm", "1e-9": "ppb", "1e-12": "ppt", "1e-15": "ppq"}
+unit_mapping = {"1e-6": "ppm", "1e-9": "ppb", "1e-12": "ppt", "1e-15": "ppq", "1e-09": "ppb", "1e-06": "ppm"}
+
 cf_ureg.preprocessors.append(lambda x: unit_mapping.get(x, x))
 
 # remove spaces from some non-standard units ("per mil", "per meg", etc.)
@@ -20,13 +22,27 @@ cf_ureg.define("@alias ppm = parts_per_million")  # this works for converting, b
 cf_ureg.define("ppb = 1e-9 mol/mol = parts_per_billion")
 cf_ureg.define("ppt = 1e-12 mol/mol = parts_per_trillion")
 cf_ureg.define("ppq = 1e-15 mol/mol = parts_per_quadrillion")
+cf_ureg.define("@alias hour = Hour = HOUR = Hours = HOURS")
 cf_ureg.define("@alias permille = permil = per_mil = per_mille")
 cf_ureg.define("permeg = 0.001 permille = per_meg")
 cf_ureg.define("hpa = 100.0 Pa = hectopascal = hPa")
 
 # Degrees_north is not an accepted CF unit, but we encounter it
+# Add these lines before the alias definitions
+cf_ureg.define("degrees_north = degree")
+cf_ureg.define("degrees_east = degree")
+
+# Now you can safely add aliases
 cf_ureg.define("@alias degrees_north = Degrees_north")
 cf_ureg.define("@alias degrees_east = Degrees_east")
+cf_ureg.define("@alias degrees_north = Degrees_North = DEGREES_NORTH")
+cf_ureg.define("@alias degrees_north = degree_north = Degree_north = DEGREE_NORTH")
+cf_ureg.define("@alias degrees_north = Degrees_N = DEGREES_N")
+cf_ureg.define("@alias degrees_north = Degree_N = DEGREE_N")
+cf_ureg.define("@alias degrees_east = Degrees_East = DEGREES_EAST")
+cf_ureg.define("@alias degrees_east = degree_east = Degree_east = DEGREE_EAST")
+cf_ureg.define("@alias degrees_east = Degrees_E = DEGREES_E")
+cf_ureg.define("@alias degrees_east = Degree_E = DEGREE_E")
 
 cf_ureg.define(
     "degrees_west = degree = degrees_west = Degrees_west = degrees_W = degreesW = degree_west = degree_W = degreeW"
@@ -55,7 +71,7 @@ def openghg_format(unit, registry):  # type: ignore
 
 
 cf_ureg.formatter.default_format = "openghg"
-cf_ureg.case_sensitive = False
+cf_ureg.case_sensitive = True
 
 
 def convert_units(ds: xr.Dataset, target_units: dict) -> None:

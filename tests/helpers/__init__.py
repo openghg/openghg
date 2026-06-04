@@ -15,6 +15,7 @@ from .helpers import (
     get_retrieval_datapath,
     get_surface_datapath,
     get_obspack_datapath,
+    get_met_datapath,
     glob_files,
     key_to_local_filepath,
     print_dict_diff,

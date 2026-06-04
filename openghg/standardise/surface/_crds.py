@@ -264,10 +264,8 @@ def _read_metadata(filepath: Path) -> dict:
     split_filename = str(filepath.name).split(".")
 
     if len(split_filename) < 4:
-        raise ValueError(
-            "Error reading metadata from filename. The expected format is \
-            {site}.{instrument}.{sampling period}.{height}.dat"
-        )
+        raise ValueError("Error reading metadata from filename. The expected format is \
+            {site}.{instrument}.{sampling period}.{height}.dat")
 
     site = split_filename[0]
     instrument = split_filename[1]

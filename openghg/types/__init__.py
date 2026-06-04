@@ -9,6 +9,7 @@ from ._enum import (
     FootprintTypes,
     BoundaryConditions,
     EulerianModelTypes,
+    MetTypes,
     DataTypes,
 )
 from ._errors import (

@@ -3,7 +3,6 @@ from collections.abc import Iterable
 import logging
 import math
 
-
 __all__ = [
     "null_metadata_values",
     "not_set_metadata_values",

@@ -298,9 +298,9 @@ def test_merge_null_values_ignore():
         ({"tag": "decc"}, {"tag": ["gemma"]}, {"tag": ["decc", "gemma"]}),
         ({"tag": ["decc"]}, {"tag": ["gemma", "gemma_v2"]}, {"tag": ["decc", "gemma", "gemma_v2"]}),
         (
-            {'tag': ['gemma', 'gemma_v2']},
-            {'tag': ['gemma', 'gemma_v2', 'gemma_v3']},
-            {'tag': ['gemma', 'gemma_v2', 'gemma_v3']}
+            {"tag": ["gemma", "gemma_v2"]},
+            {"tag": ["gemma", "gemma_v2", "gemma_v3"]},
+            {"tag": ["gemma", "gemma_v2", "gemma_v3"]},
         ),
         (
             {"site": "bsd", "inlet": "10m", "tag": "decc"},
@@ -331,4 +331,3 @@ def test_merge_and_extend_dict(left, right, expected_output):
     assert right == right_copy
 
     assert output == expected_output
-

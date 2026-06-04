@@ -416,7 +416,7 @@ def define_stored_data_filename(
                 name_components = name_components[obs_type]
             except KeyError:
                 raise ValueError(
-                    f"If name_components is specified as a dict this should use the obs_type values for the keys. Currently: {list(name_components.keys())}"  # type:ignore
+                    f"If name_components is specified as a dict this should use the obs_type values for the keys. Currently: {list(name_components.keys())}"  # type: ignore
                 )
 
         if "surface" in obs_type:

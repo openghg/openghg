@@ -142,11 +142,9 @@ def test_scenario_infer_inputs_ch4():
     assert bc_time[0] == Timestamp("2012-08-01T00:00:00")
 
 
-def test_scenario_infer_inputs_co2():
-    """
-    Test ModelScenario can find data for co2 including specific co2 footprint.
-    """
-
+@pytest.fixture
+def model_scenario_co2():
+    """Fixture to create model scenario object with co2 data for testing"""
     start_date = "2014-07-01"
     end_date = "2014-08-01"
 
@@ -158,7 +156,7 @@ def test_scenario_infer_inputs_co2():
     species = "co2"
     source = "natural-rtot"
 
-    model_scenario = ModelScenario(
+    scenario = ModelScenario(
         site=site,
         species=species,
         inlet=inlet,
@@ -169,6 +167,23 @@ def test_scenario_infer_inputs_co2():
         end_date=end_date,
     )
 
+    return { "scenario_co2": scenario,
+                "start_date" : "2014-07-01",
+                "end_date" : "2014-08-01",
+                "site" : "tac",
+                "domain" : "TEST",
+                "inlet" : "100m",
+                "network" : "DECC",
+                "species" : "co2",
+                "source" : "natural-rtot"}
+
+
+def test_scenario_infer_inputs_co2(model_scenario_co2):
+    """
+    Test ModelScenario can find data for co2 including specific co2 footprint.
+    """
+
+    model_scenario = model_scenario_co2.get("scenario_co2")
     # Check data is being found and stored
     assert model_scenario.obs is not None
     assert model_scenario.footprint is not None
@@ -176,9 +191,9 @@ def test_scenario_infer_inputs_co2():
     assert model_scenario.bc is not None
 
     # Check attributes are being assigned correctly
-    assert model_scenario.site == site
-    assert model_scenario.species == species
-    assert model_scenario.flux_sources == [source]
+    assert model_scenario.site == model_scenario_co2.get("site")
+    assert model_scenario.species == model_scenario_co2.get("species")
+    assert model_scenario.flux_sources == [model_scenario_co2.get("source")]
 
     # Check data stored is as expected
     # Obs data - time range
@@ -191,7 +206,7 @@ def test_scenario_infer_inputs_co2():
     obs_mf = obs_data["mf"]
     assert np.isclose(obs_mf[0], 396.99)
     assert np.isclose(obs_mf[-1], 388.51)
-    assert "1e-6" in obs_mf.attrs["units"]
+    assert "1e-06" in obs_mf.attrs["units"]
 
     # Footprint data - species
     assert model_scenario.footprint.metadata["species"] == "co2"
@@ -204,13 +219,45 @@ def test_scenario_infer_inputs_co2():
     assert footprint_time[-1] == Timestamp("2014-07-04T00:00:00")  # Test file - reduced time axis
 
     # Flux data - stored as dictionary and contains expected time
-    flux_data = model_scenario.fluxes[source].data
+    flux_data = model_scenario.fluxes[model_scenario_co2.get("source")].data
     flux_time = flux_data["time"]
     assert flux_time[0] == Timestamp("2014-06-29T18:00:00")  # Test file - reduced time axis
 
     # BC data
     assert model_scenario.bc.metadata["species"] == "co2"
     # TODO: Could add more checks here if needed.
+
+
+def test_plot_comparison(model_scenario_co2):
+    """Test plot_comparison method can be run for co2 data and produces expected output."""
+    model_scenario = model_scenario_co2.get("scenario_co2")
+    fig = model_scenario.plot_comparison()
+
+    assert fig is not None
+    assert fig.data[0].name == "CO<sub>2</sub> - TAC (100m) - WMO-X2019"
+    assert fig.data[1].name == "Modelled CO2: natural-rtot"
+
+
+def test_plot_comparison_uses_mf_mod_high_res(model_scenario_co2, monkeypatch):
+    """plot_comparison should use mf_mod_high_res data when available."""
+    model_scenario = model_scenario_co2.get("scenario_co2")
+    time = pd.date_range("2014-07-01", periods=3, freq="h")
+    modelled_obs = xr.Dataset(
+        {
+            "mf_mod_high_res": ("time", np.array([100.0, 200.0, 300.0])),
+        },
+        coords={"time": time},
+    )
+
+    monkeypatch.setattr(model_scenario, "calc_modelled_obs", lambda **kwargs: modelled_obs)
+
+    fig = model_scenario.plot_comparison(baseline=None)
+
+    assert fig is not None
+    modelled_traces = [trace for trace in fig.data if trace.name == "Modelled CO2: natural-rtot"]
+    assert modelled_traces, "Expected modelled CO2 trace was not found in plot output."
+    modelled_trace = modelled_traces[0]
+    np.testing.assert_allclose(np.asarray(modelled_trace.y), modelled_obs["mf_mod_high_res"].values)
 
 
 def test_scenario_flux_extend_co2():
@@ -569,7 +616,7 @@ def test_footprints_data_merge(model_scenario_1):
     assert attributes["resample_to"] == "coarsest"
 
     for dv in ("mf_mod", "bc_mod"):
-        assert combined_dataset[dv].attrs["units"] == "1e-9"
+        assert combined_dataset[dv].attrs["units"] == "1e-09"
 
     error_in_mod_obs = np.mean(
         np.abs(combined_dataset.mf - combined_dataset.mf_mod - combined_dataset.bc_mod)

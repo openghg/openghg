@@ -33,7 +33,9 @@ def get_domain_info(domain_filepath: pathType | None = None) -> dict[str, Any]:
     return domain_info_json
 
 
-def find_domain(domain: str, domain_filepath: pathType | None = None) -> tuple[ndarray, ndarray]:
+def find_domain(
+    domain: str, domain_filepath: pathType | None = None
+) -> tuple[ndarray, ndarray, float, float]:
     """Finds the latitude and longitude values in degrees associated
     with a given domain name.
 
@@ -41,7 +43,7 @@ def find_domain(domain: str, domain_filepath: pathType | None = None) -> tuple[n
         domain: Pre-defined domain name
         domain_filepath: Alternative domain info file. Defaults to openghg_defs input.
     Returns:
-        array, array : Latitude and longitude values for the domain in degrees.
+        array, array, float, float : Latitude and longitude values for the domain in degrees. Alongwith lat_increment and lon_increment values in degrees.
     """
 
     domain_info = get_domain_info(domain_filepath)
@@ -58,8 +60,10 @@ def find_domain(domain: str, domain_filepath: pathType | None = None) -> tuple[n
     # Extract or create latitude and longitude data
     latitude = _get_coord_data("latitude", domain_data, domain)
     longitude = _get_coord_data("longitude", domain_data, domain)
+    lats_increment = float(domain_data["latitude_increment"])
+    lons_increment = float(domain_data["longitude_increment"])
 
-    return latitude, longitude
+    return latitude, longitude, lats_increment, lons_increment
 
 
 def _get_coord_data(coord: str, data: dict[str, Any], domain: str) -> ndarray:
@@ -312,16 +316,18 @@ def check_coord_alignment(data: XrDataLikeMatch, domain: str, coord: str) -> XrD
 
     coords_in = data[coord].values
 
-    true_lats, true_lons = find_domain(domain)
+    true_lats, true_lons, true_lats_inrement, true_lons_increment = find_domain(domain)
     if coord in ["lat", "latitude"]:
         true_coords = true_lats
+        true_increment = true_lats_inrement
     elif coord in ["lon", "longitude"]:
         true_coords = true_lons
+        true_increment = true_lons_increment
 
     if len(coords_in) != len(true_coords):
         raise ValueError(f"length of {coord} coordinates does not match those in openghg {domain} domain")
 
-    if not np.allclose(coords_in, true_coords, atol=0, rtol=0.05):
+    if not np.allclose(coords_in, true_coords, atol=0.4 * true_increment, rtol=0):
         raise ValueError(
             f"input {coord} coordinates vary significantly from openghg {domain} domain. Please check correct domain and coordinates selected"
         )

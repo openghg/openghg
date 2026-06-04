@@ -131,7 +131,7 @@ def _plot_single_timeseries(
     dataset = to_plot.data
 
     species = metadata["species"]
-    existing_calibration_scale = metadata["calibration_scale"]
+    existing_calibration_scale = metadata.get("calibration_scale", None)
 
     if calibration_scale is not None:
         target_scale = calibration_scale
@@ -156,14 +156,20 @@ def _plot_single_timeseries(
 
     species_string = _latex2html(species_info[synonyms(species, lower=False)]["print_string"])
 
+    scale_for_label = metadata.get("calibration_scale")
+
+    if scale_for_label is None:
+        logger.warning("'calibration_scale' not found in metadata.")
+        scale_for_label = "unknown"
+
     if "satellite" in metadata:
         satellite = metadata["satellite"]
         inlet = "column"
-        legend_text = f"{species_string} - {satellite.upper()} ({inlet}) - {metadata['calibration_scale']}"
+        legend_text = f"{species_string} - {satellite.upper()} ({inlet}) - {scale_for_label}"
     else:
         site = metadata["site"]
         inlet = metadata["inlet"]
-        legend_text = f"{species_string} - {site.upper()} ({inlet}) - {metadata['calibration_scale']}"
+        legend_text = f"{species_string} - {site.upper()} ({inlet}) - {scale_for_label}"
 
     x_data = dataset[xvar] if xvar is not None else dataset.time
 

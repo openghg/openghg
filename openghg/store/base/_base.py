@@ -17,7 +17,7 @@ from xarray import Dataset
 from openghg.objectstore import get_object_from_json, exists, set_object_from_json
 from openghg.objectstore import locking_object_store
 from openghg.store._data_schema import DataSchema
-from openghg.store.storage import ChunkingSchema, chunk_size_in_megabytes
+from openghg.storage import ChunkingSchema, chunk_size_in_megabytes
 from openghg.types import (
     DatasourceLookupError,
     StandardiseError,
@@ -27,7 +27,6 @@ from openghg.types import (
 from openghg.util import timestamp_now, to_lowercase, hash_file, normalise_to_filepath_list
 
 from .._metakeys_config import get_metakeys
-
 
 T = TypeVar("T", bound="BaseStore")
 
@@ -43,6 +42,7 @@ class BaseStore:
     _data_type = ""
     _root = "root"
     _uuid = "root_uuid"
+    _metakey: str = ""
 
     def __init__(self, bucket: str) -> None:
         # from openghg.objectstore import get_object_from_json, exists
@@ -53,8 +53,6 @@ class BaseStore:
         self._file_hashes: dict[str, str] = {}
         # Hashes of previously stored data from other data platforms
         self._retrieved_hashes: dict[str, dict] = {}
-        # Where we'll store this object's metastore
-        self._metakey = ""
 
         if exists(bucket=bucket, key=self.key()):
             data = get_object_from_json(bucket=bucket, key=self.key())
@@ -1318,12 +1316,3 @@ class BaseStore:
         raise NotImplementedError("Ranking is being reworked and will be reactivated in a future release.")
         rank_dict: dict = self._rank_data.to_dict()
         return rank_dict
-
-    def clear_datasources(self) -> None:
-        """Remove all Datasources from the object
-
-        Returns:
-            None
-        """
-        self._datasource_uuids.clear()
-        self._file_hashes.clear()

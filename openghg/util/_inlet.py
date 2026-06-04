@@ -151,17 +151,42 @@ def format_inlet(
     # If we were unable to cast inlet as a float
     # check if inlet ends with unit or unit derivative
     # e.g. "magl" and "masl" would need to replaced with "m" or be removed
-    for value in unit_options:
-        if inlet.endswith(value):
+    for unit_option in unit_options:
+        if inlet.endswith(unit_option):
             if unit_needed:
-                inlet = inlet.replace(value, units)
+                inlet = inlet.replace(unit_option, units)
             else:
-                inlet = inlet.rstrip(value)
+                inlet = inlet.rstrip(unit_option)
             break
     # else:
     #     raise ValueError(f"Did not recognise input for inlet: {inlet}")
 
     return str(inlet)
+
+
+def extract_inlet_value(
+    inlet: str,
+    units: str = "m",
+) -> float:
+    """
+    Extract the numerical inlet value from an inlet string. This checks this is in
+    the correct format first (using format_inlet) and then extracts the number.
+
+    Args:
+        inlet: Inlet / Height value in the specified units
+        units: Units for the inlet value ("m" by default)
+    Returns:
+        float: Numerical value for the inlet
+    """
+
+    inlet = format_inlet(inlet, units, special_keywords=None)
+
+    try:
+        inlet_value = float(inlet)
+    except ValueError:
+        inlet_value = float(inlet.strip(units))
+
+    return inlet_value
 
 
 def extract_height_name(

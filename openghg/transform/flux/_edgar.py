@@ -48,7 +48,7 @@ import pathlib
 import re
 import zipfile
 from collections import namedtuple
-from typing import Any, Optional, cast
+from typing import Any, cast, TypeAlias
 import logging
 import numpy as np
 import xarray as xr
@@ -56,8 +56,11 @@ from numpy import ndarray
 
 from openghg.standardise.meta import assign_flux_attributes, define_species_label
 from openghg.store import infer_date_range
+from openghg.transform import regrid_uniform_cc
 from openghg.util import (
     clean_string,
+    cut_data_extent,
+    has_monthly_period,
     molar_mass,
     synonyms,
     find_coord_name,
@@ -65,15 +68,14 @@ from openghg.util import (
     timestamp_now,
 )
 
-
 logger = logging.getLogger("openghg.transform.flux")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-ArrayType = Optional[ndarray | xr.DataArray]
+ArrayType: TypeAlias = ndarray | xr.DataArray | None
 
 
-_edgar_known_versions = ("v432", "v50", "v60", "v70", "v80")
+_edgar_known_versions = ("v432", "v4.3.2", "v50", "v5.0", "v60", "v6.0", "v70", "v7.0", "v80", "v8.0")
 
 
 # TODO: make this work for...
@@ -125,7 +127,14 @@ def assemble_edgar_metadata(
         if valid_version:
             metadata["version"] = version
         else:
-            if clean_string(metadata["version"]) not in known_versions:
+            metadata_version = metadata.get("version")
+            if metadata_version is None:
+                raise ValueError(
+                    "Unable to infer EDGAR version from filename."
+                    " Please pass `edgar_version` as an argument or include a readable `_readme.html`."
+                )
+
+            if clean_string(metadata_version) not in known_versions:
                 if version is not None:
                     raise ValueError(
                         f"Unable to infer EDGAR version ({version})."
@@ -137,7 +146,7 @@ def assemble_edgar_metadata(
                         f" Please pass as an argument (one of {known_versions})"
                     )
             else:
-                metadata["version"] = clean_string(metadata["version"])
+                metadata["version"] = clean_string(metadata_version)
 
         source_from_file = metadata["source"]
         if source_from_file in ("TOTALS", ""):
@@ -165,8 +174,6 @@ def parse_edgar(
 ) -> dict:
     """
     Read and parse input EDGAR data.
-    Notes: Only accepts annual 2D grid maps in netcdf (.nc) format for now.
-           Does not accept monthly data yet.
 
     EDGAR data is global on a 0.1 x 0.1 grid. This function allows products
     to be created for a given year which cover specific regions (and matches
@@ -200,7 +207,7 @@ def parse_edgar(
         dict: Dictionary of data
 
     TODO: Allow date range to be extracted rather than year?
-    TODO: Add monthly parsing and sector stacking options
+    TODO: Add sector stacking option
     """
     period = None
 
@@ -238,19 +245,19 @@ def parse_edgar(
 
     FileInfo = namedtuple("FileInfo", "path metadata")
     files_by_year: dict[int, FileInfo] = {}
+    file_info_errors: list[ValueError] = []
     for data_file in data_files:
         try:
             metadata = assemble_edgar_metadata(data_file, species, edgar_version)
-        except ValueError:
+        except ValueError as exc:
+            file_info_errors.append(exc)
             continue
         else:
-            # Check if data is actually monthly "...2015_1" etc. - can't parse yet
-            if "month" in metadata:
-                raise NotImplementedError("Unable to parse monthly EDGAR data at present.")
-
             files_by_year[metadata["year"]] = FileInfo(data_file, metadata)
 
     if not files_by_year:
+        if file_info_errors:
+            raise file_info_errors[0]
         raise ValueError(f"Unable to extract EDGAR file info from any files in {datapath}.")
 
     try:
@@ -289,69 +296,26 @@ def parse_edgar(
     kg_to_g = 1e3
 
     flux_da = edgar_ds[name]
+
+    if len(flux_da.dims) < 2:
+        raise ValueError(
+            f"Expected data variable '{name}' to contain 2 or 3 dimensions (including time),"
+            f" but '{name}' has {len(flux_da.dims)} dimensions: {flux_da.dims}."
+        )
+
     flux_da = flux_da * kg_to_g / species_molar_mass
     units = "mol/m2/s"
 
     # TODO: some options for f-gases (.emi files) have different units...
     # need to catch this
-
-    lat_name = find_coord_name(flux_da, options=["lat", "latitude"])
-    lon_name = find_coord_name(flux_da, options=["lon", "longitude"])
-    if lat_name is None or lon_name is None:
-        raise ValueError(
-            f"Could not find '{lat_name}' or '{lon_name}' in EDGAR file.\n"
-            " Please check this is a 2D grid map."
-        )
-
-    # Check range of longitude values and convert to -180 - +180
-    flux_da = convert_internal_longitude(
-        flux_da, lon_name=lon_name
-    )  # TODO is this creating NaNs for East Asia domain?
-
-    lat_out, lon_out = _check_lat_lon(domain, lat_out, lon_out)
-
-    if lat_out is not None and lon_out is not None:
-        # Will produce import error if xesmf has not been installed.
-        from openghg.transform import regrid_uniform_cc
-        from openghg.util import cut_data_extent
-
-        # To improve performance of regridding algorithm cut down the data
-        # to match the output grid (with buffer).
-        flux_da_cut = cut_data_extent(flux_da, lat_out, lon_out)
-        flux_values = flux_da_cut.values
-
-        lat_in_cut = flux_da_cut[lat_name]
-        lon_in_cut = flux_da_cut[lon_name]
-
-        # area conservative regrid
-        flux_values = regrid_uniform_cc(flux_values, lat_out, lon_out, lat_in_cut, lon_in_cut)
-    else:
-        lat_out = flux_da[lat_name]
-        lon_out = flux_da[lon_name]
-        flux_values = flux_da.values
-
-    edgar_attrs = edgar_ds.attrs
+    flux_da = _regrid_edgar_to_domain(flux_da, domain, lat_out=lat_out, lon_out=lon_out).rename("flux")
+    em_data = flux_da.to_dataset()
+    em_data.attrs = edgar_ds.attrs
 
     # Check for "time" dimension and add if missing.
-    flux_ndim = flux_values.ndim
-    time_name = "time"
-    if time_name in flux_da:
-        time = flux_da[time_name].values
-        flux = flux_values  # TODO: this was missing... is this correct?? otherwise 'flux' might be undefined
-    elif time_name not in flux_da and flux_ndim == 2:
+    if "time" not in em_data.dims and len(em_data.dims) == 2:
         time = np.array([f"{year}-01-01"], dtype="datetime64[ns]")
-        flux = flux_values[np.newaxis, ...]
-    else:
-        raise ValueError(
-            f"Expected data variable '{name}' to contain 2 or 3 dimensions (including time),"
-            f" but '{name}' has {flux_ndim} dimensions: {flux_da.dims}."
-        )
-
-    dims = ("time", "lat", "lon")
-
-    em_data = xr.Dataset(
-        {"flux": (dims, flux)}, coords={"time": time, "lat": lat_out, "lon": lon_out}, attrs=edgar_attrs
-    )
+        em_data = em_data.expand_dims(time=time, axis=0)
 
     # Some attributes are numpy types we can't serialise to JSON so convert them
     # to their native types here
@@ -386,7 +350,18 @@ def parse_edgar(
 
     # Infer the date range associated with the flux data
     em_time = em_data.time
-    start_date, end_date, period_str = infer_date_range(em_time, filepath=edgar_file.name, period=period)
+    if em_time.size > 1:
+        # For multi-timestep EDGAR data, pd.infer_freq may not detect the frequency
+        # from irregular monthly timestamps (e.g. mid-month values like the 15th of each month).
+        # Use continuous=False so infer_date_range does not raise an error in this case.
+        # Auto-detect monthly period using the has_monthly_period helper.
+        if period is None and has_monthly_period(em_time):
+            period = "monthly"
+        start_date, end_date, period_str = infer_date_range(
+            em_time, filepath=edgar_file.name, period=period, continuous=False
+        )
+    else:
+        start_date, end_date, period_str = infer_date_range(em_time, filepath=edgar_file.name, period=period)
 
     prior_info_dict = {
         "EDGAR": {
@@ -467,7 +442,7 @@ def _check_lat_lon(
         # If domain is specified, attempt to extract lat/lon values from
         # pre-defined definitions.
         try:
-            lat_domain, lon_domain = find_domain(domain)
+            lat_domain, lon_domain = find_domain(domain)[:2]
         except ValueError:
             # If domain cannot be found and lat, lon values have not been
             # defined raise an error.
@@ -536,6 +511,44 @@ def _check_readme_data(readme_data: str) -> str | None:
     return edgar_version
 
 
+def _parse_edgar_filename(file_name: str) -> dict:
+    # remove unwanted parts like:
+    # FT2021, FT2022, etc
+    # GHG
+    # emi_nc, flx_nc
+    cleaning_regexps = [r"FT(19|20)\d{2}_", r"GHG_", r"_(emi|flx)(_nc)?", r"EDGAR_20\d{2}_"]
+    cleaning_regexps_joined = "|".join(cleaning_regexps)
+    cleaning_pat = re.compile(rf"({cleaning_regexps_joined})")
+
+    filename_clean = cleaning_pat.sub("", file_name)
+
+    # parse string of form:
+    # {version}_{species}_{optional co2 info}_{year}_{optional month}_{optional sector}_{optional resolution}
+    info_pat = re.compile(
+        r"^(?P<version>v\d[\.\d]*)_"  # capture version e.g. v432, v50, v8.0
+        r"(?P<species>[a-zA-Z\d-]+)_"  # capture species, e.g. CH4, c-C4F8, HFC-43-10-mee
+        r"((?P<co2_options>(excl|org)_short-cycle)(_org)?(_C)?_)?"  # optional, capture CO2 info
+        r"(?P<year>(19|20)\d{2})"  # capture year (might not end in _)
+        r"(_(?P<month>\d{1,2}))?"  # optionally capture month
+        r"(_(?P<sector>(\w+)))?"  # optionally capture sector, e.g. TOTALS, TNR_Ship, N2O, IPCC_4C_4D1_4D4
+        r"(\.(?P<resolution>\d\.\dx\d\.\d))?"  # optionally capture resolution, e.g. 0.1x0.1
+    )
+
+    monthly_sectoral_info_pat = re.compile(
+        r"(?P<species>[a-zA-Z\d-]+)_" r"(?P<year>(19|20)\d{2})_" r"(?P<sector>\w+)"
+    )
+
+    if m := info_pat.search(filename_clean):
+        return m.groupdict()
+    elif m := monthly_sectoral_info_pat.search(filename_clean):
+        return m.groupdict()
+    else:
+        # info_pat matches all files in known EDGAR versions
+        # (verified by searching all file names for these versions
+        # 18 March 2024)
+        raise ValueError(f"Did not recognise input file format: {file_name}")
+
+
 def _extract_file_info(edgar_file: pathlib.Path | zipfile.Path | str) -> dict:
     """
     Extract details from EDGAR filename.
@@ -571,38 +584,11 @@ def _extract_file_info(edgar_file: pathlib.Path | zipfile.Path | str) -> dict:
         edgar_file = pathlib.Path(edgar_file.name)  # zipfile.Path.stem is Python 3.11+
     filename = edgar_file.stem
 
-    # remove unwanted parts like:
-    # FT2021, FT2022, etc
-    # GHG
-    # emi_nc, flx_nc
-    cleaning_regexps = [r"FT(19|20)\d{2}_", r"GHG_", r"_(emi|flx)(_nc)?"]
-    cleaning_regexps_joined = "|".join(cleaning_regexps)
-    cleaning_pat = re.compile(rf"({cleaning_regexps_joined})")
-
-    filename_clean = cleaning_pat.sub("", filename)
-
-    # parse string of form:
-    # {version}_{species}_{optional co2 info}_{year}_{optional month}_{optional sector}_{optional resolution}
-    info_pat = re.compile(
-        r"^(?P<version>v\d[\.\d]*)_"  # capture version e.g. v432, v50, v8.0
-        r"(?P<species>[a-zA-Z\d-]+)_"  # capture species, e.g. CH4, c-C4F8, HFC-43-10-mee
-        r"((?P<co2_options>(excl|org)_short-cycle)(_org)?(_C)?_)?"  # optional, capture CO2 info
-        r"(?P<year>(19|20)\d{2})"  # capture year (might not end in _)
-        r"(_(?P<month>\d{1,2}))?"  # optionally capture month
-        r"(_(?P<sector>(\w+)))?"  # optionally capture sector, e.g. TOTALS, TNR_Ship, N2O, IPCC_4C_4D1_4D4
-        r"(\.(?P<resolution>\d\.\dx\d\.\d))?"  # optionally capture resolution, e.g. 0.1x0.1
-    )
-
-    if m := info_pat.search(filename_clean):
-        file_info = m.groupdict()
-    else:
-        # info_pat matches all files in known EDGAR versions
-        # (verified by searching all file names for these versions
-        # 18 March 2024)
-        raise ValueError(f"Did not recognise input file format: {filename}")
+    file_info = _parse_edgar_filename(filename)
 
     # make "source" string
-    co2_options = file_info.pop("co2_options") or ""
+    # monthly sectoral regex doesn't have co2_options...
+    co2_options = file_info.pop("co2_options", "") or ""
 
     sector = file_info.pop("sector") or ""
     sector = sector.replace("_", "-")
@@ -618,9 +604,9 @@ def _extract_file_info(edgar_file: pathlib.Path | zipfile.Path | str) -> dict:
     # year and month should be integers
     file_info["year"] = int(file_info["year"])
 
-    if file_info["month"] is not None:
+    if file_info.get("month") is not None:
         file_info["month"] = int(file_info["month"])
-    else:
+    elif "month" in file_info:
         del file_info["month"]
 
     # file_info["version"] = clean_string(file_info["version"])
@@ -630,6 +616,67 @@ def _extract_file_info(edgar_file: pathlib.Path | zipfile.Path | str) -> dict:
     #                      f"EDGAR versions: {_edgar_known_versions}.")
 
     return file_info
+
+
+def _normalise_lat_lon_coords(flux_da: xr.DataArray) -> xr.DataArray:
+    """Rename supported latitude/longitude coordinates to canonical lat/lon names."""
+    lat_name = find_coord_name(flux_da, options=["lat", "latitude"])
+    lon_name = find_coord_name(flux_da, options=["lon", "longitude"])
+
+    if lat_name is None or lon_name is None:
+        coords_present = ", ".join(map(str, flux_da.coords)) or "<none>"
+        raise ValueError(
+            "Could not find latitude/longitude coordinates in EDGAR file."
+            " Expected `lat`/`latitude` and `lon`/`longitude`."
+            f" Coordinates present: {coords_present}."
+        )
+
+    rename_dims = {}
+    if lat_name != "lat":
+        rename_dims[lat_name] = "lat"
+    if lon_name != "lon":
+        rename_dims[lon_name] = "lon"
+
+    if rename_dims:
+        flux_da = flux_da.rename(rename_dims)
+
+    return flux_da
+
+
+def _regrid_edgar_to_domain(
+    flux_da: xr.DataArray, domain: str | None = None, lat_out: ArrayType = None, lon_out: ArrayType = None
+) -> xr.DataArray:
+    lat_name = find_coord_name(flux_da, options=["lat", "latitude"])
+    lon_name = find_coord_name(flux_da, options=["lon", "longitude"])
+
+    if lat_name is None or lon_name is None:
+        coords_present = ", ".join(map(str, flux_da.coords)) or "<none>"
+        raise ValueError(
+            "Could not find latitude/longitude coordinates in EDGAR file."
+            " Expected `lat`/`latitude` and `lon`/`longitude`."
+            f" Coordinates present: {coords_present}."
+        )
+
+    # Check range of longitude values and convert to -180 - +180
+    flux_da = convert_internal_longitude(
+        flux_da, lon_name=lon_name
+    )  # TODO is this creating NaNs for East Asia domain?
+    flux_da = _normalise_lat_lon_coords(flux_da)
+
+    lat_out, lon_out = _check_lat_lon(domain, lat_out=lat_out, lon_out=lon_out)
+
+    if lat_out is not None and lon_out is not None and domain is not None:
+        # To improve performance of regridding algorithm cut down the data
+        # to match the output grid (with buffer).
+        flux_da_cut = cut_data_extent(flux_da, lat_out, lon_out)
+
+        if "time" in flux_da_cut.dims:
+            flux_da_cut = flux_da_cut.transpose("time", "lat", "lon")
+
+        # area conservative regrid
+        return regrid_uniform_cc(flux_da_cut, lat_out, lon_out)
+
+    return flux_da
 
 
 # def getedgarv5annualsectors(year, lon_out, lat_out, edgar_sectors, species='CH4'):

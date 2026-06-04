@@ -8,12 +8,40 @@ import xarray as xr
 import numpy as np
 import pandas as pd
 
-from openghg.util import find_domain, normalise_to_filepath_list, open_time_nc_fn, timestamp_now
+from openghg.util import (
+    find_domain,
+    normalise_to_filepath_list,
+    open_time_nc_fn,
+    timestamp_now,
+    cf_ureg,
+)
 from openghg.store import infer_date_range, update_zero_dim
 from openghg.retrieve import get_footprint
 
 logger = logging.getLogger("openghg.transform.boundary_conditions")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
+
+
+def get_cams_data_units(ds: xr.DataArray, species: str) -> str:
+    """Get unit of CAMS dataset.
+    Args:
+        ds: dataset from raw cams data from which extract the units
+        species: species of the data
+    Returns:
+        unit
+    """
+    species = species.upper()
+    if species not in ds:
+        raise ValueError(f"Species '{species}' not found in dataset.")
+    try:
+        units_from_data = ds[species].attrs["units"]
+        parsed_units = cf_ureg.parse_expression(units_from_data)
+        if not parsed_units.dimensionless:
+            raise ValueError(f"Invalid units for '{species}'.  Not dimensionless: {units_from_data}")
+        units = str(parsed_units.magnitude)
+    except Exception as e:
+        raise ValueError(f"Could not parse units: {units_from_data}") from e
+    return units
 
 
 def interp1d_np(data: np.ndarray, x: np.ndarray, xi: np.ndarray, **kwargs: Any) -> np.ndarray:
@@ -74,7 +102,7 @@ def cams_to_domain(
         lon = fp["lon"].values
         height = fp["height"].values
     else:
-        lat, lon = find_domain(domain)
+        lat, lon = find_domain(domain)[:2]
         height = np.linspace(500.0, 19500.0, 20, endpoint=True)
 
     lat_n = ds.lat.where(ds.lat > lat.max()).min()
@@ -82,9 +110,13 @@ def cams_to_domain(
     lon_e = ds.lon.where(ds.lon > lon.max()).min()
     lon_w = ds.lon.where(ds.lon < lon.min()).max()
 
-    z = 0.5 * (ds.altitude.isel(hlevel=slice(0, -1)).values + ds.altitude.isel(hlevel=slice(1, None)).values)
+    vertical_interface_height = get_vertical_interface_height(ds)
+    z = 0.5 * (
+        vertical_interface_height.isel(hlevel=slice(0, -1)).values
+        + vertical_interface_height.isel(hlevel=slice(1, None)).values
+    )
     ds = ds.assign_coords(
-        {"z": (tuple([dim if dim != "hlevel" else "level" for dim in ds.altitude.dims]), z)}
+        {"z": (tuple([dim if dim != "hlevel" else "level" for dim in vertical_interface_height.dims]), z)}
     )
 
     north = ds[["species", "z"]].sel(lat=lat_n, lon=slice(lon_w, lon_e)).drop_vars("lat")
@@ -99,6 +131,29 @@ def cams_to_domain(
         "vmr_w": xr_interp_fn(west.species, "level", height, "z").interp(lat=lat).astype("float32"),
     }
     return xr.Dataset(data_vars)
+
+
+def get_vertical_interface_height(ds: xr.Dataset) -> xr.DataArray:
+    """Return the vertical interface height variable used by CAMS files.
+
+    Args:
+        ds: CAMS dataset containing either ``altitude`` or
+            ``height_above_reference_ellipsoid``.
+
+    Returns:
+        Vertical interface heights for the CAMS dataset.
+
+    Raises:
+        ValueError: If neither supported vertical interface height variable is present.
+    """
+    if "altitude" in ds:
+        return ds["altitude"]
+    if "height_above_reference_ellipsoid" in ds:
+        return ds["height_above_reference_ellipsoid"]
+    raise ValueError(
+        "Could not find CAMS vertical interface heights. Expected 'altitude' or "
+        "'height_above_reference_ellipsoid'."
+    )
 
 
 def get_resample_args(xr_time: xr.DataArray, species: str, period: str) -> dict:
@@ -177,10 +232,14 @@ def _check_and_set_params(
 
     for file in filepath:
         file_keywords = file.name.split("_")
-        if file_keywords[0] != "cams73" or file_keywords[3] != "conc" and file_keywords[-1][-3:] != ".nc":
+        if len(file_keywords) < 4 or file_keywords[0] != "cams73" or not file.name.endswith(".nc"):
             raise ValueError(
                 "Filenames not in a proper format: expected something like cams73_*_*_conc_*.nc. Please don't alter the names from the unzipped CAMS files."
             )
+        if len(file_keywords) > 4 and file_keywords[3] == "conc":
+            detected_input_observations = ("_").join(file_keywords[4:-1])
+        else:
+            detected_input_observations = ("_").join(file_keywords[3:-1])
 
         if species and species.lower() != file_keywords[2]:
             raise ValueError(
@@ -194,11 +253,11 @@ def _check_and_set_params(
             )
         cams_version_check.append(file_keywords[1])
 
-        if input_observations and input_observations not in ["mix", ("_").join(file_keywords[3:-1])]:
+        if input_observations and input_observations not in ["mix", detected_input_observations]:
             raise ValueError(
-                f"Input input_observations is {input_observations} but input_observations detected in {file} is {('_').join(file_keywords[3:-1])}."
+                f"Input input_observations is {input_observations} but input_observations detected in {file} is {detected_input_observations}."
             )
-        input_observations_check.append(("_").join(file_keywords[3:-1]))
+        input_observations_check.append(detected_input_observations)
 
     if len(set(species_check)) != 1:
         raise ValueError("Multiple species detected. Please standardise them separately")
@@ -267,6 +326,16 @@ def make_metadata(ds: xr.Dataset, period: str, continuous: bool, **kwargs: Any) 
     return metadata
 
 
+def set_units(ds: xr.Dataset, units: str) -> None:
+    """Set units of variables vmr_x
+    Args:
+        ds: dataset with variable vmr_n/s/w/e
+        units: units of the variables
+    """
+    for c in ["n", "s", "e", "w"]:
+        ds[f"vmr_{c}"].attrs["units"] = units
+
+
 def parse_cams(
     bc_input: str,
     domain: str,
@@ -310,8 +379,10 @@ def parse_cams(
         filepath_list, cams_version, species, input_observations
     )
 
+    units = None
     with xr_open_fn(filepath).chunk(chunks) as ds:
-        # Be sure that data are sorted in ascending order (not the case for n2o latitude)
+
+        units = get_cams_data_units(ds, species)
         ds = ds.sortby(list(ds.dims))
 
         # Resample data
@@ -329,7 +400,7 @@ def parse_cams(
         ds = ds.rename({"latitude": "lat", "longitude": "lon", species.upper(): "species"})
 
         # Interpolate vmrn/s/e/w variables
-        bc_data = cams_to_domain(ds, "EUROPE", get_footprint_kwargs=get_footprint_kwargs)
+        bc_data = cams_to_domain(ds, domain, get_footprint_kwargs=get_footprint_kwargs)
 
         # Create time dimension if not present
         if "time" in bc_data.coords:
@@ -347,6 +418,12 @@ def parse_cams(
     )
 
     bc_data.attrs.update(add_attrs)
+
+    if units is None:
+        raise ValueError("Units could not be determined from data.")
+    else:
+        # set_unit
+        set_units(bc_data, units)
 
     # create metadata
     metadata = make_metadata(

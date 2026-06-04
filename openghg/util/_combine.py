@@ -11,7 +11,6 @@ from xarray.core.types import CompatOptions
 
 from openghg.types import HasMetadataAndData
 
-
 T = TypeVar("T", bound=HasMetadataAndData)  # generic type for classes with .metadata and .data attributes
 
 

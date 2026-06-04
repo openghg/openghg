@@ -61,17 +61,13 @@ We'll first install and update some of the installation tools
 
    pip install --upgrade pip wheel setuptools
 
-Now, making sure we're in the root of the OpenGHG repository we just cloned, install OpenGHG's requirements and its developer requirements.
+Now, making sure we're in the root of the OpenGHG repository we just cloned, install OpenGHG's development dependencies.
 
 .. code-block:: bash
 
-   pip install -r requirements.txt -r requirements-dev.txt
+   pip install -e ".[dev]"
 
-Finally install OpenGHG itself. The ``-e`` / ``--editable`` flag here tells ``pip`` to install the OpenGHG repo in develop mode.
-
-.. code-block:: bash
-
-   pip install -e .
+This installs OpenGHG in editable mode (``-e`` / ``--editable`` flag) with all development dependencies defined in ``pyproject.toml``.
 
 Now OpenGHG is installed please move on to :ref:`Configuring the object store<Configuring the object store>`.
 

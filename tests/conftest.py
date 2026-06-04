@@ -9,7 +9,6 @@ from pathlib import Path
 import pytest
 from helpers import clear_test_stores, get_info_datapath, temporary_store_paths
 
-
 tmp_store_paths = temporary_store_paths()
 
 from openghg.store import get_metakey_defaults

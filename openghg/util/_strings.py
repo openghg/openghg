@@ -8,19 +8,25 @@ __all__ = ["clean_string", "to_lowercase"]
 
 
 @overload
-def clean_string(to_clean: str) -> str: ...
+def clean_string(
+    to_clean: str | float | bool, keep_special_characters: str | list | None = ["_", "-", "."]
+) -> str: ...
 
 
 @overload
-def clean_string(to_clean: None) -> None: ...
+def clean_string(to_clean: None, keep_special_characters: str | list | None = ["_", "-", "."]) -> None: ...
 
 
-def clean_string(to_clean: str | None) -> str | None:
+def clean_string(
+    to_clean: str | float | bool | None, keep_special_characters: str | list | None = ["_", "-", "."]
+) -> str | None:
     """Returns a lowercase string with only alphanumeric
-    characters and underscores.
+    characters and any other characters specified by the keep_special_characters input.
 
     Args:
         to_clean: String to clean
+        keep_special_characters: Additional non-alphanumeric characters to keep.
+            Default = ["_", "-", "."] (underscores, dashes and full stops)
     Returns:
         str or None: Clean string
     """
@@ -32,16 +38,42 @@ def clean_string(to_clean: str | None) -> str | None:
     if isinstance(to_clean, bool):
         return str(to_clean).lower()
 
-    try:
-        # This might be used with numbers
-        if is_number(to_clean):
-            return str(to_clean)
+    if is_number(to_clean):
+        return str(to_clean)
 
+    # From this point make sure to_clean is a string
+    to_clean = str(to_clean)
+
+    if keep_special_characters is None:
+        special_characters = [""]
+    elif isinstance(keep_special_characters, str):
+        special_characters = [keep_special_characters]
+    else:
+        special_characters = keep_special_characters.copy()
+
+    # Check if "_" is included in the list of `keep_special_characters`
+    # This needs a special case because `\w` being used in our main
+    # regex substitution already includes an underscore - "A-Za-z0-9_"
+    underscore = "_"
+    if underscore in special_characters:
+        keep_underscore = True
+        special_characters.remove(underscore)
+    else:
+        keep_underscore = False
+
+    keep_regex = re.escape("".join(special_characters))
+
+    try:
         # Removes all whitespace
         cleaner = re.sub(r"\s+", "", to_clean, flags=re.UNICODE).lower()
-        # Removes non-alphanumeric characters but keep underscores
-        # cleanest = re.sub(r"\W+", "", cleaner)
-        cleanest = re.sub(r"[^\w-]+", "", cleaner)
+
+        # Keep unicode alphanumeric, _, and keep additional special chars
+        to_keep = rf"[^\w{keep_regex}]+"
+        cleanest = re.sub(to_keep, "", cleaner)
+
+        # Explicitly remove underscores if not keeping
+        if not keep_underscore:
+            cleanest = cleanest.replace(underscore, "")
     except TypeError:
         return to_clean
 

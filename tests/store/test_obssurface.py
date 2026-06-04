@@ -84,7 +84,7 @@ def test_metadata_tac_crds(min_uuids_fixture, hourly_uuids_fixture, bucket):
             species = result["species"]
             datasource = objstore.retrieve(uuid=result["uuid"])[0]
 
-            assert metadata_checker_obssurface(datasource.metadata(), species=species)
+            assert metadata_checker_obssurface(datasource.metadata, species=species)
 
             with datasource.get_data(version="latest") as data:
                 assert attributes_checker_obssurface(data.attrs, species=species)
@@ -1118,7 +1118,7 @@ def test_sync_surface_metadata_store_level(
 
     for res in standardised_data:
         datasource = get_datasource(bucket=bucket, uuid=res["uuid"], data_type="surface")
-        assert metadata_checker_obssurface(datasource.metadata(), species=res["species"])
+        assert metadata_checker_obssurface(datasource.metadata, species=res["species"])
 
         with datasource.get_data(version="latest") as data:
             assert attributes_checker_obssurface(data.attrs, species=res["species"])

@@ -58,7 +58,9 @@ def test_sync_surface_metadata():
         "station_height_masl": 3209.5,
     }
 
-    updated_metadata, updated_attrs = sync_surface_metadata(metadata=metadata, attributes=attrs, data_type="surface")
+    updated_metadata, updated_attrs = sync_surface_metadata(
+        metadata=metadata, attributes=attrs, data_type="surface"
+    )
 
     new_meta = {
         "site": "sum",
@@ -192,6 +194,8 @@ def test_ensure_mismatch_replaced():
 
     attrs = {"site": "sum", "network": "NOAA", "measurement_type": "swallow-carrying-a-flask"}
 
-    meta_new, attr_new = sync_surface_metadata(metadata, attrs, update_mismatch="attributes", data_type="surface")
+    meta_new, attr_new = sync_surface_metadata(
+        metadata, attrs, update_mismatch="attributes", data_type="surface"
+    )
 
     assert meta_new["measurement_type"] == "swallow-carrying-a-flask"

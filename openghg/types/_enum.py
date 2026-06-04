@@ -22,6 +22,7 @@ class ColumnTypes(Enum):
 
     OPENGHG = "OPENGHG"
     TCCON = "TCCON"
+    GEMINI = "GEMINI"
 
 
 class ColumnSources(Enum):
@@ -69,6 +70,12 @@ class EulerianModelTypes(Enum):
     """For standardising eulerian model data"""
 
     OPENGHG = "OPENGHG"
+
+
+class MetTypes(Enum):
+    """For standardising meteorological data"""
+
+    ECMWF = "ECMWF"
 
 
 class DataTypes(Enum):

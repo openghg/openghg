@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 import xarray as xr
 from openghg.store import infer_date_range, update_zero_dim
+from openghg.types import TimePeriod
 from openghg.util import timestamp_tzaware
 from pandas import Timedelta, DateOffset
 from xarray import DataArray
@@ -120,6 +121,23 @@ def test_use_input_period(time_varies):
     assert start_date == timestamp_tzaware("2012-02-01")
     assert end_date == expected_end_date
     assert period_str == "1 month"
+
+
+def test_infer_period_requires_time_unit(time_varies, monkeypatch):
+    """Check a missing time unit raises a clear error before building a DateOffset."""
+    called = False
+
+    def parse_period_stub(_period):
+        nonlocal called
+        called = True
+        return TimePeriod(1, None)
+
+    monkeypatch.setattr("openghg.util.parse_period", parse_period_stub)
+
+    with pytest.raises(ValueError, match="Unable to infer a time unit"):
+        infer_date_range(time_varies, continuous=False, period="1 month")
+
+    assert called
 
 
 def test_update_zero_dim():
