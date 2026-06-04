@@ -4,6 +4,7 @@ This is used as a base for the other dataclasses and shouldn't be used directly.
 
 from itertools import islice
 import logging
+from typing import cast
 
 from pandas import Timestamp, Timedelta
 import xarray as xr
@@ -59,7 +60,7 @@ class _BaseData:
                 If a dictionary is passed, the attribute(s) will be retained and the new value assigned.
                 If a list/string is passed, the attribute(s) will be removed.
         """
-        from openghg.util import timestamp_epoch, timestamp_now
+        from openghg.util._time import timestamp_epoch, timestamp_now
 
         if data is None and uuid is None and version is None:
             raise ValueError("Must supply either data or uuid and version")
@@ -84,12 +85,18 @@ class _BaseData:
             self.data = data
         elif uuid is not None and version is not None:
             slice_time = False
+            slice_start_date: Timestamp | None = None
+            slice_end_date: Timestamp | None = None
             if start_date is not None or end_date is not None:
                 slice_time = True
                 if start_date is None:
-                    start_date = timestamp_epoch()
+                    slice_start_date = timestamp_epoch()
+                else:
+                    slice_start_date = cast(Timestamp, Timestamp(start_date))
                 if end_date is None:
-                    end_date = timestamp_now()
+                    slice_end_date = timestamp_now()
+                else:
+                    slice_end_date = cast(Timestamp, Timestamp(end_date))
 
             self._version = version
             self._bucket = metadata["object_store"]
@@ -110,18 +117,18 @@ class _BaseData:
                 sorted = True
 
                 if self.data.time.size > 1:
-                    assert start_date is not None
-                    assert end_date is not None
+                    if slice_start_date is None or slice_end_date is None:
+                        raise RuntimeError("Slice dates were not normalised.")
 
-                    start_timestamp = Timestamp(start_date) - Timedelta("1s")
+                    slice_start_date = slice_start_date - Timedelta("1s")
                     # TODO: May want to consider this extra 1s subtraction as end_date on data has already has -1s applied.
-                    end_timestamp = Timestamp(end_date) - Timedelta("1s")
+                    slice_end_date = slice_end_date - Timedelta("1s")
 
                     # TODO - I feel we should do this in a tider way
-                    start_date = start_timestamp.tz_localize(None)
-                    end_date = end_timestamp.tz_localize(None)
+                    slice_start_date = slice_start_date.tz_localize(None)
+                    slice_end_date = slice_end_date.tz_localize(None)
 
-                    self.data = self.data.sel(time=slice(start_date, end_date))
+                    self.data = self.data.sel(time=slice(slice_start_date, slice_end_date))
         else:
             raise ValueError(
                 "Must supply either data or uuid and version, cannot create an empty data object."
