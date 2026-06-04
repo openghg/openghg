@@ -85,7 +85,7 @@ classifiers = [
         "types-paramiko<=4.0.0.20260518",
         "types-pyyaml<=6.0.12.20250915",
         "types-requests<=2.33.0.20260518",
-        "types-toml<=0.10.8.20260518",
+        "types-toml<=0.10.8.20240310",
         "types-urllib3",
     ]
     doc = [
