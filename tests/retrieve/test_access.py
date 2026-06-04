@@ -518,6 +518,7 @@ def test_sanitise_negative_uncertainties_converts_negative_to_nan():
             "ch4": ("time", [1.8e-6, 1.9e-6, 2.0e-6]),
             "ch4_repeatability": ("time", [-9.99e-9, 1.5e-9, 2.0e-9]),
             "ch4_variability": ("time", [-9.99e-9, -9.99e-9, -9.99e-9]),
+            "quality_flag": ("time", [np.nan, np.nan, np.nan]),
         },
         coords={"time": times},
     )
@@ -532,6 +533,7 @@ def test_sanitise_negative_uncertainties_converts_negative_to_nan():
 
     # ch4_variability was entirely negative so it should be dropped
     assert "ch4_variability" not in result.data_vars
+    assert "quality_flag" in result.data_vars
 
     # The main species variable should be unchanged
     np.testing.assert_array_equal(result["ch4"].values, ds["ch4"].values)

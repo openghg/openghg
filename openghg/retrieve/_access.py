@@ -91,12 +91,12 @@ def _get_generic(
 
 
 def _sanitise_negative_uncertainties(data: Any, surface_keywords: dict) -> Any:
-    """Set negative uncertainty values to NaN and drop variables that are entirely NaN.
+    """Set negative uncertainty values to NaN and drop uncertainty variables that are entirely NaN.
 
     Negative values in repeatability/variability variables are fill-value flags
     (e.g. -9.99) used in flask and other measurement data.  This function
-    replaces them with NaN and then removes any variable whose values are all NaN
-    after that replacement.
+    replaces them with NaN and then removes repeatability/variability variables
+    whose values are all NaN after that replacement.
 
     Args:
         data: xarray Dataset with observation data.
@@ -110,10 +110,10 @@ def _sanitise_negative_uncertainties(data: Any, surface_keywords: dict) -> Any:
         dv for dv in data.data_vars if str(dv).endswith("repeatability") or str(dv).endswith("variability")
     ]
     for dv in uncertainty_data_vars:
-        cond = (data[dv] >= 0.0).compute()
+        cond = data[dv] >= 0.0
         data[dv] = data[dv].where(cond)
 
-    vars_to_delete = [var for var in data if data[var].isnull().all().values.item()]
+    vars_to_delete = [var for var in uncertainty_data_vars if data[var].isnull().all().values.item()]
     if vars_to_delete:
         logger.info(
             f"{vars_to_delete} contain only NaN values for obs. in {surface_keywords}. They are thus deleted."
