@@ -51,7 +51,7 @@ dependencies = [
     "plotly<=6.3.1",
     "pyvis<=0.3.2",
     "rapidfuzz<=3.14.5",
-    "requests<=2.25",
+    "requests>=2.25, <=2.25.1",
     "rich<=14.2.0",
     "scipy<=1.15.3",
     "sympy<=1.14.0",
@@ -111,6 +111,73 @@ classifiers = [
         "sphinx-issues<=3.0.1",
         "pydata-sphinx-theme<=0.15.2"
     ]
+
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["linux-64", "osx-64", "osx-arm64"]
+
+[tool.pixi.dependencies]
+# Use the oldest CI Python version for the reproducible Pixi development environment.
+python = "3.10.*"
+pip = "*"
+
+# Keep the fragile compiled scientific and HDF5/NetCDF stack on conda-forge.
+# These entries override matching PyPI dependencies from this project.
+cf_xarray = "<=0.10.6"
+cftime = "*"
+filelock = "<=3.29.0"
+flox = "<=0.10.4"
+hdf5 = "*"
+h5netcdf = ">=1.0.0,<=1.8.1"
+h5py = "<3.15"
+libnetcdf = "*"
+matplotlib = ">=3.5,<=3.10.7"
+msgpack-python = ">=1.0,<=1.1.1"
+nc-time-axis = "<=1.4.1"
+netcdf4 = ">=1.6.0,<=1.7.2"
+numcodecs = "<0.16"
+numexpr = "<=2.14.1"
+numpy = ">=2.0,<=2.3.3"
+pandas = ">=2.0,<=2.3.3"
+rapidfuzz = "<=3.14.5"
+scipy = ">=1.10,<=1.15.3"
+urllib3 = ">=1.26.3,<1.27"
+xarray = ">=2025.4.0,<=2025.9.1"
+zarr = "==2.18.3"
+
+[tool.pixi.pypi-dependencies]
+openghg = { path = ".", editable = true }
+
+[tool.pixi.environments]
+default = { features = [], solve-group = "default" }
+dev = { features = ["pixi-dev"], solve-group = "default" }
+
+[tool.pixi.feature.pixi-dev.dependencies]
+black = "==26.5.1"
+flake8 = "<=7.3.0"
+mypy = "==2.1.0"
+pre-commit = "<=4.6.0"
+pytest = "<=7.0.0"
+pytest-cov = "<=7.0.0"
+pytest-mock = "<=3.15.1"
+pytest-timeout = ">=2.4.0,<3.0.0"
+pytest-tornasync = "<=0.6.0.post2"
+types-paramiko = "<=4.0.0.20260518"
+types-pyyaml = "<=6.0.12.20250915"
+types-requests = "<=2.33.0.20260518"
+types-toml = "<=0.10.8.20240310"
+types-urllib3 = "*"
+
+[tool.pixi.feature.pixi-dev.pypi-dependencies]
+cfchecker = { git = "https://github.com/openghg/cf-checker", rev = "master" }
+msgpack-types = "<=0.7.0"
+requests-mock = "<=1.12.1"
+
+[tool.pixi.feature.pixi-dev.tasks]
+test = "pytest"
+test-storage = "pytest tests/storage/test_store.py tests/store/test_obssurface.py::test_read_CRDS tests/store/test_footprints.py::test_read_footprint_high_spatial_resolution"
+lint = "black --check openghg && flake8 openghg"
+typecheck = "mypy openghg"
 
 [tool.uv.sources]
 cfchecker = { git = "https://github.com/openghg/cf-checker", rev = "master" }

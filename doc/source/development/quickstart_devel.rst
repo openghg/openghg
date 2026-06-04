@@ -8,7 +8,7 @@ The main repository for OpenGHG can be found on `GitHub <https://github.com/open
 Setting up your computer
 =========================
 
-You'll need `git <https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`_ and Python >= 3.9, so please make sure you have both installed before continuing
+You'll need `git <https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`_ and Python >= 3.10, so please make sure you have both installed before continuing
 further.
 
 Clone OpenGHG
@@ -22,7 +22,7 @@ First we'll clone the repository and make sure we're on the ``devel`` branch. Th
    cd openghg
    git checkout devel
 
-Next we'll get a virtual environment setup using either ``pip`` or ``conda``.
+Next we'll get a virtual environment setup using ``pixi``, ``pip``, or ``conda``.
 
 Environments
 ------------
@@ -31,6 +31,42 @@ Here we cover the creation of an environment and the installation of OpenGHG int
 We'll install it in developer mode so that any changes you make to the code will automatically be available when you run commands. Similarly, if you
 run a ``git pull`` on the ``devel`` branch all changes made will be available to you straight away, without having to reinstall or update OpenGHG within
 the environment.
+
+``pixi``
+^^^^^^^^
+
+Pixi is the recommended development environment when working with
+NetCDF, HDF5, or Zarr data. It installs the compiled scientific,
+HDF5, and NetCDF stack from ``conda-forge`` and keeps this OpenGHG
+checkout editable.
+
+Install `Pixi <https://pixi.prefix.dev/latest/installation/>`__, then
+run:
+
+.. code-block:: bash
+
+   pixi install -e dev
+   pixi run -e dev python -c "import openghg, h5py, h5netcdf, netCDF4, xarray, zarr"
+
+Useful development commands:
+
+.. code-block:: bash
+
+   pixi run -e dev test
+   pixi run -e dev test-storage
+   pixi run -e dev lint
+   pixi run -e dev typecheck
+
+Avoid running commands such as ``pip install -U h5py h5netcdf netcdf4``
+inside the Pixi environment. That can replace Pixi's conda-forge
+HDF5/NetCDF packages with PyPI wheels and reintroduce binary
+incompatibilities.
+
+OpenGHG should now be installed, you can check this by opening ``ipython`` and running
+
+.. code-block:: ipython
+
+   In [1]: import openghg
 
 ``pip``
 ^^^^^^^
