@@ -23,20 +23,21 @@ from collections.abc import Callable, Generator, Iterable
 from contextlib import contextmanager
 import inspect
 from types import TracebackType
-from typing import Any, Generic, Literal, TypeAlias, TypeVar
+from typing import Any, TYPE_CHECKING, Generic, Literal, TypeAlias, TypeVar
 import warnings
 from typing_extensions import Self
 from uuid import uuid4
 
 import tinydb
-import xarray as xr
-
 from openghg.objectstore._datasource import DatasourceFactory, DatasourceT
 from openghg.objectstore._legacy_datasource import Datasource, get_legacy_datasource_factory
 from openghg.objectstore.metastore import MetaStore, TinyDBMetaStore, open_metastore
 from openghg.objectstore.metastore._classic_metastore import DataClassMetaStore, FileLock, LockingError
 from openghg.types import ObjectStoreError
 from openghg.util import split_function_inputs
+
+if TYPE_CHECKING:
+    import xarray as xr
 
 MetaData = dict[str, Any]
 QueryResults = list[MetaData]
@@ -708,17 +709,15 @@ def open_object_store(
     with open_metastore(bucket=bucket, data_type=data_type, mode=mode) as ms:
         ds_factory = get_legacy_datasource_factory(bucket=bucket, data_type=data_type, mode=mode)
 
-        # make metadata updater
-        from openghg.store.spec import define_data_type_classes
-
-        dc = define_data_type_classes()[data_type]
         try:
-            list_keys = dc(bucket=bucket).get_list_metakeys()
+            from openghg.store import find_list_metakeys
+
+            list_keys = find_list_metakeys(data_type=data_type, bucket=bucket)
         except (ObjectStoreError, ValueError):
             list_keys = None
         metadata_updater = make_metadata_updater_fn(extend_keys=list_keys)
 
-        object_store = ObjectStore[Datasource, xr.Dataset](
+        object_store = ObjectStore(
             metastore=ms, datasource_factory=ds_factory, metadata_updater=metadata_updater
         )
         yield object_store
@@ -823,7 +822,10 @@ class LockingObjectStore(ObjectStore[DatasourceT, T]):
         return super().delete(uuid)
 
 
-LockingObjectStoreType: TypeAlias = LockingObjectStore[Datasource, xr.Dataset]
+if TYPE_CHECKING:
+    LockingObjectStoreType: TypeAlias = LockingObjectStore[Datasource, xr.Dataset]
+else:
+    LockingObjectStoreType: TypeAlias = LockingObjectStore
 
 
 def locking_object_store(
@@ -836,7 +838,7 @@ def locking_object_store(
     ms = DataClassMetaStore(bucket=bucket, data_type=data_type)
     ds_factory = get_legacy_datasource_factory(bucket=bucket, data_type=data_type, mode=mode)
     metadata_updater = make_metadata_updater_fn(skip_keys=skip_keys, extend_keys=extend_keys)
-    object_store = LockingObjectStore[Datasource, xr.Dataset](
+    object_store = LockingObjectStore(
         metastore=ms, datasource_factory=ds_factory, metadata_updater=metadata_updater, lock=ms.lock
     )
 

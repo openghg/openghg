@@ -217,12 +217,60 @@ exposed to the Python help system.
 * Each module file contains an ``__all__`` variable that lists the
   specific items that should be imported.
 
-* The package ``__init__.py`` can be used to safely expose the required
-  functionality to the user with:
+* Import-heavy package ``__init__.py`` files should expose public names
+  lazily. Keep the public names in ``__all__`` and add a matching
+  ``_EXPORTS`` mapping from each public name to the private implementation
+  module that defines it:
 
 .. code-block:: python
 
-   from module import function_a, function_b
+   from importlib import import_module
+   from typing import Any
+
+   __all__ = ["function_a", "ClassB"]
+
+   _EXPORTS = {
+       "function_a": "._module_a",
+       "ClassB": "._module_b",
+   }
+
+   def __getattr__(name: str) -> Any:
+       try:
+           module_name = _EXPORTS[name]
+       except KeyError as exc:
+           raise AttributeError(f"module {__name__!r} has no attribute {name!r}") from exc
+
+       value = getattr(import_module(module_name, __name__), name)
+       globals()[name] = value
+       return value
+
+   def __dir__() -> list[str]:
+       return sorted(__all__)
+
+The invariant is ``set(__all__) == set(_EXPORTS)``. Tests should enforce
+this for each package using the lazy export pattern.
+
+Packages using this pattern must also include a sibling ``__init__.pyi``
+stub that re-exports the same public names from their implementation
+modules. The runtime ``__getattr__`` necessarily returns ``Any``, and the
+stub keeps ``mypy`` and other static checkers from losing the real function
+and class types while preserving lazy runtime imports.
+
+* The top-level ``openghg`` package uses the same idea for subpackages:
+  subpackages are listed in ``__all__`` and imported only when first
+  accessed.
+
+* Do not rely on importing a package ``__init__.py`` to trigger subclass
+  registration, xarray accessor registration, or other implementation-module
+  side effects. Discovery that must work before implementation modules are
+  imported should use declarative metadata instead. For example, store data
+  type discovery is maintained in ``openghg.store.spec`` rather than by
+  eagerly importing every store class.
+
+* If a previous import-time side effect is still useful, provide an explicit
+  opt-in helper rather than restoring the eager import. For example,
+  ``openghg.enable_pint_xarray()`` imports ``pint_xarray`` and registers the
+  xarray ``.pint`` accessor without making ``import openghg`` import xarray.
 
 This results in a clean API and documentation, with all extraneous information,
 e.g. external modules, hidden from the user. This is important when working

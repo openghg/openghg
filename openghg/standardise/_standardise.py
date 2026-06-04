@@ -31,7 +31,7 @@ def standardise(
     Returns:
         dict: Dictionary of result data.
     """
-    from openghg.store import get_data_class
+    from openghg.store._meta import get_data_class
 
     filepath_missing = filepath is None or (
         isinstance(filepath, (list, tuple)) and all(f is None for f in filepath)
@@ -795,7 +795,7 @@ def standardise_from_binary_data(
     returns:
         Dictionary of result data.
     """
-    from openghg.store import get_data_class
+    from openghg.store._meta import get_data_class
 
     dclass = get_data_class(data_type)
     bucket = get_writable_bucket(name=store)

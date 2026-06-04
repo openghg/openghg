@@ -28,7 +28,7 @@ from collections import defaultdict
 from collections.abc import Callable, Sequence
 from functools import partial, wraps
 import logging
-from typing import Any, Concatenate, Literal, ParamSpec
+from typing import Any, Literal
 
 import numpy as np
 import pandas as pd
@@ -45,21 +45,14 @@ logger = logging.getLogger("openghg.data_processing")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-# somewhat complicated typing for decorator:
-# we need to use `ParamSpec` to represent *args and **kwargs
-P = ParamSpec("P")
-
-# resampling functions take: a dataset, an averaging period (str), and possibly *args and **kwargs
-ResampleFunctionType = Callable[Concatenate[xr.Dataset, str, P], xr.Dataset]
+ResampleFunctionType = Callable[..., xr.Dataset]
 
 
 def add_averaging_attrs(func: ResampleFunctionType) -> ResampleFunctionType:
     """Decorator to add averaging attributes to result of resampling function."""
 
     @wraps(func)
-    def wrapper(
-        ds: xr.Dataset, averaging_period: str, *args: P.args, **kwargs: P.kwargs  # type: ignore[valid-type]
-    ) -> xr.Dataset:
+    def wrapper(ds: xr.Dataset, averaging_period: str, *args: Any, **kwargs: Any) -> xr.Dataset:
         average_in_seconds = pd.Timedelta(averaging_period).total_seconds()
         avg_attrs = {"averaged_period": average_in_seconds, "averaged_period_str": averaging_period}
         return func(ds, averaging_period, *args, **kwargs).assign_attrs(avg_attrs)
@@ -336,8 +329,8 @@ def variability_resample(ds: xr.Dataset, averaging_period: str, fill_zero: bool 
     return result
 
 
-# typing for `apply_funcs`
-DatasetOpType = Callable[Concatenate[xr.Dataset, P], xr.Dataset]
+# Functions in this registry are selected dynamically and often partially applied.
+DatasetOpType = Callable[..., xr.Dataset]
 
 
 def apply_funcs(
