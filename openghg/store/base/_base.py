@@ -17,7 +17,7 @@ from xarray import Dataset
 from openghg.objectstore import get_object_from_json, exists, set_object_from_json
 from openghg.objectstore import locking_object_store
 from openghg.store._data_schema import DataSchema
-from openghg.store.storage import ChunkingSchema, chunk_size_in_megabytes
+from openghg.storage import ChunkingSchema, chunk_size_in_megabytes
 from openghg.types import (
     DatasourceLookupError,
     StandardiseError,

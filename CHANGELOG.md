@@ -17,6 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed "xarray fails to decode time" by using pandas datetime conversion and storing as np.datetime64[ns].[PR #1608](https://github.com/openghg/openghg/pull/1608)
 - Clarified datasource update/versioning behavior for `if_exists`, `save_current`, and overlap handling, including fixes for copied-version metadata and non-overlapping combine updates. [PR #1614](https://github.com/openghg/openghg/pull/1614)
 - Fixed handling of irregular fp time reindexing and missing "calibration_scale", also added the ability to detect "mf_mod_high_res"  for plot_comparison.[PR #1611](https://github.com/openghg/openghg/pull/1611)
+- Fixed object store search and retrieve results to include datasource-managed metadata without mutating datasource records, while keeping raw metastore descriptor metadata authoritative. [PR #1652](https://github.com/openghg/openghg/pull/1652)
+
+### Updated
+
+- Refactored `Datasource` to use `VersionedZarrStore` directly, removed `LocalZarrStore` and `openghg.store.storage`, and moved storage utilities into `openghg.storage`. [PR #1618](https://github.com/openghg/openghg/pull/1618)
 
 ### Added
 

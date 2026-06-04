@@ -1,7 +1,7 @@
 """This module defines an interface for object stores.
 
 Object stores comprise a metastore for storing metadata
-and a collecton of data, which is accessible via the metadata.
+and a collection of data, which is accessible via the metadata.
 
 Data is organized into logical units called "objects" or "datasources".
 Datasources are accessed by a UUID, which is stored in the metastore along
@@ -11,21 +11,27 @@ An ObjectStore object coordinates the metastore and storage of data.
 In particular, it manages UUIDs and controls any operation that involves
 both metadata and data.
 
+The metastore attached to an ObjectStore is the raw persisted metastore.
+Search and retrieve operations use a private metastore view to include
+metadata stored on datasources without changing the persisted records.
+
 """
 
 from __future__ import annotations
 
 from collections.abc import Callable, Generator, Iterable
 from contextlib import contextmanager
+import inspect
 from types import TracebackType
 from typing import Any, TYPE_CHECKING, Generic, Literal, TypeAlias, TypeVar
 import warnings
 from typing_extensions import Self
 from uuid import uuid4
 
+import tinydb
 from openghg.objectstore._datasource import DatasourceFactory, DatasourceT
 from openghg.objectstore._legacy_datasource import Datasource, get_legacy_datasource_factory
-from openghg.objectstore.metastore import MetaStore, open_metastore
+from openghg.objectstore.metastore import MetaStore, TinyDBMetaStore, open_metastore
 from openghg.objectstore.metastore._classic_metastore import DataClassMetaStore, FileLock, LockingError
 from openghg.types import ObjectStoreError
 from openghg.util import split_function_inputs
@@ -42,12 +48,314 @@ Bucket = str
 MetadataUpdaterT = Callable[[QueryResults, Iterable[DatasourceT]], tuple[QueryResults, Iterable[DatasourceT]]]
 """Type for function that transforms query results and a list of datasources."""
 
+DATASOURCE_METADATA_OVERRIDE_KEYS = {
+    "end_date",
+    "latest_version",
+    "sampling_period",
+    "start_date",
+    "tag",
+    "timestamp",
+    "versions",
+}
+"""Datasource-managed canonical metadata keys that override raw metastore values.
+
+Raw metastore records remain authoritative for descriptor keys. These keys are
+maintained by datasource update paths, where values may be normalised or
+list-expanded before being returned in search and retrieve results.
+"""
+
 
 def _default_metadata_updater(
     metadata: QueryResults, datasources: Iterable[DatasourceT]
 ) -> tuple[QueryResults, Iterable[DatasourceT]]:
     """Default metadata updater for ObjectStore."""
     return metadata, datasources
+
+
+@contextmanager
+def _memory_metastore(records: QueryResults) -> Generator[TinyDBMetaStore, None, None]:
+    """Create an in-memory TinyDB metastore populated with metadata records.
+
+    Args:
+        records: Metadata records to make searchable.
+
+    Yields:
+        TinyDBMetaStore backed by a temporary MemoryStorage database.
+    """
+    with tinydb.TinyDB(storage=tinydb.storages.MemoryStorage) as database:
+        metastore = TinyDBMetaStore(database=database)
+        formatted_records = [{key.lower(): value for key, value in record.items()} for record in records]
+        if formatted_records:
+            database.insert_multiple(formatted_records)
+        yield metastore
+
+
+class _MergedMetadataView(Generic[DatasourceT]):
+    """Read view that combines raw metastore records with datasource metadata.
+
+    This class is not a persistence layer and does not implement MetaStore. It
+    reads raw candidates through the wrapped metastore, applies the metadata
+    updater, then filters the merged records. Search arguments named
+    `search_terms`, `search_functions`, `negative_lookup_keys`, and
+    `search_list_keys` mirror the search arguments used by ObjectStore and
+    TinyDBMetaStore.
+
+    Args:
+        metastore: Raw persisted metastore used for first-pass candidate lookup.
+        datasource_factory: Factory used to load datasources for candidate UUIDs.
+        metadata_updater: Callable that combines raw metadata and datasources
+            before final filtering.
+    """
+
+    def __init__(
+        self,
+        metastore: MetaStore,
+        datasource_factory: DatasourceFactory[DatasourceT],
+        metadata_updater: MetadataUpdaterT,
+    ) -> None:
+        self._metastore = metastore
+        self._datasource_factory = datasource_factory
+        self._metadata_updater = metadata_updater
+
+    def _load_datasource(self, uuid: UUID) -> DatasourceT:
+        return self._datasource_factory.load(uuid)
+
+    def _retrieve_candidates(
+        self, search_terms: MetaData | None = None, skip_uuids: set[UUID] | None = None
+    ) -> tuple[QueryResults, list[DatasourceT], QueryResults]:
+        """Retrieve raw candidates and apply datasource metadata updates.
+
+        Args:
+            search_terms: Exact search terms used for the first-pass raw
+                metastore lookup.
+            skip_uuids: UUIDs to exclude from the returned candidates.
+
+        Returns:
+            Tuple of updated metadata records, their corresponding datasources,
+            and raw records whose datasources could not be loaded.
+        """
+        skip_uuids = skip_uuids or set()
+        raw_results = []
+        datasources = []
+        missing_datasource_results = []
+        for result in self._metastore.search(search_terms=search_terms):
+            uuid = result["uuid"]
+            if uuid in skip_uuids:
+                continue
+            try:
+                datasource = self._load_datasource(uuid)
+            except (ObjectStoreError, LookupError):
+                missing_datasource_results.append(dict(result))
+                continue
+            raw_results.append(dict(result))
+            datasources.append(datasource)
+
+        updated_results, updated_datasources = self._metadata_updater(raw_results, datasources)
+        return list(updated_results), list(updated_datasources), missing_datasource_results
+
+    @staticmethod
+    def _candidate_search_terms(search_terms: MetaData) -> list[MetaData | None]:
+        """Generate raw metastore lookup terms for a merged metadata search.
+
+        Args:
+            search_terms: Exact metadata terms requested by the caller.
+
+        Returns:
+            Search terms for candidate lookups, ordered from narrowest to
+            broadest. The final `None` lookup loads all raw records when exact
+            terms were supplied.
+        """
+        if not search_terms:
+            return [{}]
+
+        broadened_terms = [
+            {key: value for key, value in search_terms.items() if key != key_to_drop}
+            for key_to_drop in search_terms
+        ]
+        return [search_terms, *broadened_terms, None]
+
+    @staticmethod
+    def _filter_results(
+        results: QueryResults,
+        search_terms: MetaData | None = None,
+        search_functions: dict[str, Callable] | None = None,
+        negative_lookup_keys: list[str] | None = None,
+        search_list_keys: dict | None = None,
+    ) -> QueryResults:
+        """Filter candidate records using TinyDBMetaStore search semantics.
+
+        Args:
+            results: Merged metadata records to filter.
+            search_terms: Exact metadata terms to match.
+            search_functions: Metadata keys and predicate functions to match.
+            negative_lookup_keys: Metadata keys that must be absent.
+            search_list_keys: Metadata list keys and values that must be present
+                in those lists.
+
+        Returns:
+            Records from `results` that match the search criteria.
+        """
+        if not results:
+            return []
+
+        with _memory_metastore(results) as metastore:
+            filtered_results = metastore.search(
+                search_terms=search_terms,
+                search_functions=search_functions,
+                negative_lookup_keys=negative_lookup_keys,
+                search_list_keys=search_list_keys,
+            )
+            if filtered_results or not (search_terms or search_list_keys):
+                return filtered_results
+
+            from openghg.util import to_lowercase
+
+            formatted_search_terms = to_lowercase(search_terms) if search_terms else search_terms
+            formatted_search_list_keys = (
+                to_lowercase(search_list_keys) if search_list_keys else search_list_keys
+            )
+            return metastore.search(
+                search_terms=formatted_search_terms,
+                search_functions=search_functions,
+                negative_lookup_keys=negative_lookup_keys,
+                search_list_keys=formatted_search_list_keys,
+            )
+
+    @staticmethod
+    def _filter_datasources(
+        filtered_results: QueryResults,
+        candidate_results: QueryResults,
+        datasources: list[DatasourceT],
+        attach_metadata: bool = False,
+    ) -> list[DatasourceT]:
+        """Return datasources corresponding to filtered metadata records.
+
+        Args:
+            filtered_results: Metadata records that survived final filtering.
+            candidate_results: Candidate metadata records before filtering.
+            datasources: Datasources corresponding to `candidate_results`.
+            attach_metadata: If True, update returned datasource objects in
+                memory with the corresponding merged metadata records.
+
+        Returns:
+            Datasources corresponding to `filtered_results`, preserving filtered
+            result order.
+        """
+        datasource_lookup = {
+            result["uuid"]: datasource for result, datasource in zip(candidate_results, datasources)
+        }
+        filtered_datasources = [datasource_lookup[result["uuid"]] for result in filtered_results]
+        if attach_metadata:
+            for result, datasource in zip(filtered_results, filtered_datasources):
+                metadata = getattr(datasource, "metadata", None)
+                if isinstance(metadata, dict):
+                    metadata.clear()
+                    metadata.update({key: value for key, value in result.items() if key != "object_store"})
+        return filtered_datasources
+
+    def retrieve(
+        self,
+        search_terms: MetaData | None = None,
+        search_functions: dict[str, Callable] | None = None,
+        negative_lookup_keys: list[str] | None = None,
+        search_list_keys: dict | None = None,
+        attach_metadata: bool = True,
+    ) -> tuple[QueryResults, list[DatasourceT]]:
+        """Retrieve merged metadata records and datasources matching search parameters.
+
+        Candidate lookup starts with exact raw metastore terms, broadens by
+        dropping exact terms one at a time, then loads all raw records. Final
+        filtering is applied once to the de-duplicated merged candidate set so
+        mixed fresh and stale raw metadata records can all be returned.
+
+        Args:
+            search_terms: Exact metadata terms to match.
+            search_functions: Metadata keys and predicate functions to match.
+            negative_lookup_keys: Metadata keys that must be absent.
+            search_list_keys: Metadata list keys and values that must be present
+                in those lists.
+            attach_metadata: If True, update returned datasource objects in
+                memory with their corresponding merged metadata records.
+
+        Returns:
+            Tuple containing matched merged metadata records and their
+            corresponding datasources.
+        """
+        search_terms = search_terms or {}
+
+        candidate_results: QueryResults = []
+        datasources: list[DatasourceT] = []
+        seen_uuids: set[UUID] = set()
+        exact_missing_datasource_results: QueryResults = []
+        exact_loaded_candidate_count = 0
+
+        for index, candidate_terms in enumerate(self._candidate_search_terms(search_terms)):
+            new_results, new_datasources, missing_datasource_results = self._retrieve_candidates(
+                search_terms=candidate_terms, skip_uuids=seen_uuids
+            )
+            if index == 0:
+                exact_missing_datasource_results = missing_datasource_results
+                exact_loaded_candidate_count = len(new_results)
+            candidate_results.extend(new_results)
+            datasources.extend(new_datasources)
+            seen_uuids.update(result["uuid"] for result in new_results)
+
+        filtered_results = self._filter_results(
+            candidate_results,
+            search_terms=search_terms,
+            search_functions=search_functions,
+            negative_lookup_keys=negative_lookup_keys,
+            search_list_keys=search_list_keys,
+        )
+        if filtered_results:
+            return filtered_results, self._filter_datasources(
+                filtered_results, candidate_results, datasources, attach_metadata=attach_metadata
+            )
+
+        if exact_missing_datasource_results and exact_loaded_candidate_count == 0:
+            uuid = exact_missing_datasource_results[0]["uuid"]
+            raise ObjectStoreError(f"No Datasource with uuid {uuid} found")
+
+        return [], []
+
+    def search(
+        self,
+        search_terms: MetaData | None = None,
+        search_functions: dict[str, Callable] | None = None,
+        negative_lookup_keys: list[str] | None = None,
+        search_list_keys: dict | None = None,
+    ) -> QueryResults:
+        """Search merged metastore and datasource metadata.
+
+        Args:
+            search_terms: Exact metadata terms to match.
+            search_functions: Metadata keys and predicate functions to match.
+            negative_lookup_keys: Metadata keys that must be absent.
+            search_list_keys: Metadata list keys and values that must be present
+                in those lists.
+
+        Returns:
+            Merged metadata records matching the search criteria.
+        """
+        results, _ = self.retrieve(
+            search_terms=search_terms,
+            search_functions=search_functions,
+            negative_lookup_keys=negative_lookup_keys,
+            search_list_keys=search_list_keys,
+            attach_metadata=False,
+        )
+        return results
+
+    def select(self, key: str) -> list[Any]:
+        """Select values from merged metadata records.
+
+        Args:
+            key: Metadata key to select.
+
+        Returns:
+            Values stored at `key` in all merged metadata records.
+        """
+        return [result[key] for result in self.search()]
 
 
 class ObjectStore(Generic[DatasourceT, T]):
@@ -62,6 +370,11 @@ class ObjectStore(Generic[DatasourceT, T]):
 
         # use default metadata updater if None is passed
         self.metadata_updater = metadata_updater or _default_metadata_updater
+        self._metadata_view = _MergedMetadataView(
+            metastore=self.metastore,
+            datasource_factory=self.datasource_factory,
+            metadata_updater=self.metadata_updater,
+        )
 
     def __enter__(self) -> Self:
         return self
@@ -76,6 +389,18 @@ class ObjectStore(Generic[DatasourceT, T]):
 
     def close(self) -> None:
         self.metastore.close()
+
+    def _search_params(self, metadata: MetaData | None = None, **kwargs: Any) -> dict:
+        """Prepare metastore search parameters from metadata and keyword arguments."""
+        metadata = metadata or {}
+        params, remainder = split_function_inputs({**metadata, **kwargs}, self._metadata_view.search)
+
+        if "search_terms" in params:
+            params["search_terms"] = params["search_terms"] or {}
+            params["search_terms"].update(**remainder)
+        else:
+            params["search_terms"] = remainder
+        return params
 
     def _search(self, metadata: MetaData | None = None, **kwargs: Any) -> QueryResults:
         """Internal metastore search.
@@ -92,17 +417,13 @@ class ObjectStore(Generic[DatasourceT, T]):
         Returns:
             Query results (list of search results)
         """
-        metadata = metadata or {}
+        params = self._search_params(metadata, **kwargs)
+        search_parameters = inspect.signature(self.metastore.search).parameters
+        if any(parameter.kind == inspect.Parameter.VAR_KEYWORD for parameter in search_parameters.values()):
+            return self.metastore.search(**params)
 
-        # get arguments for search function
-        params, remainder = split_function_inputs({**metadata, **kwargs}, self.metastore.search)
-
-        if "search_terms" in params:
-            params["search_terms"].update(**remainder)
-        else:
-            params["search_terms"] = remainder
-
-        return self.metastore.search(**params)
+        compatible_params = {key: value for key, value in params.items() if key in search_parameters}
+        return self.metastore.search(**compatible_params)
 
     def get_datasource(self, uuid: UUID) -> DatasourceT:
         """Get data stored at given uuid."""
@@ -132,10 +453,10 @@ class ObjectStore(Generic[DatasourceT, T]):
         return self.metadata_updater(search_results, datasources)
 
     def search(self, metadata: MetaData | None = None, **kwargs: Any) -> QueryResults:
-        """Search the metastore.
+        """Search object store metadata.
 
-        Adds metadata from Datasources via `self.metadata_updater`, if Datasource
-        metadata is available.
+        Uses the metastore as the first-pass index, then filters the merged
+        metastore and Datasource metadata returned to users.
 
         Args:
             metadata: metadata to narrow search by
@@ -144,8 +465,9 @@ class ObjectStore(Generic[DatasourceT, T]):
         Returns:
             Query results (list of search results)
         """
+        params = self._search_params(metadata, **kwargs)
         try:
-            search_results, _ = self._retrieve(metadata, **kwargs)
+            search_results = self._metadata_view.search(**params)
         except ObjectStoreError as e:
             # Datasource not found? just warn...
             warnings.warn(f"Metadata found without corresponding Datasource {e}.")
@@ -165,12 +487,20 @@ class ObjectStore(Generic[DatasourceT, T]):
         Returns:
             list of Datasources corresponding to query.
         """
-        _, datasources = self._retrieve(metadata, **kwargs)
+        params = self._search_params(metadata, **kwargs)
+        _, datasources = self._metadata_view.retrieve(**params)
         return list(datasources)
 
     def get_uuids(self, metadata: MetaData | None = None) -> list[UUID]:
         metadata = metadata or {}
-        results = self.metastore.search(metadata)
+        if not metadata:
+            results = self.metastore.search()
+        else:
+            try:
+                results = self._metadata_view.search(search_terms=metadata)
+            except ObjectStoreError as e:
+                warnings.warn(f"Metadata found without corresponding Datasource {e}.")
+                results = self._search(metadata)
         return [result["uuid"] for result in results]
 
     @property
@@ -192,9 +522,13 @@ class ObjectStore(Generic[DatasourceT, T]):
         Raises:
             ObjectStoreError if the given metadata is already associated with a UUID.
         """
-        if uuids := self.get_uuids(metadata):
+        existing_results = self._search(metadata)
+        existing_uuids = [result["uuid"] for result in existing_results]
+        merged_uuids = [uuid for uuid in self.get_uuids(metadata) if uuid not in existing_uuids]
+
+        if uuids := [*existing_uuids, *merged_uuids]:
             raise ObjectStoreError(
-                f"Cannot create new Datasource: this metadata is already associated with UUID f{uuids[0]}."
+                f"Cannot create new Datasource: this metadata is already associated with UUID {uuids[0]}."
             )
 
         uuid: UUID = str(uuid4())
@@ -278,17 +612,40 @@ def _update_one(
 
     Updates one pair of metadata and datasource.
 
-    Note that this only changes the input if the datasource has metadata and an `add_metadata`
-    method, like the standard datasource we use for storing data in zarr stores.
+    Metastore metadata is normalised using the same lowercasing rules as
+    Datasource metadata and takes precedence for descriptor keys in returned
+    records. Datasource metadata fills keys missing from the metastore, extends
+    configured list keys, and takes precedence for Datasource-managed storage
+    keys. The Datasource itself is not persisted.
     """
-    if hasattr(d, "add_metadata") and hasattr(d, "metadata"):
-        # update datasource by adding missing metadata
-        d_keys = list(d.metadata.keys())  # type: ignore
-        to_add = {k: v for k, v in r.items() if k not in d_keys}
-        d.add_metadata(metadata=to_add, skip_keys=skip_keys, extend_keys=extend_keys)  # type: ignore
+    if not hasattr(d, "metadata"):
+        return dict(r), d
 
-        r.update(d.metadata)  # type: ignore
-    return r, d
+    from openghg.util import merge_and_extend_dict, to_lowercase
+
+    def list_metadata(metadata: MetaData) -> MetaData:
+        """Return list-key metadata with string values wrapped in lists."""
+        metadata_extend = {}
+        for key in extend_keys:
+            if key in metadata:
+                value = metadata.pop(key)
+                if isinstance(value, str):
+                    value = [value]
+                metadata_extend[key] = value
+        return metadata_extend
+
+    extend_keys = extend_keys or []
+    raw_metadata = to_lowercase(dict(r), skip_keys=skip_keys)
+    datasource_metadata = to_lowercase(d.metadata, skip_keys=skip_keys)  # type: ignore
+    raw_extend = list_metadata(raw_metadata)
+    datasource_extend = list_metadata(datasource_metadata)
+
+    merged_metadata = dict(raw_metadata)
+    for key, value in datasource_metadata.items():
+        if key not in merged_metadata or key in DATASOURCE_METADATA_OVERRIDE_KEYS:
+            merged_metadata[key] = value
+
+    return merge_and_extend_dict(merge_and_extend_dict(merged_metadata, raw_extend), datasource_extend), d
 
 
 def make_metadata_updater_fn(
@@ -313,11 +670,13 @@ def make_metadata_updater_fn(
     def metadata_updater(
         search_results: QueryResults, datasources: Iterable[DatasourceT]
     ) -> tuple[QueryResults, Iterable[DatasourceT]]:
-        """Update metastore and datasource metadata by combining their metadata.
+        """Merge metastore and datasource metadata in returned search records.
 
-        The returned metastore results and datasources will have the same
-        metadata, which is a combination of the unique metadata from each
-        source.
+        The returned metastore results include metadata from both sources.
+        Metastore metadata takes precedence over Datasource metadata for
+        descriptor keys; Datasource metadata takes precedence for
+        Datasource-managed storage keys. Datasource objects are returned
+        unchanged.
 
         Args:
             search_results: results of metastore search
@@ -325,7 +684,7 @@ def make_metadata_updater_fn(
             search results.
 
         Returns:
-            updated search results and datasources with updated metadata.
+            updated search results and corresponding datasources.
 
         """
         # handle empty search
