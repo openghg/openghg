@@ -40,8 +40,28 @@ NetCDF, HDF5, or Zarr data. It installs the compiled scientific,
 HDF5, and NetCDF stack from ``conda-forge`` and keeps this OpenGHG
 checkout editable.
 
-Install `Pixi <https://pixi.prefix.dev/latest/installation/>`__, then
-run:
+Install Pixi directly with one of the following commands.
+
+On macOS or Linux, use the official installer:
+
+.. code-block:: bash
+
+   curl -fsSL https://pixi.sh/install.sh | sh
+
+If ``curl`` is unavailable, use ``wget``:
+
+.. code-block:: bash
+
+   wget -qO- https://pixi.sh/install.sh | sh
+
+On macOS with Homebrew:
+
+.. code-block:: bash
+
+   brew install pixi
+
+Then create the editable OpenGHG development environment from this
+checkout:
 
 .. code-block:: bash
 

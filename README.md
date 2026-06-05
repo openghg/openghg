@@ -18,7 +18,27 @@ OpenGHG supports Python 3.10 and later on Linux or MacOS. To install the release
 
 OpenGHG reads and writes NetCDF/HDF5 data through `xarray`, `h5netcdf`, `h5py`, `netcdf4`, and `zarr`. The Pixi environment in this repository installs the compiled scientific, HDF5, and NetCDF stack from `conda-forge` and installs the local OpenGHG checkout in editable mode.
 
-Install [Pixi](https://pixi.prefix.dev/latest/installation/), then run:
+Install Pixi directly with one of the following commands.
+
+On macOS or Linux, use the official installer:
+
+```bash
+curl -fsSL https://pixi.sh/install.sh | sh
+```
+
+If `curl` is unavailable, use `wget`:
+
+```bash
+wget -qO- https://pixi.sh/install.sh | sh
+```
+
+On macOS with Homebrew:
+
+```bash
+brew install pixi
+```
+
+Then create the editable OpenGHG development environment from a cloned checkout:
 
 ```bash
 git clone https://github.com/openghg/openghg.git

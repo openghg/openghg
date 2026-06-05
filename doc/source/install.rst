@@ -46,8 +46,28 @@ workspace in this repository installs the compiled scientific,
 HDF5, and NetCDF stack from ``conda-forge`` and installs the local
 OpenGHG checkout in editable mode.
 
-Install `Pixi <https://pixi.prefix.dev/latest/installation/>`__, then
-run:
+Install Pixi directly with one of the following commands.
+
+On macOS or Linux, use the official installer:
+
+.. code-block:: bash
+
+    curl -fsSL https://pixi.sh/install.sh | sh
+
+If ``curl`` is unavailable, use ``wget``:
+
+.. code-block:: bash
+
+    wget -qO- https://pixi.sh/install.sh | sh
+
+On macOS with Homebrew:
+
+.. code-block:: bash
+
+    brew install pixi
+
+Then create the editable OpenGHG development environment from a cloned
+checkout:
 
 .. code-block:: bash
 
