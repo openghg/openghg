@@ -28,6 +28,14 @@ logger.setLevel(logging.DEBUG)
 
 
 def parse_to_zarr_kwargs(to_zarr_kwargs: dict) -> dict:
+    """Filter keyword arguments accepted by xarray's zarr writer.
+
+    Args:
+        to_zarr_kwargs: Candidate keyword arguments for ``xr.Dataset.to_zarr``.
+
+    Returns:
+        Dictionary containing supported zarr writer keyword arguments.
+    """
     accepted_keys = ["write_empty_chunks", "zarr_format", "storage_options"]
     result = {}
     for k, v in to_zarr_kwargs.items():
@@ -100,6 +108,7 @@ class ZarrStore(Store, Generic[ZST]):
 
     @property
     def _xarray_store(self) -> Any:
+        """Return the store using xarray's broader runtime store typing."""
         return self.store
 
     @property
@@ -116,12 +125,15 @@ class ZarrStore(Store, Generic[ZST]):
         return OverlapDeterminer(index=self.index, **self.index_options)
 
     def __bool__(self) -> bool:
+        """Return True if the current underlying zarr store contains data."""
         return not store_is_empty(self.store)
 
     def clear(self) -> None:
+        """Clear all keys from the current underlying zarr store."""
         clear_store(self.store)
 
     def bytes_stored(self) -> int:
+        """Return the number of bytes stored in the current zarr store."""
         return store_byte_size(self.store)
 
     def _get(self, sort: bool = True) -> xr.Dataset:
@@ -137,9 +149,21 @@ class ZarrStore(Store, Generic[ZST]):
         return cast(xr.Dataset, result)
 
     def get(self) -> xr.Dataset:
+        """Return the stored dataset sorted by the append dimension."""
         return self._get(sort=True)
 
     def insert(self, data: xr.Dataset, on_overlap: Literal["error", "ignore"] = "error") -> None:
+        """Insert data into the zarr store.
+
+        Args:
+            data: Dataset to write or append to the store.
+            on_overlap: If "error", raise when new append-dimension values overlap
+                stored values. If "ignore", only non-overlapping values are appended.
+
+        Raises:
+            DataOverlapError: If overlapping values are found and ``on_overlap`` is
+                "error".
+        """
         if store_is_empty(self.store):
             encoding = get_zarr_encoding(data.data_vars, self.compressor, self.filters)
             encoding.update(self.encoding)
@@ -172,6 +196,19 @@ class ZarrStore(Store, Generic[ZST]):
             )
 
     def update(self, data: xr.Dataset, on_nonoverlap: Literal["error", "ignore"] = "error") -> None:
+        """Update existing data in the zarr store.
+
+        Args:
+            data: Dataset containing replacement values.
+            on_nonoverlap: If "error", raise when input append-dimension values do
+                not overlap stored values. If "ignore", only overlapping values are
+                updated.
+
+        Raises:
+            UpdateError: If the store is empty, if non-overlapping values are found
+                and ``on_nonoverlap`` is "error", or if index options map multiple
+                input values to the same stored value.
+        """
 
         if store_is_empty(self.store):
             raise UpdateError("Cannot update empty Store.")

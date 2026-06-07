@@ -1,4 +1,12 @@
-"""Compatibility helpers for zarr-python storage APIs."""
+"""Compatibility helpers for zarr-python storage APIs.
+
+This module centralises the zarr v2/v3 store API differences needed by
+OpenGHG storage. It provides factories for memory and local filesystem stores,
+helpers for key iteration, prefix clearing, empty checks, byte sizing, and a
+copy wrapper. Zarr v3 store methods are asynchronous, so helpers synchronise
+awaitable store operations before returning to the synchronous OpenGHG storage
+API.
+"""
 
 from __future__ import annotations
 
@@ -15,7 +23,13 @@ import zarr.storage
 
 
 class ZarrStoreLike(Protocol):
-    """Common marker protocol for zarr v2 and v3 store objects."""
+    """Minimal mapping protocol for zarr stores used by OpenGHG.
+
+    Zarr v2 stores expose mapping methods directly, while zarr v3 stores expose
+    asynchronous methods for most I/O. Compatibility helpers handle those
+    asynchronous methods where needed; this protocol records the current
+    mapping-shaped surface that xarray and OpenGHG's zarr v2 tests still use.
+    """
 
     def __getitem__(self, key: str) -> Any: ...
 
@@ -117,11 +131,8 @@ def clear_store(store: ZarrStoreLike, prefix: str | None = None) -> None:
     """
     normalised_prefix = _normalise_prefix(prefix)
     rmdir = getattr(store, "rmdir", None)
-    if rmdir is not None:
-        if normalised_prefix is None:
-            rmdir()
-        else:
-            rmdir(normalised_prefix)
+    if normalised_prefix is None and rmdir is not None:
+        rmdir()
         return None
 
     if normalised_prefix is None:
@@ -130,11 +141,6 @@ def clear_store(store: ZarrStoreLike, prefix: str | None = None) -> None:
             _delete_store_keys(store, iter_store_keys(store))
         else:
             _call_maybe_async(clear)
-        return None
-
-    delete_dir = getattr(store, "delete_dir", None)
-    if delete_dir is not None:
-        _call_maybe_async(delete_dir, normalised_prefix)
         return None
 
     _delete_store_keys(store, iter_store_keys(store, prefix=normalised_prefix))
@@ -156,7 +162,8 @@ def iter_store_keys(store: ZarrStoreLike, prefix: str | None = None) -> Iterator
     if normalised_prefix is not None:
         list_prefix = getattr(store, "list_prefix", None)
         if list_prefix is not None:
-            return iter(_collect_iterable(list_prefix(normalised_prefix)))
+            keys = _collect_iterable(list_prefix(normalised_prefix))
+            return (key for key in keys if _key_matches_prefix(key, normalised_prefix))
 
     list_all = getattr(store, "list", None)
     if list_all is not None:
@@ -221,6 +228,7 @@ def copy_store(source: ZarrStoreLike, dest: ZarrStoreLike) -> None:
 
 
 def _normalise_prefix(prefix: str | None) -> str | None:
+    """Normalise empty or slash-delimited prefixes to internal form."""
     if prefix is None:
         return None
 
@@ -229,10 +237,20 @@ def _normalise_prefix(prefix: str | None) -> str | None:
 
 
 def _key_matches_prefix(key: str, prefix: str) -> bool:
+    """Check whether a key is exactly under a normalised prefix."""
     return key == prefix or key.startswith(f"{prefix}/")
 
 
 def _call_maybe_async(func: Any, *args: Any) -> Any:
+    """Call a store method and synchronously resolve awaitable results.
+
+    Args:
+        func: Store method or callable to invoke.
+        args: Positional arguments to pass to ``func``.
+
+    Returns:
+        Direct return value, or awaited return value for asynchronous methods.
+    """
     result = func(*args)
     if inspect.isawaitable(result):
         return _sync(cast(Awaitable[Any], result))
@@ -241,6 +259,14 @@ def _call_maybe_async(func: Any, *args: Any) -> Any:
 
 
 def _collect_iterable(value: Any) -> list[str]:
+    """Collect synchronous or asynchronous store key iterables.
+
+    Args:
+        value: Synchronous iterable or asynchronous iterator of store keys.
+
+    Returns:
+        Store keys converted to strings.
+    """
     if hasattr(value, "__aiter__"):
         return _sync(_collect_async_iterable(cast(AsyncIterator[str], value)))
 
@@ -248,10 +274,17 @@ def _collect_iterable(value: Any) -> list[str]:
 
 
 async def _collect_async_iterable(value: AsyncIterator[str]) -> list[str]:
+    """Collect an asynchronous store key iterator."""
     return [str(item) async for item in value]
 
 
 def _delete_store_keys(store: ZarrStoreLike, keys: Iterable[str]) -> None:
+    """Delete keys from a zarr store.
+
+    Args:
+        store: Zarr store instance.
+        keys: Keys to delete from the store.
+    """
     delete = getattr(store, "delete", None)
     if delete is not None:
         for key in keys:
@@ -264,6 +297,18 @@ def _delete_store_keys(store: ZarrStoreLike, keys: Iterable[str]) -> None:
 
 
 def _sync(awaitable: Awaitable[T]) -> T:
+    """Synchronously wait for an awaitable store operation.
+
+    Uses zarr's own sync helper when available. Otherwise, it runs the awaitable
+    with ``asyncio.run``; if an event loop is already running, the awaitable is
+    resolved in a short-lived worker thread.
+
+    Args:
+        awaitable: Awaitable store operation.
+
+    Returns:
+        Awaited result.
+    """
     try:
         from zarr.core.sync import sync as zarr_sync
     except ImportError:
@@ -282,4 +327,5 @@ def _sync(awaitable: Awaitable[T]) -> T:
 
 
 def _asyncio_run(awaitable: Awaitable[T]) -> T:
+    """Run an awaitable through ``asyncio.run`` with a coroutine cast."""
     return asyncio.run(cast(Coroutine[Any, Any, T], awaitable))

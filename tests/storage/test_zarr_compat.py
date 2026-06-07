@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+from collections.abc import AsyncIterator
 from pathlib import Path
 
 import zarr
@@ -19,7 +20,34 @@ from openghg.storage._zarr_compat import (
 )
 
 
+class AsyncPrefixStore:
+    """Small v3-style async store fake for prefix helper tests."""
+
+    def __init__(self) -> None:
+        self.values: dict[str, bytes] = {}
+
+    async def list(self) -> AsyncIterator[str]:
+        """Yield all keys."""
+        for key in self.values:
+            yield key
+
+    async def list_prefix(self, prefix: str) -> AsyncIterator[str]:
+        """Yield keys using zarr v3's broad prefix semantics."""
+        for key in self.values:
+            if key.startswith(prefix):
+                yield key
+
+    async def getsize(self, key: str) -> int:
+        """Return the size of a stored byte value."""
+        return len(self.values[key])
+
+    async def delete(self, key: str) -> None:
+        """Delete a stored key."""
+        del self.values[key]
+
+
 def _put_bytes(store: object, key: str, value: bytes) -> None:
+    """Write a byte value to a mapping-like zarr store."""
     store[key] = value  # type: ignore[index]
 
 
@@ -52,6 +80,36 @@ def test_memory_store_helpers() -> None:
     clear_store(store)
 
     assert store_is_empty(store)
+
+
+def test_prefix_helpers_do_not_match_sibling_prefixes() -> None:
+    """Check prefix helpers do not include keys from similarly named siblings."""
+    store = make_memory_store()
+    _put_bytes(store, "group/a", b"a")
+    _put_bytes(store, "grouped/a", b"bb")
+
+    assert sorted(iter_store_keys(store, prefix="group")) == ["group/a"]
+    assert store_byte_size(store, prefix="group") == 1
+
+    clear_store(store, prefix="group")
+
+    assert sorted(iter_store_keys(store)) == ["grouped/a"]
+    assert store_byte_size(store) == 2
+
+
+def test_async_prefix_helpers_filter_v3_prefix_results() -> None:
+    """Check v3-style broad prefix listings are filtered to path boundaries."""
+    store = AsyncPrefixStore()
+    store.values["group/a"] = b"a"
+    store.values["grouped/a"] = b"bb"
+
+    assert sorted(iter_store_keys(store, prefix="group")) == ["group/a"]
+    assert store_byte_size(store, prefix="group") == 1
+
+    clear_store(store, prefix="group")
+
+    assert sorted(iter_store_keys(store)) == ["grouped/a"]
+    assert store_byte_size(store) == 2
 
 
 def test_local_store_helpers(tmp_path: Path) -> None:
