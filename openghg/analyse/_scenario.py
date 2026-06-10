@@ -699,20 +699,23 @@ class ModelScenario:
             input dataset with aligned units
 
         """
+        #if output_units is None:
+         #   output_units = self.units or "mol/mol"  # use mol/mol if obs units are not available
         if output_units is None:
-            output_units = self.units or "mol/mol"  # use mol/mol if obs units are not available
+            output_units = self.units or "mol/mol"
 
         to_convert = []
         data_vars = data_vars or ds.data_vars
         for dv in data_vars:
+            unit = ds[dv].attrs.get("units")
+            if unit in ("1", None):
+               ds[dv].attrs["units"] = "mol/mol"
             if ds[dv].attrs.get("units") is not None and "time" in ds[dv].dims:
                 to_convert.append(dv)
 
         target_units = {dv: output_units for dv in to_convert}
-
         result = ds.pint.quantify().pint.to(target_units).pint.dequantify()
         return cast(xr.Dataset, result)
-
     def _check_data_is_present(self, need: str | Sequence | None = None) -> None:
         """Check whether correct data types have been included. This should
         be used by functions to check whether they can perform the requested
