@@ -1,32 +1,86 @@
 from __future__ import annotations
 from collections import defaultdict
-from typing import Any, cast, Literal
+from collections.abc import Callable
+from dataclasses import dataclass
+from functools import wraps
+from pathlib import Path
+from typing import Any, TYPE_CHECKING, cast, Literal, TypeVar
 from typing_extensions import Self
 from types import TracebackType
 import logging
-from pandas import Timestamp, Timedelta
-import xarray as xr
 
 from openghg.objectstore import exists, get_object_from_json
 from openghg.objectstore._local_store import delete_object
-from openghg.util import (
-    create_daterange_str,
-    get_representative_daterange_str,
-    split_daterange_str,
-    timestamp_now,
-    timestamp_tzaware,
-)
-from openghg.types import DataOverlapError, ObjectStoreError
+from openghg.types import DataOverlapError, ObjectStoreError, ZarrStoreError
 
 from ._datasource import AbstractDatasource, DatasourceFactory
+
+if TYPE_CHECKING:
+    from pandas import Timestamp
+    import xarray as xr
+    from xarray import Dataset as XrDataset
+else:
+    XrDataset = Any
 
 logger = logging.getLogger("openghg.objectstore")
 logger.setLevel(logging.DEBUG)
 
-__all___ = ["Datasource"]
+__all__ = ["Datasource"]
+
+WriteMethodT = TypeVar("WriteMethodT", bound=Callable[..., Any])
 
 
-class Datasource(AbstractDatasource[xr.Dataset]):
+def _requires_write(method: WriteMethodT) -> WriteMethodT:
+    """Prevent write methods from running on read-only Datasources."""
+
+    @wraps(method)
+    def wrapped(self: Any, *args: Any, **kwargs: Any) -> Any:
+        if self._mode == "r":
+            raise PermissionError("Cannot modify a read-only datasource")
+        return method(self, *args, **kwargs)
+
+    return cast(WriteMethodT, wrapped)
+
+
+TimedDataAction = Literal["insert", "copy_insert", "replace", "upsert", "error_overlap"]
+
+
+@dataclass(frozen=True)
+class TimedDataUpdatePlan:
+    """Storage action for adding time-indexed data to a Datasource."""
+
+    action: TimedDataAction
+    new_version: bool
+
+
+def plan_timed_data_update(
+    *,
+    if_exists: str,
+    new_version: bool,
+    has_existing_data: bool,
+    overlapping: bool,
+) -> TimedDataUpdatePlan:
+    """Plan the concrete store operation after overlap detection."""
+    if not has_existing_data:
+        return TimedDataUpdatePlan(action="insert", new_version=True)
+
+    if if_exists == "new":
+        action: TimedDataAction = "insert" if new_version else "replace"
+        return TimedDataUpdatePlan(action=action, new_version=new_version)
+
+    if if_exists == "combine":
+        action = "upsert" if overlapping or not new_version else "copy_insert"
+        return TimedDataUpdatePlan(action=action, new_version=new_version)
+
+    if if_exists == "auto":
+        if overlapping:
+            return TimedDataUpdatePlan(action="error_overlap", new_version=False)
+        return TimedDataUpdatePlan(action="copy_insert" if new_version else "insert", new_version=new_version)
+
+    raise ValueError("Invalid if_exists option. Please use 'auto', 'new', or 'combine'.")
+
+
+class Datasource(AbstractDatasource[XrDataset]):
     """A Datasource holds data relating to a single source.
 
     For instance, a specific species at a certain height on a specific
@@ -36,7 +90,8 @@ class Datasource(AbstractDatasource[xr.Dataset]):
     _datasource_root = "datasource"
 
     def __init__(self, bucket: str, uuid: str, mode: Literal["r", "rw"] = "rw", data_type: str = "") -> None:
-        from openghg.store.storage import LocalZarrStore
+        from openghg.storage import get_versioned_zarr_directory_store
+        from openghg.util._time import timestamp_now
 
         self._uuid = uuid
         self._creation_datetime = str(timestamp_now())
@@ -54,12 +109,38 @@ class Datasource(AbstractDatasource[xr.Dataset]):
             raise ValueError("Invalid mode. Please select r or rw.")
 
         self._mode = mode
-        # TODO - add in selection of other store types, this could NetCDF, sparse, whatever
-        self._store = LocalZarrStore(bucket=bucket, datasource_uuid=self._uuid, mode=mode)
-        # So we know where to write out to
         self._bucket = bucket
+        self._root_store_key = f"data/{uuid}/zarr"
+        self._stores_path = Path(bucket, self._root_store_key).expanduser().resolve()
+        self._store = get_versioned_zarr_directory_store(path=self._stores_path)
 
         self.update_daterange()
+
+    def _set_store_encoding(self, compressor: Any | None = None, filters: Any | None = None) -> None:
+        """Set encoding options used for newly written zarr variables."""
+        if compressor:
+            self._store.compressor = compressor
+        if filters:
+            self._store.filters = filters
+
+    def _checkout_version(self, version: str) -> None:
+        """Checkout a store version, wrapping versioning errors as ZarrStoreError."""
+        try:
+            self._store.checkout_version(version.lower())
+        except ValueError as e:
+            raise ZarrStoreError(f"Invalid version: {version}") from e
+
+    def _ensure_store_version(self, version: str, *, copy_current: bool = False) -> None:
+        """Create a zarr version if needed, otherwise check out the existing version."""
+        version = version.lower()
+        if version in self._store.versions:
+            self._store.checkout_version(version)
+        else:
+            if not self._store.versions and version != "v1":
+                raise ValueError("First version must be v1")
+            if copy_current and not self._store.versions:
+                raise ValueError("Cannot copy current version when creating the first version.")
+            self._store.create_version(version, checkout=True, copy_current=copy_current)
 
     # Methods to satisfy AbstractDatasource ABC
     @classmethod
@@ -72,6 +153,7 @@ class Datasource(AbstractDatasource[xr.Dataset]):
 
         ds = cls(bucket, uuid, mode, data_type)
         ds.__dict__.update(stored_data)
+        ds._mode = mode
         ds._data_keys = defaultdict(list, ds._data_keys)
 
         return ds
@@ -89,7 +171,10 @@ class Datasource(AbstractDatasource[xr.Dataset]):
 
         DO_NOT_STORE = {
             "_store",
+            "_root_store_key",
+            "_stores_path",
             "_bucket",
+            "_mode",
             "_status",
             "_start_date",
             "_end_date",
@@ -97,8 +182,8 @@ class Datasource(AbstractDatasource[xr.Dataset]):
 
         internal_metadata = {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
         set_object_from_json(bucket=self._bucket, key=self.key, data=internal_metadata)
-        self._store.close()
 
+    @_requires_write
     def add(self, data: xr.Dataset, **kwargs) -> None:
         if (period := kwargs.pop("period", None)) is not None:
             self._metadata["period"] = period
@@ -116,8 +201,10 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         if version == "latest":
             version = self._latest_version
 
-        return self._store.get(version=version)
+        self._checkout_version(version)
+        return self._store.get()
 
+    @_requires_write
     def delete(self) -> None:
         self.delete_all_data()
         delete_object(bucket=self._bucket, key=self.key)
@@ -192,6 +279,7 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         return self._store.bytes_stored()
 
     # Methods related storing, getting, deleting data
+    @_requires_write
     def add_data(
         self,
         metadata: dict,
@@ -245,6 +333,7 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         else:
             raise NotImplementedError()
 
+    @_requires_write
     def add_timed_data(
         self,
         data: xr.Dataset,
@@ -276,20 +365,14 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         Returns:
             None
         """
+        from openghg.util._time import get_representative_daterange_str, timestamp_now
+
         # Ensure data is in time order
         time_coord = "time"
         new_daterange_str = get_representative_daterange_str(dataset=data, period=self.period)
 
-        if self._latest_version and not new_version:
-            version_str = self._latest_version
-        else:
-            version_str = f"v{len(self._data_keys) + 1!s}"
-
         # Save details of current Datasource status
         self._status = {}
-
-        # We'll use this to store the dates covered by this version of the data
-        date_keys = self._data_keys[self._latest_version] if self._data_keys else []
 
         if sort and drop_duplicates:
             data = data.drop_duplicates(time_coord, keep="first").sortby(time_coord)
@@ -298,44 +381,64 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         elif drop_duplicates:
             data = data.drop_duplicates(time_coord, keep="first")
 
-        overlapping = self._store and self._store._vzds._overlap_determiner.has_overlaps(
-            data.get_index(self._store._vzds.append_dim)
+        has_existing_data = bool(self._store)
+        if has_existing_data:
+            self._checkout_version(self._latest_version)
+            overlapping = self._store._overlap_determiner.has_overlaps(data.get_index(self._store.append_dim))
+        else:
+            overlapping = False
+        plan = plan_timed_data_update(
+            if_exists=if_exists,
+            new_version=new_version,
+            has_existing_data=has_existing_data,
+            overlapping=overlapping,
+        )
+
+        if self._latest_version and not plan.new_version:
+            version_str = self._latest_version
+        else:
+            version_str = f"v{len(self._data_keys) + 1!s}"
+
+        current_date_keys = (
+            list(self._data_keys[self._latest_version])
+            if self._data_keys and self._latest_version in self._data_keys
+            else []
         )
 
         # TODO: what does the following comment mean? (BM Jan 2026)
         # We'll only need to sort the new dataset if the data we add comes before the current data
 
-        # If we don't have any data in this Datasource or we have no overlap we'll just add the new data
-        if not self._store or not overlapping:
-            self._store.add(version=version_str, dataset=data, compressor=compressor, filters=filters)
-            date_keys.append(new_daterange_str)
-        # Otherwise if we have data already stored in the Datasource
-        elif if_exists == "new":
-            # If we have existing data we'll just keep the new data
-            # If new_version is True then we create a new version containing just this data
-            # If new_version is False then we delete the current data and replace it with just the new data
-            logger.info("Updating store to include new added data only.")
-
-            if new_version:
-                self._store.add(version=version_str, dataset=data, compressor=compressor, filters=filters)
-            else:
-                self._store.overwrite(
-                    version=version_str, dataset=data, compressor=compressor, filters=filters
-                )
-            # Only save the current daterange string for this version
-            date_keys = [new_daterange_str]
-        elif if_exists == "combine":
-            logger.info("Updating store by combining new data with existing.")
-            self._store.update(version=version_str, dataset=data, compressor=compressor, filters=filters)
-            date_keys = [get_representative_daterange_str(self.get_data())]
-        # If we don't know what (i.e. we've got "auto") to do we'll raise an error
-        else:
-            # if_exists == "auto" (or at least... not "new" or "combine"), but we already have data
-            # and the new data overlaps
+        if plan.action == "error_overlap":
             raise DataOverlapError(
                 "Unable to add new data, because it overlaps with current data and `if_exists` is set to 'auto'. "
                 "To update current data in object store use `if_exists` input (see options in documentation)."
             )
+
+        self._set_store_encoding(compressor=compressor, filters=filters)
+
+        if plan.action == "insert":
+            self._ensure_store_version(version_str)
+            self._store.insert(data)
+            if has_existing_data and plan.new_version:
+                date_keys = [new_daterange_str]
+            else:
+                date_keys = [*current_date_keys, new_daterange_str]
+        elif plan.action == "copy_insert":
+            self._ensure_store_version(version_str, copy_current=True)
+            self._store.insert(data)
+            date_keys = [*current_date_keys, new_daterange_str]
+        elif plan.action == "replace":
+            logger.info("Updating store to include new added data only.")
+            self._checkout_version(version_str)
+            self._store.overwrite(data)
+            date_keys = [new_daterange_str]
+        elif plan.action == "upsert":
+            logger.info("Updating store by combining new data with existing.")
+            if not self._store.versions:
+                raise ValueError("Cannot update empty Zarr store.")
+            self._ensure_store_version(version_str, copy_current=True)
+            self._store.upsert(data)
+            date_keys = [get_representative_daterange_str(self.get_data(version=version_str))]
 
         self._data_type = data_type
         self.add_metadata_key(key="data_type", value=data_type)
@@ -362,6 +465,7 @@ class Datasource(AbstractDatasource[xr.Dataset]):
 
         self._last_updated = timestamp_str_now
 
+    @_requires_write
     def delete_all_data(self) -> None:
         """Delete datasource entirely.
 
@@ -373,12 +477,14 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         Returns:
             None
         """
-        self._store.delete_all()
-        self._store.close()
+        self._store.delete_all_versions()
+        if self._stores_path.exists():
+            self._stores_path.rmdir()
         self._data_keys.clear()
         self._metadata.clear()
         self._timestamps.clear()
 
+    @_requires_write
     def delete_version(self, version: str) -> None:
         """Delete a specific version of data.
 
@@ -394,7 +500,11 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         if version not in self._data_keys:
             raise KeyError("Invalid version.")
 
-        self._store.delete_version(version=version)
+        try:
+            self._store.delete_version(version.lower())
+        except ValueError as e:
+            raise ZarrStoreError(f"Invalid version: {version}") from e
+
         del self._data_keys[version]
         del self._timestamps[version]
 
@@ -492,6 +602,8 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         Returns:
             None
         """
+        from openghg.util._time import split_daterange_str
+
         if not self._data_keys:
             return
 
@@ -522,6 +634,8 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         Returns:
             str: Daterange covered by this Datasource
         """
+        from openghg.util._time import create_daterange_str
+
         start, end = self.daterange()
 
         return create_daterange_str(start=start, end=end)
@@ -533,15 +647,19 @@ class Datasource(AbstractDatasource[xr.Dataset]):
         Returns:
             None
         """
+        from pandas import Timedelta
+        import xarray as xr
+        from openghg.util._time import split_daterange_str, timestamp_tzaware
+
         for version, dateranges in self._data_keys.items():
             start_date, _ = split_daterange_str(daterange_str=dateranges[0])
             _, end_date = split_daterange_str(daterange_str=dateranges[-1])
 
-            if version not in self._store._vzds.versions:
+            if version not in self._store.versions:
                 raise ObjectStoreError(f"{version} not found in object store.")
 
-            self._store._vzds.checkout_version(version)
-            with xr.open_zarr(self._store._vzds.store, consolidated=True) as ds:
+            self._store.checkout_version(version)
+            with xr.open_zarr(self._store.store, consolidated=True) as ds:
                 if ds.time.size == 1:
                     start_keys = timestamp_tzaware(start_date)
                     start_data = timestamp_tzaware(ds.time[0].values)

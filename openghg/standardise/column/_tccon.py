@@ -3,6 +3,7 @@ from typing import cast
 from collections.abc import MutableMapping
 from datetime import datetime
 import numpy as np
+import pandas as pd
 import xarray as xr
 
 from openghg.util import load_internal_json
@@ -28,7 +29,7 @@ def _filter_and_resample(ds: xr.Dataset, species: str, quality_filt: bool, resam
     if quality_filt:
         logger.info(f"Applying filter based on variable 'extrapolation_flags_ak_x{species}'.")
         ds = ds.where(abs(ds[f"extrapolation_flags_ak_x{species}"]) != 2)
-    ds.dropna("time").sortby("time")
+    ds = ds.dropna("time").sortby("time")
 
     if not resample:
         ds[f"x{species}_uncertainty"] = ds[f"x{species}_error"]
@@ -216,8 +217,13 @@ def parse_tccon(
         "prior_gravity",
     ]
 
-    data = xr.open_dataset(filepath)[var_to_read].chunk(chunks if chunks is not None else {})
+    data = xr.open_dataset(filepath, decode_times=False)[var_to_read].chunk(
+        chunks if chunks is not None else {}
+    )
 
+    decode_times = pd.to_datetime(data.time.values, unit="s", origin="unix", utc=True)
+
+    data = data.assign_coords(time=decode_times.values.astype("datetime64[ns]"))
     # Create metadata #
     attributes = cast(MutableMapping, data.attrs)
 
@@ -234,7 +240,7 @@ def parse_tccon(
     attributes["domain"] = domain
     attributes["site"] = "T" + site_tccon_shortname.upper()
     attributes["network"] = "TCCON"
-    attributes["platform"] = "site"
+    attributes["platform"] = "column"
     attributes["inlet"] = "column"
     attributes["pressure_weights_method"] = pressure_weights_method
 

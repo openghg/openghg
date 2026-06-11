@@ -8,6 +8,7 @@ from helpers import get_surface_datapath, get_footprint_datapath
 from openghg.objectstore import get_bucket, exists
 from openghg.standardise.surface import parse_crds
 from openghg.objectstore import Datasource
+from openghg.objectstore._legacy_datasource import plan_timed_data_update
 from openghg.types import ObjectStoreError, ZarrStoreError
 from openghg.types._errors import DataOverlapError
 from openghg.util import timestamp_tzaware
@@ -271,6 +272,30 @@ def test_save_footprint(bucket, datasource):
     assert datasource_2._data_type == "footprints"
 
 
+def test_read_only_load_cannot_modify_data(bucket, datasource, datasets_with_gaps):
+    data_a, data_b, _ = datasets_with_gaps
+    metadata = create_attributes()
+
+    datasource.add_data(metadata=metadata, data=data_a, data_type="surface")
+    datasource.save()
+
+    read_only = Datasource.load(bucket=bucket, uuid=datasource.uuid, mode="r")
+
+    assert read_only._mode == "r"
+
+    with pytest.raises(PermissionError):
+        read_only.add_data(metadata=metadata, data=data_b, data_type="surface", if_exists="combine")
+
+    with pytest.raises(PermissionError):
+        read_only.delete_version("v1")
+
+    with pytest.raises(PermissionError):
+        read_only.delete_all_data()
+
+    assert read_only.latest_version == "v1"
+    assert "v2" not in read_only._store.versions
+
+
 def test_add_metadata_key(datasource):
     datasource.add_metadata_key(key="foo", value=123)
     datasource.add_metadata_key(key="bar", value=456)
@@ -369,7 +394,9 @@ def test_integrity_check(data, bucket, datasource):
     d = Datasource.load(bucket=bucket, uuid=uid)
     d.integrity_check()
 
-    d._store.delete_all()
+    d._store.delete_all_versions()
+    if d._stores_path.exists():
+        d._stores_path.rmdir()
 
     with pytest.raises(ObjectStoreError):
         d.integrity_check()
@@ -383,7 +410,8 @@ def test_data_version_deletion(data, datasource):
 
     d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
 
-    zarr_keys = set(d._store.keys(version="v1"))
+    d._store.checkout_version("v1")
+    zarr_keys = set(d._store.store.keys())
 
     partial_expected_keys = {
         "ch4/.zarray",
@@ -399,7 +427,7 @@ def test_data_version_deletion(data, datasource):
     assert "v1" not in d._data_keys
 
     with pytest.raises(ZarrStoreError):
-        d._store.keys(version="v1")
+        d._checkout_version("v1")
 
 
 def test_surface_data_stored_and_dated_correctly(data, datasource):
@@ -442,6 +470,151 @@ def test_add_data_with_gaps_check_stored_dataset(datasets_with_gaps, datasource)
     with d.get_data(version="latest") as ds:
         assert ds.equals(xr.concat([data_a, data_b, data_c], dim="time"))
         assert ds.time.size == 91
+
+
+def test_plan_timed_data_update_matrix():
+    assert (
+        plan_timed_data_update(
+            if_exists="auto", new_version=False, has_existing_data=True, overlapping=False
+        ).action
+        == "insert"
+    )
+    assert (
+        plan_timed_data_update(
+            if_exists="auto", new_version=True, has_existing_data=True, overlapping=False
+        ).action
+        == "copy_insert"
+    )
+    assert (
+        plan_timed_data_update(
+            if_exists="auto", new_version=False, has_existing_data=True, overlapping=True
+        ).action
+        == "error_overlap"
+    )
+    assert (
+        plan_timed_data_update(
+            if_exists="combine", new_version=True, has_existing_data=True, overlapping=False
+        ).action
+        == "copy_insert"
+    )
+    assert (
+        plan_timed_data_update(
+            if_exists="new", new_version=True, has_existing_data=True, overlapping=True
+        ).action
+        == "insert"
+    )
+    assert (
+        plan_timed_data_update(
+            if_exists="new", new_version=False, has_existing_data=True, overlapping=True
+        ).action
+        == "replace"
+    )
+
+
+def test_combine_nonoverlapping_new_version_copies_current_data(datasource, datasets_with_gaps):
+    data_a, data_b, _ = datasets_with_gaps
+    attributes = create_attributes()
+
+    d = datasource
+
+    d.add_data(metadata=attributes, data=data_a, data_type="surface", new_version=False)
+    d.add_data(metadata=attributes, data=data_b, data_type="surface", if_exists="combine")
+
+    assert d.latest_version == "v2"
+
+    with d.get_data(version="v1").compute() as ds_v1:
+        assert ds_v1.equals(data_a)
+
+    with d.get_data(version="latest").compute() as ds_latest:
+        assert ds_latest.equals(xr.concat([data_a, data_b], dim="time"))
+
+
+def test_combine_nonoverlapping_read_only_does_not_create_version(datasource, datasets_with_gaps):
+    data_a, data_b, _ = datasets_with_gaps
+    attributes = create_attributes()
+
+    d = datasource
+
+    d.add_data(metadata=attributes, data=data_a, data_type="surface", new_version=False)
+    d._mode = "r"
+
+    try:
+        with pytest.raises(PermissionError):
+            d.add_data(metadata=attributes, data=data_b, data_type="surface", if_exists="combine")
+
+        assert d.latest_version == "v1"
+        assert "v2" not in d._store.versions
+    finally:
+        d._mode = "rw"
+
+
+def test_new_nonoverlapping_version_does_not_mutate_previous_date_keys(datasource, datasets_with_gaps):
+    data_a, data_b, _ = datasets_with_gaps
+    attributes = create_attributes()
+
+    d = datasource
+
+    d.add_data(metadata=attributes, data=data_a, data_type="surface", new_version=False)
+    v1_date_keys = list(d.all_data_keys()["v1"])
+
+    d.add_data(metadata=attributes, data=data_b, data_type="surface", if_exists="new")
+
+    assert d.all_data_keys()["v1"] == v1_date_keys
+    assert d.all_data_keys()["v2"] == [
+        "2012-04-01-00:00:00+00:00_2012-04-30-00:00:59+00:00",
+    ]
+
+
+def test_auto_overlap_does_not_create_orphan_version(datasource, datasets_with_overlap):
+    data_a, data_b, _ = datasets_with_overlap
+    attributes = create_attributes()
+
+    d = datasource
+
+    d.add_data(metadata=attributes, data=data_a, data_type="surface", new_version=False)
+
+    with pytest.raises(DataOverlapError):
+        d.add_data(metadata=attributes, data=data_b, data_type="surface", if_exists="auto")
+
+    assert d.latest_version == "v1"
+    assert list(d.all_data_keys()) == ["v1"]
+    assert "v2" not in d._store.versions
+
+
+def test_combine_overlapping_new_version_uses_new_version_date_keys(datasource, datasets_with_overlap):
+    data_a, data_b, _ = datasets_with_overlap
+    attributes = create_attributes()
+
+    d = datasource
+
+    d.add_data(metadata=attributes, data=data_a, data_type="surface", new_version=False)
+    d.add_data(metadata=attributes, data=data_b, data_type="surface", if_exists="combine")
+
+    assert d.latest_version == "v2"
+    assert d.all_data_keys()["v1"] == [
+        "2012-01-01-00:00:00+00:00_2012-01-31-00:00:59+00:00",
+    ]
+    assert d.all_data_keys()["v2"] == [
+        "2012-01-01-00:00:00+00:00_2012-04-30-00:00:00+00:00",
+    ]
+
+
+def test_overlap_detection_uses_latest_version_after_getting_old_version(datasource, datasets_with_gaps):
+    data_a, data_b, data_c = datasets_with_gaps
+    attributes = create_attributes()
+
+    d = datasource
+
+    d.add_data(metadata=attributes, data=data_a, data_type="surface", new_version=False)
+    d.add_data(metadata=attributes, data=data_b, data_type="surface", if_exists="combine")
+
+    d.get_data(version="v1")
+    d.add_data(metadata=attributes, data=data_c, data_type="surface", new_version=False)
+
+    assert d.latest_version == "v2"
+
+    with d.get_data(version="latest").compute() as ds_latest:
+        assert ds_latest.equals(xr.concat([data_a, data_b, data_c], dim="time"))
 
 
 def test_add_data_with_overlap_check_stored_dataset(datasource, datasets_with_overlap):

@@ -75,8 +75,10 @@ def parse_agage(
 
         instrument = str(instrument)
 
-        species = file_attributes.get("species", None)
-        species = define_species_label(species)[0]
+        species_attr = file_attributes.get("species")
+        if not isinstance(species_attr, str):
+            raise ValueError("No 'species' attribute found in file metadata.")
+        species = define_species_label(species_attr)[0]
 
         dataframe = dataset.to_dataframe()
 

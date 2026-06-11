@@ -1,15 +1,19 @@
+from __future__ import annotations
+
 from datetime import date
+from itertools import pairwise
 import logging
 from math import isnan
 import re
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
 from pandas import DataFrame, DateOffset, DatetimeIndex, Timedelta, Timestamp
-from xarray import Dataset
 
-from openghg.types import TimePeriod
-from ._util import pairwise
+if TYPE_CHECKING:
+    from openghg.types import TimePeriod
+    from xarray import DataArray, Dataset
 
 __all__ = [
     "timestamp_tzaware",
@@ -42,6 +46,7 @@ __all__ = [
     "evaluate_sampling_period",
     "get_representative_daterange_str",
     "get_dataset_daterange",
+    "has_monthly_period",
 ]
 
 # TupleTimeType = Tuple[Union[int, float], str]
@@ -663,6 +668,8 @@ def parse_period(period: str | tuple) -> TimePeriod:
         >>> parse_period((1, "minute"))
             TimePeriod(1, "minutes")
     """
+    from openghg.types import TimePeriod
+
     if isinstance(period, tuple):
         if len(period) != 2:
             raise ValueError(
@@ -886,6 +893,38 @@ def infer_frequency(timestamps: DatetimeIndex) -> str | None:
         inferred_period = pd.infer_freq(timestamps)
 
     return inferred_period
+
+
+def has_monthly_period(time: DataArray) -> bool:
+    """Check whether a time DataArray has approximately monthly time intervals.
+
+    Checks whether all consecutive time differences fall within the range of
+    calendar month durations (28 to 31 days inclusive). This correctly identifies
+    monthly data even when timestamps fall on irregular day-of-month positions
+    (e.g. the 15th of each month), which ``pd.infer_freq`` cannot handle.
+
+    This check works for both single-year (12 steps) and multi-year monthly data.
+
+    Args:
+        time: xarray DataArray containing time coordinate values
+
+    Returns:
+        bool: True if all consecutive time differences are consistent with
+              monthly data (each step is 28-31 days), False otherwise.
+              Returns False if fewer than 2 time points are present.
+    """
+    if time.size < 2:
+        return False
+    try:
+        time_ns = np.asarray(time.values, dtype="datetime64[ns]")
+    except (TypeError, ValueError):
+        return False
+
+    delta_ns = np.diff(time_ns)
+    min_month_ns = np.timedelta64(28, "D").astype("timedelta64[ns]")
+    max_month_ns = np.timedelta64(31, "D").astype("timedelta64[ns]")
+
+    return bool(delta_ns.size > 0 and np.all((delta_ns >= min_month_ns) & (delta_ns <= max_month_ns)))
 
 
 def in_daterange(
