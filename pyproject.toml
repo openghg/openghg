@@ -26,14 +26,14 @@ dependencies = [
     "cdsapi>=0.7.7",
     "cf-xarray<=0.10.6",
     "dask<2026.4",
-    "filelock<=3.29.1",
+    "filelock<=3.29.3",
     "flox<=0.10.4",
     "h5netcdf>=1.0.0, <=1.8.1",
     "h5py<3.17",
-    "icoscp<=0.2.2",
+    "icoscp<=0.2.3",
     "ipywidgets<=8.1.8",
     "matplotlib<=3.10.9",
-    "msgpack<=1.1.2",
+    "msgpack<=1.2.0",
     "msgpack-types<=0.7.0",
     "nbformat<=5.10.4",
     "nc-time-axis<=1.4.1",
@@ -103,13 +103,13 @@ classifiers = [
         "sphinx-autobuild<=2024.10.3",
         "nbsphinx<=0.9.8",
         "ipython<=8.39.0",
-        "jupyter_client<=8.8.0",
+        "jupyter_client<=8.9.1",
         "jupyter_core<=5.9.1",
         "jupyter-sphinx",
         "nbconvert<=7.17.1",
         "docutils<=0.23",
         "sphinx-issues<=6.0.0",
-        "pydata-sphinx-theme<=0.15.2"
+        "pydata-sphinx-theme<=0.18.0"
     ]
 
 [tool.pixi.workspace]
