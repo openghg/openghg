@@ -1,391 +1,414 @@
-
 <!DOCTYPE html>
 
-
-<html lang="en" data-content_root="../../../" >
-
+<html lang="en" data-content_root="../../../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Adding ancillary spatial data &#8212; OpenGHG 0.18.0 documentation</title>
+    <title>Adding ancillary spatial data &#8212; OpenGHG 0.19.0 documentation</title>
+    
+    <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
   
+    
+    <link rel="stylesheet"
+      href="../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+      href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+      href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
   
+    
+      
   
-  <script data-cfasync="false">
-    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
-    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
-  </script>
-  
-  <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
-<link href="../../../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
-
-  
-  <link href="../../../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
-
+    
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/pydata-sphinx-theme.css?v=1140d252" />
     <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=9c3e77be" />
     <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
+    
+    <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
   
-  <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
-  <script src="../../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
-
-    <script src="../../../_static/documentation_options.js?v=ba2e7b09"></script>
-    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/documentation_options.js?v=8a079089"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../../../_static/togglebutton.js?v=1ae7504c"></script>
+    <script src="../../../_static/togglebutton.js?v=b8b12719"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
-    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/local/Adding_data/Adding_ancillary_data';</script>
     <script src="../../../_static/custom.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="next" title="Using databases to add data" href="Creating_data_from_databases.html" />
     <link rel="prev" title="Adding observation data" href="Adding_observation_data.html" />
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Feb 18, 2026"/>
-  </head>
-  
-  
-  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="en">
+    
 
-  
-  
-  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
-  
-  <div id="pst-scroll-pixel-helper"></div>
-  
-  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
-    <i class="fa-solid fa-arrow-up"></i>
-    Back to top
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
+
+  <div id="navbar-start">
+    
+    
+<a class="navbar-brand" href="../../../index.html">
+<p class="title">OpenGHG</p>
+</a>
+
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
   </button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__primary"
-          id="__primary"/>
-  <label class="overlay overlay-primary" for="__primary"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__secondary"
-          id="__secondary"/>
-  <label class="overlay overlay-secondary" for="__secondary"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
-<form class="bd-search d-flex align-items-center"
-      action="../../../search.html"
-      method="get">
-  <i class="fa-solid fa-magnifying-glass"></i>
-  <input type="search"
-         class="form-control"
-         name="q"
-         id="search-input"
-         placeholder="Search the docs ..."
-         aria-label="Search the docs ..."
-         autocomplete="off"
-         autocorrect="off"
-         autocapitalize="off"
-         spellcheck="false"/>
-  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
-  
-    <header class="bd-header navbar navbar-expand-lg bd-navbar">
-<div class="bd-header__inner bd-page-width">
-  <label class="sidebar-toggle primary-toggle" for="__primary">
-    <span class="fa-solid fa-bars"></span>
-  </label>
-  
-  
-  <div class="col-lg-3 navbar-header-items__start">
-    
-      <div class="navbar-item">
-
-  
-
-<a class="navbar-brand logo" href="../../../index.html">
-  
-  
-  
-  
-  
-    
-    
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
       
-    
-    
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.18.0 documentation - Home"/>
-    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.18.0 documentation - Home"/>`);</script>
-  
-  
-</a></div>
-    
-  </div>
-  
-  <div class="col-lg-9 navbar-header-items">
-    
-    <div class="me-auto navbar-header-items__center">
-      
-        <div class="navbar-item">
-<nav class="navbar-nav">
-  <ul class="bd-navbar-elements navbar-nav">
-    
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../install.html">
-                        Installation
-                      </a>
-                    </li>
-                
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../install.html">
+  Installation
+ </a>
+</li>
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="../../index.html">
-                        Tutorials
-                      </a>
-                    </li>
-                
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="../../index.html">
+  Tutorials
+ </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../api/index.html">
-                        User API
-                      </a>
-                    </li>
-                
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../api/index.html">
+  User API
+ </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../development/index_devel.html">
-                        Development
-                      </a>
-                    </li>
-                
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../development/index_devel.html">
+  Development
+ </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../api/index_devapi.html">
-                        Developer API
-                      </a>
-                    </li>
-                
-  </ul>
-</nav></div>
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../api/index_devapi.html">
+  Developer API
+ </a>
+</li>
+
+    
+</ul>
+      </div>
       
     </div>
-    
-    
-    <div class="navbar-header-items__end">
+
+    <div id="navbar-end">
       
-        <div class="navbar-item navbar-persistent--container">
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+            
+            <!-- Only show if we have sidebars configured, else just a small margin  -->
+            <div class="col-12 col-md-3 bd-sidebar">
+              <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Adding data
+ </span>
+</p>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="Adding_observation_data.html">
+   Adding observation data
+  </a>
+ </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   Adding ancillary spatial data
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="Creating_data_from_databases.html">
+   Using databases to add data
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="Metadata_and_attributes.html">
+   Metadata and attributes
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="Updating_existing_data.html">
+   Updating existing data
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Analysing data
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../Analysing_data/Comparing_with_emissions.html">
+   Comparing observations to emissions
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../Analysing_data/Comparing_satellite_observations_with_emissions.html">
+   Comparing Satellite Observations to Emissions
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../Analysing_data/Working_with_co2.html">
+   Working with carbon dioxide
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Exploring data
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../Exploring_data/Explore_NOAA_ObsPack.html">
+   Explore NOAA ObsPack
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../Exploring_data/Retrieving_remote_data.html">
+   Retrieving data from remote archives
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../Exploring_data/Searching_and_plotting.html">
+   Searching and plotting
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Managing the object store
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../Managing_object_store/Managing_data.html">
+   Managing and deleting data
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../Managing_object_store/Changing_object_store.html">
+   Changing the object store path
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../Managing_object_store/Converting_a_store.html">
+   Converting an object store
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Outputting data
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../Outputting_data/Creating_obspack.html">
+   Creating an ObsPack
+  </a>
+ </li>
+</ul>
+
+  </div>
+</nav>
+              </div>
+              <div class="sidebar-end-items">
+              </div>
+            </div>
+            
           
 
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
-  </button>
-`);
-</script>
-        </div>
-      
-      
-    </div>
-    
-  </div>
-  
-  
-    <div class="navbar-persistent--mobile">
-
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
-  </button>
-`);
-</script>
-    </div>
-  
-
-  
-    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
-      <span class="fa-solid fa-outdent"></span>
-    </label>
-  
-</div>
-
-    </header>
-  
-
-  <div class="bd-container">
-    <div class="bd-container__inner bd-page-width">
-      
-      
-      
-      <div class="bd-sidebar-primary bd-sidebar">
-        
-
-  
-  <div class="sidebar-header-items sidebar-primary__section">
-    
-    
-      <div class="sidebar-header-items__center">
-        
-          <div class="navbar-item">
-<nav class="navbar-nav">
-  <ul class="bd-navbar-elements navbar-nav">
-    
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../install.html">
-                        Installation
-                      </a>
-                    </li>
-                
-
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="../../index.html">
-                        Tutorials
-                      </a>
-                    </li>
-                
-
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../api/index.html">
-                        User API
-                      </a>
-                    </li>
-                
-
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../development/index_devel.html">
-                        Development
-                      </a>
-                    </li>
-                
-
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../api/index_devapi.html">
-                        Developer API
-                      </a>
-                    </li>
-                
-  </ul>
-</nav></div>
-        
-      </div>
-    
-    
-    
-  </div>
-  
-    <div class="sidebar-primary-items__start sidebar-primary__section">
-        <div class="sidebar-primary-item">
-<nav class="bd-docs-nav bd-links"
-     aria-label="Section Navigation">
-  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
-  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Adding data</span></p>
-<ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="Adding_observation_data.html">Adding observation data</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Adding ancillary spatial data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Creating_data_from_databases.html">Using databases to add data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Metadata_and_attributes.html">Metadata and attributes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Updating_existing_data.html">Updating existing data</a></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Analysing data</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../Analysing_data/Comparing_with_emissions.html">Comparing observations to emissions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Analysing_data/Comparing_satellite_observations_with_emissions.html">Comparing Satellite Observations to Emissions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Analysing_data/Working_with_co2.html">Working with carbon dioxide</a></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Exploring data</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../Exploring_data/Explore_NOAA_ObsPack.html">Explore NOAA ObsPack</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Exploring_data/Retrieving_remote_data.html">Retrieving data from remote archives</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Exploring_data/Searching_and_plotting.html">Searching and plotting</a></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Managing the object store</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Managing_data.html">Managing and deleting data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Changing_object_store.html">Changing the object store path</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Converting_a_store.html">Converting an object store</a></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Outputting data</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../Outputting_data/Creating_obspack.html">Creating an ObsPack</a></li>
-</ul>
-</div>
-</nav></div>
-    </div>
-  
-  
-  <div class="sidebar-primary-items__end sidebar-primary__section">
-  </div>
-  
-  <div id="rtd-footer-container"></div>
-
-
-      </div>
-      
-      <main id="main-content" class="bd-main">
-        
-        
-          <div class="bd-content">
-            <div class="bd-article-container">
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+            
               
-              <div class="bd-header-article">
-<div class="header-article-items header-article__inner">
-  
-    <div class="header-article-items__start">
-      
-        <div class="header-article-item">
+              <div class="toc-item">
+                
+<div class="tocsection onthispage pt-5 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
 
-
-
-<nav aria-label="Breadcrumb">
-  <ul class="bd-breadcrumbs">
-    
-    <li class="breadcrumb-item breadcrumb-home">
-      <a href="../../../index.html" class="nav-link" aria-label="Home">
-        <i class="fa-solid fa-home"></i>
+<nav id="bd-toc-nav">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#using-the-tutorial-object-store">
+   Using the tutorial object store
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#adding-and-standardising-data">
+   1. Adding and standardising data
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#data-domains">
+     Data domains
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#footprints">
+       Footprints
       </a>
-    </li>
-    
-    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Tutorials</a></li>
-    
-    <li class="breadcrumb-item active" aria-current="page">Adding...</li>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#chunking">
+       Chunking
+      </a>
+      <ul class="nav section-nav flex-column">
+       <li class="toc-h5 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#default-chunking">
+         Default chunking
+        </a>
+       </li>
+       <li class="toc-h5 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#manual-chunking">
+         Manual chunking
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#flux-emissions">
+       Flux / Emissions
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#boundary-conditions">
+       Boundary conditions
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#user-defined-keywords-source-and-bc-input">
+     User defined keywords:
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       source
+      </span>
+     </code>
+     and
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       bc_input
+      </span>
+     </code>
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#flux-timeseries-one-dimensional-timeseries-data">
+       Flux Timeseries - [One dimensional timeseries data]
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#reviewing-what-is-in-the-object-store">
+     Reviewing what is in the object store
+    </a>
+   </li>
   </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#input-format">
+   2. Input format
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#input-format-for-flux-data">
+     Input format for flux data
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#input-format-for-footprints">
+     Input format for footprints
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#default-inert-footprint-format">
+       Default (inert) footprint format
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#other-footprint-formats">
+       Other footprint formats
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#cleanup">
+   3. Cleanup
+  </a>
+ </li>
+</ul>
+
 </nav>
-</div>
-      
-    </div>
-  
-  
-</div>
-</div>
+              </div>
               
-              
-              
+              <div class="toc-item">
                 
-<div id="searchbox"></div>
-                <article class="bd-article">
-                  
+              </div>
+              
+            
+          </div>
+          
+
+          
+          
+            
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
   <section id="adding-ancillary-spatial-data">
-<span id="adding-ancillary-data"></span><h1>Adding ancillary spatial data<a class="headerlink" href="#adding-ancillary-spatial-data" title="Link to this heading">#</a></h1>
+<span id="adding-ancillary-data"></span><h1>Adding ancillary spatial data<a class="headerlink" href="#adding-ancillary-spatial-data" title="Link to this heading">¶</a></h1>
 <p>This tutorial demonstrates how to add ancillary spatial data to the
 OpenGHG store. These are split into several data types which currently
 include:</p>
@@ -406,7 +429,7 @@ transformation functions available to create and store data in this
 format directly. See the <a class="reference external" href="https://docs.openghg.org/api/api_transform.html"><code class="docutils literal notranslate"><span class="pre">openghg.transform</span></code></a> sub-module for options.</p>
 </div>
 <section id="using-the-tutorial-object-store">
-<h2>Using the tutorial object store<a class="headerlink" href="#using-the-tutorial-object-store" title="Link to this heading">#</a></h2>
+<h2>Using the tutorial object store<a class="headerlink" href="#using-the-tutorial-object-store" title="Link to this heading">¶</a></h2>
 <p>As in the <a class="reference internal" href="Adding_observation_data.html#using-the-tutorial-object-store"><span class="std std-ref">previous tutorial</span></a>,
 we will use the tutorial object store to avoid cluttering your personal
 object store.</p>
@@ -417,7 +440,7 @@ object store.</p>
 </div>
 </section>
 <section id="adding-and-standardising-data">
-<h2>1. Adding and standardising data<a class="headerlink" href="#adding-and-standardising-data" title="Link to this heading">#</a></h2>
+<h2>1. Adding and standardising data<a class="headerlink" href="#adding-and-standardising-data" title="Link to this heading">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Outside of this tutorial, if you have write access to multiple object stores you
@@ -457,7 +480,7 @@ Downloading ch4_EUROPE_201607.tar.gz: 100%|██████████| 77.4k
 </pre></div>
 </div>
 <section id="data-domains">
-<h3>Data domains<a class="headerlink" href="#data-domains" title="Link to this heading">#</a></h3>
+<h3>Data domains<a class="headerlink" href="#data-domains" title="Link to this heading">¶</a></h3>
 <p>For spatial data, a <em>domain</em> label indicates consistent areas and resolution.
 For multiple pieces of data, a single domain name should refer to the exact
 same set of latitude and longitude bounds.</p>
@@ -469,7 +492,7 @@ same set of latitude and longitude bounds.</p>
 </div>
 <p>You can also add new domain labels and definitions as needed.</p>
 <section id="footprints">
-<h4>Footprints<a class="headerlink" href="#footprints" title="Link to this heading">#</a></h4>
+<h4>Footprints<a class="headerlink" href="#footprints" title="Link to this heading">¶</a></h4>
 <p>To standardise <a class="footnote-reference brackets" href="#f5" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a> footprint data, we pass the following arguments to
 <code class="docutils literal notranslate"><span class="pre">standardise_footprint</span></code>:</p>
 <ul class="simple">
@@ -531,15 +554,15 @@ labelled correctly.
 See schema details below for how these inputs are defined.</p>
 </section>
 <section id="chunking">
-<h4>Chunking<a class="headerlink" href="#chunking" title="Link to this heading">#</a></h4>
+<h4>Chunking<a class="headerlink" href="#chunking" title="Link to this heading">¶</a></h4>
 <p>When reading in a netCDF file for standardisation we can pass a dictionary of chunk sizes to the standardisation function.
 This is useful for large files as it can reduce memory usage and speed up the process.</p>
 <section id="default-chunking">
-<h5>Default chunking<a class="headerlink" href="#default-chunking" title="Link to this heading">#</a></h5>
+<h5>Default chunking<a class="headerlink" href="#default-chunking" title="Link to this heading">¶</a></h5>
 <p>If you don’t specify chunk sizes OpenGHG will use a default chunking schema for the the data type. For footprints the chunking scheme used will depend on the properties of the footprint, such as whether it is a high time resolution CO2 footprint, a high spatial resolution footprint or a short lifetime species footprint. The default chunking scheme is designed to be a good compromise between memory usage and speed. If you’re unsure what chunk sizes to use then it’s best to leave the chunking to OpenGHG.</p>
 </section>
 <section id="manual-chunking">
-<h5>Manual chunking<a class="headerlink" href="#manual-chunking" title="Link to this heading">#</a></h5>
+<h5>Manual chunking<a class="headerlink" href="#manual-chunking" title="Link to this heading">¶</a></h5>
 <p>As a rule of thumb aim for chunk sizes of 100 - 300 MB in size. The best chunk size for you will depend on the memory of the system you’re running the standardisation process on and how you’ll be retrieving using the data from the object store. In this example we’ll standardise a high time resolution CO2 footprint dataset and tell OpenGHG to
 chunk the file into chunks of 24 time points.</p>
 <p>Let’s perform a quick calculation of the chunk sizes for the CO2 footprint dataset. As the variable <em class="xref py py-obj">fp_HiTRes</em> is has an extra <em class="xref py py-obj">H_back</em> dimension we’ll calculate the chunk sizes for this variable.</p>
@@ -583,7 +606,7 @@ chunk the file into chunks of 24 time points.</p>
 </section>
 </section>
 <section id="flux-emissions">
-<h4>Flux / Emissions<a class="headerlink" href="#flux-emissions" title="Link to this heading">#</a></h4>
+<h4>Flux / Emissions<a class="headerlink" href="#flux-emissions" title="Link to this heading">¶</a></h4>
 <p>Flux/emissions data typically describes “prior guesses” for emissions
 of substances, often broken down by region and source of emission.</p>
 <p>To  standardise flux/emissions data <a class="footnote-reference brackets" href="#f3" id="id7" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a> we pass the following arguments
@@ -616,7 +639,7 @@ by the same “EUROPE” domain as the footprint data described above.</p>
 </div>
 </section>
 <section id="boundary-conditions">
-<h4>Boundary conditions<a class="headerlink" href="#boundary-conditions" title="Link to this heading">#</a></h4>
+<h4>Boundary conditions<a class="headerlink" href="#boundary-conditions" title="Link to this heading">¶</a></h4>
 <p>Boundary conditions describe the vertical curtains of a
 regional domain.</p>
 <p>To  standardise boundary conditions data we pass the following arguments
@@ -640,7 +663,7 @@ at the edges of the “EUROPE” domain. They were created using the <a class="r
 </section>
 </section>
 <section id="user-defined-keywords-source-and-bc-input">
-<h3>User defined keywords: <code class="docutils literal notranslate"><span class="pre">source</span></code> and <code class="docutils literal notranslate"><span class="pre">bc_input</span></code><a class="headerlink" href="#user-defined-keywords-source-and-bc-input" title="Link to this heading">#</a></h3>
+<h3>User defined keywords: <code class="docutils literal notranslate"><span class="pre">source</span></code> and <code class="docutils literal notranslate"><span class="pre">bc_input</span></code><a class="headerlink" href="#user-defined-keywords-source-and-bc-input" title="Link to this heading">¶</a></h3>
 <p>Unlike the <code class="docutils literal notranslate"><span class="pre">domain</span></code> and <code class="docutils literal notranslate"><span class="pre">species</span></code> inputs which have some pre-defined
 values, the <code class="docutils literal notranslate"><span class="pre">source</span></code> and <code class="docutils literal notranslate"><span class="pre">bc_input</span></code> keywords can be chosen by the
 user as a way to describe the flux and boundary condition inputs,
@@ -653,7 +676,7 @@ in a timeseries to be identified.</p>
 <p>See the <span class="xref std std-ref">Modifying and deleting data</span> tutorial for how to update stored
 metadata if needed.</p>
 <section id="flux-timeseries-one-dimensional-timeseries-data">
-<h4>Flux Timeseries - [One dimensional timeseries data]<a class="headerlink" href="#flux-timeseries-one-dimensional-timeseries-data" title="Link to this heading">#</a></h4>
+<h4>Flux Timeseries - [One dimensional timeseries data]<a class="headerlink" href="#flux-timeseries-one-dimensional-timeseries-data" title="Link to this heading">¶</a></h4>
 <p>Flux timeseries data is one dimensional data i.e. time dimension.
 Currently, this is used to standardise ` National Inventory Submissions - CRF data &lt;<a class="reference external" href="https://unfccc.int/ghg-inventories-annex-i-parties/2024">https://unfccc.int/ghg-inventories-annex-i-parties/2024</a>&gt;`_  provided by UK Inventory team to United Nations Climate Change.</p>
 <p>To  standardise flux timeseries data we pass the following arguments
@@ -678,7 +701,7 @@ to <code class="docutils literal notranslate"><span class="pre">standardise_flux
 </section>
 </section>
 <section id="reviewing-what-is-in-the-object-store">
-<h3>Reviewing what is in the object store<a class="headerlink" href="#reviewing-what-is-in-the-object-store" title="Link to this heading">#</a></h3>
+<h3>Reviewing what is in the object store<a class="headerlink" href="#reviewing-what-is-in-the-object-store" title="Link to this heading">¶</a></h3>
 <p>To check the data and metadata already stored within an object store,
 use the <code class="docutils literal notranslate"><span class="pre">search</span></code> function from within the <code class="docutils literal notranslate"><span class="pre">openghg.retrieve</span></code> sub-module:</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.retrieve</span><span class="w"> </span><span class="kn">import</span> <span class="n">search</span>
@@ -887,7 +910,7 @@ include other separators.</p>
 </section>
 </section>
 <section id="input-format">
-<h2>2. Input format<a class="headerlink" href="#input-format" title="Link to this heading">#</a></h2>
+<h2>2. Input format<a class="headerlink" href="#input-format" title="Link to this heading">¶</a></h2>
 <p>For each of the data types seen above, there is an associated object from the
 <code class="docutils literal notranslate"><span class="pre">openghg.store</span></code> sub-module:</p>
 <ul class="simple">
@@ -899,7 +922,7 @@ include other separators.</p>
 <p>To get information about the expected format <a class="footnote-reference brackets" href="#f7" id="id10" role="doc-noteref"><span class="fn-bracket">[</span>7<span class="fn-bracket">]</span></a> for a data type,
 use the <code class="docutils literal notranslate"><span class="pre">.schema()</span></code> method for the associated object.</p>
 <section id="input-format-for-flux-data">
-<h3>Input format for flux data<a class="headerlink" href="#input-format-for-flux-data" title="Link to this heading">#</a></h3>
+<h3>Input format for flux data<a class="headerlink" href="#input-format-for-flux-data" title="Link to this heading">¶</a></h3>
 <p>For instance, to see the schema for flux data:</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.store</span><span class="w"> </span><span class="kn">import</span> <span class="n">Flux</span>
 
@@ -925,7 +948,7 @@ use the <code class="docutils literal notranslate"><span class="pre">.schema()</
 </ul>
 </section>
 <section id="input-format-for-footprints">
-<h3>Input format for footprints<a class="headerlink" href="#input-format-for-footprints" title="Link to this heading">#</a></h3>
+<h3>Input format for footprints<a class="headerlink" href="#input-format-for-footprints" title="Link to this heading">¶</a></h3>
 <p>Similarly for <code class="docutils literal notranslate"><span class="pre">Footprints</span></code>, as described in the standardisations
 section, there are a few different input options available:</p>
 <ul class="simple">
@@ -937,7 +960,7 @@ section, there are a few different input options available:</p>
 </ul>
 <p>These can be shown by passing keywords to the <code class="docutils literal notranslate"><span class="pre">.schema()</span></code> method.</p>
 <section id="default-inert-footprint-format">
-<h4>Default (inert) footprint format<a class="headerlink" href="#default-inert-footprint-format" title="Link to this heading">#</a></h4>
+<h4>Default (inert) footprint format<a class="headerlink" href="#default-inert-footprint-format" title="Link to this heading">¶</a></h4>
 <p>For example, if nothing is passed this returns the details for an integrated
 footprint for an inert species:</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.store</span><span class="w"> </span><span class="kn">import</span> <span class="n">Footprints</span>
@@ -973,7 +996,7 @@ requirement for these particle location boundary sensitivies to be
 included.</p>
 </section>
 <section id="other-footprint-formats">
-<h4>Other footprint formats<a class="headerlink" href="#other-footprint-formats" title="Link to this heading">#</a></h4>
+<h4>Other footprint formats<a class="headerlink" href="#other-footprint-formats" title="Link to this heading">¶</a></h4>
 <p>For species with a short lifetime the input footprints require
 additional variables. This can be seen by passing the <code class="docutils literal notranslate"><span class="pre">short_lifetime</span></code>
 flag:</p>
@@ -1005,7 +1028,7 @@ within the input footprint files.</p>
 </section>
 </section>
 <section id="cleanup">
-<h2>3. Cleanup<a class="headerlink" href="#cleanup" title="Link to this heading">#</a></h2>
+<h2>3. Cleanup<a class="headerlink" href="#cleanup" title="Link to this heading">¶</a></h2>
 <p>If you’re finished with the data in this tutorial you can clean up the
 tutorial object store using the <code class="docutils literal notranslate"><span class="pre">clear_tutorial_store</span></code> function.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.tutorial</span><span class="w"> </span><span class="kn">import</span> <span class="n">clear_tutorial_store</span>
@@ -1055,130 +1078,50 @@ raw data files to the object store.</p>
 </section>
 
 
-                </article>
+              </div>
               
               
-              
-              
-              
-                <footer class="prev-next-footer">
-                  
-<div class="prev-next-area">
-    <a class="left-prev"
-       href="Adding_observation_data.html"
-       title="previous page">
-      <i class="fa-solid fa-angle-left"></i>
-      <div class="prev-next-info">
-        <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Adding observation data</p>
-      </div>
+              <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+    <a class='left-prev' id="prev-link" href="Adding_observation_data.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">Adding observation data</p>
+        </div>
     </a>
-    <a class="right-next"
-       href="Creating_data_from_databases.html"
-       title="next page">
-      <div class="prev-next-info">
+    <a class='right-next' id="next-link" href="Creating_data_from_databases.html" title="next page">
+    <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
         <p class="prev-next-title">Using databases to add data</p>
-      </div>
-      <i class="fa-solid fa-angle-right"></i>
+    </div>
+    <i class="fas fa-angle-right"></i>
     </a>
 </div>
-                </footer>
               
-            </div>
-            
-            
-              
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+          </main>
+          
 
-
-  <div class="sidebar-secondary-item">
-<div
-    id="pst-page-navigation-heading-2"
-    class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> On this page
-  </div>
-  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-the-tutorial-object-store">Using the tutorial object store</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adding-and-standardising-data">1. Adding and standardising data</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#data-domains">Data domains</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#footprints">Footprints</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#chunking">Chunking</a><ul class="nav section-nav flex-column">
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#default-chunking">Default chunking</a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#manual-chunking">Manual chunking</a></li>
-</ul>
-</li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#flux-emissions">Flux / Emissions</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#boundary-conditions">Boundary conditions</a></li>
-</ul>
-</li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#user-defined-keywords-source-and-bc-input">User defined keywords: <code class="docutils literal notranslate"><span class="pre">source</span></code> and <code class="docutils literal notranslate"><span class="pre">bc_input</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#flux-timeseries-one-dimensional-timeseries-data">Flux Timeseries - [One dimensional timeseries data]</a></li>
-</ul>
-</li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#reviewing-what-is-in-the-object-store">Reviewing what is in the object store</a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input-format">2. Input format</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#input-format-for-flux-data">Input format for flux data</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#input-format-for-footprints">Input format for footprints</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#default-inert-footprint-format">Default (inert) footprint format</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#other-footprint-formats">Other footprint formats</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cleanup">3. Cleanup</a></li>
-</ul>
-  </nav></div>
-
-</div></div>
-              
-            
-          </div>
-          <footer class="bd-footer-content">
-            
-          </footer>
-        
-      </main>
+      </div>
     </div>
-  </div>
   
-  <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
-<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
-
-  <footer class="bd-footer">
-<div class="bd-footer__inner bd-page-width">
-  
-    <div class="footer-items__start">
-      
-        <div class="footer-item">
-
-  <p class="copyright">
+    <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+  <footer class="footer mt-5 mt-md-0">
+  <div class="container">
     
-      © Copyright 2024 OpenGHG development team.
-      <br/>
+    <div class="footer-item">
+      <p class="copyright">
+    &copy; Copyright 2024 OpenGHG development team.<br>
+</p>
+    </div>
     
-  </p>
-</div>
-      
+    <div class="footer-item">
+      <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 8.2.3.<br>
+</p>
     </div>
-  
-  
-  
-    <div class="footer-items__end">
-      
-        <div class="footer-item">
-<p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.2.
-</p></div>
-      
-    </div>
-  
-</div>
-
-  </footer>
+    
+  </div>
+</footer>
   </body>
 </html>

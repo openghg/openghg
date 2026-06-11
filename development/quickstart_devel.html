@@ -1,397 +1,357 @@
-
 <!DOCTYPE html>
 
-
-<html lang="en" data-content_root="../" >
-
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Quickstart - developer &#8212; OpenGHG 0.18.0 documentation</title>
+    <title>Quickstart - developer &#8212; OpenGHG 0.19.0 documentation</title>
+    
+    <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
   
+    
+    <link rel="stylesheet"
+      href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+      href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+      href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
   
+    
+      
   
-  <script data-cfasync="false">
-    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
-    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
-  </script>
-  
-  <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
-
-  
-  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
-
+    
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/pydata-sphinx-theme.css?v=1140d252" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=9c3e77be" />
     <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../_static/thebelab.css" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=db7899ab" />
+    
+    <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
   
-  <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
-  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
-
-    <script src="../_static/documentation_options.js?v=ba2e7b09"></script>
-    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/documentation_options.js?v=8a079089"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/thebelab-helper.js"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../_static/togglebutton.js?v=1ae7504c"></script>
+    <script src="../_static/togglebutton.js?v=b8b12719"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
-    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'development/quickstart_devel';</script>
     <script src="../_static/custom.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Getting setup" href="python_devel.html" />
     <link rel="prev" title="Development" href="index_devel.html" />
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Feb 18, 2026"/>
-  </head>
-  
-  
-  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="en">
+    
 
-  
-  
-  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
-  
-  <div id="pst-scroll-pixel-helper"></div>
-  
-  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
-    <i class="fa-solid fa-arrow-up"></i>
-    Back to top
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
+
+  <div id="navbar-start">
+    
+    
+<a class="navbar-brand" href="../index.html">
+<p class="title">OpenGHG</p>
+</a>
+
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
   </button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__primary"
-          id="__primary"/>
-  <label class="overlay overlay-primary" for="__primary"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__secondary"
-          id="__secondary"/>
-  <label class="overlay overlay-secondary" for="__secondary"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
-<form class="bd-search d-flex align-items-center"
-      action="../search.html"
-      method="get">
-  <i class="fa-solid fa-magnifying-glass"></i>
-  <input type="search"
-         class="form-control"
-         name="q"
-         id="search-input"
-         placeholder="Search the docs ..."
-         aria-label="Search the docs ..."
-         autocomplete="off"
-         autocorrect="off"
-         autocapitalize="off"
-         spellcheck="false"/>
-  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
-  
-    <header class="bd-header navbar navbar-expand-lg bd-navbar">
-<div class="bd-header__inner bd-page-width">
-  <label class="sidebar-toggle primary-toggle" for="__primary">
-    <span class="fa-solid fa-bars"></span>
-  </label>
-  
-  
-  <div class="col-lg-3 navbar-header-items__start">
-    
-      <div class="navbar-item">
-
-  
-
-<a class="navbar-brand logo" href="../index.html">
-  
-  
-  
-  
-  
-    
-    
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
       
-    
-    
-    <img src="../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.18.0 documentation - Home"/>
-    <script>document.write(`<img src="../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.18.0 documentation - Home"/>`);</script>
-  
-  
-</a></div>
-    
-  </div>
-  
-  <div class="col-lg-9 navbar-header-items">
-    
-    <div class="me-auto navbar-header-items__center">
-      
-        <div class="navbar-item">
-<nav class="navbar-nav">
-  <ul class="bd-navbar-elements navbar-nav">
-    
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../install.html">
-                        Installation
-                      </a>
-                    </li>
-                
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../install.html">
+  Installation
+ </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../tutorials/index.html">
-                        Tutorials
-                      </a>
-                    </li>
-                
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../tutorials/index.html">
+  Tutorials
+ </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../api/index.html">
-                        User API
-                      </a>
-                    </li>
-                
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../api/index.html">
+  User API
+ </a>
+</li>
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="index_devel.html">
-                        Development
-                      </a>
-                    </li>
-                
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="index_devel.html">
+  Development
+ </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../api/index_devapi.html">
-                        Developer API
-                      </a>
-                    </li>
-                
-  </ul>
-</nav></div>
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../api/index_devapi.html">
+  Developer API
+ </a>
+</li>
+
+    
+</ul>
+      </div>
       
     </div>
-    
-    
-    <div class="navbar-header-items__end">
+
+    <div id="navbar-end">
       
-        <div class="navbar-item navbar-persistent--container">
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+            
+            <!-- Only show if we have sidebars configured, else just a small margin  -->
+            <div class="col-12 col-md-3 bd-sidebar">
+              <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    <ul class="current nav bd-sidenav">
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   Quickstart - developer
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="python_devel.html">
+   Getting setup
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="packaging.html">
+   Packaging releases
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="specifications/data_spec.html">
+   Data Specification
+  </a>
+ </li>
+</ul>
+
+  </div>
+</nav>
+              </div>
+              <div class="sidebar-end-items">
+              </div>
+            </div>
+            
           
 
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
-  </button>
-`);
-</script>
-        </div>
-      
-      
-    </div>
-    
-  </div>
-  
-  
-    <div class="navbar-persistent--mobile">
-
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
-  </button>
-`);
-</script>
-    </div>
-  
-
-  
-    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
-      <span class="fa-solid fa-outdent"></span>
-    </label>
-  
-</div>
-
-    </header>
-  
-
-  <div class="bd-container">
-    <div class="bd-container__inner bd-page-width">
-      
-      
-      
-      <div class="bd-sidebar-primary bd-sidebar">
-        
-
-  
-  <div class="sidebar-header-items sidebar-primary__section">
-    
-    
-      <div class="sidebar-header-items__center">
-        
-          <div class="navbar-item">
-<nav class="navbar-nav">
-  <ul class="bd-navbar-elements navbar-nav">
-    
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../install.html">
-                        Installation
-                      </a>
-                    </li>
-                
-
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../tutorials/index.html">
-                        Tutorials
-                      </a>
-                    </li>
-                
-
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../api/index.html">
-                        User API
-                      </a>
-                    </li>
-                
-
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="index_devel.html">
-                        Development
-                      </a>
-                    </li>
-                
-
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../api/index_devapi.html">
-                        Developer API
-                      </a>
-                    </li>
-                
-  </ul>
-</nav></div>
-        
-      </div>
-    
-    
-    
-  </div>
-  
-    <div class="sidebar-primary-items__start sidebar-primary__section">
-        <div class="sidebar-primary-item">
-<nav class="bd-docs-nav bd-links"
-     aria-label="Section Navigation">
-  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
-  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Quickstart - developer</a></li>
-</ul>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="python_devel.html">Getting setup</a></li>
-</ul>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="packaging.html">Packaging releases</a></li>
-</ul>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="specifications/data_spec.html">Data Specification</a></li>
-</ul>
-</div>
-</nav></div>
-    </div>
-  
-  
-  <div class="sidebar-primary-items__end sidebar-primary__section">
-  </div>
-  
-  <div id="rtd-footer-container"></div>
-
-
-      </div>
-      
-      <main id="main-content" class="bd-main">
-        
-        
-          <div class="bd-content">
-            <div class="bd-article-container">
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+            
               
-              <div class="bd-header-article">
-<div class="header-article-items header-article__inner">
-  
-    <div class="header-article-items__start">
-      
-        <div class="header-article-item">
+              <div class="toc-item">
+                
+<div class="tocsection onthispage pt-5 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
 
-
-
-<nav aria-label="Breadcrumb">
-  <ul class="bd-breadcrumbs">
-    
-    <li class="breadcrumb-item breadcrumb-home">
-      <a href="../index.html" class="nav-link" aria-label="Home">
-        <i class="fa-solid fa-home"></i>
+<nav id="bd-toc-nav">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#setting-up-your-computer">
+   Setting up your computer
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#clone-openghg">
+     Clone OpenGHG
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#environments">
+     Environments
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#pixi">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         pixi
+        </span>
+       </code>
       </a>
-    </li>
-    
-    <li class="breadcrumb-item"><a href="index_devel.html" class="nav-link">Development</a></li>
-    
-    <li class="breadcrumb-item active" aria-current="page">Quickstart...</li>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#pip">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         pip
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#conda">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         conda
+        </span>
+       </code>
+      </a>
+     </li>
+    </ul>
+   </li>
   </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#configuration">
+   Configuration
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#python">
+     Python
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#command-line">
+     Command line
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#jupyter">
+   Jupyter
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#what-next">
+   What next?
+  </a>
+ </li>
+</ul>
+
 </nav>
-</div>
-      
-    </div>
-  
-  
-</div>
-</div>
+              </div>
               
-              
-              
+              <div class="toc-item">
                 
-<div id="searchbox"></div>
-                <article class="bd-article">
-                  
+              </div>
+              
+            
+          </div>
+          
+
+          
+          
+            
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
   <section id="quickstart-developer">
-<h1>Quickstart - developer<a class="headerlink" href="#quickstart-developer" title="Link to this heading">#</a></h1>
+<h1>Quickstart - developer<a class="headerlink" href="#quickstart-developer" title="Link to this heading">¶</a></h1>
 <p>This quickstart guide will get you quickly setup with a development environment so you can use and contribute to OpenGHG.
 The main repository for OpenGHG can be found on <a class="reference external" href="https://github.com/openghg/openghg">GitHub</a>.</p>
 <section id="setting-up-your-computer">
-<h2>Setting up your computer<a class="headerlink" href="#setting-up-your-computer" title="Link to this heading">#</a></h2>
-<p>You’ll need <a class="reference external" href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git">git</a> and Python &gt;= 3.9, so please make sure you have both installed before continuing
+<h2>Setting up your computer<a class="headerlink" href="#setting-up-your-computer" title="Link to this heading">¶</a></h2>
+<p>You’ll need <a class="reference external" href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git">git</a> and Python &gt;= 3.10, so please make sure you have both installed before continuing
 further.</p>
 <section id="clone-openghg">
-<h3>Clone OpenGHG<a class="headerlink" href="#clone-openghg" title="Link to this heading">#</a></h3>
+<h3>Clone OpenGHG<a class="headerlink" href="#clone-openghg" title="Link to this heading">¶</a></h3>
 <p>First we’ll clone the repository and make sure we’re on the <code class="docutils literal notranslate"><span class="pre">devel</span></code> branch. This makes sure we’re on the most up to date version of OpenGHG.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/openghg/openghg.git
 <span class="nb">cd</span><span class="w"> </span>openghg
 git<span class="w"> </span>checkout<span class="w"> </span>devel
 </pre></div>
 </div>
-<p>Next we’ll get a virtual environment setup using either <code class="docutils literal notranslate"><span class="pre">pip</span></code> or <code class="docutils literal notranslate"><span class="pre">conda</span></code>.</p>
+<p>Next we’ll get a virtual environment setup using <code class="docutils literal notranslate"><span class="pre">pixi</span></code>, <code class="docutils literal notranslate"><span class="pre">pip</span></code>, or <code class="docutils literal notranslate"><span class="pre">conda</span></code>.</p>
 </section>
 <section id="environments">
-<h3>Environments<a class="headerlink" href="#environments" title="Link to this heading">#</a></h3>
+<h3>Environments<a class="headerlink" href="#environments" title="Link to this heading">¶</a></h3>
 <p>Here we cover the creation of an environment and the installation of OpenGHG into it. Installation here means adding OpenGHG to the environment.
 We’ll install it in developer mode so that any changes you make to the code will automatically be available when you run commands. Similarly, if you
 run a <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">pull</span></code> on the <code class="docutils literal notranslate"><span class="pre">devel</span></code> branch all changes made will be available to you straight away, without having to reinstall or update OpenGHG within
 the environment.</p>
+<section id="pixi">
+<h4><code class="docutils literal notranslate"><span class="pre">pixi</span></code><a class="headerlink" href="#pixi" title="Link to this heading">¶</a></h4>
+<p>Pixi is the recommended development environment when working with
+NetCDF, HDF5, or Zarr data. It installs the compiled scientific,
+HDF5, and NetCDF stack from <code class="docutils literal notranslate"><span class="pre">conda-forge</span></code> and keeps this OpenGHG
+checkout editable.</p>
+<p>Install Pixi directly with one of the following commands.</p>
+<p>On macOS or Linux, use the official installer:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://pixi.sh/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
+</pre></div>
+</div>
+<p>If <code class="docutils literal notranslate"><span class="pre">curl</span></code> is unavailable, use <code class="docutils literal notranslate"><span class="pre">wget</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wget<span class="w"> </span>-qO-<span class="w"> </span>https://pixi.sh/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
+</pre></div>
+</div>
+<p>On macOS with Homebrew:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>brew<span class="w"> </span>install<span class="w"> </span>pixi
+</pre></div>
+</div>
+<p>Then create the editable OpenGHG development environment from this
+checkout:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pixi<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>dev
+pixi<span class="w"> </span>run<span class="w"> </span>-e<span class="w"> </span>dev<span class="w"> </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import openghg, h5py, h5netcdf, netCDF4, xarray, zarr&quot;</span>
+</pre></div>
+</div>
+<p>Useful development commands:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pixi<span class="w"> </span>run<span class="w"> </span>-e<span class="w"> </span>dev<span class="w"> </span><span class="nb">test</span>
+pixi<span class="w"> </span>run<span class="w"> </span>-e<span class="w"> </span>dev<span class="w"> </span>test-storage
+pixi<span class="w"> </span>run<span class="w"> </span>-e<span class="w"> </span>dev<span class="w"> </span>lint
+pixi<span class="w"> </span>run<span class="w"> </span>-e<span class="w"> </span>dev<span class="w"> </span>typecheck
+</pre></div>
+</div>
+<p>Avoid running commands such as <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-U</span> <span class="pre">h5py</span> <span class="pre">h5netcdf</span> <span class="pre">netcdf4</span></code>
+inside the Pixi environment. That can replace Pixi’s conda-forge
+HDF5/NetCDF packages with PyPI wheels and reintroduce binary
+incompatibilities.</p>
+<p>OpenGHG should now be installed, you can check this by opening <code class="docutils literal notranslate"><span class="pre">ipython</span></code> and running</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="kn">import</span><span class="w"> </span><span class="nn">openghg</span>
+</pre></div>
+</div>
+</section>
 <section id="pip">
-<h4><code class="docutils literal notranslate"><span class="pre">pip</span></code><a class="headerlink" href="#pip" title="Link to this heading">#</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">pip</span></code><a class="headerlink" href="#pip" title="Link to this heading">¶</a></h4>
 <p>It is recommended that you develop OpenGHG in a Python
 <a class="reference external" href="https://docs.python.org/3/tutorial/venv.html">virtual environment</a>.
 Here we’ll create a new folder called <code class="docutils literal notranslate"><span class="pre">envs</span></code> in our home directory and create
@@ -419,7 +379,7 @@ interfering with other Python installations.</p>
 <p>Now OpenGHG is installed please move on to <span class="xref std std-ref">Configuring the object store</span>.</p>
 </section>
 <section id="conda">
-<h4><code class="docutils literal notranslate"><span class="pre">conda</span></code><a class="headerlink" href="#conda" title="Link to this heading">#</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">conda</span></code><a class="headerlink" href="#conda" title="Link to this heading">¶</a></h4>
 <p>Making sure you’re in the <code class="docutils literal notranslate"><span class="pre">openghg</span></code> repository folder run</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>environment-dev.yaml
 </pre></div>
@@ -441,12 +401,12 @@ interfering with other Python installations.</p>
 </section>
 </section>
 <section id="configuration">
-<h2>Configuration<a class="headerlink" href="#configuration" title="Link to this heading">#</a></h2>
+<h2>Configuration<a class="headerlink" href="#configuration" title="Link to this heading">¶</a></h2>
 <p>OpenGHG needs to know where to create the object store it uses to store data, it does this by reading a configuration file in your home
 directory. As part of the setup process we need to create this configuration file using either the <a class="reference internal" href="../api/devapi_util.html#openghg.util.create_config" title="openghg.util.create_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openghg.util.create_config</span></code></a> function
 or the command line interface.</p>
 <section id="python">
-<h3>Python<a class="headerlink" href="#python" title="Link to this heading">#</a></h3>
+<h3>Python<a class="headerlink" href="#python" title="Link to this heading">¶</a></h3>
 <p>You can use the <em class="xref py py-obj">create_config</em> function to help you make a config file. First import</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_config</span>
 
@@ -464,7 +424,7 @@ or the command line interface.</p>
 <p>Here I left the path to the object store blank to use the default path in my home directory.</p>
 </section>
 <section id="command-line">
-<h3>Command line<a class="headerlink" href="#command-line" title="Link to this heading">#</a></h3>
+<h3>Command line<a class="headerlink" href="#command-line" title="Link to this heading">¶</a></h3>
 <p>You can also use the <code class="xref py py-obj docutils literal notranslate"><span class="pre">openghg</span></code> command line tool to get the configuration file setup.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>openghg<span class="w"> </span>--quickstart
 
@@ -488,7 +448,7 @@ you can find it at <code class="docutils literal notranslate"><span class="pre">
 </section>
 </section>
 <section id="jupyter">
-<h2>Jupyter<a class="headerlink" href="#jupyter" title="Link to this heading">#</a></h2>
+<h2>Jupyter<a class="headerlink" href="#jupyter" title="Link to this heading">¶</a></h2>
 <p>If you want to use Jupyter notebooks to interact with OpenGHG, you can install <code class="docutils literal notranslate"><span class="pre">jupyterlab</span></code>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>jupyterlab
 </pre></div>
@@ -496,123 +456,57 @@ you can find it at <code class="docutils literal notranslate"><span class="pre">
 <p>Then just run <code class="docutils literal notranslate"><span class="pre">jupyter</span> <span class="pre">notebook</span></code> to get started.</p>
 </section>
 <section id="what-next">
-<h2>What next?<a class="headerlink" href="#what-next" title="Link to this heading">#</a></h2>
+<h2>What next?<a class="headerlink" href="#what-next" title="Link to this heading">¶</a></h2>
 <p>Now you’ve got OpenGHG setup please take a look at our <a class="reference internal" href="../tutorials/index.html#tutorials"><span class="std std-ref">tutorials section</span></a> and if you’d like to start
 contributing to OpenGHG <a class="reference external" href="https://github.com/openghg/openghg/issues">open an issue</a> and submit a pull request!</p>
 </section>
 </section>
 
 
-                </article>
+              </div>
               
               
-              
-              
-              
-                <footer class="prev-next-footer">
-                  
-<div class="prev-next-area">
-    <a class="left-prev"
-       href="index_devel.html"
-       title="previous page">
-      <i class="fa-solid fa-angle-left"></i>
-      <div class="prev-next-info">
-        <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Development</p>
-      </div>
+              <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+    <a class='left-prev' id="prev-link" href="index_devel.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">Development</p>
+        </div>
     </a>
-    <a class="right-next"
-       href="python_devel.html"
-       title="next page">
-      <div class="prev-next-info">
+    <a class='right-next' id="next-link" href="python_devel.html" title="next page">
+    <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
         <p class="prev-next-title">Getting setup</p>
-      </div>
-      <i class="fa-solid fa-angle-right"></i>
+    </div>
+    <i class="fas fa-angle-right"></i>
     </a>
 </div>
-                </footer>
               
-            </div>
-            
-            
-              
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+          </main>
+          
 
-
-  <div class="sidebar-secondary-item">
-<div
-    id="pst-page-navigation-heading-2"
-    class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> On this page
-  </div>
-  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-up-your-computer">Setting up your computer</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#clone-openghg">Clone OpenGHG</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#environments">Environments</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#pip"><code class="docutils literal notranslate"><span class="pre">pip</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#conda"><code class="docutils literal notranslate"><span class="pre">conda</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#configuration">Configuration</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#python">Python</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#command-line">Command line</a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#jupyter">Jupyter</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-next">What next?</a></li>
-</ul>
-  </nav></div>
-
-</div></div>
-              
-            
-          </div>
-          <footer class="bd-footer-content">
-            
-          </footer>
-        
-      </main>
+      </div>
     </div>
-  </div>
   
-  <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
-
-  <footer class="bd-footer">
-<div class="bd-footer__inner bd-page-width">
-  
-    <div class="footer-items__start">
-      
-        <div class="footer-item">
-
-  <p class="copyright">
+    <script src="../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+  <footer class="footer mt-5 mt-md-0">
+  <div class="container">
     
-      © Copyright 2024 OpenGHG development team.
-      <br/>
+    <div class="footer-item">
+      <p class="copyright">
+    &copy; Copyright 2024 OpenGHG development team.<br>
+</p>
+    </div>
     
-  </p>
-</div>
-      
+    <div class="footer-item">
+      <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 8.2.3.<br>
+</p>
     </div>
-  
-  
-  
-    <div class="footer-items__end">
-      
-        <div class="footer-item">
-<p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.2.
-</p></div>
-      
-    </div>
-  
-</div>
-
-  </footer>
+    
+  </div>
+</footer>
   </body>
 </html>

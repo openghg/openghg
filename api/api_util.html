@@ -1,355 +1,424 @@
-
 <!DOCTYPE html>
 
-
-<html lang="en" data-content_root="../" >
-
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Util &#8212; OpenGHG 0.18.0 documentation</title>
+    <title>Util &#8212; OpenGHG 0.19.0 documentation</title>
+    
+    <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
   
+    
+    <link rel="stylesheet"
+      href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+      href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+      href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
   
+    
+      
   
-  <script data-cfasync="false">
-    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
-    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
-  </script>
-  
-  <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
-
-  
-  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
-
+    
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/pydata-sphinx-theme.css?v=1140d252" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=9c3e77be" />
     <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../_static/thebelab.css" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=db7899ab" />
+    
+    <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
   
-  <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
-  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
-
-    <script src="../_static/documentation_options.js?v=ba2e7b09"></script>
-    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/documentation_options.js?v=8a079089"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/thebelab-helper.js"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../_static/togglebutton.js?v=1ae7504c"></script>
+    <script src="../_static/togglebutton.js?v=b8b12719"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
-    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'api/api_util';</script>
     <script src="../_static/custom.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Feb 18, 2026"/>
-  </head>
-  
-  
-  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="en">
+    
 
-  
-  
-  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
-  
-  <div id="pst-scroll-pixel-helper"></div>
-  
-  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
-    <i class="fa-solid fa-arrow-up"></i>
-    Back to top
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
+
+  <div id="navbar-start">
+    
+    
+<a class="navbar-brand" href="../index.html">
+<p class="title">OpenGHG</p>
+</a>
+
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
   </button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__primary"
-          id="__primary"/>
-  <label class="overlay overlay-primary" for="__primary"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__secondary"
-          id="__secondary"/>
-  <label class="overlay overlay-secondary" for="__secondary"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
-<form class="bd-search d-flex align-items-center"
-      action="../search.html"
-      method="get">
-  <i class="fa-solid fa-magnifying-glass"></i>
-  <input type="search"
-         class="form-control"
-         name="q"
-         id="search-input"
-         placeholder="Search the docs ..."
-         aria-label="Search the docs ..."
-         autocomplete="off"
-         autocorrect="off"
-         autocapitalize="off"
-         spellcheck="false"/>
-  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
-  
-    <header class="bd-header navbar navbar-expand-lg bd-navbar">
-<div class="bd-header__inner bd-page-width">
-  <label class="sidebar-toggle primary-toggle" for="__primary">
-    <span class="fa-solid fa-bars"></span>
-  </label>
-  
-  
-  <div class="col-lg-3 navbar-header-items__start">
-    
-      <div class="navbar-item">
-
-  
-
-<a class="navbar-brand logo" href="../index.html">
-  
-  
-  
-  
-  
-    
-    
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
       
-    
-    
-    <img src="../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.18.0 documentation - Home"/>
-    <script>document.write(`<img src="../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.18.0 documentation - Home"/>`);</script>
-  
-  
-</a></div>
-    
-  </div>
-  
-  <div class="col-lg-9 navbar-header-items">
-    
-    <div class="me-auto navbar-header-items__center">
-      
-        <div class="navbar-item">
-<nav class="navbar-nav">
-  <ul class="bd-navbar-elements navbar-nav">
-    
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../install.html">
-                        Installation
-                      </a>
-                    </li>
-                
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../install.html">
+  Installation
+ </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../tutorials/index.html">
-                        Tutorials
-                      </a>
-                    </li>
-                
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../tutorials/index.html">
+  Tutorials
+ </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="index.html">
-                        User API
-                      </a>
-                    </li>
-                
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="index.html">
+  User API
+ </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../development/index_devel.html">
-                        Development
-                      </a>
-                    </li>
-                
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../development/index_devel.html">
+  Development
+ </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="index_devapi.html">
-                        Developer API
-                      </a>
-                    </li>
-                
-  </ul>
-</nav></div>
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="index_devapi.html">
+  Developer API
+ </a>
+</li>
+
+    
+</ul>
+      </div>
       
     </div>
-    
-    
-    <div class="navbar-header-items__end">
+
+    <div id="navbar-end">
       
-        <div class="navbar-item navbar-persistent--container">
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+            
+            <!-- Only show if we have sidebars configured, else just a small margin  -->
+            <div class="col-12 col-md-3 bd-sidebar">
+              <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+  </div>
+</nav>
+              </div>
+              <div class="sidebar-end-items">
+              </div>
+            </div>
+            
           
 
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
-  </button>
-`);
-</script>
-        </div>
-      
-      
-    </div>
-    
-  </div>
-  
-  
-    <div class="navbar-persistent--mobile">
-
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
-  </button>
-`);
-</script>
-    </div>
-  
-
-  
-    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
-      <span class="fa-solid fa-outdent"></span>
-    </label>
-  
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+            
+              
+              <div class="toc-item">
+                
+<div class="tocsection onthispage pt-5 pb-3">
+    <i class="fas fa-list"></i> On this page
 </div>
 
-    </header>
-  
-
-  <div class="bd-container">
-    <div class="bd-container__inner bd-page-width">
-      
-      
-      
-        
-      
-      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
-        
-
-  
-  <div class="sidebar-header-items sidebar-primary__section">
-    
-    
-      <div class="sidebar-header-items__center">
-        
-          <div class="navbar-item">
-<nav class="navbar-nav">
-  <ul class="bd-navbar-elements navbar-nav">
-    
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../install.html">
-                        Installation
-                      </a>
-                    </li>
-                
-
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../tutorials/index.html">
-                        Tutorials
-                      </a>
-                    </li>
-                
-
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="index.html">
-                        User API
-                      </a>
-                    </li>
-                
-
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../development/index_devel.html">
-                        Development
-                      </a>
-                    </li>
-                
-
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="index_devapi.html">
-                        Developer API
-                      </a>
-                    </li>
-                
+<nav id="bd-toc-nav">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#exporting">
+   Exporting
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.to_dashboard">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       to_dashboard()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.to_dashboard_mobile">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       to_dashboard_mobile()
+      </span>
+     </code>
+    </a>
+   </li>
   </ul>
-</nav></div>
-        
-      </div>
-    
-    
-    
-  </div>
-  
-  
-  <div class="sidebar-primary-items__end sidebar-primary__section">
-  </div>
-  
-  <div id="rtd-footer-container"></div>
-
-
-      </div>
-      
-      <main id="main-content" class="bd-main">
-        
-        
-          <div class="bd-content">
-            <div class="bd-article-container">
-              
-              <div class="bd-header-article">
-<div class="header-article-items header-article__inner">
-  
-    <div class="header-article-items__start">
-      
-        <div class="header-article-item">
-
-
-
-<nav aria-label="Breadcrumb">
-  <ul class="bd-breadcrumbs">
-    
-    <li class="breadcrumb-item breadcrumb-home">
-      <a href="../index.html" class="nav-link" aria-label="Home">
-        <i class="fa-solid fa-home"></i>
-      </a>
-    </li>
-    <li class="breadcrumb-item active" aria-current="page">Util</li>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#hashing">
+   Hashing
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.hash_file">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       hash_file()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.hash_string">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       hash_string()
+      </span>
+     </code>
+    </a>
+   </li>
   </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#string-manipulation">
+   String manipulation
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.clean_string">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       clean_string()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.to_lowercase">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       to_lowercase()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.remove_punctuation">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       remove_punctuation()
+      </span>
+     </code>
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#time">
+   Time
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.timestamp_tzaware">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       timestamp_tzaware()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.timestamp_now">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       timestamp_now()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.timestamp_epoch">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       timestamp_epoch()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.daterange_from_str">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       daterange_from_str()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.daterange_to_str">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       daterange_to_str()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.create_daterange_str">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       create_daterange_str()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.create_daterange">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       create_daterange()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.check_nan">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       check_nan()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.check_date">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       check_date()
+      </span>
+     </code>
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#site-checks">
+   Site Checks
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.verify_site">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       verify_site()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.multiple_inlets">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       multiple_inlets()
+      </span>
+     </code>
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#domain">
+   Domain
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.find_domain">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       find_domain()
+      </span>
+     </code>
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#inlet">
+   Inlet
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.format_inlet">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       format_inlet()
+      </span>
+     </code>
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
 </nav>
-</div>
-      
-    </div>
-  
-  
-</div>
-</div>
+              </div>
               
-              
-              
+              <div class="toc-item">
                 
-<div id="searchbox"></div>
-                <article class="bd-article">
-                  
+              </div>
+              
+            
+          </div>
+          
+
+          
+          
+            
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
   <section id="util">
-<h1>Util<a class="headerlink" href="#util" title="Link to this heading">#</a></h1>
+<h1>Util<a class="headerlink" href="#util" title="Link to this heading">¶</a></h1>
 <section id="exporting">
-<h2>Exporting<a class="headerlink" href="#exporting" title="Link to this heading">#</a></h2>
+<h2>Exporting<a class="headerlink" href="#exporting" title="Link to this heading">¶</a></h2>
 <p>These are used to export data to a format readable by the <a class="reference external" href="https://github.com/openghg/dashboard">OpenGHG data dashboard</a>.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.to_dashboard">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">to_dashboard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">downsample_n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_export.html#to_dashboard"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.to_dashboard" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">to_dashboard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">downsample_n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_export.html#to_dashboard"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.to_dashboard" title="Link to this definition">¶</a></dt>
 <dd><p>Takes a Dataset produced by OpenGHG and outputs it into a JSON
 format readable by the OpenGHG dashboard or a related project.</p>
 <p>This also exports a separate file with the locations of the sites
@@ -359,14 +428,14 @@ inlets.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="devapi_dataobjects.html#openghg.dataobjects.ObsData" title="openghg.dataobjects._obsdata.ObsData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsData</span></code></a> | <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="devapi_dataobjects.html#openghg.dataobjects.ObsData" title="openghg.dataobjects._obsdata.ObsData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsData</span></code></a>]</span>) – Dictionary of retrieved data</p></li>
-<li><p><strong>selected_vars</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></span>) – The variables to want to export</p></li>
-<li><p><strong>downsample_n</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – Take every nth value from the data</p></li>
-<li><p><strong>filename</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – filename to write output to</p></li>
+<li><p><strong>data</strong> (<a class="reference internal" href="devapi_dataobjects.html#openghg.dataobjects.ObsData" title="openghg.dataobjects.ObsData"><em>ObsData</em></a><em> | </em><em>list</em><em>[</em><a class="reference internal" href="devapi_dataobjects.html#openghg.dataobjects.ObsData" title="openghg.dataobjects.ObsData"><em>ObsData</em></a><em>]</em>) – Dictionary of retrieved data</p></li>
+<li><p><strong>selected_vars</strong> (<em>list</em>) – The variables to want to export</p></li>
+<li><p><strong>downsample_n</strong> (<em>int</em>) – Take every nth value from the data</p></li>
+<li><p><strong>filename</strong> (<em>str</em><em> | </em><em>None</em>) – filename to write output to</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+<dd class="field-even"><p>dict | None</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
@@ -376,13 +445,13 @@ inlets.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.to_dashboard_mobile">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">to_dashboard_mobile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_export.html#to_dashboard_mobile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.to_dashboard_mobile" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">to_dashboard_mobile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_export.html#to_dashboard_mobile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.to_dashboard_mobile" title="Link to this definition">¶</a></dt>
 <dd><p>Export the Glasgow LICOR data to JSON for the dashboard</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></span>) – Data dictionary</p></li>
-<li><p><strong>filename</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Filename for export of JSON</p></li>
+<li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – Data dictionary</p></li>
+<li><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">UnionType</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Filename for export of JSON</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -396,11 +465,11 @@ inlets.</p>
 
 </section>
 <section id="hashing">
-<h2>Hashing<a class="headerlink" href="#hashing" title="Link to this heading">#</a></h2>
+<h2>Hashing<a class="headerlink" href="#hashing" title="Link to this heading">¶</a></h2>
 <p>These handle hashing of data (usually with SHA1)</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.hash_file">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">hash_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_hashing.html#hash_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.hash_file" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">hash_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_hashing.html#hash_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.hash_file" title="Link to this definition">¶</a></dt>
 <dd><p>Opens the file at filepath and calculates its SHA1 hash</p>
 <p>Taken from <a class="reference external" href="https://stackoverflow.com/a/22058673">https://stackoverflow.com/a/22058673</a></p>
 <dl class="field-list simple">
@@ -418,11 +487,11 @@ inlets.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.hash_string">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">hash_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to_hash</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_hashing.html#hash_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.hash_string" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">hash_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to_hash</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_hashing.html#hash_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.hash_string" title="Link to this definition">¶</a></dt>
 <dd><p>Return the SHA-1 hash of a string</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>to_hash</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – String to hash</p>
+<dd class="field-odd"><p><strong>to_hash</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – String to hash</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>SHA1 hash of string</p>
@@ -435,18 +504,20 @@ inlets.</p>
 
 </section>
 <section id="string-manipulation">
-<h2>String manipulation<a class="headerlink" href="#string-manipulation" title="Link to this heading">#</a></h2>
+<h2>String manipulation<a class="headerlink" href="#string-manipulation" title="Link to this heading">¶</a></h2>
 <p>String cleaning and formatting functions</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.clean_string">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">clean_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to_clean</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_special_characters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['_',</span> <span class="pre">'-',</span> <span class="pre">'.']</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_strings.html#clean_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.clean_string" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">clean_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to_clean</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_special_characters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">['_',</span> <span class="pre">'-',</span> <span class="pre">'.']</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/openghg/util/_strings.html#clean_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.clean_string" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">clean_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to_clean</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_special_characters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">['_',</span> <span class="pre">'-',</span> <span class="pre">'.']</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span></dt>
 <dd><p>Returns a lowercase string with only alphanumeric
 characters and any other characters specified by the keep_special_characters input.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>to_clean</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – String to clean</p></li>
-<li><p><strong>keep_special_characters</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Additional non-alphanumeric characters to keep.
+<li><p><strong>to_clean</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">UnionType</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – String to clean</p></li>
+<li><p><strong>keep_special_characters</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">UnionType</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Additional non-alphanumeric characters to keep.
 Default = [“_”, “-”, “.”] (underscores, dashes and full stops)</p></li>
 </ul>
 </dd>
@@ -461,7 +532,15 @@ Default = [“_”, “-”, “.”] (underscores, dashes and full stops)</p></
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.to_lowercase">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">to_lowercase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_strings.html#to_lowercase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.to_lowercase" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">to_lowercase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_keys</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/openghg/util/_strings.html#to_lowercase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.to_lowercase" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">to_lowercase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_keys</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">to_lowercase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_keys</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">to_lowercase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_keys</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">set</span></span></span></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">to_lowercase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_keys</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span></dt>
 <dd><p>Convert an object to lowercase. All keys and values in a dictionary will be converted
 to lowercase as will all objects in a list, tuple or set. You can optionally pass in a list of keys to
 skip when lowercasing a dictionary.</p>
@@ -469,8 +548,8 @@ skip when lowercasing a dictionary.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>d</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">set</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Object to lower case</p></li>
-<li><p><strong>skip_keys</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – List of keys to skip when lowercasing.</p></li>
+<li><p><strong>d</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">UnionType</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">set</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Object to lower case</p></li>
+<li><p><strong>skip_keys</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">UnionType</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – List of keys to skip when lowercasing.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -484,12 +563,12 @@ skip when lowercasing a dictionary.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.remove_punctuation">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">remove_punctuation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_strings.html#remove_punctuation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.remove_punctuation" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">remove_punctuation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_strings.html#remove_punctuation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.remove_punctuation" title="Link to this definition">¶</a></dt>
 <dd><p>Removes punctuation and converts the passed string
 to lowercase</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>s</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – String to convert</p>
+<dd class="field-odd"><p><strong>s</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – String to convert</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Unpunctuated, lowercased string</p>
@@ -502,11 +581,11 @@ to lowercase</p>
 
 </section>
 <section id="time">
-<h2>Time<a class="headerlink" href="#time" title="Link to this heading">#</a></h2>
+<h2>Time<a class="headerlink" href="#time" title="Link to this heading">¶</a></h2>
 <p>Helpers to deal with all things datetime.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.timestamp_tzaware">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">timestamp_tzaware</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#timestamp_tzaware"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.timestamp_tzaware" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">timestamp_tzaware</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#timestamp_tzaware"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.timestamp_tzaware" title="Link to this definition">¶</a></dt>
 <dd><p>Returns the pandas Timestamp passed as a timezone (UTC) aware
 Timestamp.</p>
 <dl class="field-list simple">
@@ -524,7 +603,7 @@ Timestamp.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.timestamp_now">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">timestamp_now</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#timestamp_now"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.timestamp_now" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">timestamp_now</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#timestamp_now"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.timestamp_now" title="Link to this definition">¶</a></dt>
 <dd><p>Returns a pandas timezone (UTC) aware Timestamp for the current time.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -538,7 +617,7 @@ Timestamp.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.timestamp_epoch">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">timestamp_epoch</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#timestamp_epoch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.timestamp_epoch" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">timestamp_epoch</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#timestamp_epoch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.timestamp_epoch" title="Link to this definition">¶</a></dt>
 <dd><p>Returns the UNIX epoch time
 1st of January 1970</p>
 <dl class="field-list simple">
@@ -553,7 +632,7 @@ Timestamp.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.daterange_from_str">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">daterange_from_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daterange_str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'D'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#daterange_from_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.daterange_from_str" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">daterange_from_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daterange_str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'D'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#daterange_from_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.daterange_from_str" title="Link to this definition">¶</a></dt>
 <dd><p>Get a Pandas DatetimeIndex from a string. The created
 DatetimeIndex has minute frequency.</p>
 <dl class="field-list simple">
@@ -574,7 +653,7 @@ DatetimeIndex has minute frequency.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.daterange_to_str">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">daterange_to_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daterange</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#daterange_to_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.daterange_to_str" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">daterange_to_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daterange</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#daterange_to_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.daterange_to_str" title="Link to this definition">¶</a></dt>
 <dd><p>Takes a pandas DatetimeIndex created by pandas date_range converts it to a
 string of the form 2019-01-01-00:00:00_2019-03-16-00:00:00</p>
 <dl class="field-list simple">
@@ -592,7 +671,7 @@ string of the form 2019-01-01-00:00:00_2019-03-16-00:00:00</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.create_daterange_str">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">create_daterange_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#create_daterange_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.create_daterange_str" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">create_daterange_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#create_daterange_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.create_daterange_str" title="Link to this definition">¶</a></dt>
 <dd><p>Convert the passed datetimes into a daterange string
 for use in searches and Datasource interactions</p>
 <dl class="field-list simple">
@@ -613,17 +692,17 @@ for use in searches and Datasource interactions</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.create_daterange">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">create_daterange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'D'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#create_daterange"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.create_daterange" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">create_daterange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'D'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#create_daterange"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.create_daterange" title="Link to this definition">¶</a></dt>
 <dd><p>Create a minute aligned daterange</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>start</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code></span>) – Start date</p></li>
-<li><p><strong>end</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code></span>) – End date</p></li>
+<li><p><strong>start</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code>) – Start date</p></li>
+<li><p><strong>end</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code>) – End date</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatetimeIndex</span></code></span></p>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">DatetimeIndex</span></code></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>pandas.DatetimeIndex</p>
@@ -633,12 +712,12 @@ for use in searches and Datasource interactions</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.check_nan">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">check_nan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#check_nan"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.check_nan" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">check_nan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#check_nan"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.check_nan" title="Link to this definition">¶</a></dt>
 <dd><p>Check if a number is Nan.</p>
 <p>Returns a string that can be JSON serialised.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – Number</p>
+<dd class="field-odd"><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">UnionType</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Number</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Returns NA if not a number else number</p>
@@ -651,13 +730,13 @@ for use in searches and Datasource interactions</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.check_date">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">check_date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#check_date"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.check_date" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">check_date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#check_date"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.check_date" title="Link to this definition">¶</a></dt>
 <dd><p>Check if a date string can be converted to a pd.Timestamp
 and returns NA if not.</p>
 <p>Returns a string that can be JSON serialised.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>date</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – String to test</p>
+<dd class="field-odd"><p><strong>date</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – String to test</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Returns NA if not a date, otherwise date string</p>
@@ -670,19 +749,19 @@ and returns NA if not.</p>
 
 </section>
 <section id="site-checks">
-<h2>Site Checks<a class="headerlink" href="#site-checks" title="Link to this heading">#</a></h2>
+<h2>Site Checks<a class="headerlink" href="#site-checks" title="Link to this heading">¶</a></h2>
 <p>These perform checks to ensure data processed for each site is correct</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.verify_site">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">verify_site</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_util.html#verify_site"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.verify_site" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">verify_site</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_util.html#verify_site"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.verify_site" title="Link to this definition">¶</a></dt>
 <dd><p>Check if the passed site is a valid one and returns the three
 letter site code if found. Otherwise we use fuzzy text matching to suggest
 sites with similar names.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>site</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Three letter site code or site name</p></li>
-<li><p><strong>site_filepath</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – Alternative site info file. Defaults to openghg_defs input.</p></li>
+<li><p><strong>site</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Three letter site code or site name</p></li>
+<li><p><strong>site_filepath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Alternative site info file. Defaults to openghg_defs input.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -696,13 +775,13 @@ sites with similar names.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.multiple_inlets">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">multiple_inlets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_util.html#multiple_inlets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.multiple_inlets" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">multiple_inlets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_util.html#multiple_inlets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.multiple_inlets" title="Link to this definition">¶</a></dt>
 <dd><p>Check if the passed site has more than one inlet</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>site</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Three letter site code</p></li>
-<li><p><strong>site_filepath</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – Alternative site info file. Defaults to openghg_defs input.</p></li>
+<li><p><strong>site</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Three letter site code</p></li>
+<li><p><strong>site_filepath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Alternative site info file. Defaults to openghg_defs input.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -716,34 +795,40 @@ sites with similar names.</p>
 
 </section>
 <section id="domain">
-<h2>Domain<a class="headerlink" href="#domain" title="Link to this heading">#</a></h2>
+<h2>Domain<a class="headerlink" href="#domain" title="Link to this heading">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.find_domain">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">find_domain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_domain.html#find_domain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.find_domain" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">find_domain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_domain.html#find_domain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.find_domain" title="Link to this definition">¶</a></dt>
 <dd><p>Finds the latitude and longitude values in degrees associated
 with a given domain name.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>domain</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Pre-defined domain name</p></li>
-<li><p><strong>domain_filepath</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – Alternative domain info file. Defaults to openghg_defs input.</p></li>
+<li><p><strong>domain</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Pre-defined domain name</p></li>
+<li><p><strong>domain_filepath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Alternative domain info file. Defaults to openghg_defs input.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Latitude and longitude values for the domain in degrees.</p>
+<dd class="field-even"><p>Latitude and longitude values for the domain in degrees. Alongwith lat_increment and lon_increment values in degrees.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>array, array</p>
+<dd class="field-odd"><p>array, array, float, float</p>
 </dd>
 </dl>
 </dd></dl>
 
 </section>
 <section id="inlet">
-<h2>Inlet<a class="headerlink" href="#inlet" title="Link to this heading">#</a></h2>
+<h2>Inlet<a class="headerlink" href="#inlet" title="Link to this heading">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.format_inlet">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">format_inlet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inlet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'m'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">special_keywords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_inlet.html#format_inlet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.format_inlet" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">format_inlet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'m'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">special_keywords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/openghg/util/_inlet.html#format_inlet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.format_inlet" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">format_inlet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'m'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">special_keywords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">format_inlet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">slice</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'m'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">special_keywords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">slice</span></span></span></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">format_inlet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">slice</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'m'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">special_keywords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">slice</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span></dt>
 <dd><p>Make sure inlet / height name conforms to standard. The standard
 imposed can depend on the associated key_name itself (can
 be supplied as an option to check).</p>
@@ -763,17 +848,17 @@ be supplied as an option to check).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>inlet</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">slice</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">slice</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – Inlet / Height value in the specified units</p></li>
-<li><p><strong>units</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Units for the inlet value (“m” by default)</p></li>
-<li><p><strong>key_name</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Name of the associated key. This is optional but will be used to
+<li><p><strong>inlet</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">UnionType</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">slice</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">UnionType</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">slice</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]]]) – Inlet / Height value in the specified units</p></li>
+<li><p><strong>units</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Units for the inlet value (“m” by default)</p></li>
+<li><p><strong>key_name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">UnionType</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Name of the associated key. This is optional but will be used to
 determine whether the unit value should be added to the output string.</p></li>
-<li><p><strong>special_keywords</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Specify special keywords inlet could be set to
+<li><p><strong>special_keywords</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">UnionType</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Specify special keywords inlet could be set to
 If so do not apply any formatting.
 If this is not set a special keyword of “multiple” and “column” will still be allowed.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">slice</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">slice</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span></p>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">UnionType</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">slice</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">UnionType</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">slice</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]]]</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>same type as input, with all strings formatted</p>
@@ -808,123 +893,36 @@ If this is not set a special keyword of “multiple” and “column” will sti
 </section>
 
 
-                </article>
+              </div>
               
               
-              
-              
-              
-                <footer class="prev-next-footer">
-                  
-<div class="prev-next-area">
+              <!-- Previous / next buttons -->
+<div class='prev-next-area'>
 </div>
-                </footer>
               
-            </div>
-            
-            
-              
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+          </main>
+          
 
-
-  <div class="sidebar-secondary-item">
-<div
-    id="pst-page-navigation-heading-2"
-    class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> On this page
-  </div>
-  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exporting">Exporting</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.util.to_dashboard"><code class="docutils literal notranslate"><span class="pre">to_dashboard()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.util.to_dashboard_mobile"><code class="docutils literal notranslate"><span class="pre">to_dashboard_mobile()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hashing">Hashing</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.util.hash_file"><code class="docutils literal notranslate"><span class="pre">hash_file()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.util.hash_string"><code class="docutils literal notranslate"><span class="pre">hash_string()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#string-manipulation">String manipulation</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.util.clean_string"><code class="docutils literal notranslate"><span class="pre">clean_string()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.util.to_lowercase"><code class="docutils literal notranslate"><span class="pre">to_lowercase()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.util.remove_punctuation"><code class="docutils literal notranslate"><span class="pre">remove_punctuation()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#time">Time</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.util.timestamp_tzaware"><code class="docutils literal notranslate"><span class="pre">timestamp_tzaware()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.util.timestamp_now"><code class="docutils literal notranslate"><span class="pre">timestamp_now()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.util.timestamp_epoch"><code class="docutils literal notranslate"><span class="pre">timestamp_epoch()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.util.daterange_from_str"><code class="docutils literal notranslate"><span class="pre">daterange_from_str()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.util.daterange_to_str"><code class="docutils literal notranslate"><span class="pre">daterange_to_str()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.util.create_daterange_str"><code class="docutils literal notranslate"><span class="pre">create_daterange_str()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.util.create_daterange"><code class="docutils literal notranslate"><span class="pre">create_daterange()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.util.check_nan"><code class="docutils literal notranslate"><span class="pre">check_nan()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.util.check_date"><code class="docutils literal notranslate"><span class="pre">check_date()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#site-checks">Site Checks</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.util.verify_site"><code class="docutils literal notranslate"><span class="pre">verify_site()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.util.multiple_inlets"><code class="docutils literal notranslate"><span class="pre">multiple_inlets()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#domain">Domain</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.util.find_domain"><code class="docutils literal notranslate"><span class="pre">find_domain()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#inlet">Inlet</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.util.format_inlet"><code class="docutils literal notranslate"><span class="pre">format_inlet()</span></code></a></li>
-</ul>
-</li>
-</ul>
-  </nav></div>
-
-</div></div>
-              
-            
-          </div>
-          <footer class="bd-footer-content">
-            
-          </footer>
-        
-      </main>
+      </div>
     </div>
-  </div>
   
-  <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
-
-  <footer class="bd-footer">
-<div class="bd-footer__inner bd-page-width">
-  
-    <div class="footer-items__start">
-      
-        <div class="footer-item">
-
-  <p class="copyright">
+    <script src="../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+  <footer class="footer mt-5 mt-md-0">
+  <div class="container">
     
-      © Copyright 2024 OpenGHG development team.
-      <br/>
+    <div class="footer-item">
+      <p class="copyright">
+    &copy; Copyright 2024 OpenGHG development team.<br>
+</p>
+    </div>
     
-  </p>
-</div>
-      
+    <div class="footer-item">
+      <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 8.2.3.<br>
+</p>
     </div>
-  
-  
-  
-    <div class="footer-items__end">
-      
-        <div class="footer-item">
-<p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.2.
-</p></div>
-      
-    </div>
-  
-</div>
-
-  </footer>
+    
+  </div>
+</footer>
   </body>
 </html>

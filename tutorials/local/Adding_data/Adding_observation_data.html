@@ -1,392 +1,420 @@
-
 <!DOCTYPE html>
 
-
-<html lang="en" data-content_root="../../../" >
-
+<html lang="en" data-content_root="../../../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Adding observation data &#8212; OpenGHG 0.18.0 documentation</title>
+    <title>Adding observation data &#8212; OpenGHG 0.19.0 documentation</title>
+    
+    <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
   
+    
+    <link rel="stylesheet"
+      href="../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+      href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+      href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
   
+    
+      
   
-  <script data-cfasync="false">
-    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
-    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
-  </script>
-  
-  <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
-<link href="../../../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
-
-  
-  <link href="../../../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
-
+    
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/pydata-sphinx-theme.css?v=1140d252" />
     <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=9c3e77be" />
     <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
+    
+    <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
   
-  <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
-  <script src="../../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
-
-    <script src="../../../_static/documentation_options.js?v=ba2e7b09"></script>
-    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/documentation_options.js?v=8a079089"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../../../_static/togglebutton.js?v=1ae7504c"></script>
+    <script src="../../../_static/togglebutton.js?v=b8b12719"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
-    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/local/Adding_data/Adding_observation_data';</script>
     <script src="../../../_static/custom.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="next" title="Adding ancillary spatial data" href="Adding_ancillary_data.html" />
     <link rel="prev" title="Tutorials" href="../../index.html" />
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Feb 18, 2026"/>
-  </head>
-  
-  
-  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="en">
+    
 
-  
-  
-  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
-  
-  <div id="pst-scroll-pixel-helper"></div>
-  
-  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
-    <i class="fa-solid fa-arrow-up"></i>
-    Back to top
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
+
+  <div id="navbar-start">
+    
+    
+<a class="navbar-brand" href="../../../index.html">
+<p class="title">OpenGHG</p>
+</a>
+
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
   </button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__primary"
-          id="__primary"/>
-  <label class="overlay overlay-primary" for="__primary"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__secondary"
-          id="__secondary"/>
-  <label class="overlay overlay-secondary" for="__secondary"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
-<form class="bd-search d-flex align-items-center"
-      action="../../../search.html"
-      method="get">
-  <i class="fa-solid fa-magnifying-glass"></i>
-  <input type="search"
-         class="form-control"
-         name="q"
-         id="search-input"
-         placeholder="Search the docs ..."
-         aria-label="Search the docs ..."
-         autocomplete="off"
-         autocorrect="off"
-         autocapitalize="off"
-         spellcheck="false"/>
-  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
-  
-    <header class="bd-header navbar navbar-expand-lg bd-navbar">
-<div class="bd-header__inner bd-page-width">
-  <label class="sidebar-toggle primary-toggle" for="__primary">
-    <span class="fa-solid fa-bars"></span>
-  </label>
-  
-  
-  <div class="col-lg-3 navbar-header-items__start">
-    
-      <div class="navbar-item">
-
-  
-
-<a class="navbar-brand logo" href="../../../index.html">
-  
-  
-  
-  
-  
-    
-    
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
       
-    
-    
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.18.0 documentation - Home"/>
-    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.18.0 documentation - Home"/>`);</script>
-  
-  
-</a></div>
-    
-  </div>
-  
-  <div class="col-lg-9 navbar-header-items">
-    
-    <div class="me-auto navbar-header-items__center">
-      
-        <div class="navbar-item">
-<nav class="navbar-nav">
-  <ul class="bd-navbar-elements navbar-nav">
-    
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../install.html">
-                        Installation
-                      </a>
-                    </li>
-                
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../install.html">
+  Installation
+ </a>
+</li>
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="../../index.html">
-                        Tutorials
-                      </a>
-                    </li>
-                
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="../../index.html">
+  Tutorials
+ </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../api/index.html">
-                        User API
-                      </a>
-                    </li>
-                
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../api/index.html">
+  User API
+ </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../development/index_devel.html">
-                        Development
-                      </a>
-                    </li>
-                
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../development/index_devel.html">
+  Development
+ </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../api/index_devapi.html">
-                        Developer API
-                      </a>
-                    </li>
-                
-  </ul>
-</nav></div>
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../api/index_devapi.html">
+  Developer API
+ </a>
+</li>
+
+    
+</ul>
+      </div>
       
     </div>
-    
-    
-    <div class="navbar-header-items__end">
+
+    <div id="navbar-end">
       
-        <div class="navbar-item navbar-persistent--container">
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+            
+            <!-- Only show if we have sidebars configured, else just a small margin  -->
+            <div class="col-12 col-md-3 bd-sidebar">
+              <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Adding data
+ </span>
+</p>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   Adding observation data
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="Adding_ancillary_data.html">
+   Adding ancillary spatial data
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="Creating_data_from_databases.html">
+   Using databases to add data
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="Metadata_and_attributes.html">
+   Metadata and attributes
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="Updating_existing_data.html">
+   Updating existing data
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Analysing data
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../Analysing_data/Comparing_with_emissions.html">
+   Comparing observations to emissions
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../Analysing_data/Comparing_satellite_observations_with_emissions.html">
+   Comparing Satellite Observations to Emissions
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../Analysing_data/Working_with_co2.html">
+   Working with carbon dioxide
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Exploring data
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../Exploring_data/Explore_NOAA_ObsPack.html">
+   Explore NOAA ObsPack
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../Exploring_data/Retrieving_remote_data.html">
+   Retrieving data from remote archives
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../Exploring_data/Searching_and_plotting.html">
+   Searching and plotting
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Managing the object store
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../Managing_object_store/Managing_data.html">
+   Managing and deleting data
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../Managing_object_store/Changing_object_store.html">
+   Changing the object store path
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../Managing_object_store/Converting_a_store.html">
+   Converting an object store
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Outputting data
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../Outputting_data/Creating_obspack.html">
+   Creating an ObsPack
+  </a>
+ </li>
+</ul>
+
+  </div>
+</nav>
+              </div>
+              <div class="sidebar-end-items">
+              </div>
+            </div>
+            
           
 
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
-  </button>
-`);
-</script>
-        </div>
-      
-      
-    </div>
-    
-  </div>
-  
-  
-    <div class="navbar-persistent--mobile">
-
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
-  </button>
-`);
-</script>
-    </div>
-  
-
-  
-    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
-      <span class="fa-solid fa-outdent"></span>
-    </label>
-  
-</div>
-
-    </header>
-  
-
-  <div class="bd-container">
-    <div class="bd-container__inner bd-page-width">
-      
-      
-      
-      <div class="bd-sidebar-primary bd-sidebar">
-        
-
-  
-  <div class="sidebar-header-items sidebar-primary__section">
-    
-    
-      <div class="sidebar-header-items__center">
-        
-          <div class="navbar-item">
-<nav class="navbar-nav">
-  <ul class="bd-navbar-elements navbar-nav">
-    
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../install.html">
-                        Installation
-                      </a>
-                    </li>
-                
-
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="../../index.html">
-                        Tutorials
-                      </a>
-                    </li>
-                
-
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../api/index.html">
-                        User API
-                      </a>
-                    </li>
-                
-
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../development/index_devel.html">
-                        Development
-                      </a>
-                    </li>
-                
-
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../api/index_devapi.html">
-                        Developer API
-                      </a>
-                    </li>
-                
-  </ul>
-</nav></div>
-        
-      </div>
-    
-    
-    
-  </div>
-  
-    <div class="sidebar-primary-items__start sidebar-primary__section">
-        <div class="sidebar-primary-item">
-<nav class="bd-docs-nav bd-links"
-     aria-label="Section Navigation">
-  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
-  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Adding data</span></p>
-<ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Adding observation data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Adding_ancillary_data.html">Adding ancillary spatial data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Creating_data_from_databases.html">Using databases to add data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Metadata_and_attributes.html">Metadata and attributes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Updating_existing_data.html">Updating existing data</a></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Analysing data</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../Analysing_data/Comparing_with_emissions.html">Comparing observations to emissions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Analysing_data/Comparing_satellite_observations_with_emissions.html">Comparing Satellite Observations to Emissions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Analysing_data/Working_with_co2.html">Working with carbon dioxide</a></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Exploring data</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../Exploring_data/Explore_NOAA_ObsPack.html">Explore NOAA ObsPack</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Exploring_data/Retrieving_remote_data.html">Retrieving data from remote archives</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Exploring_data/Searching_and_plotting.html">Searching and plotting</a></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Managing the object store</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Managing_data.html">Managing and deleting data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Changing_object_store.html">Changing the object store path</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Converting_a_store.html">Converting an object store</a></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Outputting data</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../Outputting_data/Creating_obspack.html">Creating an ObsPack</a></li>
-</ul>
-</div>
-</nav></div>
-    </div>
-  
-  
-  <div class="sidebar-primary-items__end sidebar-primary__section">
-  </div>
-  
-  <div id="rtd-footer-container"></div>
-
-
-      </div>
-      
-      <main id="main-content" class="bd-main">
-        
-        
-          <div class="bd-content">
-            <div class="bd-article-container">
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+            
               
-              <div class="bd-header-article">
-<div class="header-article-items header-article__inner">
-  
-    <div class="header-article-items__start">
-      
-        <div class="header-article-item">
+              <div class="toc-item">
+                
+<div class="tocsection onthispage pt-5 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
 
-
-
-<nav aria-label="Breadcrumb">
-  <ul class="bd-breadcrumbs">
-    
-    <li class="breadcrumb-item breadcrumb-home">
-      <a href="../../../index.html" class="nav-link" aria-label="Home">
-        <i class="fa-solid fa-home"></i>
+<nav id="bd-toc-nav">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#what-is-an-object-store">
+   What is an object store?
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#using-the-tutorial-object-store">
+   0. Using the tutorial object store
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#adding-and-standardising-data">
+   1. Adding and standardising data
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#adding-and-standardising-surface-data">
+     Adding and standardising surface data
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#source-formats">
+       Source formats
       </a>
-    </li>
-    
-    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Tutorials</a></li>
-    
-    <li class="breadcrumb-item active" aria-current="page">Adding...</li>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#decc-network">
+       DECC network
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#agage-data">
+       AGAGE data
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#note-on-datasources">
+       Note on Datasources
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#other-keywords">
+       Other keywords
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#informational-keywords">
+       Informational keywords
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#using-the-tag-keyword">
+       Using the
+       <em class="xref py py-obj">
+        tag
+       </em>
+       keyword
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#adding-informational-keys">
+       Adding informational keys
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#multiple-stores">
+       Multiple stores
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#adding-and-standardising-column-data">
+     Adding and standardising column data
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#adding-in-memory-dataset-to-the-object-store">
+     Adding In-memory dataset to the object store
+    </a>
+   </li>
   </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#searching-for-data">
+   2. Searching for data
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#searching-the-object-store">
+     Searching the object store
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#searching-by-tag-keyword">
+     Searching by
+     <em class="xref py py-obj">
+      tag
+     </em>
+     keyword
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#quickly-retrieve-data">
+     Quickly retrieve data
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#retrieving-data">
+   3. Retrieving data
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#cleanup">
+   4. Cleanup
+  </a>
+ </li>
+</ul>
+
 </nav>
-</div>
-      
-    </div>
-  
-  
-</div>
-</div>
+              </div>
               
-              
-              
+              <div class="toc-item">
                 
-<div id="searchbox"></div>
-                <article class="bd-article">
-                  
+              </div>
+              
+            
+          </div>
+          
+
+          
+          
+            
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
   <section id="adding-observation-data">
-<span id="adding-obs-data"></span><h1>Adding observation data<a class="headerlink" href="#adding-observation-data" title="Link to this heading">#</a></h1>
+<span id="adding-obs-data"></span><h1>Adding observation data<a class="headerlink" href="#adding-observation-data" title="Link to this heading">¶</a></h1>
 <div class="jupyter_cell docutils container">
 <div class="cell_output docutils container">
 </div>
@@ -395,11 +423,11 @@ document.write(`
 measurement data, search the data present and to retrieve this for
 analysis and visualisation.</p>
 <section id="what-is-an-object-store">
-<span id="what-is-object-store"></span><h2>What is an object store?<a class="headerlink" href="#what-is-an-object-store" title="Link to this heading">#</a></h2>
+<span id="what-is-object-store"></span><h2>What is an object store?<a class="headerlink" href="#what-is-an-object-store" title="Link to this heading">¶</a></h2>
 <p>Each object and piece of data in the object store is stored at a specific key, which can be thought of as the address of the data. The data is stored in a bucket which in the cloud is a section of the OpenGHG object store. Locally a bucket is just a normal directory in the user’s filesystem specified by the path given in the configuration file at <code class="docutils literal notranslate"><span class="pre">~/.config/openghg/openghg.conf</span></code>.</p>
 </section>
 <section id="using-the-tutorial-object-store">
-<span id="id1"></span><h2>0. Using the tutorial object store<a class="headerlink" href="#using-the-tutorial-object-store" title="Link to this heading">#</a></h2>
+<span id="id1"></span><h2>0. Using the tutorial object store<a class="headerlink" href="#using-the-tutorial-object-store" title="Link to this heading">¶</a></h2>
 <p>An object store is a folder with a fixed structure within which openghg
 can read and write data. To avoid adding the example data we use in this
 tutorial to your normal object store, we need to tell OpenGHG to use a
@@ -420,9 +448,9 @@ won’t affect your use of OpenGHG outside of this tutorial.</p>
 </div>
 </section>
 <section id="adding-and-standardising-data">
-<h2>1. Adding and standardising data<a class="headerlink" href="#adding-and-standardising-data" title="Link to this heading">#</a></h2>
+<h2>1. Adding and standardising data<a class="headerlink" href="#adding-and-standardising-data" title="Link to this heading">¶</a></h2>
 <section id="adding-and-standardising-surface-data">
-<h3>Adding and standardising surface data<a class="headerlink" href="#adding-and-standardising-surface-data" title="Link to this heading">#</a></h3>
+<h3>Adding and standardising surface data<a class="headerlink" href="#adding-and-standardising-surface-data" title="Link to this heading">¶</a></h3>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Outside of this tutorial, if you have write access to multiple object stores you
@@ -430,7 +458,7 @@ will need to pass the name of the object store you wish to write to to
 the <code class="docutils literal notranslate"><span class="pre">store</span></code> argument of the standardise functions.</p>
 </div>
 <section id="source-formats">
-<h4>Source formats<a class="headerlink" href="#source-formats" title="Link to this heading">#</a></h4>
+<h4>Source formats<a class="headerlink" href="#source-formats" title="Link to this heading">¶</a></h4>
 <p>OpenGHG can process and store several source formats in the object store,
 including data from the AGAGE, DECC, NOAA, LondonGHG, BEAC2ON networks.
 The process of adding data to the object store is called <em>standardisation</em>.</p>
@@ -819,7 +847,7 @@ First, we’ll list all source formats.</p>
 </div>
 </section>
 <section id="decc-network">
-<h4>DECC network<a class="headerlink" href="#decc-network" title="Link to this heading">#</a></h4>
+<h4>DECC network<a class="headerlink" href="#decc-network" title="Link to this heading">¶</a></h4>
 <p>We will start by adding data to the object store from Tacolneston, which is a <em>surface site</em>
 in the DECC network. (Data at surface sites is measured in-situ.)</p>
 <p>First we retrieve the raw data.</p>
@@ -834,9 +862,11 @@ in the DECC network. (Data at surface sites is measured in-situ.)</p>
 </div>
 </div>
 <div class="cell_output docutils container">
-<script type="application/vnd.jupyter.widget-view+json">
-{"version_major": 2, "version_minor": 0, "model_id": "da603d5614714dfa985f516e9c7d0342"}
-</script><div class="output text_html"><pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
+<div class="output text_html"><pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
+</div><script type="application/vnd.jupyter.widget-view+json">
+{"version_major": 2, "version_minor": 0, "model_id": "cb99023f31184bf4ad31f6a8322ee285"}
+</script><div class="output text_html"><pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">
+</pre>
 </div></div>
 </div>
 <p>Now we add this data to the object store using <code class="docutils literal notranslate"><span class="pre">standardise_surface</span></code>, passing the
@@ -858,7 +888,7 @@ following arguments:</p>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>[{&#39;uuid&#39;: &#39;511a0e22-943c-4e91-8110-22227b28b67d&#39;,
+<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>[{&#39;uuid&#39;: &#39;5eaa6434-99c5-4ad0-874e-e055b9bee275&#39;,
   &#39;new&#39;: True,
   &#39;site&#39;: &#39;tac&#39;,
   &#39;instrument&#39;: &#39;picarro&#39;,
@@ -869,7 +899,7 @@ following arguments:</p>
   &#39;data_source&#39;: &#39;internal&#39;,
   &#39;source_format&#39;: &#39;CRDS&#39;,
   &#39;file&#39;: &#39;tac.picarro.hourly.54m.dat&#39;},
- {&#39;uuid&#39;: &#39;dd11b2ea-4914-4cd9-a74f-741f4df8ff62&#39;,
+ {&#39;uuid&#39;: &#39;fd7a4ebb-e5e7-4a8e-a15e-8138f76a74ab&#39;,
   &#39;new&#39;: True,
   &#39;site&#39;: &#39;tac&#39;,
   &#39;instrument&#39;: &#39;picarro&#39;,
@@ -880,7 +910,7 @@ following arguments:</p>
   &#39;data_source&#39;: &#39;internal&#39;,
   &#39;source_format&#39;: &#39;CRDS&#39;,
   &#39;file&#39;: &#39;tac.picarro.hourly.54m.dat&#39;},
- {&#39;uuid&#39;: &#39;4f4092f5-7569-4e69-a2fb-8f17deb7193c&#39;,
+ {&#39;uuid&#39;: &#39;d84f2897-888d-45f8-a75a-5649608863ed&#39;,
   &#39;new&#39;: True,
   &#39;site&#39;: &#39;tac&#39;,
   &#39;instrument&#39;: &#39;picarro&#39;,
@@ -891,7 +921,7 @@ following arguments:</p>
   &#39;data_source&#39;: &#39;internal&#39;,
   &#39;source_format&#39;: &#39;CRDS&#39;,
   &#39;file&#39;: &#39;tac.picarro.hourly.100m.dat&#39;},
- {&#39;uuid&#39;: &#39;f51ca518-129a-43b3-bbb3-ed40f08da1a4&#39;,
+ {&#39;uuid&#39;: &#39;0d38763a-3704-4535-b125-05332c328454&#39;,
   &#39;new&#39;: True,
   &#39;site&#39;: &#39;tac&#39;,
   &#39;instrument&#39;: &#39;picarro&#39;,
@@ -902,7 +932,7 @@ following arguments:</p>
   &#39;data_source&#39;: &#39;internal&#39;,
   &#39;source_format&#39;: &#39;CRDS&#39;,
   &#39;file&#39;: &#39;tac.picarro.hourly.100m.dat&#39;},
- {&#39;uuid&#39;: &#39;f1dcd013-c0ef-4e5c-ba5e-cc14609147ba&#39;,
+ {&#39;uuid&#39;: &#39;a65ad21e-de62-4d34-a3b2-0e18c4c2974d&#39;,
   &#39;new&#39;: True,
   &#39;site&#39;: &#39;tac&#39;,
   &#39;instrument&#39;: &#39;picarro&#39;,
@@ -913,7 +943,7 @@ following arguments:</p>
   &#39;data_source&#39;: &#39;internal&#39;,
   &#39;source_format&#39;: &#39;CRDS&#39;,
   &#39;file&#39;: &#39;tac.picarro.hourly.185m.dat&#39;},
- {&#39;uuid&#39;: &#39;a1001deb-2dcb-4b43-b442-07ea043c2e53&#39;,
+ {&#39;uuid&#39;: &#39;82f07c37-8dfc-483d-a961-7616f44f7345&#39;,
   &#39;new&#39;: True,
   &#39;site&#39;: &#39;tac&#39;,
   &#39;instrument&#39;: &#39;picarro&#39;,
@@ -940,7 +970,7 @@ any errors have been encountered when trying to access and standardise
 this data.</p>
 </section>
 <section id="agage-data">
-<h4>AGAGE data<a class="headerlink" href="#agage-data" title="Link to this heading">#</a></h4>
+<h4>AGAGE data<a class="headerlink" href="#agage-data" title="Link to this heading">¶</a></h4>
 <p>OpenGHG can also process data from the <a class="reference external" href="https://agage.mit.edu/">AGAGE network</a>.</p>
 <p>Historically, the AGAGE network produces output files from GCWERKS alongside a seperate <em>precisions file</em>. If you wish
 to use this form of input file, we create a tuple with the data filename and the precisions filename. For example:</p>
@@ -954,9 +984,11 @@ to use this form of input file, we create a tuple with the data filename and the
 </div>
 </div>
 <div class="cell_output docutils container">
-<script type="application/vnd.jupyter.widget-view+json">
-{"version_major": 2, "version_minor": 0, "model_id": "965ea98749dd46e585511ec00943cf38"}
-</script><div class="output text_html"><pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
+<div class="output text_html"><pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
+</div><script type="application/vnd.jupyter.widget-view+json">
+{"version_major": 2, "version_minor": 0, "model_id": "26346749e2754e558589019c7b111563"}
+</script><div class="output text_html"><pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">
+</pre>
 </div></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">capegrim_data</span></code> is a list of two file paths, one for the data file and one for the precisions file:</p>
@@ -997,7 +1029,7 @@ data by including the right arguments:</p>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>[{&#39;uuid&#39;: &#39;216fe5d7-dbe8-4ef8-9e29-c4ee91f8ec05&#39;,
+<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>[{&#39;uuid&#39;: &#39;e72f1bda-ebce-49c4-adcb-dba231c7ffcb&#39;,
   &#39;new&#39;: True,
   &#39;instrument&#39;: &#39;medusa&#39;,
   &#39;site&#39;: &#39;cgo&#39;,
@@ -1008,7 +1040,7 @@ data by including the right arguments:</p>
   &#39;data_source&#39;: &#39;internal&#39;,
   &#39;source_format&#39;: &#39;GCWERKS&#39;,
   &#39;file&#39;: &#39;capegrim.18.C&#39;},
- {&#39;uuid&#39;: &#39;e86ec9e6-4934-473f-b658-92823be0b197&#39;,
+ {&#39;uuid&#39;: &#39;69328e58-8d04-4c36-a0e7-19ea69bc7255&#39;,
   &#39;new&#39;: True,
   &#39;instrument&#39;: &#39;medusa&#39;,
   &#39;site&#39;: &#39;cgo&#39;,
@@ -1019,7 +1051,7 @@ data by including the right arguments:</p>
   &#39;data_source&#39;: &#39;internal&#39;,
   &#39;source_format&#39;: &#39;GCWERKS&#39;,
   &#39;file&#39;: &#39;capegrim.18.C&#39;},
- {&#39;uuid&#39;: &#39;c00f5272-78fa-4e39-9eb5-e00835afb568&#39;,
+ {&#39;uuid&#39;: &#39;019f62de-69fb-4ed1-b2c8-b5d6def647e2&#39;,
   &#39;new&#39;: True,
   &#39;instrument&#39;: &#39;medusa&#39;,
   &#39;site&#39;: &#39;cgo&#39;,
@@ -1030,7 +1062,7 @@ data by including the right arguments:</p>
   &#39;data_source&#39;: &#39;internal&#39;,
   &#39;source_format&#39;: &#39;GCWERKS&#39;,
   &#39;file&#39;: &#39;capegrim.18.C&#39;},
- {&#39;uuid&#39;: &#39;d8e6e465-34c5-4854-91ac-12079add2bc4&#39;,
+ {&#39;uuid&#39;: &#39;69b733e9-822f-4b92-835f-eaa1547dd58c&#39;,
   &#39;new&#39;: True,
   &#39;instrument&#39;: &#39;medusa&#39;,
   &#39;site&#39;: &#39;cgo&#39;,
@@ -1041,7 +1073,7 @@ data by including the right arguments:</p>
   &#39;data_source&#39;: &#39;internal&#39;,
   &#39;source_format&#39;: &#39;GCWERKS&#39;,
   &#39;file&#39;: &#39;capegrim.18.C&#39;},
- {&#39;uuid&#39;: &#39;4e4ae1ac-72ea-4638-b838-ccb14971ab80&#39;,
+ {&#39;uuid&#39;: &#39;5ffc8dc1-2160-4cec-8974-b3544d4a8a59&#39;,
   &#39;new&#39;: True,
   &#39;instrument&#39;: &#39;medusa&#39;,
   &#39;site&#39;: &#39;cgo&#39;,
@@ -1052,7 +1084,7 @@ data by including the right arguments:</p>
   &#39;data_source&#39;: &#39;internal&#39;,
   &#39;source_format&#39;: &#39;GCWERKS&#39;,
   &#39;file&#39;: &#39;capegrim.18.C&#39;},
- {&#39;uuid&#39;: &#39;b6f48d26-38de-4c21-9bd2-8a4ab799fe36&#39;,
+ {&#39;uuid&#39;: &#39;c18b8fc8-376c-41d8-b363-f5606ce1dea6&#39;,
   &#39;new&#39;: True,
   &#39;instrument&#39;: &#39;medusa&#39;,
   &#39;site&#39;: &#39;cgo&#39;,
@@ -1063,7 +1095,7 @@ data by including the right arguments:</p>
   &#39;data_source&#39;: &#39;internal&#39;,
   &#39;source_format&#39;: &#39;GCWERKS&#39;,
   &#39;file&#39;: &#39;capegrim.18.C&#39;},
- {&#39;uuid&#39;: &#39;7c391afb-8cc3-4ae6-9795-240cac077f08&#39;,
+ {&#39;uuid&#39;: &#39;5638e7e2-8bdb-4ce9-baf5-d5f92c2cea7c&#39;,
   &#39;new&#39;: True,
   &#39;instrument&#39;: &#39;medusa&#39;,
   &#39;site&#39;: &#39;cgo&#39;,
@@ -1074,7 +1106,7 @@ data by including the right arguments:</p>
   &#39;data_source&#39;: &#39;internal&#39;,
   &#39;source_format&#39;: &#39;GCWERKS&#39;,
   &#39;file&#39;: &#39;capegrim.18.C&#39;},
- {&#39;uuid&#39;: &#39;9504d276-f3a8-4824-8417-49fd9da56eb2&#39;,
+ {&#39;uuid&#39;: &#39;5513b4ee-0d92-4a66-b4ff-20f413ccffb0&#39;,
   &#39;new&#39;: True,
   &#39;instrument&#39;: &#39;medusa&#39;,
   &#39;site&#39;: &#39;cgo&#39;,
@@ -1085,7 +1117,7 @@ data by including the right arguments:</p>
   &#39;data_source&#39;: &#39;internal&#39;,
   &#39;source_format&#39;: &#39;GCWERKS&#39;,
   &#39;file&#39;: &#39;capegrim.18.C&#39;},
- {&#39;uuid&#39;: &#39;47ece145-0b29-406e-b8df-4f11d8ab7116&#39;,
+ {&#39;uuid&#39;: &#39;a200fea9-9acd-4f53-b41f-1ab6f153f8ee&#39;,
   &#39;new&#39;: True,
   &#39;instrument&#39;: &#39;medusa&#39;,
   &#39;site&#39;: &#39;cgo&#39;,
@@ -1096,7 +1128,7 @@ data by including the right arguments:</p>
   &#39;data_source&#39;: &#39;internal&#39;,
   &#39;source_format&#39;: &#39;GCWERKS&#39;,
   &#39;file&#39;: &#39;capegrim.18.C&#39;},
- {&#39;uuid&#39;: &#39;8e913cdf-07eb-437d-980e-38c9f39e9f57&#39;,
+ {&#39;uuid&#39;: &#39;2c2761d6-c27c-4da7-8a78-317d54009598&#39;,
   &#39;new&#39;: True,
   &#39;instrument&#39;: &#39;medusa&#39;,
   &#39;site&#39;: &#39;cgo&#39;,
@@ -1107,7 +1139,7 @@ data by including the right arguments:</p>
   &#39;data_source&#39;: &#39;internal&#39;,
   &#39;source_format&#39;: &#39;GCWERKS&#39;,
   &#39;file&#39;: &#39;capegrim.18.C&#39;},
- {&#39;uuid&#39;: &#39;32fc05ce-0726-41dd-94c5-caf57aaf3d06&#39;,
+ {&#39;uuid&#39;: &#39;77d77df8-2f19-4608-8791-bfa4298d8154&#39;,
   &#39;new&#39;: True,
   &#39;instrument&#39;: &#39;medusa&#39;,
   &#39;site&#39;: &#39;cgo&#39;,
@@ -1140,7 +1172,7 @@ species and instrument and do not need an accompanying precisions file. These ca
 Ensure that the <code class="docutils literal notranslate"><span class="pre">source_format</span></code> argument matches the input filetype, as the two are not compatible.</p>
 </section>
 <section id="note-on-datasources">
-<span id="id2"></span><h4>Note on Datasources<a class="headerlink" href="#note-on-datasources" title="Link to this heading">#</a></h4>
+<span id="id2"></span><h4>Note on Datasources<a class="headerlink" href="#note-on-datasources" title="Link to this heading">¶</a></h4>
 <p>Datasources are objects that are stored in the <a class="reference external" href="https://docs.openghg.org/api/devapi_objectstore.html">object store</a> that hold the data and metadata associated with
 each measurement we upload to the platform.</p>
 <p>For example, if we upload a file that contains readings for three gas
@@ -1153,7 +1185,7 @@ site, so if scales or other factors change multiple versions may be
 stored for easy future comparison.</p>
 </section>
 <section id="other-keywords">
-<h4>Other keywords<a class="headerlink" href="#other-keywords" title="Link to this heading">#</a></h4>
+<h4>Other keywords<a class="headerlink" href="#other-keywords" title="Link to this heading">¶</a></h4>
 <p>When adding data in this way there are other keywords which can be used to
 distinguish between different data sets as required including:</p>
 <ul class="simple">
@@ -1166,12 +1198,12 @@ distinguish between different data sets as required including:</p>
 <p>See the <em class="xref py py-obj">standardise_surface</em> documentation for a full list of inputs.</p>
 </section>
 <section id="informational-keywords">
-<h4>Informational keywords<a class="headerlink" href="#informational-keywords" title="Link to this heading">#</a></h4>
+<h4>Informational keywords<a class="headerlink" href="#informational-keywords" title="Link to this heading">¶</a></h4>
 <p>In addition to the keywords demonstrated for adding data and described above which are used to distinguish
 between different data sets being stored, the following informational details can also be added to help describe the data.</p>
 </section>
 <section id="using-the-tag-keyword">
-<h4>Using the <em class="xref py py-obj">tag</em> keyword<a class="headerlink" href="#using-the-tag-keyword" title="Link to this heading">#</a></h4>
+<h4>Using the <em class="xref py py-obj">tag</em> keyword<a class="headerlink" href="#using-the-tag-keyword" title="Link to this heading">¶</a></h4>
 <p>The <em class="xref py py-obj">tag</em> keyword allows one or multiple short labels to be specified which can be the same across multiple
 data sources. For instance, data from different sites which is associated with a particular project could all be
 added using the same <em class="xref py py-obj">tag</em>. For example below we show how to add the same data as above with a <em class="xref py py-obj">tag</em>:</p>
@@ -1209,7 +1241,7 @@ a previous step of the tutorial - see “Updating existing data” tutorial for 
 object store. For the <em class="xref py py-obj">tag</em> keyword this can be used to return all data which includes the chosen tag.</p>
 </section>
 <section id="adding-informational-keys">
-<h4>Adding informational keys<a class="headerlink" href="#adding-informational-keys" title="Link to this heading">#</a></h4>
+<h4>Adding informational keys<a class="headerlink" href="#adding-informational-keys" title="Link to this heading">¶</a></h4>
 <p>Informational keys and associated values can also be added using the <em class="xref py py-obj">info_metadata</em> input. The most
 common example for this would be to add a <em class="xref py py-obj">comment</em> input. For example:</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">decc_results</span> <span class="o">=</span> <span class="n">standardise_surface</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">tac_data</span><span class="p">,</span>
@@ -1223,7 +1255,7 @@ common example for this would be to add a <em class="xref py py-obj">comment</em
 observations).</p>
 </section>
 <section id="multiple-stores">
-<h4>Multiple stores<a class="headerlink" href="#multiple-stores" title="Link to this heading">#</a></h4>
+<h4>Multiple stores<a class="headerlink" href="#multiple-stores" title="Link to this heading">¶</a></h4>
 <p>If you have write access to more than one object store you’ll need to pass in the name of that store
 to the <code class="docutils literal notranslate"><span class="pre">store</span></code> argument.
 So instead of the standardise_surface call above, we’ll tell it to write to our default <code class="docutils literal notranslate"><span class="pre">user</span></code> object store. This is our default local object store
@@ -1238,13 +1270,14 @@ to more than one store.</p>
 </section>
 </section>
 <section id="adding-and-standardising-column-data">
-<h3>Adding and standardising column data<a class="headerlink" href="#adding-and-standardising-column-data" title="Link to this heading">#</a></h3>
+<h3>Adding and standardising column data<a class="headerlink" href="#adding-and-standardising-column-data" title="Link to this heading">¶</a></h3>
 <p>Similar to the surface data, we can also add column data to the object store.
-The column data can comprise of 2 platforms - “site-colum” and “satellite” data.</p>
+The column data can comprise of 2 platforms - “site-column” and “satellite” data.</p>
 <p>The input formats supported for standardise_column are:</p>
 <blockquote>
 <div><ul class="simple">
 <li><p>“tccon”, which can be used to standardise <a class="reference external" href="https://tccondata.org/">TCCON data</a>.</p></li>
+<li><p>“gemini”, which can be used to standardise GEMINI site-based column observations.</p></li>
 <li><p>“openghg”, which can be used to standardise data that matches the internal “openghg” specification (see <a class="reference external" href="https://docs.openghg.org/api/devapi_store.html#openghg.store.ObsColumn.schema">ObsColumn.schema</a> for details of the expected data). See the tutorial on <a class="reference internal" href="Adding_ancillary_data.html#adding-ancillary-data"><span class="std std-ref">Adding ancillary spatial data</span></a> to learn about schema for different data types.</p></li>
 </ul>
 </div></blockquote>
@@ -1259,16 +1292,31 @@ The column data can comprise of 2 platforms - “site-colum” and “satellite�
 </div>
 </div>
 <div class="cell_output docutils container">
-<script type="application/vnd.jupyter.widget-view+json">
-{"version_major": 2, "version_minor": 0, "model_id": "4c1cb382de6d4813894256a9586a6dcc"}
-</script><div class="output text_html"><pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
+<div class="output text_html"><pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
+</div><script type="application/vnd.jupyter.widget-view+json">
+{"version_major": 2, "version_minor": 0, "model_id": "cf789b63684c40429e22bad4c0ad408a"}
+</script><div class="output text_html"><pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">
+</pre>
 </div></div>
 </div>
 <p>Now we add this data to the object store using <code class="docutils literal notranslate"><span class="pre">standardise_column</span></code>, passing the below arguments:</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>For column site data the <em class="xref py py-obj">satellite</em> argument is replaced with the <code class="xref py py-obj docutils literal notranslate"><span class="pre">site</span></code> argument and <code class="xref py py-obj docutils literal notranslate"><span class="pre">platform</span></code> is set to “site-column”.
-(Inversions check the platform value to determine whether the data is satellite or site-column data)</p>
+<p>For GEMINI site-column data, use <code class="docutils literal notranslate"><span class="pre">source_format=&quot;gemini&quot;</span></code> with <code class="docutils literal notranslate"><span class="pre">platform=&quot;column&quot;</span></code>,
+and provide the required <code class="docutils literal notranslate"><span class="pre">site</span></code> and <code class="docutils literal notranslate"><span class="pre">species</span></code> arguments. Use <code class="docutils literal notranslate"><span class="pre">domain</span></code> or <code class="docutils literal notranslate"><span class="pre">obs_region</span></code>
+to specify the geographic area covered by the data. For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">standardise_column</span><span class="p">(</span>
+    <span class="n">filepath</span><span class="o">=...</span><span class="p">,</span>
+    <span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span>
+    <span class="n">source_format</span><span class="o">=</span><span class="s2">&quot;gemini&quot;</span><span class="p">,</span>
+    <span class="n">platform</span><span class="o">=</span><span class="s2">&quot;column&quot;</span><span class="p">,</span>
+    <span class="n">site</span><span class="o">=</span><span class="s2">&quot;wao&quot;</span><span class="p">,</span>
+    <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;europe&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Inversions check the <code class="docutils literal notranslate"><span class="pre">platform</span></code> value to determine whether the data is satellite or
+site-column data.</p>
 </div>
 <div class="jupyter_cell jupyter_container docutils container">
 <div class="cell_input code_cell docutils container">
@@ -1286,7 +1334,7 @@ The column data can comprise of 2 platforms - “site-colum” and “satellite�
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>[{&#39;uuid&#39;: &#39;d1a7e480-332d-4df2-878b-7ab03110c924&#39;,
+<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>[{&#39;uuid&#39;: &#39;51d0a26a-a9ba-42d9-bbe3-990eeee408d3&#39;,
   &#39;new&#39;: True,
   &#39;satellite&#39;: &#39;gosat&#39;,
   &#39;species&#39;: &#39;ch4&#39;,
@@ -1304,7 +1352,7 @@ The column data can comprise of 2 platforms - “site-colum” and “satellite�
 </div>
 </section>
 <section id="adding-in-memory-dataset-to-the-object-store">
-<h3>Adding In-memory dataset to the object store<a class="headerlink" href="#adding-in-memory-dataset-to-the-object-store" title="Link to this heading">#</a></h3>
+<h3>Adding In-memory dataset to the object store<a class="headerlink" href="#adding-in-memory-dataset-to-the-object-store" title="Link to this heading">¶</a></h3>
 <p>Up to this point, we have seen how to specify a file path and add data to the object store.
 In many workflows, however, you may already have your data available in memory as an <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code>.
 For the appropriate <em class="xref py py-obj">source_format</em> inputs, the <code class="docutils literal notranslate"><span class="pre">standardise_surface</span></code> function also supports this workflow, allowing you to pass a dataset directly without needing to first write it to disk.</p>
@@ -1322,9 +1370,11 @@ For the appropriate <em class="xref py py-obj">source_format</em> inputs, the <c
 </div>
 </div>
 <div class="cell_output docutils container">
-<script type="application/vnd.jupyter.widget-view+json">
-{"version_major": 2, "version_minor": 0, "model_id": "9f3ae181ad5845a7af023e8a10dee2e3"}
-</script><div class="output text_html"><pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
+<div class="output text_html"><pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
+</div><script type="application/vnd.jupyter.widget-view+json">
+{"version_major": 2, "version_minor": 0, "model_id": "1a1a13f5298549ceba75f4cd6a5a684e"}
+</script><div class="output text_html"><pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">
+</pre>
 </div></div>
 </div>
 <p>Now that we have our dataset in memory, we can provide it directly to the <code class="docutils literal notranslate"><span class="pre">dataset</span></code> argument of <code class="docutils literal notranslate"><span class="pre">standardise_surface</span></code>.
@@ -1356,7 +1406,7 @@ This will standardise the data and add it to the object store just as if we had 
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>[{&#39;uuid&#39;: &#39;1fae5ab1-71eb-4645-9d72-831ca100d825&#39;,
+<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>[{&#39;uuid&#39;: &#39;216c6756-a88a-4520-b798-f5ed27c8190b&#39;,
   &#39;new&#39;: True,
   &#39;site&#39;: &#39;tac&#39;,
   &#39;species&#39;: &#39;co2&#39;,
@@ -1373,9 +1423,9 @@ This will standardise the data and add it to the object store just as if we had 
 </section>
 </section>
 <section id="searching-for-data">
-<h2>2. Searching for data<a class="headerlink" href="#searching-for-data" title="Link to this heading">#</a></h2>
+<h2>2. Searching for data<a class="headerlink" href="#searching-for-data" title="Link to this heading">¶</a></h2>
 <section id="searching-the-object-store">
-<h3>Searching the object store<a class="headerlink" href="#searching-the-object-store" title="Link to this heading">#</a></h3>
+<h3>Searching the object store<a class="headerlink" href="#searching-the-object-store" title="Link to this heading">¶</a></h3>
 <p>We can search the object store by property using the
 <code class="docutils literal notranslate"><span class="pre">search_surface(...)</span></code> function. This function retrieves all of the metadata associated with the search query from the data in the object store.</p>
 <p>For example we can find all sites which have measurements for carbon
@@ -1421,13 +1471,13 @@ tetrafluoride (“cf4”) using the <code class="docutils literal notranslate"><
       <th>...</th>
       <th>source_format</th>
       <th>uuid</th>
-      <th>tag</th>
       <th>period</th>
       <th>latest_version</th>
       <th>timestamp</th>
       <th>start_date</th>
       <th>end_date</th>
       <th>versions</th>
+      <th>tag</th>
       <th>object_store</th>
     </tr>
   </thead>
@@ -1446,14 +1496,14 @@ tetrafluoride (“cf4”) using the <code class="docutils literal notranslate"><
       <td>cfc-11</td>
       <td>...</td>
       <td>gcwerks</td>
-      <td>d8e6e465-34c5-4854-91ac-12079add2bc4</td>
-      <td>[project1, project2]</td>
+      <td>69b733e9-822f-4b92-835f-eaa1547dd58c</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:14.421507+00:00</td>
+      <td>2026-06-11 13:39:35.737836+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
+      <td>[project1, project2]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
     </tr>
   </tbody>
@@ -1502,13 +1552,13 @@ tetrafluoride (“cf4”) using the <code class="docutils literal notranslate"><
       <th>...</th>
       <th>source_format</th>
       <th>uuid</th>
-      <th>tag</th>
       <th>period</th>
       <th>latest_version</th>
       <th>timestamp</th>
       <th>start_date</th>
       <th>end_date</th>
       <th>versions</th>
+      <th>tag</th>
       <th>object_store</th>
     </tr>
   </thead>
@@ -1527,14 +1577,14 @@ tetrafluoride (“cf4”) using the <code class="docutils literal notranslate"><
       <td>tacolneston</td>
       <td>...</td>
       <td>crds</td>
-      <td>511a0e22-943c-4e91-8110-22227b28b67d</td>
-      <td>[project1]</td>
+      <td>5eaa6434-99c5-4ad0-874e-e055b9bee275</td>
       <td>3600s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:13.519770+00:00</td>
+      <td>2026-06-11 13:39:34.670309+00:00</td>
       <td>2012-07-26 11:23:05+00:00</td>
       <td>2017-12-19 11:25:19+00:00</td>
       <td>{'v1': ['2012-07-26-11:23:05+00:00_2017-12-19-...</td>
+      <td>[project1]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
     </tr>
     <tr>
@@ -1551,14 +1601,14 @@ tetrafluoride (“cf4”) using the <code class="docutils literal notranslate"><
       <td>tacolneston</td>
       <td>...</td>
       <td>crds</td>
-      <td>dd11b2ea-4914-4cd9-a74f-741f4df8ff62</td>
-      <td>[project1]</td>
+      <td>fd7a4ebb-e5e7-4a8e-a15e-8138f76a74ab</td>
       <td>3600s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:13.548311+00:00</td>
+      <td>2026-06-11 13:39:34.696899+00:00</td>
       <td>2012-07-26 11:23:05+00:00</td>
       <td>2017-12-19 11:25:19+00:00</td>
       <td>{'v1': ['2012-07-26-11:23:05+00:00_2017-12-19-...</td>
+      <td>[project1]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
     </tr>
     <tr>
@@ -1575,14 +1625,14 @@ tetrafluoride (“cf4”) using the <code class="docutils literal notranslate"><
       <td>tacolneston</td>
       <td>...</td>
       <td>crds</td>
-      <td>4f4092f5-7569-4e69-a2fb-8f17deb7193c</td>
-      <td>[project1]</td>
+      <td>d84f2897-888d-45f8-a75a-5649608863ed</td>
       <td>3600s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:13.765700+00:00</td>
+      <td>2026-06-11 13:39:35.001295+00:00</td>
       <td>2012-07-26 11:04:07+00:00</td>
       <td>2018-01-01 00:23:04+00:00</td>
       <td>{'v1': ['2012-07-26-11:04:07+00:00_2018-01-01-...</td>
+      <td>[project1]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
     </tr>
     <tr>
@@ -1599,14 +1649,14 @@ tetrafluoride (“cf4”) using the <code class="docutils literal notranslate"><
       <td>tacolneston</td>
       <td>...</td>
       <td>crds</td>
-      <td>f51ca518-129a-43b3-bbb3-ed40f08da1a4</td>
-      <td>[project1]</td>
+      <td>0d38763a-3704-4535-b125-05332c328454</td>
       <td>3600s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:13.792844+00:00</td>
+      <td>2026-06-11 13:39:35.027663+00:00</td>
       <td>2012-07-26 11:04:07+00:00</td>
       <td>2018-01-01 00:23:04+00:00</td>
       <td>{'v1': ['2012-07-26-11:04:07+00:00_2018-01-01-...</td>
+      <td>[project1]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
     </tr>
     <tr>
@@ -1623,14 +1673,14 @@ tetrafluoride (“cf4”) using the <code class="docutils literal notranslate"><
       <td>tacolneston</td>
       <td>...</td>
       <td>crds</td>
-      <td>f1dcd013-c0ef-4e5c-ba5e-cc14609147ba</td>
-      <td>[project1]</td>
+      <td>a65ad21e-de62-4d34-a3b2-0e18c4c2974d</td>
       <td>3600s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:13.990567+00:00</td>
+      <td>2026-06-11 13:39:35.242338+00:00</td>
       <td>2013-01-31 00:13:28+00:00</td>
       <td>2018-01-01 00:53:06+00:00</td>
       <td>{'v1': ['2013-01-31-00:13:28+00:00_2018-01-01-...</td>
+      <td>[project1]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
     </tr>
     <tr>
@@ -1647,14 +1697,14 @@ tetrafluoride (“cf4”) using the <code class="docutils literal notranslate"><
       <td>tacolneston</td>
       <td>...</td>
       <td>crds</td>
-      <td>a1001deb-2dcb-4b43-b442-07ea043c2e53</td>
-      <td>[project1]</td>
+      <td>82f07c37-8dfc-483d-a961-7616f44f7345</td>
       <td>3600s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:14.016183+00:00</td>
+      <td>2026-06-11 13:39:35.266937+00:00</td>
       <td>2013-01-31 00:13:28+00:00</td>
       <td>2018-01-01 00:53:06+00:00</td>
       <td>{'v1': ['2013-01-31-00:13:28+00:00_2018-01-01-...</td>
+      <td>[project1]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
     </tr>
     <tr>
@@ -1671,14 +1721,14 @@ tetrafluoride (“cf4”) using the <code class="docutils literal notranslate"><
       <td>NaN</td>
       <td>...</td>
       <td>openghg</td>
-      <td>1fae5ab1-71eb-4645-9d72-831ca100d825</td>
-      <td>[in-memory-dataset]</td>
+      <td>216c6756-a88a-4520-b798-f5ed27c8190b</td>
       <td>3600s</td>
       <td>v1</td>
-      <td>2026-02-18 17:20:15.360337+00:00</td>
+      <td>2026-06-11 13:39:36.646952+00:00</td>
       <td>2013-01-31 00:05:00+00:00</td>
       <td>2022-09-29 12:44:59+00:00</td>
       <td>{'v1': ['2013-01-31-00:05:00+00:00_2022-09-29-...</td>
+      <td>[in-memory-dataset]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
     </tr>
   </tbody>
@@ -1690,7 +1740,7 @@ tetrafluoride (“cf4”) using the <code class="docutils literal notranslate"><
 as well as the inlet heights these were measured at.</p>
 </section>
 <section id="searching-by-tag-keyword">
-<h3>Searching by <em class="xref py py-obj">tag</em> keyword<a class="headerlink" href="#searching-by-tag-keyword" title="Link to this heading">#</a></h3>
+<h3>Searching by <em class="xref py py-obj">tag</em> keyword<a class="headerlink" href="#searching-by-tag-keyword" title="Link to this heading">¶</a></h3>
 <p>We can also search by the <em class="xref py py-obj">tag</em> keyword when this has been set. Even though the <em class="xref py py-obj">tag</em>
 keyword can contain multiple values, this will find all the datasources where the
 tag value is included (rather than needing an exact match like the other keywords).</p>
@@ -1733,13 +1783,13 @@ using this keyword:</p>
       <th>calibration_scale</th>
       <th>long_name</th>
       <th>...</th>
-      <th>tag</th>
       <th>period</th>
       <th>latest_version</th>
       <th>timestamp</th>
       <th>start_date</th>
       <th>end_date</th>
       <th>versions</th>
+      <th>tag</th>
       <th>object_store</th>
       <th>units</th>
       <th>species_alt</th>
@@ -1759,13 +1809,13 @@ using this keyword:</p>
       <td>wmo-x2004a</td>
       <td>tacolneston</td>
       <td>...</td>
-      <td>[project1]</td>
       <td>3600s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:13.519770+00:00</td>
+      <td>2026-06-11 13:39:34.670309+00:00</td>
       <td>2012-07-26 11:23:05+00:00</td>
       <td>2017-12-19 11:25:19+00:00</td>
       <td>{'v1': ['2012-07-26-11:23:05+00:00_2017-12-19-...</td>
+      <td>[project1]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
       <td>NaN</td>
       <td>NaN</td>
@@ -1783,13 +1833,13 @@ using this keyword:</p>
       <td>wmo-x2019</td>
       <td>tacolneston</td>
       <td>...</td>
-      <td>[project1]</td>
       <td>3600s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:13.548311+00:00</td>
+      <td>2026-06-11 13:39:34.696899+00:00</td>
       <td>2012-07-26 11:23:05+00:00</td>
       <td>2017-12-19 11:25:19+00:00</td>
       <td>{'v1': ['2012-07-26-11:23:05+00:00_2017-12-19-...</td>
+      <td>[project1]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
       <td>NaN</td>
       <td>NaN</td>
@@ -1807,13 +1857,13 @@ using this keyword:</p>
       <td>wmo-x2004a</td>
       <td>tacolneston</td>
       <td>...</td>
-      <td>[project1]</td>
       <td>3600s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:13.765700+00:00</td>
+      <td>2026-06-11 13:39:35.001295+00:00</td>
       <td>2012-07-26 11:04:07+00:00</td>
       <td>2018-01-01 00:23:04+00:00</td>
       <td>{'v1': ['2012-07-26-11:04:07+00:00_2018-01-01-...</td>
+      <td>[project1]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
       <td>NaN</td>
       <td>NaN</td>
@@ -1831,13 +1881,13 @@ using this keyword:</p>
       <td>wmo-x2019</td>
       <td>tacolneston</td>
       <td>...</td>
-      <td>[project1]</td>
       <td>3600s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:13.792844+00:00</td>
+      <td>2026-06-11 13:39:35.027663+00:00</td>
       <td>2012-07-26 11:04:07+00:00</td>
       <td>2018-01-01 00:23:04+00:00</td>
       <td>{'v1': ['2012-07-26-11:04:07+00:00_2018-01-01-...</td>
+      <td>[project1]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
       <td>NaN</td>
       <td>NaN</td>
@@ -1855,13 +1905,13 @@ using this keyword:</p>
       <td>wmo-x2004a</td>
       <td>tacolneston</td>
       <td>...</td>
-      <td>[project1]</td>
       <td>3600s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:13.990567+00:00</td>
+      <td>2026-06-11 13:39:35.242338+00:00</td>
       <td>2013-01-31 00:13:28+00:00</td>
       <td>2018-01-01 00:53:06+00:00</td>
       <td>{'v1': ['2013-01-31-00:13:28+00:00_2018-01-01-...</td>
+      <td>[project1]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
       <td>NaN</td>
       <td>NaN</td>
@@ -1879,13 +1929,13 @@ using this keyword:</p>
       <td>wmo-x2019</td>
       <td>tacolneston</td>
       <td>...</td>
-      <td>[project1]</td>
       <td>3600s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:14.016183+00:00</td>
+      <td>2026-06-11 13:39:35.266937+00:00</td>
       <td>2013-01-31 00:13:28+00:00</td>
       <td>2018-01-01 00:53:06+00:00</td>
       <td>{'v1': ['2013-01-31-00:13:28+00:00_2018-01-01-...</td>
+      <td>[project1]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
       <td>NaN</td>
       <td>NaN</td>
@@ -1903,13 +1953,13 @@ using this keyword:</p>
       <td>tu1987</td>
       <td>NaN</td>
       <td>...</td>
-      <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:14.366863+00:00</td>
+      <td>2026-06-11 13:39:35.687107+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
+      <td>[project1, project2]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
       <td>ppb</td>
       <td>NaN</td>
@@ -1927,13 +1977,13 @@ using this keyword:</p>
       <td>sio-05</td>
       <td>NaN</td>
       <td>...</td>
-      <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:14.384229+00:00</td>
+      <td>2026-06-11 13:39:35.703953+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
+      <td>[project1, project2]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
       <td>ppt</td>
       <td>cfc-12</td>
@@ -1951,13 +2001,13 @@ using this keyword:</p>
       <td>sio-16</td>
       <td>NaN</td>
       <td>...</td>
-      <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:14.404077+00:00</td>
+      <td>2026-06-11 13:39:35.720590+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
+      <td>[project1, project2]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
       <td>ppb</td>
       <td>NaN</td>
@@ -1975,13 +2025,13 @@ using this keyword:</p>
       <td>sio-05</td>
       <td>NaN</td>
       <td>...</td>
-      <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:14.421507+00:00</td>
+      <td>2026-06-11 13:39:35.737836+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
+      <td>[project1, project2]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
       <td>ppt</td>
       <td>cfc-11</td>
@@ -1999,13 +2049,13 @@ using this keyword:</p>
       <td>sio-05</td>
       <td>NaN</td>
       <td>...</td>
-      <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:14.438829+00:00</td>
+      <td>2026-06-11 13:39:35.754141+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
+      <td>[project1, project2]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
       <td>ppt</td>
       <td>cfc-113</td>
@@ -2023,13 +2073,13 @@ using this keyword:</p>
       <td>sio-98</td>
       <td>NaN</td>
       <td>...</td>
-      <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:14.456564+00:00</td>
+      <td>2026-06-11 13:39:35.770434+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
+      <td>[project1, project2]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
       <td>ppt</td>
       <td>NaN</td>
@@ -2047,13 +2097,13 @@ using this keyword:</p>
       <td>sio-05</td>
       <td>NaN</td>
       <td>...</td>
-      <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:14.474348+00:00</td>
+      <td>2026-06-11 13:39:35.787671+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
+      <td>[project1, project2]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
       <td>ppt</td>
       <td>NaN</td>
@@ -2071,13 +2121,13 @@ using this keyword:</p>
       <td>sio-05</td>
       <td>NaN</td>
       <td>...</td>
-      <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:14.491901+00:00</td>
+      <td>2026-06-11 13:39:35.804136+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
+      <td>[project1, project2]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
       <td>ppt</td>
       <td>NaN</td>
@@ -2095,13 +2145,13 @@ using this keyword:</p>
       <td>mpi-2009</td>
       <td>NaN</td>
       <td>...</td>
-      <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:14.509424+00:00</td>
+      <td>2026-06-11 13:39:35.820697+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-27 00:02:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-27-...</td>
+      <td>[project1, project2]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
       <td>ppb</td>
       <td>h2_pdd</td>
@@ -2119,13 +2169,13 @@ using this keyword:</p>
       <td>csiro-94</td>
       <td>NaN</td>
       <td>...</td>
-      <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:14.528108+00:00</td>
+      <td>2026-06-11 13:39:35.837317+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
+      <td>[project1, project2]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
       <td>ppb</td>
       <td>NaN</td>
@@ -2143,13 +2193,13 @@ using this keyword:</p>
       <td>na</td>
       <td>NaN</td>
       <td>...</td>
-      <td>[project1, project2]</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:14.545768+00:00</td>
+      <td>2026-06-11 13:39:35.853136+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-11-19 10:54:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-11-19-...</td>
+      <td>[project1, project2]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
       <td>na</td>
       <td>ne_pdd</td>
@@ -2199,13 +2249,13 @@ data by searching for this:</p>
       <th>inlet_height_magl</th>
       <th>...</th>
       <th>uuid</th>
-      <th>tag</th>
       <th>period</th>
       <th>latest_version</th>
       <th>timestamp</th>
       <th>start_date</th>
       <th>end_date</th>
       <th>versions</th>
+      <th>tag</th>
       <th>object_store</th>
       <th>species_alt</th>
     </tr>
@@ -2224,14 +2274,14 @@ data by searching for this:</p>
       <td>surface</td>
       <td>70</td>
       <td>...</td>
-      <td>216fe5d7-dbe8-4ef8-9e29-c4ee91f8ec05</td>
-      <td>[project1, project2]</td>
+      <td>e72f1bda-ebce-49c4-adcb-dba231c7ffcb</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:14.366863+00:00</td>
+      <td>2026-06-11 13:39:35.687107+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
+      <td>[project1, project2]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
       <td>NaN</td>
     </tr>
@@ -2248,14 +2298,14 @@ data by searching for this:</p>
       <td>surface</td>
       <td>70</td>
       <td>...</td>
-      <td>e86ec9e6-4934-473f-b658-92823be0b197</td>
-      <td>[project1, project2]</td>
+      <td>69328e58-8d04-4c36-a0e7-19ea69bc7255</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:14.384229+00:00</td>
+      <td>2026-06-11 13:39:35.703953+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
+      <td>[project1, project2]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
       <td>cfc-12</td>
     </tr>
@@ -2272,14 +2322,14 @@ data by searching for this:</p>
       <td>surface</td>
       <td>70</td>
       <td>...</td>
-      <td>c00f5272-78fa-4e39-9eb5-e00835afb568</td>
-      <td>[project1, project2]</td>
+      <td>019f62de-69fb-4ed1-b2c8-b5d6def647e2</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:14.404077+00:00</td>
+      <td>2026-06-11 13:39:35.720590+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
+      <td>[project1, project2]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
       <td>NaN</td>
     </tr>
@@ -2296,14 +2346,14 @@ data by searching for this:</p>
       <td>surface</td>
       <td>70</td>
       <td>...</td>
-      <td>d8e6e465-34c5-4854-91ac-12079add2bc4</td>
-      <td>[project1, project2]</td>
+      <td>69b733e9-822f-4b92-835f-eaa1547dd58c</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:14.421507+00:00</td>
+      <td>2026-06-11 13:39:35.737836+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
+      <td>[project1, project2]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
       <td>cfc-11</td>
     </tr>
@@ -2320,14 +2370,14 @@ data by searching for this:</p>
       <td>surface</td>
       <td>70</td>
       <td>...</td>
-      <td>4e4ae1ac-72ea-4638-b838-ccb14971ab80</td>
-      <td>[project1, project2]</td>
+      <td>5ffc8dc1-2160-4cec-8974-b3544d4a8a59</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:14.438829+00:00</td>
+      <td>2026-06-11 13:39:35.754141+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
+      <td>[project1, project2]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
       <td>cfc-113</td>
     </tr>
@@ -2344,14 +2394,14 @@ data by searching for this:</p>
       <td>surface</td>
       <td>70</td>
       <td>...</td>
-      <td>b6f48d26-38de-4c21-9bd2-8a4ab799fe36</td>
-      <td>[project1, project2]</td>
+      <td>c18b8fc8-376c-41d8-b363-f5606ce1dea6</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:14.456564+00:00</td>
+      <td>2026-06-11 13:39:35.770434+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
+      <td>[project1, project2]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
       <td>NaN</td>
     </tr>
@@ -2368,14 +2418,14 @@ data by searching for this:</p>
       <td>surface</td>
       <td>70</td>
       <td>...</td>
-      <td>7c391afb-8cc3-4ae6-9795-240cac077f08</td>
-      <td>[project1, project2]</td>
+      <td>5638e7e2-8bdb-4ce9-baf5-d5f92c2cea7c</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:14.474348+00:00</td>
+      <td>2026-06-11 13:39:35.787671+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
+      <td>[project1, project2]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
       <td>NaN</td>
     </tr>
@@ -2392,14 +2442,14 @@ data by searching for this:</p>
       <td>surface</td>
       <td>70</td>
       <td>...</td>
-      <td>9504d276-f3a8-4824-8417-49fd9da56eb2</td>
-      <td>[project1, project2]</td>
+      <td>5513b4ee-0d92-4a66-b4ff-20f413ccffb0</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:14.491901+00:00</td>
+      <td>2026-06-11 13:39:35.804136+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
+      <td>[project1, project2]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
       <td>NaN</td>
     </tr>
@@ -2416,14 +2466,14 @@ data by searching for this:</p>
       <td>surface</td>
       <td>70</td>
       <td>...</td>
-      <td>47ece145-0b29-406e-b8df-4f11d8ab7116</td>
-      <td>[project1, project2]</td>
+      <td>a200fea9-9acd-4f53-b41f-1ab6f153f8ee</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:14.509424+00:00</td>
+      <td>2026-06-11 13:39:35.820697+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-27 00:02:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-27-...</td>
+      <td>[project1, project2]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
       <td>h2_pdd</td>
     </tr>
@@ -2440,14 +2490,14 @@ data by searching for this:</p>
       <td>surface</td>
       <td>70</td>
       <td>...</td>
-      <td>8e913cdf-07eb-437d-980e-38c9f39e9f57</td>
-      <td>[project1, project2]</td>
+      <td>2c2761d6-c27c-4da7-8a78-317d54009598</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:14.528108+00:00</td>
+      <td>2026-06-11 13:39:35.837317+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-12-31 23:24:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-12-31-...</td>
+      <td>[project1, project2]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
       <td>NaN</td>
     </tr>
@@ -2464,14 +2514,14 @@ data by searching for this:</p>
       <td>surface</td>
       <td>70</td>
       <td>...</td>
-      <td>32fc05ce-0726-41dd-94c5-caf57aaf3d06</td>
-      <td>[project1, project2]</td>
+      <td>77d77df8-2f19-4608-8791-bfa4298d8154</td>
       <td>1200s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:14.545768+00:00</td>
+      <td>2026-06-11 13:39:35.853136+00:00</td>
       <td>2018-01-01 00:30:00+00:00</td>
       <td>2018-11-19 10:54:59+00:00</td>
       <td>{'v1': ['2018-01-01-00:30:00+00:00_2018-11-19-...</td>
+      <td>[project1, project2]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
       <td>ne_pdd</td>
     </tr>
@@ -2482,7 +2532,7 @@ data by searching for this:</p>
 </div>
 </section>
 <section id="quickly-retrieve-data">
-<h3>Quickly retrieve data<a class="headerlink" href="#quickly-retrieve-data" title="Link to this heading">#</a></h3>
+<h3>Quickly retrieve data<a class="headerlink" href="#quickly-retrieve-data" title="Link to this heading">¶</a></h3>
 <p>Say we want to retrieve all the <code class="docutils literal notranslate"><span class="pre">co2</span></code> data from Tacolneston, we can
 perform perform a search and expect a <a class="reference external" href="https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.SearchResult"><code class="docutils literal notranslate"><span class="pre">SearchResults</span></code></a>
 object to be returned. If no results are found <code class="docutils literal notranslate"><span class="pre">None</span></code> is returned.</p>
@@ -2525,13 +2575,13 @@ object to be returned. If no results are found <code class="docutils literal not
       <th>...</th>
       <th>source_format</th>
       <th>uuid</th>
-      <th>tag</th>
       <th>period</th>
       <th>latest_version</th>
       <th>timestamp</th>
       <th>start_date</th>
       <th>end_date</th>
       <th>versions</th>
+      <th>tag</th>
       <th>object_store</th>
     </tr>
   </thead>
@@ -2550,14 +2600,14 @@ object to be returned. If no results are found <code class="docutils literal not
       <td>tacolneston</td>
       <td>...</td>
       <td>crds</td>
-      <td>dd11b2ea-4914-4cd9-a74f-741f4df8ff62</td>
-      <td>[project1]</td>
+      <td>fd7a4ebb-e5e7-4a8e-a15e-8138f76a74ab</td>
       <td>3600s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:13.548311+00:00</td>
+      <td>2026-06-11 13:39:34.696899+00:00</td>
       <td>2012-07-26 11:23:05+00:00</td>
       <td>2017-12-19 11:25:19+00:00</td>
       <td>{'v1': ['2012-07-26-11:23:05+00:00_2017-12-19-...</td>
+      <td>[project1]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
     </tr>
     <tr>
@@ -2574,14 +2624,14 @@ object to be returned. If no results are found <code class="docutils literal not
       <td>tacolneston</td>
       <td>...</td>
       <td>crds</td>
-      <td>f51ca518-129a-43b3-bbb3-ed40f08da1a4</td>
-      <td>[project1]</td>
+      <td>0d38763a-3704-4535-b125-05332c328454</td>
       <td>3600s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:13.792844+00:00</td>
+      <td>2026-06-11 13:39:35.027663+00:00</td>
       <td>2012-07-26 11:04:07+00:00</td>
       <td>2018-01-01 00:23:04+00:00</td>
       <td>{'v1': ['2012-07-26-11:04:07+00:00_2018-01-01-...</td>
+      <td>[project1]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
     </tr>
     <tr>
@@ -2598,14 +2648,14 @@ object to be returned. If no results are found <code class="docutils literal not
       <td>tacolneston</td>
       <td>...</td>
       <td>crds</td>
-      <td>a1001deb-2dcb-4b43-b442-07ea043c2e53</td>
-      <td>[project1]</td>
+      <td>82f07c37-8dfc-483d-a961-7616f44f7345</td>
       <td>3600s</td>
       <td>v2</td>
-      <td>2026-02-18 17:20:14.016183+00:00</td>
+      <td>2026-06-11 13:39:35.266937+00:00</td>
       <td>2013-01-31 00:13:28+00:00</td>
       <td>2018-01-01 00:53:06+00:00</td>
       <td>{'v1': ['2013-01-31-00:13:28+00:00_2018-01-01-...</td>
+      <td>[project1]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
     </tr>
     <tr>
@@ -2622,14 +2672,14 @@ object to be returned. If no results are found <code class="docutils literal not
       <td>NaN</td>
       <td>...</td>
       <td>openghg</td>
-      <td>1fae5ab1-71eb-4645-9d72-831ca100d825</td>
-      <td>[in-memory-dataset]</td>
+      <td>216c6756-a88a-4520-b798-f5ed27c8190b</td>
       <td>3600s</td>
       <td>v1</td>
-      <td>2026-02-18 17:20:15.360337+00:00</td>
+      <td>2026-06-11 13:39:36.646952+00:00</td>
       <td>2013-01-31 00:05:00+00:00</td>
       <td>2022-09-29 12:44:59+00:00</td>
       <td>{'v1': ['2013-01-31-00:05:00+00:00_2022-09-29-...</td>
+      <td>[in-memory-dataset]</td>
       <td>/home/runner/openghg_store/tutorial_store</td>
     </tr>
   </tbody>
@@ -2647,7 +2697,7 @@ object to be returned. If no results are found <code class="docutils literal not
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>ObsData(metadata={&#39;site&#39;: &#39;tac&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;sampling_period&#39;: &#39;3600.0&#39;, &#39;inlet&#39;: &#39;54m&#39;, ...}, uuid=dd11b2ea-4914-4cd9-a74f-741f4df8ff62)
+<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>ObsData(metadata={&#39;site&#39;: &#39;tac&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;sampling_period&#39;: &#39;3600.0&#39;, &#39;inlet&#39;: &#39;54m&#39;, ...}, uuid=fd7a4ebb-e5e7-4a8e-a15e-8138f76a74ab)
 </pre></div>
 </div>
 </div>
@@ -2662,10 +2712,10 @@ objects.</p>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>[ObsData(metadata={&#39;site&#39;: &#39;tac&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;sampling_period&#39;: &#39;3600.0&#39;, &#39;inlet&#39;: &#39;54m&#39;, ...}, uuid=dd11b2ea-4914-4cd9-a74f-741f4df8ff62),
- ObsData(metadata={&#39;site&#39;: &#39;tac&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;sampling_period&#39;: &#39;3600.0&#39;, &#39;inlet&#39;: &#39;100m&#39;, ...}, uuid=f51ca518-129a-43b3-bbb3-ed40f08da1a4),
- ObsData(metadata={&#39;site&#39;: &#39;tac&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;sampling_period&#39;: &#39;3600.0&#39;, &#39;inlet&#39;: &#39;185m&#39;, ...}, uuid=a1001deb-2dcb-4b43-b442-07ea043c2e53),
- ObsData(metadata={&#39;site&#39;: &#39;tac&#39;, &#39;species&#39;: &#39;co2&#39;, &#39;network&#39;: &#39;decc&#39;, &#39;instrument&#39;: &#39;picarro&#39;, ...}, uuid=1fae5ab1-71eb-4645-9d72-831ca100d825)]
+<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>[ObsData(metadata={&#39;site&#39;: &#39;tac&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;sampling_period&#39;: &#39;3600.0&#39;, &#39;inlet&#39;: &#39;54m&#39;, ...}, uuid=fd7a4ebb-e5e7-4a8e-a15e-8138f76a74ab),
+ ObsData(metadata={&#39;site&#39;: &#39;tac&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;sampling_period&#39;: &#39;3600.0&#39;, &#39;inlet&#39;: &#39;100m&#39;, ...}, uuid=0d38763a-3704-4535-b125-05332c328454),
+ ObsData(metadata={&#39;site&#39;: &#39;tac&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;sampling_period&#39;: &#39;3600.0&#39;, &#39;inlet&#39;: &#39;185m&#39;, ...}, uuid=82f07c37-8dfc-483d-a961-7616f44f7345),
+ ObsData(metadata={&#39;site&#39;: &#39;tac&#39;, &#39;species&#39;: &#39;co2&#39;, &#39;network&#39;: &#39;decc&#39;, &#39;instrument&#39;: &#39;picarro&#39;, ...}, uuid=216c6756-a88a-4520-b798-f5ed27c8190b)]
 </pre></div>
 </div>
 </div>
@@ -2673,7 +2723,7 @@ objects.</p>
 </section>
 </section>
 <section id="retrieving-data">
-<h2>3. Retrieving data<a class="headerlink" href="#retrieving-data" title="Link to this heading">#</a></h2>
+<h2>3. Retrieving data<a class="headerlink" href="#retrieving-data" title="Link to this heading">¶</a></h2>
 <p>To retrieve the standardised data from the object store there are
 several functions we can use which depend on the type of data we want to
 access.</p>
@@ -2708,7 +2758,7 @@ e.g. <code class="docutils literal notranslate"><span class="pre">obs_data.metad
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>ObsData(metadata={&#39;site&#39;: &#39;tac&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;sampling_period&#39;: &#39;3600.0&#39;, &#39;inlet&#39;: &#39;185m&#39;, ...}, uuid=a1001deb-2dcb-4b43-b442-07ea043c2e53)
+<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>ObsData(metadata={&#39;site&#39;: &#39;tac&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;sampling_period&#39;: &#39;3600.0&#39;, &#39;inlet&#39;: &#39;185m&#39;, ...}, uuid=82f07c37-8dfc-483d-a961-7616f44f7345)
 </pre></div>
 </div>
 </div>
@@ -3219,10 +3269,10 @@ Attributes: (12/28)
     station_longitude:     1.1387
     tag:                   project1
     type:                  air
-    scale:                 WMO-X2019</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-8ba214ba-fbac-465a-9546-0e0849a68d46' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-8ba214ba-fbac-465a-9546-0e0849a68d46' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 39114</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-dfec1abc-f69d-405c-93b8-72bd3a45f7d6' class='xr-section-summary-in' type='checkbox'  checked><label for='section-dfec1abc-f69d-405c-93b8-72bd3a45f7d6' class='xr-section-summary' >Coordinates: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>2013-01-31T00:13:28 ... 2017-12-...</div><input id='attrs-3d56a1ca-b362-467d-b66c-8f5c2ce872cf' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-3d56a1ca-b362-467d-b66c-8f5c2ce872cf' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-91acde64-36bb-417f-b997-fa863a98e4b7' class='xr-var-data-in' type='checkbox'><label for='data-91acde64-36bb-417f-b997-fa863a98e4b7' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>comment :</span></dt><dd>Time stamp corresponds to beginning of sampling period. Time since midnight UTC of reference date. Note that sampling periods are approximate.</dd><dt><span>label :</span></dt><dd>left</dd><dt><span>sampling_period_seconds :</span></dt><dd>3600.0</dd><dt><span>standard_name :</span></dt><dd>time</dd></dl></div><div class='xr-var-data'><pre>array([&#x27;2013-01-31T00:13:28.000000000&#x27;, &#x27;2013-01-31T01:13:36.000000000&#x27;,
+    scale:                 WMO-X2019</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-f00f99f6-6154-4274-a482-4d1b3d617c85' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-f00f99f6-6154-4274-a482-4d1b3d617c85' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 39114</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-bf8b51fd-91b2-49be-92f6-a23e3cf407b8' class='xr-section-summary-in' type='checkbox'  checked><label for='section-bf8b51fd-91b2-49be-92f6-a23e3cf407b8' class='xr-section-summary' >Coordinates: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>2013-01-31T00:13:28 ... 2017-12-...</div><input id='attrs-86ec2247-809d-4be8-b10e-938e231ecd60' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-86ec2247-809d-4be8-b10e-938e231ecd60' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-45aab312-e155-47d0-94b7-321ba2ace41f' class='xr-var-data-in' type='checkbox'><label for='data-45aab312-e155-47d0-94b7-321ba2ace41f' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>comment :</span></dt><dd>Time stamp corresponds to beginning of sampling period. Time since midnight UTC of reference date. Note that sampling periods are approximate.</dd><dt><span>label :</span></dt><dd>left</dd><dt><span>sampling_period_seconds :</span></dt><dd>3600.0</dd><dt><span>standard_name :</span></dt><dd>time</dd></dl></div><div class='xr-var-data'><pre>array([&#x27;2013-01-31T00:13:28.000000000&#x27;, &#x27;2013-01-31T01:13:36.000000000&#x27;,
        &#x27;2013-01-31T02:13:51.000000000&#x27;, ..., &#x27;2017-12-31T21:53:07.000000000&#x27;,
        &#x27;2017-12-31T22:53:06.000000000&#x27;, &#x27;2017-12-31T23:53:07.000000000&#x27;],
-      shape=(39114,), dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-ae9ec8da-f4f6-4f49-947b-a645c4916a26' class='xr-section-summary-in' type='checkbox'  checked><label for='section-ae9ec8da-f4f6-4f49-947b-a645c4916a26' class='xr-section-summary' >Data variables: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>mf</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(19557,), meta=np.ndarray&gt;</div><input id='attrs-0414401d-f0c5-4acb-a5f0-99d15bfd9115' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-0414401d-f0c5-4acb-a5f0-99d15bfd9115' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-4f0effc6-47de-4848-a7ad-832c1f388c03' class='xr-var-data-in' type='checkbox'><label for='data-4f0effc6-47de-4848-a7ad-832c1f388c03' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_dioxide_in_air</dd><dt><span>units :</span></dt><dd>1e-06</dd></dl></div><div class='xr-var-data'><table>
+      shape=(39114,), dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-8d46bc15-7e38-4399-afc2-add89272f6c3' class='xr-section-summary-in' type='checkbox'  checked><label for='section-8d46bc15-7e38-4399-afc2-add89272f6c3' class='xr-section-summary' >Data variables: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>mf</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(19557,), meta=np.ndarray&gt;</div><input id='attrs-e09754e9-c729-42a3-bbe2-cebe9b152b62' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-e09754e9-c729-42a3-bbe2-cebe9b152b62' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-ab36ed02-e67a-423f-823d-e85c04d6cf16' class='xr-var-data-in' type='checkbox'><label for='data-ab36ed02-e67a-423f-823d-e85c04d6cf16' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_dioxide_in_air</dd><dt><span>units :</span></dt><dd>1e-06</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -3273,12 +3323,12 @@ Attributes: (12/28)
   <polygon points="0.0,0.0 120.0,0.0 120.0,25.412616514582485 0.0,25.412616514582485" style="fill:#ECB172A0;stroke-width:0"/>
 
   <!-- Text -->
-  <text x="60.000000" y="45.412617" font-size="1.0rem" font-weight="100" text-anchor="middle" >39114</text>
-  <text x="140.000000" y="12.706308" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,140.000000,12.706308)">1</text>
+  <text x="60.0" y="45.41261651458248" font-size="1.0rem" font-weight="100" text-anchor="middle" >39114</text>
+  <text x="140.0" y="12.706308257291242" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,140.0,12.706308257291242)">1</text>
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mf_number_of_observations</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(19557,), meta=np.ndarray&gt;</div><input id='attrs-9f4d7d65-b3ba-46ea-a401-e4466c436a63' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-9f4d7d65-b3ba-46ea-a401-e4466c436a63' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-89514e87-3bc3-4015-8059-22fef9a6a1a8' class='xr-var-data-in' type='checkbox'><label for='data-89514e87-3bc3-4015-8059-22fef9a6a1a8' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_dioxide_in_air_number_of_observations</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mf_number_of_observations</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(19557,), meta=np.ndarray&gt;</div><input id='attrs-1ae2c836-2e87-4685-bc29-5f7a6c23b680' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-1ae2c836-2e87-4685-bc29-5f7a6c23b680' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-0747b68a-b9d0-4430-b952-2e6c3ab97571' class='xr-var-data-in' type='checkbox'><label for='data-0747b68a-b9d0-4430-b952-2e6c3ab97571' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_dioxide_in_air_number_of_observations</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -3329,12 +3379,12 @@ Attributes: (12/28)
   <polygon points="0.0,0.0 120.0,0.0 120.0,25.412616514582485 0.0,25.412616514582485" style="fill:#ECB172A0;stroke-width:0"/>
 
   <!-- Text -->
-  <text x="60.000000" y="45.412617" font-size="1.0rem" font-weight="100" text-anchor="middle" >39114</text>
-  <text x="140.000000" y="12.706308" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,140.000000,12.706308)">1</text>
+  <text x="60.0" y="45.41261651458248" font-size="1.0rem" font-weight="100" text-anchor="middle" >39114</text>
+  <text x="140.0" y="12.706308257291242" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,140.0,12.706308257291242)">1</text>
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mf_variability</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(19557,), meta=np.ndarray&gt;</div><input id='attrs-722daddb-b40c-408e-8736-38e9d01877da' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-722daddb-b40c-408e-8736-38e9d01877da' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-ce768c40-1cdb-41ad-a524-e76571e12959' class='xr-var-data-in' type='checkbox'><label for='data-ce768c40-1cdb-41ad-a524-e76571e12959' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_dioxide_in_air_variability</dd><dt><span>units :</span></dt><dd>1e-06</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mf_variability</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(19557,), meta=np.ndarray&gt;</div><input id='attrs-b01de4dd-87bf-4897-849c-f70dbb3fd7c3' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-b01de4dd-87bf-4897-849c-f70dbb3fd7c3' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-7f4b2f72-000b-40b9-b189-763f115659ba' class='xr-var-data-in' type='checkbox'><label for='data-7f4b2f72-000b-40b9-b189-763f115659ba' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_dioxide_in_air_variability</dd><dt><span>units :</span></dt><dd>1e-06</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -3360,7 +3410,7 @@ Attributes: (12/28)
                     </tr>
                     <tr>
                         <th> Dask graph </th>
-                        <td colspan="2"> 2 chunks in 5 graph layers </td>
+                        <td colspan="2"> 2 chunks in 7 graph layers </td>
                     </tr>
                     <tr>
                         <th> Data type </th>
@@ -3385,12 +3435,12 @@ Attributes: (12/28)
   <polygon points="0.0,0.0 120.0,0.0 120.0,25.412616514582485 0.0,25.412616514582485" style="fill:#ECB172A0;stroke-width:0"/>
 
   <!-- Text -->
-  <text x="60.000000" y="45.412617" font-size="1.0rem" font-weight="100" text-anchor="middle" >39114</text>
-  <text x="140.000000" y="12.706308" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,140.000000,12.706308)">1</text>
+  <text x="60.0" y="45.41261651458248" font-size="1.0rem" font-weight="100" text-anchor="middle" >39114</text>
+  <text x="140.0" y="12.706308257291242" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,140.0,12.706308257291242)">1</text>
 </svg>
         </td>
     </tr>
-</table></div></li></ul></div></li><li class='xr-section-item'><input id='section-2a3e7913-1516-4a11-a561-8e0585fcd3bd' class='xr-section-summary-in' type='checkbox'  ><label for='section-2a3e7913-1516-4a11-a561-8e0585fcd3bd' class='xr-section-summary' >Attributes: <span>(28)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>Conventions :</span></dt><dd>CF-1.8</dd><dt><span>comment :</span></dt><dd>Cavity ring-down measurements. Output from GCWerks</dd><dt><span>conditions_of_use :</span></dt><dd>Ensure that you contact the data owner at the outset of your project.</dd><dt><span>data_owner :</span></dt><dd>Simon O&#x27;Doherty</dd><dt><span>data_owner_email :</span></dt><dd>s.odoherty@bristol.ac.uk</dd><dt><span>data_source :</span></dt><dd>internal</dd><dt><span>data_type :</span></dt><dd>surface</dd><dt><span>file_created :</span></dt><dd>2026-02-18 17:20:13.960191+00:00</dd><dt><span>inlet :</span></dt><dd>185m</dd><dt><span>inlet_height_magl :</span></dt><dd>185</dd><dt><span>instrument :</span></dt><dd>picarro</dd><dt><span>long_name :</span></dt><dd>tacolneston</dd><dt><span>network :</span></dt><dd>decc</dd><dt><span>port :</span></dt><dd>10</dd><dt><span>processed_by :</span></dt><dd>OpenGHG_Cloud</dd><dt><span>sampling_period :</span></dt><dd>3600.0</dd><dt><span>sampling_period_unit :</span></dt><dd>s</dd><dt><span>site :</span></dt><dd>tac</dd><dt><span>source :</span></dt><dd>In situ measurements of air</dd><dt><span>source_format :</span></dt><dd>CRDS</dd><dt><span>species :</span></dt><dd>co2</dd><dt><span>station_height_masl :</span></dt><dd>64</dd><dt><span>station_latitude :</span></dt><dd>52.51882</dd><dt><span>station_long_name :</span></dt><dd>Tacolneston Tower, UK</dd><dt><span>station_longitude :</span></dt><dd>1.1387</dd><dt><span>tag :</span></dt><dd>project1</dd><dt><span>type :</span></dt><dd>air</dd><dt><span>scale :</span></dt><dd>WMO-X2019</dd></dl></div></li></ul></div></div></div></div>
+</table></div></li></ul></div></li><li class='xr-section-item'><input id='section-44852d03-8796-4115-87c7-26d52872fb69' class='xr-section-summary-in' type='checkbox'  ><label for='section-44852d03-8796-4115-87c7-26d52872fb69' class='xr-section-summary' >Attributes: <span>(28)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>Conventions :</span></dt><dd>CF-1.8</dd><dt><span>comment :</span></dt><dd>Cavity ring-down measurements. Output from GCWerks</dd><dt><span>conditions_of_use :</span></dt><dd>Ensure that you contact the data owner at the outset of your project.</dd><dt><span>data_owner :</span></dt><dd>Simon O&#x27;Doherty</dd><dt><span>data_owner_email :</span></dt><dd>s.odoherty@bristol.ac.uk</dd><dt><span>data_source :</span></dt><dd>internal</dd><dt><span>data_type :</span></dt><dd>surface</dd><dt><span>file_created :</span></dt><dd>2026-06-11 13:39:35.201954+00:00</dd><dt><span>inlet :</span></dt><dd>185m</dd><dt><span>inlet_height_magl :</span></dt><dd>185</dd><dt><span>instrument :</span></dt><dd>picarro</dd><dt><span>long_name :</span></dt><dd>tacolneston</dd><dt><span>network :</span></dt><dd>decc</dd><dt><span>port :</span></dt><dd>10</dd><dt><span>processed_by :</span></dt><dd>OpenGHG_Cloud</dd><dt><span>sampling_period :</span></dt><dd>3600.0</dd><dt><span>sampling_period_unit :</span></dt><dd>s</dd><dt><span>site :</span></dt><dd>tac</dd><dt><span>source :</span></dt><dd>In situ measurements of air</dd><dt><span>source_format :</span></dt><dd>CRDS</dd><dt><span>species :</span></dt><dd>co2</dd><dt><span>station_height_masl :</span></dt><dd>64</dd><dt><span>station_latitude :</span></dt><dd>52.51882</dd><dt><span>station_long_name :</span></dt><dd>Tacolneston Tower, UK</dd><dt><span>station_longitude :</span></dt><dd>1.1387</dd><dt><span>tag :</span></dt><dd>project1</dd><dt><span>type :</span></dt><dd>air</dd><dt><span>scale :</span></dt><dd>WMO-X2019</dd></dl></div></li></ul></div></div></div></div>
 </div>
 <div class="jupyter_cell jupyter_container docutils container">
 <div class="cell_input code_cell docutils container">
@@ -3423,20 +3473,20 @@ Attributes: (12/28)
  &#39;platform&#39;: &#39;not_set&#39;,
  &#39;data_source&#39;: &#39;internal&#39;,
  &#39;source_format&#39;: &#39;CRDS&#39;,
- &#39;uuid&#39;: &#39;a1001deb-2dcb-4b43-b442-07ea043c2e53&#39;,
- &#39;tag&#39;: &#39;project1&#39;,
+ &#39;uuid&#39;: &#39;82f07c37-8dfc-483d-a961-7616f44f7345&#39;,
  &#39;period&#39;: &#39;3600s&#39;,
  &#39;latest_version&#39;: &#39;v2&#39;,
- &#39;timestamp&#39;: &#39;2026-02-18 17:20:14.016183+00:00&#39;,
+ &#39;timestamp&#39;: &#39;2026-06-11 13:39:35.266937+00:00&#39;,
  &#39;start_date&#39;: &#39;2013-01-31 00:13:28+00:00&#39;,
  &#39;end_date&#39;: &#39;2018-01-01 00:53:06+00:00&#39;,
  &#39;versions&#39;: {&#39;v1&#39;: [&#39;2013-01-31-00:13:28+00:00_2018-01-01-00:53:06+00:00&#39;],
   &#39;v2&#39;: [&#39;2013-01-31-00:13:28+00:00_2018-01-01-00:53:06+00:00&#39;]},
+ &#39;tag&#39;: &#39;project1&#39;,
  &#39;object_store&#39;: &#39;/home/runner/openghg_store/tutorial_store&#39;,
  &#39;Conventions&#39;: &#39;CF-1.8&#39;,
  &#39;comment&#39;: &#39;Cavity ring-down measurements. Output from GCWerks&#39;,
  &#39;conditions_of_use&#39;: &#39;Ensure that you contact the data owner at the outset of your project.&#39;,
- &#39;file_created&#39;: &#39;2026-02-18 17:20:13.960191+00:00&#39;,
+ &#39;file_created&#39;: &#39;2026-06-11 13:39:35.201954+00:00&#39;,
  &#39;processed_by&#39;: &#39;OpenGHG_Cloud&#39;,
  &#39;sampling_period_unit&#39;: &#39;s&#39;,
  &#39;source&#39;: &#39;In situ measurements of air&#39;,
@@ -4016,10 +4066,10 @@ Attributes: (12/28)
     station_longitude:     1.1387
     tag:                   project1
     type:                  air
-    scale:                 WMO-X2019</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-398fb026-bbc7-4035-a722-4634603b883e' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-398fb026-bbc7-4035-a722-4634603b883e' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 39114</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-ca881f1d-f52e-4adf-94a9-52691312bd4d' class='xr-section-summary-in' type='checkbox'  checked><label for='section-ca881f1d-f52e-4adf-94a9-52691312bd4d' class='xr-section-summary' >Coordinates: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>2013-01-31T00:13:28 ... 2017-12-...</div><input id='attrs-569d18bf-5872-40e1-a235-3c2ed7de4555' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-569d18bf-5872-40e1-a235-3c2ed7de4555' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-be96f9f4-3f93-4350-ad33-868ccaac3fb5' class='xr-var-data-in' type='checkbox'><label for='data-be96f9f4-3f93-4350-ad33-868ccaac3fb5' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>comment :</span></dt><dd>Time stamp corresponds to beginning of sampling period. Time since midnight UTC of reference date. Note that sampling periods are approximate.</dd><dt><span>label :</span></dt><dd>left</dd><dt><span>sampling_period_seconds :</span></dt><dd>3600.0</dd><dt><span>standard_name :</span></dt><dd>time</dd></dl></div><div class='xr-var-data'><pre>array([&#x27;2013-01-31T00:13:28.000000000&#x27;, &#x27;2013-01-31T01:13:36.000000000&#x27;,
+    scale:                 WMO-X2019</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-ecd23ab4-6d77-48a0-bbab-80a36d028a51' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-ecd23ab4-6d77-48a0-bbab-80a36d028a51' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 39114</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-2af339fa-e0f2-46db-9498-fed0cf3541fc' class='xr-section-summary-in' type='checkbox'  checked><label for='section-2af339fa-e0f2-46db-9498-fed0cf3541fc' class='xr-section-summary' >Coordinates: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>2013-01-31T00:13:28 ... 2017-12-...</div><input id='attrs-a943ca5f-4503-4ef0-bba5-0f5360801c04' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-a943ca5f-4503-4ef0-bba5-0f5360801c04' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-db8c91eb-66ec-47c7-83a0-852d08ede94e' class='xr-var-data-in' type='checkbox'><label for='data-db8c91eb-66ec-47c7-83a0-852d08ede94e' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>comment :</span></dt><dd>Time stamp corresponds to beginning of sampling period. Time since midnight UTC of reference date. Note that sampling periods are approximate.</dd><dt><span>label :</span></dt><dd>left</dd><dt><span>sampling_period_seconds :</span></dt><dd>3600.0</dd><dt><span>standard_name :</span></dt><dd>time</dd></dl></div><div class='xr-var-data'><pre>array([&#x27;2013-01-31T00:13:28.000000000&#x27;, &#x27;2013-01-31T01:13:36.000000000&#x27;,
        &#x27;2013-01-31T02:13:51.000000000&#x27;, ..., &#x27;2017-12-31T21:53:07.000000000&#x27;,
        &#x27;2017-12-31T22:53:06.000000000&#x27;, &#x27;2017-12-31T23:53:07.000000000&#x27;],
-      shape=(39114,), dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-458f0cb9-4777-4c2a-a6a6-179974d3e76b' class='xr-section-summary-in' type='checkbox'  checked><label for='section-458f0cb9-4777-4c2a-a6a6-179974d3e76b' class='xr-section-summary' >Data variables: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>mf</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(19557,), meta=np.ndarray&gt;</div><input id='attrs-cb34271d-9762-42b1-82b0-01f7b11e71f2' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-cb34271d-9762-42b1-82b0-01f7b11e71f2' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-ebfaac66-4bec-4892-93a0-bc6dd37feab3' class='xr-var-data-in' type='checkbox'><label for='data-ebfaac66-4bec-4892-93a0-bc6dd37feab3' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_dioxide_in_air</dd><dt><span>units_definition :</span></dt><dd>parts_per_billion</dd><dt><span>units :</span></dt><dd>1e-09</dd></dl></div><div class='xr-var-data'><table>
+      shape=(39114,), dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-f0c48cb2-f15b-49d4-94db-28d26fd9ada8' class='xr-section-summary-in' type='checkbox'  checked><label for='section-f0c48cb2-f15b-49d4-94db-28d26fd9ada8' class='xr-section-summary' >Data variables: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>mf</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(19557,), meta=np.ndarray&gt;</div><input id='attrs-7c69a86d-f219-4b35-987c-70e0889f5fda' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-7c69a86d-f219-4b35-987c-70e0889f5fda' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-9d1e69f3-dd09-428f-98e0-12f8f402f807' class='xr-var-data-in' type='checkbox'><label for='data-9d1e69f3-dd09-428f-98e0-12f8f402f807' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_dioxide_in_air</dd><dt><span>units_definition :</span></dt><dd>parts_per_billion</dd><dt><span>units :</span></dt><dd>1e-09</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -4070,12 +4120,12 @@ Attributes: (12/28)
   <polygon points="0.0,0.0 120.0,0.0 120.0,25.412616514582485 0.0,25.412616514582485" style="fill:#ECB172A0;stroke-width:0"/>
 
   <!-- Text -->
-  <text x="60.000000" y="45.412617" font-size="1.0rem" font-weight="100" text-anchor="middle" >39114</text>
-  <text x="140.000000" y="12.706308" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,140.000000,12.706308)">1</text>
+  <text x="60.0" y="45.41261651458248" font-size="1.0rem" font-weight="100" text-anchor="middle" >39114</text>
+  <text x="140.0" y="12.706308257291242" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,140.0,12.706308257291242)">1</text>
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mf_number_of_observations</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(19557,), meta=np.ndarray&gt;</div><input id='attrs-ac53c11c-ecb4-40ac-8735-e1e9744bbd7e' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-ac53c11c-ecb4-40ac-8735-e1e9744bbd7e' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-05331eea-d592-4278-b259-fb8663fff879' class='xr-var-data-in' type='checkbox'><label for='data-05331eea-d592-4278-b259-fb8663fff879' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_dioxide_in_air_number_of_observations</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mf_number_of_observations</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(19557,), meta=np.ndarray&gt;</div><input id='attrs-d8179e58-0c98-4706-9c7a-4e28f1e3f8d9' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-d8179e58-0c98-4706-9c7a-4e28f1e3f8d9' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-e8f3a922-4f73-4733-8cb0-5539d3dc0664' class='xr-var-data-in' type='checkbox'><label for='data-e8f3a922-4f73-4733-8cb0-5539d3dc0664' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_dioxide_in_air_number_of_observations</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -4126,12 +4176,12 @@ Attributes: (12/28)
   <polygon points="0.0,0.0 120.0,0.0 120.0,25.412616514582485 0.0,25.412616514582485" style="fill:#ECB172A0;stroke-width:0"/>
 
   <!-- Text -->
-  <text x="60.000000" y="45.412617" font-size="1.0rem" font-weight="100" text-anchor="middle" >39114</text>
-  <text x="140.000000" y="12.706308" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,140.000000,12.706308)">1</text>
+  <text x="60.0" y="45.41261651458248" font-size="1.0rem" font-weight="100" text-anchor="middle" >39114</text>
+  <text x="140.0" y="12.706308257291242" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,140.0,12.706308257291242)">1</text>
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mf_variability</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(19557,), meta=np.ndarray&gt;</div><input id='attrs-4a955ad3-a412-4022-856b-a95a9be60ba1' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-4a955ad3-a412-4022-856b-a95a9be60ba1' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-465bd33b-829c-49a5-af35-3ded303a2dea' class='xr-var-data-in' type='checkbox'><label for='data-465bd33b-829c-49a5-af35-3ded303a2dea' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_dioxide_in_air_variability</dd><dt><span>units :</span></dt><dd>1e-06</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mf_variability</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(19557,), meta=np.ndarray&gt;</div><input id='attrs-040d1c53-81f3-4535-a0f1-0937e1a5b5fc' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-040d1c53-81f3-4535-a0f1-0937e1a5b5fc' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-0fce5823-bb65-4f98-9359-967eb3718c90' class='xr-var-data-in' type='checkbox'><label for='data-0fce5823-bb65-4f98-9359-967eb3718c90' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_dioxide_in_air_variability</dd><dt><span>units :</span></dt><dd>1e-06</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -4157,7 +4207,7 @@ Attributes: (12/28)
                     </tr>
                     <tr>
                         <th> Dask graph </th>
-                        <td colspan="2"> 2 chunks in 5 graph layers </td>
+                        <td colspan="2"> 2 chunks in 7 graph layers </td>
                     </tr>
                     <tr>
                         <th> Data type </th>
@@ -4182,12 +4232,12 @@ Attributes: (12/28)
   <polygon points="0.0,0.0 120.0,0.0 120.0,25.412616514582485 0.0,25.412616514582485" style="fill:#ECB172A0;stroke-width:0"/>
 
   <!-- Text -->
-  <text x="60.000000" y="45.412617" font-size="1.0rem" font-weight="100" text-anchor="middle" >39114</text>
-  <text x="140.000000" y="12.706308" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,140.000000,12.706308)">1</text>
+  <text x="60.0" y="45.41261651458248" font-size="1.0rem" font-weight="100" text-anchor="middle" >39114</text>
+  <text x="140.0" y="12.706308257291242" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,140.0,12.706308257291242)">1</text>
 </svg>
         </td>
     </tr>
-</table></div></li></ul></div></li><li class='xr-section-item'><input id='section-048a5c79-b83d-41e9-b719-f583bfe3ea9f' class='xr-section-summary-in' type='checkbox'  ><label for='section-048a5c79-b83d-41e9-b719-f583bfe3ea9f' class='xr-section-summary' >Attributes: <span>(28)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>Conventions :</span></dt><dd>CF-1.8</dd><dt><span>comment :</span></dt><dd>Cavity ring-down measurements. Output from GCWerks</dd><dt><span>conditions_of_use :</span></dt><dd>Ensure that you contact the data owner at the outset of your project.</dd><dt><span>data_owner :</span></dt><dd>Simon O&#x27;Doherty</dd><dt><span>data_owner_email :</span></dt><dd>s.odoherty@bristol.ac.uk</dd><dt><span>data_source :</span></dt><dd>internal</dd><dt><span>data_type :</span></dt><dd>surface</dd><dt><span>file_created :</span></dt><dd>2026-02-18 17:20:13.960191+00:00</dd><dt><span>inlet :</span></dt><dd>185m</dd><dt><span>inlet_height_magl :</span></dt><dd>185</dd><dt><span>instrument :</span></dt><dd>picarro</dd><dt><span>long_name :</span></dt><dd>tacolneston</dd><dt><span>network :</span></dt><dd>decc</dd><dt><span>port :</span></dt><dd>10</dd><dt><span>processed_by :</span></dt><dd>OpenGHG_Cloud</dd><dt><span>sampling_period :</span></dt><dd>3600.0</dd><dt><span>sampling_period_unit :</span></dt><dd>s</dd><dt><span>site :</span></dt><dd>tac</dd><dt><span>source :</span></dt><dd>In situ measurements of air</dd><dt><span>source_format :</span></dt><dd>CRDS</dd><dt><span>species :</span></dt><dd>co2</dd><dt><span>station_height_masl :</span></dt><dd>64</dd><dt><span>station_latitude :</span></dt><dd>52.51882</dd><dt><span>station_long_name :</span></dt><dd>Tacolneston Tower, UK</dd><dt><span>station_longitude :</span></dt><dd>1.1387</dd><dt><span>tag :</span></dt><dd>project1</dd><dt><span>type :</span></dt><dd>air</dd><dt><span>scale :</span></dt><dd>WMO-X2019</dd></dl></div></li></ul></div></div></div></div>
+</table></div></li></ul></div></li><li class='xr-section-item'><input id='section-e7ae2f0f-ae5f-4f60-bdb6-14cc758811a8' class='xr-section-summary-in' type='checkbox'  ><label for='section-e7ae2f0f-ae5f-4f60-bdb6-14cc758811a8' class='xr-section-summary' >Attributes: <span>(28)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>Conventions :</span></dt><dd>CF-1.8</dd><dt><span>comment :</span></dt><dd>Cavity ring-down measurements. Output from GCWerks</dd><dt><span>conditions_of_use :</span></dt><dd>Ensure that you contact the data owner at the outset of your project.</dd><dt><span>data_owner :</span></dt><dd>Simon O&#x27;Doherty</dd><dt><span>data_owner_email :</span></dt><dd>s.odoherty@bristol.ac.uk</dd><dt><span>data_source :</span></dt><dd>internal</dd><dt><span>data_type :</span></dt><dd>surface</dd><dt><span>file_created :</span></dt><dd>2026-06-11 13:39:35.201954+00:00</dd><dt><span>inlet :</span></dt><dd>185m</dd><dt><span>inlet_height_magl :</span></dt><dd>185</dd><dt><span>instrument :</span></dt><dd>picarro</dd><dt><span>long_name :</span></dt><dd>tacolneston</dd><dt><span>network :</span></dt><dd>decc</dd><dt><span>port :</span></dt><dd>10</dd><dt><span>processed_by :</span></dt><dd>OpenGHG_Cloud</dd><dt><span>sampling_period :</span></dt><dd>3600.0</dd><dt><span>sampling_period_unit :</span></dt><dd>s</dd><dt><span>site :</span></dt><dd>tac</dd><dt><span>source :</span></dt><dd>In situ measurements of air</dd><dt><span>source_format :</span></dt><dd>CRDS</dd><dt><span>species :</span></dt><dd>co2</dd><dt><span>station_height_masl :</span></dt><dd>64</dd><dt><span>station_latitude :</span></dt><dd>52.51882</dd><dt><span>station_long_name :</span></dt><dd>Tacolneston Tower, UK</dd><dt><span>station_longitude :</span></dt><dd>1.1387</dd><dt><span>tag :</span></dt><dd>project1</dd><dt><span>type :</span></dt><dd>air</dd><dt><span>scale :</span></dt><dd>WMO-X2019</dd></dl></div></li></ul></div></div></div></div>
 </div>
 <p>By default, the returned data is dequantified, so you can confirm the unit conversion using:</p>
 <div class="jupyter_cell jupyter_container docutils container">
@@ -4250,7 +4300,7 @@ ppb
 </div>
 </section>
 <section id="cleanup">
-<h2>4. Cleanup<a class="headerlink" href="#cleanup" title="Link to this heading">#</a></h2>
+<h2>4. Cleanup<a class="headerlink" href="#cleanup" title="Link to this heading">¶</a></h2>
 <p>If you’re finished with the data in this tutorial you can cleanup the
 tutorial object store using the <code class="docutils literal notranslate"><span class="pre">clear_tutorial_store</span></code> function.</p>
 <div class="jupyter_cell jupyter_container docutils container">
@@ -4276,132 +4326,55 @@ tutorial object store using the <code class="docutils literal notranslate"><span
 
 
 <script type="application/vnd.jupyter.widget-state+json">
-{"state": {"c738b9f7230d477fb8cd9ac7f641768f": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "da603d5614714dfa985f516e9c7d0342": {"model_name": "OutputModel", "model_module": "@jupyter-widgets/output", "model_module_version": "1.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/output", "_model_module_version": "1.0.0", "_model_name": "OutputModel", "_view_count": null, "_view_module": "@jupyter-widgets/output", "_view_module_version": "1.0.0", "_view_name": "OutputView", "layout": "IPY_MODEL_c738b9f7230d477fb8cd9ac7f641768f", "msg_id": "", "outputs": [{"output_type": "display_data", "metadata": {}, "data": {"text/plain": "Downloading tac_example.tar.gz \u001b[38;2;249;38;114m\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u001b[0m\u001b[38;5;237m\u257a\u001b[0m\u001b[38;5;237m\u2501\u2501\u001b[0m \u001b[32m2.2/2.4 MB\u001b[0m \u001b[36m0:00:01\u001b[0m\n", "text/html": "<pre style=\"white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace\">Downloading tac_example.tar.gz <span style=\"color: #f92672; text-decoration-color: #f92672\">\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501</span><span style=\"color: #3a3a3a; text-decoration-color: #3a3a3a\">\u257a\u2501\u2501</span> <span style=\"color: #008000; text-decoration-color: #008000\">2.2/2.4 MB</span> <span style=\"color: #008080; text-decoration-color: #008080\">0:00:01</span>\n</pre>\n"}}], "tabbable": null, "tooltip": null}}, "8e441f45b45448ecaf08e8b16b3c2b7d": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "965ea98749dd46e585511ec00943cf38": {"model_name": "OutputModel", "model_module": "@jupyter-widgets/output", "model_module_version": "1.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/output", "_model_module_version": "1.0.0", "_model_name": "OutputModel", "_view_count": null, "_view_module": "@jupyter-widgets/output", "_view_module_version": "1.0.0", "_view_name": "OutputView", "layout": "IPY_MODEL_8e441f45b45448ecaf08e8b16b3c2b7d", "msg_id": "", "outputs": [{"output_type": "display_data", "metadata": {}, "data": {"text/plain": "Downloading capegrim_example.tar.gz \u001b[38;5;237m\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u001b[0m \u001b[32m0.0/557.9 kB\u001b[0m \u001b[36m-:--:--\u001b[0m\n", "text/html": "<pre style=\"white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace\">Downloading capegrim_example.tar.gz <span style=\"color: #3a3a3a; text-decoration-color: #3a3a3a\">\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501</span> <span style=\"color: #008000; text-decoration-color: #008000\">0.0/557.9 kB</span> <span style=\"color: #008080; text-decoration-color: #008080\">-:--:--</span>\n</pre>\n"}}], "tabbable": null, "tooltip": null}}, "ffb32559225a438aa5fb21ef0af10f4e": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "4c1cb382de6d4813894256a9586a6dcc": {"model_name": "OutputModel", "model_module": "@jupyter-widgets/output", "model_module_version": "1.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/output", "_model_module_version": "1.0.0", "_model_name": "OutputModel", "_view_count": null, "_view_module": "@jupyter-widgets/output", "_view_module_version": "1.0.0", "_view_name": "OutputView", "layout": "IPY_MODEL_ffb32559225a438aa5fb21ef0af10f4e", "msg_id": "", "outputs": [{"output_type": "display_data", "metadata": {}, "data": {"text/plain": "Downloading gosat-fts_gosat_20160101_ch4-column.nc.tar.gz \u001b[38;5;237m\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u001b[0m \u001b[32m0.0/21.5 kB\u001b[0m \u001b[36m-:--:--\u001b[0m\n", "text/html": "<pre style=\"white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace\">Downloading gosat-fts_gosat_20160101_ch4-column.nc.tar.gz <span style=\"color: #3a3a3a; text-decoration-color: #3a3a3a\">\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501</span> <span style=\"color: #008000; text-decoration-color: #008000\">0.0/21.5 kB</span> <span style=\"color: #008080; text-decoration-color: #008080\">-:--:--</span>\n</pre>\n"}}], "tabbable": null, "tooltip": null}}, "c4ec1c16315c4a058ca7a2a3e86f3a0f": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "9f3ae181ad5845a7af023e8a10dee2e3": {"model_name": "OutputModel", "model_module": "@jupyter-widgets/output", "model_module_version": "1.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/output", "_model_module_version": "1.0.0", "_model_name": "OutputModel", "_view_count": null, "_view_module": "@jupyter-widgets/output", "_view_module_version": "1.0.0", "_view_name": "OutputView", "layout": "IPY_MODEL_c4ec1c16315c4a058ca7a2a3e86f3a0f", "msg_id": "", "outputs": [{"output_type": "display_data", "metadata": {}, "data": {"text/plain": "Downloading decc-picarro_co2.tar.gz \u001b[38;5;237m\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u001b[0m \u001b[32m0.0/30.7 kB\u001b[0m \u001b[36m-:--:--\u001b[0m\n", "text/html": "<pre style=\"white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace\">Downloading decc-picarro_co2.tar.gz <span style=\"color: #3a3a3a; text-decoration-color: #3a3a3a\">\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501</span> <span style=\"color: #008000; text-decoration-color: #008000\">0.0/30.7 kB</span> <span style=\"color: #008080; text-decoration-color: #008080\">-:--:--</span>\n</pre>\n"}}], "tabbable": null, "tooltip": null}}}, "version_major": 2, "version_minor": 0}
+{"state": {"6b8e510aab8447a6ba1f0f44796d03ad": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "cb99023f31184bf4ad31f6a8322ee285": {"model_name": "OutputModel", "model_module": "@jupyter-widgets/output", "model_module_version": "1.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/output", "_model_module_version": "1.0.0", "_model_name": "OutputModel", "_view_count": null, "_view_module": "@jupyter-widgets/output", "_view_module_version": "1.0.0", "_view_name": "OutputView", "layout": "IPY_MODEL_6b8e510aab8447a6ba1f0f44796d03ad", "msg_id": "", "outputs": [{"output_type": "display_data", "metadata": {}, "data": {"text/plain": "Downloading tac_example.tar.gz \u001b[38;5;237m\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u001b[0m \u001b[32m0.0/2.4 MB\u001b[0m \u001b[36m-:--:--\u001b[0m\nDownloading tac_example.tar.gz \u001b[38;5;237m\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u001b[0m \u001b[32m0.0/2.4 MB\u001b[0m \u001b[36m-:--:--\u001b[0m", "text/html": "<pre style=\"white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace\">Downloading tac_example.tar.gz <span style=\"color: #3a3a3a; text-decoration-color: #3a3a3a\">\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501</span> <span style=\"color: #008000; text-decoration-color: #008000\">0.0/2.4 MB</span> <span style=\"color: #008080; text-decoration-color: #008080\">-:--:--</span>\nDownloading tac_example.tar.gz <span style=\"color: #3a3a3a; text-decoration-color: #3a3a3a\">\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501</span> <span style=\"color: #008000; text-decoration-color: #008000\">0.0/2.4 MB</span> <span style=\"color: #008080; text-decoration-color: #008080\">-:--:--</span></pre>\n"}}], "tabbable": null, "tooltip": null}}, "25f5b7f98a1147f0b079554c727995fe": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "26346749e2754e558589019c7b111563": {"model_name": "OutputModel", "model_module": "@jupyter-widgets/output", "model_module_version": "1.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/output", "_model_module_version": "1.0.0", "_model_name": "OutputModel", "_view_count": null, "_view_module": "@jupyter-widgets/output", "_view_module_version": "1.0.0", "_view_name": "OutputView", "layout": "IPY_MODEL_25f5b7f98a1147f0b079554c727995fe", "msg_id": "", "outputs": [{"output_type": "display_data", "metadata": {}, "data": {"text/plain": "Downloading capegrim_example.tar.gz \u001b[38;5;237m\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u001b[0m \u001b[32m0.0/557.9 kB\u001b[0m \u001b[36m-:--:--\u001b[0m\nDownloading capegrim_example.tar.gz \u001b[38;5;237m\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u001b[0m \u001b[32m0.0/557.9 kB\u001b[0m \u001b[36m-:--:--\u001b[0m", "text/html": "<pre style=\"white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace\">Downloading capegrim_example.tar.gz <span style=\"color: #3a3a3a; text-decoration-color: #3a3a3a\">\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501</span> <span style=\"color: #008000; text-decoration-color: #008000\">0.0/557.9 kB</span> <span style=\"color: #008080; text-decoration-color: #008080\">-:--:--</span>\nDownloading capegrim_example.tar.gz <span style=\"color: #3a3a3a; text-decoration-color: #3a3a3a\">\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501</span> <span style=\"color: #008000; text-decoration-color: #008000\">0.0/557.9 kB</span> <span style=\"color: #008080; text-decoration-color: #008080\">-:--:--</span></pre>\n"}}], "tabbable": null, "tooltip": null}}, "1e0021beb85a4852aca1539556aa634d": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "cf789b63684c40429e22bad4c0ad408a": {"model_name": "OutputModel", "model_module": "@jupyter-widgets/output", "model_module_version": "1.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/output", "_model_module_version": "1.0.0", "_model_name": "OutputModel", "_view_count": null, "_view_module": "@jupyter-widgets/output", "_view_module_version": "1.0.0", "_view_name": "OutputView", "layout": "IPY_MODEL_1e0021beb85a4852aca1539556aa634d", "msg_id": "", "outputs": [{"output_type": "display_data", "metadata": {}, "data": {"text/plain": "Downloading gosat-fts_gosat_20160101_ch4-column.nc.tar.gz \u001b[38;5;237m\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u001b[0m \u001b[32m0.0/21.5 kB\u001b[0m \u001b[36m-:--:--\u001b[0m\nDownloading gosat-fts_gosat_20160101_ch4-column.nc.tar.gz \u001b[38;5;237m\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u001b[0m \u001b[32m0.0/21.5 kB\u001b[0m \u001b[36m-:--:--\u001b[0m", "text/html": "<pre style=\"white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace\">Downloading gosat-fts_gosat_20160101_ch4-column.nc.tar.gz <span style=\"color: #3a3a3a; text-decoration-color: #3a3a3a\">\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501</span> <span style=\"color: #008000; text-decoration-color: #008000\">0.0/21.5 kB</span> <span style=\"color: #008080; text-decoration-color: #008080\">-:--:--</span>\nDownloading gosat-fts_gosat_20160101_ch4-column.nc.tar.gz <span style=\"color: #3a3a3a; text-decoration-color: #3a3a3a\">\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501</span> <span style=\"color: #008000; text-decoration-color: #008000\">0.0/21.5 kB</span> <span style=\"color: #008080; text-decoration-color: #008080\">-:--:--</span></pre>\n"}}], "tabbable": null, "tooltip": null}}, "2440cb42a9dd445391aaf5b89051af48": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "1a1a13f5298549ceba75f4cd6a5a684e": {"model_name": "OutputModel", "model_module": "@jupyter-widgets/output", "model_module_version": "1.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/output", "_model_module_version": "1.0.0", "_model_name": "OutputModel", "_view_count": null, "_view_module": "@jupyter-widgets/output", "_view_module_version": "1.0.0", "_view_name": "OutputView", "layout": "IPY_MODEL_2440cb42a9dd445391aaf5b89051af48", "msg_id": "", "outputs": [{"output_type": "display_data", "metadata": {}, "data": {"text/plain": "Downloading decc-picarro_co2.tar.gz \u001b[38;5;237m\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u001b[0m \u001b[32m0.0/30.7 kB\u001b[0m \u001b[36m-:--:--\u001b[0m\nDownloading decc-picarro_co2.tar.gz \u001b[38;5;237m\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u001b[0m \u001b[32m0.0/30.7 kB\u001b[0m \u001b[36m-:--:--\u001b[0m", "text/html": "<pre style=\"white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace\">Downloading decc-picarro_co2.tar.gz <span style=\"color: #3a3a3a; text-decoration-color: #3a3a3a\">\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501</span> <span style=\"color: #008000; text-decoration-color: #008000\">0.0/30.7 kB</span> <span style=\"color: #008080; text-decoration-color: #008080\">-:--:--</span>\nDownloading decc-picarro_co2.tar.gz <span style=\"color: #3a3a3a; text-decoration-color: #3a3a3a\">\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501</span> <span style=\"color: #008000; text-decoration-color: #008000\">0.0/30.7 kB</span> <span style=\"color: #008080; text-decoration-color: #008080\">-:--:--</span></pre>\n"}}], "tabbable": null, "tooltip": null}}}, "version_major": 2, "version_minor": 0}
 </script>
 
 
 
-                </article>
+              </div>
               
               
-              
-              
-              
-                <footer class="prev-next-footer">
-                  
-<div class="prev-next-area">
-    <a class="left-prev"
-       href="../../index.html"
-       title="previous page">
-      <i class="fa-solid fa-angle-left"></i>
-      <div class="prev-next-info">
-        <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Tutorials</p>
-      </div>
+              <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+    <a class='left-prev' id="prev-link" href="../../index.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">Tutorials</p>
+        </div>
     </a>
-    <a class="right-next"
-       href="Adding_ancillary_data.html"
-       title="next page">
-      <div class="prev-next-info">
+    <a class='right-next' id="next-link" href="Adding_ancillary_data.html" title="next page">
+    <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
         <p class="prev-next-title">Adding ancillary spatial data</p>
-      </div>
-      <i class="fa-solid fa-angle-right"></i>
+    </div>
+    <i class="fas fa-angle-right"></i>
     </a>
 </div>
-                </footer>
               
-            </div>
-            
-            
-              
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+          </main>
+          
 
-
-  <div class="sidebar-secondary-item">
-<div
-    id="pst-page-navigation-heading-2"
-    class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> On this page
-  </div>
-  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-an-object-store">What is an object store?</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-the-tutorial-object-store">0. Using the tutorial object store</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adding-and-standardising-data">1. Adding and standardising data</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adding-and-standardising-surface-data">Adding and standardising surface data</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#source-formats">Source formats</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#decc-network">DECC network</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#agage-data">AGAGE data</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#note-on-datasources">Note on Datasources</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#other-keywords">Other keywords</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#informational-keywords">Informational keywords</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#using-the-tag-keyword">Using the <em class="xref py py-obj">tag</em> keyword</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#adding-informational-keys">Adding informational keys</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#multiple-stores">Multiple stores</a></li>
-</ul>
-</li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adding-and-standardising-column-data">Adding and standardising column data</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adding-in-memory-dataset-to-the-object-store">Adding In-memory dataset to the object store</a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#searching-for-data">2. Searching for data</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#searching-the-object-store">Searching the object store</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#searching-by-tag-keyword">Searching by <em class="xref py py-obj">tag</em> keyword</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#quickly-retrieve-data">Quickly retrieve data</a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#retrieving-data">3. Retrieving data</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cleanup">4. Cleanup</a></li>
-</ul>
-  </nav></div>
-
-</div></div>
-              
-            
-          </div>
-          <footer class="bd-footer-content">
-            
-          </footer>
-        
-      </main>
+      </div>
     </div>
-  </div>
   
-  <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
-<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
-
-  <footer class="bd-footer">
-<div class="bd-footer__inner bd-page-width">
-  
-    <div class="footer-items__start">
-      
-        <div class="footer-item">
-
-  <p class="copyright">
+    <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+  <footer class="footer mt-5 mt-md-0">
+  <div class="container">
     
-      © Copyright 2024 OpenGHG development team.
-      <br/>
+    <div class="footer-item">
+      <p class="copyright">
+    &copy; Copyright 2024 OpenGHG development team.<br>
+</p>
+    </div>
     
-  </p>
-</div>
-      
+    <div class="footer-item">
+      <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 8.2.3.<br>
+</p>
     </div>
-  
-  
-  
-    <div class="footer-items__end">
-      
-        <div class="footer-item">
-<p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.2.
-</p></div>
-      
-    </div>
-  
-</div>
-
-  </footer>
+    
+  </div>
+</footer>
   </body>
 </html>
