@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.18.0...HEAD)
 
+### Fixed
+- Added a dimension dtype checker for H_back dimension to "timedelta64[ns]". Bug occured for dimension "resolution" and dtype "resolution".[PR #1671](https://github.com/openghg/openghg/pull/1671)
+
 ## [0.19.0] - 2026-06-11
 
 ### Fixed
