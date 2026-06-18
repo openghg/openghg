@@ -1,15 +1,19 @@
+from __future__ import annotations
+
 from datetime import date
+from itertools import pairwise
 import logging
 from math import isnan
 import re
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
 from pandas import DataFrame, DateOffset, DatetimeIndex, Timedelta, Timestamp
-from xarray import DataArray, Dataset
 
-from openghg.types import TimePeriod
-from ._util import pairwise
+if TYPE_CHECKING:
+    from openghg.types import TimePeriod
+    from xarray import DataArray, Dataset
 
 __all__ = [
     "timestamp_tzaware",
@@ -664,6 +668,8 @@ def parse_period(period: str | tuple) -> TimePeriod:
         >>> parse_period((1, "minute"))
             TimePeriod(1, "minutes")
     """
+    from openghg.types import TimePeriod
+
     if isinstance(period, tuple):
         if len(period) != 2:
             raise ValueError(

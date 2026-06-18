@@ -3,6 +3,7 @@ import datetime
 import numpy as np
 import pandas as pd
 import pytest
+import xarray as xr
 from helpers import call_function_packager
 from openghg.dataobjects import ObsData
 from openghg.retrieve import (
@@ -13,6 +14,7 @@ from openghg.retrieve import (
     get_obs_surface,
     search,
 )
+from openghg.retrieve._access import _sanitise_negative_uncertainties
 from openghg.types import SearchError
 from openghg.util import compress, compress_str, hash_bytes
 from pandas import Timedelta, Timestamp
@@ -506,3 +508,51 @@ def test_get_obs_convert_calibration_scale():
     assert "CSIRO-94" == result.data["mf_variability"].attrs["calibration_scale"]
     assert "calibration_scale" not in result.data["inlet"].attrs
     assert "CSIRO-94" in result.metadata["calibration_scale"]
+
+
+def test_sanitise_negative_uncertainties_converts_negative_to_nan():
+    """Test that negative values in repeatability/variability variables are replaced with NaN."""
+    times = pd.date_range("2020-01-01", periods=3, freq="h")
+    ds = xr.Dataset(
+        {
+            "ch4": ("time", [1.8e-6, 1.9e-6, 2.0e-6]),
+            "ch4_repeatability": ("time", [-9.99e-9, 1.5e-9, 2.0e-9]),
+            "ch4_variability": ("time", [-9.99e-9, -9.99e-9, -9.99e-9]),
+            "quality_flag": ("time", [np.nan, np.nan, np.nan]),
+        },
+        coords={"time": times},
+    )
+    surface_keywords: dict = {}
+
+    result = _sanitise_negative_uncertainties(ds, surface_keywords)
+
+    # Negative repeatability value replaced with NaN; positive values kept
+    assert np.isnan(result["ch4_repeatability"].values[0])
+    assert not np.isnan(result["ch4_repeatability"].values[1])
+    assert not np.isnan(result["ch4_repeatability"].values[2])
+
+    # ch4_variability was entirely negative so it should be dropped
+    assert "ch4_variability" not in result.data_vars
+    assert "quality_flag" in result.data_vars
+
+    # The main species variable should be unchanged
+    np.testing.assert_array_equal(result["ch4"].values, ds["ch4"].values)
+
+
+def test_sanitise_negative_uncertainties_no_negative_values():
+    """Test that non-negative uncertainty values are left unchanged."""
+    times = pd.date_range("2020-01-01", periods=3, freq="h")
+    ds = xr.Dataset(
+        {
+            "ch4": ("time", [1.8e-6, 1.9e-6, 2.0e-6]),
+            "ch4_repeatability": ("time", [1.0e-9, 1.5e-9, 2.0e-9]),
+        },
+        coords={"time": times},
+    )
+    surface_keywords: dict = {}
+
+    result = _sanitise_negative_uncertainties(ds, surface_keywords)
+
+    # All values should be unchanged (no negatives to replace)
+    np.testing.assert_array_equal(result["ch4_repeatability"].values, ds["ch4_repeatability"].values)
+    assert "ch4_repeatability" in result.data_vars

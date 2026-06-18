@@ -22,7 +22,7 @@ First we'll clone the repository and make sure we're on the ``devel`` branch. Th
    cd openghg
    git checkout devel
 
-Next we'll get a virtual environment setup using either ``pip`` or ``conda``.
+Next we'll get a virtual environment setup using ``pixi``, ``pip``, or ``conda``.
 
 Environments
 ------------
@@ -31,6 +31,62 @@ Here we cover the creation of an environment and the installation of OpenGHG int
 We'll install it in developer mode so that any changes you make to the code will automatically be available when you run commands. Similarly, if you
 run a ``git pull`` on the ``devel`` branch all changes made will be available to you straight away, without having to reinstall or update OpenGHG within
 the environment.
+
+``pixi``
+^^^^^^^^
+
+Pixi is the recommended development environment when working with
+NetCDF, HDF5, or Zarr data. It installs the compiled scientific,
+HDF5, and NetCDF stack from ``conda-forge`` and keeps this OpenGHG
+checkout editable.
+
+Install Pixi directly with one of the following commands.
+
+On macOS or Linux, use the official installer:
+
+.. code-block:: bash
+
+   curl -fsSL https://pixi.sh/install.sh | sh
+
+If ``curl`` is unavailable, use ``wget``:
+
+.. code-block:: bash
+
+   wget -qO- https://pixi.sh/install.sh | sh
+
+On macOS with Homebrew:
+
+.. code-block:: bash
+
+   brew install pixi
+
+Then create the editable OpenGHG development environment from this
+checkout:
+
+.. code-block:: bash
+
+   pixi install -e dev
+   pixi run -e dev python -c "import openghg, h5py, h5netcdf, netCDF4, xarray, zarr"
+
+Useful development commands:
+
+.. code-block:: bash
+
+   pixi run -e dev test
+   pixi run -e dev test-storage
+   pixi run -e dev lint
+   pixi run -e dev typecheck
+
+Avoid running commands such as ``pip install -U h5py h5netcdf netcdf4``
+inside the Pixi environment. That can replace Pixi's conda-forge
+HDF5/NetCDF packages with PyPI wheels and reintroduce binary
+incompatibilities.
+
+OpenGHG should now be installed, you can check this by opening ``ipython`` and running
+
+.. code-block:: ipython
+
+   In [1]: import openghg
 
 ``pip``
 ^^^^^^^
@@ -217,12 +273,60 @@ exposed to the Python help system.
 * Each module file contains an ``__all__`` variable that lists the
   specific items that should be imported.
 
-* The package ``__init__.py`` can be used to safely expose the required
-  functionality to the user with:
+* Import-heavy package ``__init__.py`` files should expose public names
+  lazily. Keep the public names in ``__all__`` and add a matching
+  ``_EXPORTS`` mapping from each public name to the private implementation
+  module that defines it:
 
 .. code-block:: python
 
-   from module import function_a, function_b
+   from importlib import import_module
+   from typing import Any
+
+   __all__ = ["function_a", "ClassB"]
+
+   _EXPORTS = {
+       "function_a": "._module_a",
+       "ClassB": "._module_b",
+   }
+
+   def __getattr__(name: str) -> Any:
+       try:
+           module_name = _EXPORTS[name]
+       except KeyError as exc:
+           raise AttributeError(f"module {__name__!r} has no attribute {name!r}") from exc
+
+       value = getattr(import_module(module_name, __name__), name)
+       globals()[name] = value
+       return value
+
+   def __dir__() -> list[str]:
+       return sorted(__all__)
+
+The invariant is ``set(__all__) == set(_EXPORTS)``. Tests should enforce
+this for each package using the lazy export pattern.
+
+Packages using this pattern must also include a sibling ``__init__.pyi``
+stub that re-exports the same public names from their implementation
+modules. The runtime ``__getattr__`` necessarily returns ``Any``, and the
+stub keeps ``mypy`` and other static checkers from losing the real function
+and class types while preserving lazy runtime imports.
+
+* The top-level ``openghg`` package uses the same idea for subpackages:
+  subpackages are listed in ``__all__`` and imported only when first
+  accessed.
+
+* Do not rely on importing a package ``__init__.py`` to trigger subclass
+  registration, xarray accessor registration, or other implementation-module
+  side effects. Discovery that must work before implementation modules are
+  imported should use declarative metadata instead. For example, store data
+  type discovery is maintained in ``openghg.store.spec`` rather than by
+  eagerly importing every store class.
+
+* If a previous import-time side effect is still useful, provide an explicit
+  opt-in helper rather than restoring the eager import. For example,
+  ``openghg.enable_pint_xarray()`` imports ``pint_xarray`` and registers the
+  xarray ``.pint`` accessor without making ``import openghg`` import xarray.
 
 This results in a clean API and documentation, with all extraneous information,
 e.g. external modules, hidden from the user. This is important when working

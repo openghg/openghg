@@ -6,7 +6,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 from types import TracebackType
-from typing import Any, TypeVar
+from typing import Any, TypeVar, cast
 from collections.abc import MutableSequence, Sequence, Callable
 import warnings
 
@@ -17,14 +17,17 @@ from xarray import Dataset
 from openghg.objectstore import get_object_from_json, exists, set_object_from_json
 from openghg.objectstore import locking_object_store
 from openghg.store._data_schema import DataSchema
-from openghg.store.storage import ChunkingSchema, chunk_size_in_megabytes
+from openghg.storage import ChunkingSchema, chunk_size_in_megabytes
 from openghg.types import (
     DatasourceLookupError,
     StandardiseError,
     ValidationError,
     MetadataAndData,
 )
-from openghg.util import timestamp_now, to_lowercase, hash_file, normalise_to_filepath_list
+from openghg.util._hashing import hash_file
+from openghg.util._strings import to_lowercase
+from openghg.util._time import timestamp_now
+from openghg.util._util import normalise_to_filepath_list
 
 from .._metakeys_config import get_metakeys
 
@@ -62,13 +65,26 @@ class BaseStore:
         # self._metastore = DataClassMetaStore(bucket=bucket, data_type=self._data_type)
         self._objectstore = locking_object_store(bucket=bucket, data_type=self._data_type)
         self._bucket = bucket
-        self._datasource_uuids = self._objectstore.get_uuids()
+        self._datasource_uuids = cast(list[str], self._objectstore.get_uuids())
 
     def __init_subclass__(cls) -> None:
         if cls._data_type == "":
             raise ClassDefinitionError(
                 f"Subclass {cls.__name__} of `BaseStore` must set the `_data_type` attribute."
             )
+
+        try:
+            from openghg.store.spec import get_data_type_class_target
+
+            builtin_module, builtin_class = get_data_type_class_target(cls._data_type)
+        except ValueError:
+            pass
+        else:
+            if (cls.__module__, cls.__name__) != (builtin_module, builtin_class):
+                raise ClassDefinitionError(
+                    f"Subclass {cls.__name__} uses reserved built-in `_data_type` {cls._data_type}. Please set a unique data type."
+                )
+
         if cls._data_type in BaseStore._registry:
             raise ClassDefinitionError(
                 f"Subclass {BaseStore._registry[cls._data_type]} already uses `_data_type` {cls._data_type}. Please set a unique data type."
@@ -237,6 +253,7 @@ class BaseStore:
             filters=filters,
         )
 
+        filepaths: list[Path] | Path | None = None
         if filepath is not None:
             filepaths = normalise_to_filepath_list(filepath)
         else:
@@ -548,7 +565,7 @@ class BaseStore:
                 if isinstance(filepaths, list):
                     msg = f"Unable to validate and store data from grouped files: {', '.join([fp.name for fp in filepaths])}. Error: {err}"
                 elif isinstance(filepaths, Path):
-                    msg = f"Unable to validate and store data from file: {filepath.name}. Error: {err}"
+                    msg = f"Unable to validate and store data from file: {filepaths.name}. Error: {err}"
                 else:
                     msg = f"Unable to validate and store supplied data. Error: {err}"
                 logger.error(msg)
@@ -577,7 +594,7 @@ class BaseStore:
         """
         Extract the expected inputs for the schema method.
         """
-        from openghg.util import get_parameters
+        from openghg.util._registry import get_parameters
 
         fn = self.schema
         inputs = get_parameters(fn)
@@ -588,7 +605,7 @@ class BaseStore:
         """
         Extract the expected inputs for the chunking_schema method.
         """
-        from openghg.util import get_parameters
+        from openghg.util._registry import get_parameters
 
         fn = self.chunking_schema
         inputs = get_parameters(fn)
