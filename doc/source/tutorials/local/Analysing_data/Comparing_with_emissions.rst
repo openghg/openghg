@@ -32,6 +32,9 @@ Omit this step if you want to analyse data in your local object store.
 
 .. jupyter-execute::
 
+    %matplotlib inline
+    import matplotlib.pyplot as plt
+
     import plotly.io as pio
     pio.renderers.default = "notebook_connected"
 
