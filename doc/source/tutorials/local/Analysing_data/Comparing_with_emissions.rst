@@ -234,6 +234,10 @@ default to allow comparison:
 
     scenario.plot_comparison()
 
+    .. scenario.plot_comparison(save_path="./scenario_comparison.html")
+
+The saved HTML file is self-contained and can be opened in any web browser. It preserves all interactivity — you can hover for values, zoom, pan, and toggle traces on/off.
+
 The ``ModelScenario.footprints_data_merge()`` method can also be used to
 created a combined output, with all aligned data stored directly within
 an ``xarray.Dataset``:
