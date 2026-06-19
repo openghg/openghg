@@ -30,6 +30,12 @@ Omit this step if you want to analyse data in your local object store.
 (This data needs to be added following the instructions in the
 :ref:`previous <Adding observation data>` :ref:`tutorials <Adding ancillary spatial data>`.)
 
+.. jupyter-execute::
+
+    import plotly.io as pio
+    pio.renderers.default = "notebook_connected"
+
+For rendering the interactive plots in this tutorial, we will use the ``notebook_connected`` renderer. This allows the interactive plots to be displayed directly in the notebook.
 
 1. Loading data sources into the object store
 ---------------------------------------------
@@ -215,7 +221,7 @@ This could then be plotted directly using the xarray plotting methods:
 
 .. jupyter-execute::
 
-    modelled_observations.mf_mod.plot()  # Can plot using xarray plotting methods
+    modelled_observations.mf_mod.plot.scatter(x="time", y="mf_mod")  # Can plot using xarray plotting methods
 
 The modelled baseline, based on the linked boundary conditions, can also
 be calculated in a similar way:
@@ -223,7 +229,7 @@ be calculated in a similar way:
 .. jupyter-execute::
 
     modelled_baseline = scenario.calc_modelled_baseline()
-    modelled_baseline.bc_mod.plot()  # Can plot using xarray plotting methods
+    modelled_baseline.bc_mod.plot.scatter(x="time", y="bc_mod")  # Can plot using xarray plotting methods
 
 To compare these modelled observations to the observations
 themselves, the ``ModelScenario.plot_comparison()`` method can be used.
@@ -234,9 +240,14 @@ default to allow comparison:
 
     scenario.plot_comparison()
 
-    .. scenario.plot_comparison(save_path="./scenario_comparison.html")
+.. note::
+   The ``ModelScenario.plot_comparison()`` method can also be used to save
+   the output as an interactive HTML file or other acceptable formats. This is done by specifying a
+   ``save_path`` input. For example:
 
-The saved HTML file is self-contained and can be opened in any web browser. It preserves all interactivity — you can hover for values, zoom, pan, and toggle traces on/off.
+       `scenario.plot_comparison(save_path="./scenario_comparison.html")`
+
+        The saved HTML file is self-contained and can be opened in any web browser. It preserves all interactivity — you can hover for values, zoom, pan, and toggle traces on/off.
 
 The ``ModelScenario.footprints_data_merge()`` method can also be used to
 created a combined output, with all aligned data stored directly within
@@ -261,7 +272,7 @@ aliases):
 .. jupyter-execute::
 
     modelled_observations_daily = scenario.calc_modelled_obs(resample_to="1D")
-    modelled_observations_daily.mf_mod.plot()
+    modelled_observations_daily.mf_mod.plot.scatter(x="time", y="mf_mod")
 
 Explicit resampling of the data can be also be skipped by using a ``resample_to`` input
 of ``None``. This will align the footprints to the observations by forward filling the
@@ -270,7 +281,7 @@ footprint values. Note: using ``platform="flask"`` will turn on this option as w
 .. jupyter-execute::
 
     modelled_observations_align = scenario.calc_modelled_obs(resample_to=None)
-    modelled_observations_align.mf_mod.plot()
+    modelled_observations_align.mf_mod.plot.scatter(x="time", y="mf_mod")
 
 To allow comparisons with multiple flux sources, more than one flux
 source can be linked to your ``ModelScenario``. This can be either be
@@ -293,7 +304,7 @@ Output for individual sources can also be created by specifying the
 
     # Included recalculate option to ensure this is updated from cached data.
     modelled_obs_energyprod = scenario.calc_modelled_obs(sources="energyprod", recalculate=True)
-    modelled_obs_energyprod.mf_mod.plot()
+    modelled_obs_energyprod.mf_mod.plot.scatter(x="time", y="mf_mod")
 
 *Plotting functions to be added for 2D / 3D data*
 

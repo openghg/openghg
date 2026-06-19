@@ -25,6 +25,13 @@ tutorial object store to avoid cluttering your personal object store.
 
 Omit this step if you're analysing data in your local object store.
 
+.. jupyter-execute::
+
+    import plotly.io as pio
+    pio.renderers.default = "notebook_connected"
+
+For rendering the interactive plots in this tutorial, we will use the ``notebook_connected`` renderer. This allows the interactive plots to be displayed directly in the notebook.
+
 1. Loading data sources into the object store
 ---------------------------------------------
 
@@ -62,7 +69,7 @@ We can now create a ``ModelScenario`` linking satellite observations with ancill
                    platform="satellite",
                    max_level=3,
                    domain="southamerica",
-                   obs_region="brazil"
+                   obs_region="brazil",
                    source="all")
 
 Using these keywords, this will search the object store and attempt to collect and attach observation(satellite), footprint(satellite), flux and boundary conditions data. This collected data will be attached to your created ModelScenario. For the observations this will be stored as the ModelScenario.obs attribute. This will be an ObsColumnData object which contains metadata and data for your observations.
@@ -179,7 +186,7 @@ This could then be plotted directly using the xarray plotting methods:
 
 .. jupyter-execute::
 
-    modelled_observations.plot()  # Can plot using xarray plotting methods
+    modelled_observations.plot.scatter(x="time", y="mf_mod")  # Can plot using xarray plotting methods
 
 The modelled baseline, based on the linked boundary conditions, can also
 be calculated in a similar way:
@@ -187,7 +194,7 @@ be calculated in a similar way:
 .. jupyter-execute::
 
     modelled_baseline = scenario.calc_modelled_baseline()
-    modelled_baseline.plot()  # Can plot using xarray plotting methods
+    modelled_baseline.plot.scatter(x="time", y="bc_mod")  # Can plot using xarray plotting methods
 
 To compare these modelled observations to the observations
 themselves, the ``ModelScenario.plot_comparison()`` method can be used.
@@ -196,7 +203,7 @@ default to allow comparison:
 
 .. jupyter-execute::
 
-    scenario.plot_comparison()
+    scenario.plot_comparison(save_path="./scenario_comparison.html")
 
 The ``ModelScenario.footprints_data_merge()`` method can also be used to
 created a combined output, with all aligned data stored directly within
@@ -221,7 +228,7 @@ aliases):
 .. jupyter-execute::
 
     modelled_observations_daily = scenario.calc_modelled_obs(resample_to="1D")
-    modelled_observations_daily.plot()
+    modelled_observations_daily.plot.scatter(x="time", y="mf_mod")
 
 Explicit resampling of the data can be also be skipped by using a ``resample_to`` input
 of ``None``. This will align the footprints to the observations by forward filling the
@@ -230,7 +237,7 @@ footprint values. Note: using ``platform="flask"`` will turn on this option as w
 .. jupyter-execute::
 
     modelled_observations_align = scenario.calc_modelled_obs(resample_to=None)
-    modelled_observations_align.plot()
+    modelled_observations_align.plot.scatter(x="time", y="mf_mod")
 
 To allow comparisons with multiple flux sources, more than one flux
 source can be linked to your ``ModelScenario``. This can be either be
@@ -244,8 +251,7 @@ time and stacked to create a total output:
 
 .. jupyter-execute::
 
-    scenario.plot_comparison()
-    .. scenario.plot_comparison(save_path="./scenario_comparison.html")
+    scenario.plot_comparison(save_path="./scenario_comparison_multiple_sources.html")
 
 The saved HTML file is self-contained and can be opened in any web browser. It preserves all interactivity — you can hover for values, zoom, pan, and toggle traces on/off.
 
@@ -256,7 +262,7 @@ Output for individual sources can also be created by specifying the
 
     # Included recalculate option to ensure this is updated from cached data.
     modelled_obs_anthro = scenario.calc_modelled_obs(sources="anthro", recalculate=True)
-    modelled_obs_anthro.plot()
+    modelled_obs_anthro.plot.scatter(x="time", y="mf_mod")
 
 
 Note: units are automatically aligned for satellite data, as in the "Working with units" section of :ref:`Comparing observations to emissions`.
