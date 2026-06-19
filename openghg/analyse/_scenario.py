@@ -1495,6 +1495,9 @@ class ModelScenario:
             platform: Observation platform used to decide whether to resample e.g. "satellite", "insitu", "flask"
             cache: Cache this data after calculation. Default = True.
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
+            save_path: Path to save the figure. If None, the figure will not be saved.
+            save_kwargs: Additional keyword arguments to pass to the save function. These will be passed to the plotly write_html or write_image functions depending on the file extension of save_path.
+            example: width=1000, height=600, scale=2,
 
         Returns:
             Plotly Figure
