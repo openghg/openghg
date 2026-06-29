@@ -77,7 +77,9 @@ def parse_paris(
 
     fp_data = xr_open_fn(filepath)
 
-    time_resolved = check_species_time_resolved(species, time_resolved)
+    #time_resolved = check_species_time_resolved(species, time_resolved)
+    if time_resolved is not False:
+        time_resolved = check_species_time_resolved(species, time_resolved)
     short_lifetime = check_species_lifetime(species, short_lifetime)
 
     # Mapping NAME 2025 processed footprint variables to pre-2025
@@ -99,6 +101,16 @@ def parse_paris(
         dv_rename["srr_time_resolved"] = "fp_time_resolved"
         dv_rename["srr_residual"] = "fp_residual"
         dim_rename["resolution"] = "H_back"
+    # delete unecessary notification when set the time_resolved as false
+    else:
+        drop_vars = [v for v in ["srr_time_resolved", "srr_residual"] if v in fp_data]
+        if drop_vars:
+            fp_data = fp_data.drop_vars(drop_vars)
+        if "resolution" in fp_data.dims:
+            if fp_data.sizes["resolution"] == 1:
+                fp_data = fp_data.squeeze("resolution", drop=True)
+            else:
+                fp_data = fp_data.drop_dims("resolution")
 
     try:
         # Ignore type - dv_rename type should be fine as a dict but mypy unhappy.

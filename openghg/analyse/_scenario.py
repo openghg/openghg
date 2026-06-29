@@ -1073,6 +1073,7 @@ class ModelScenario:
         output_fp_x_flux: bool = False,
         split_by_sectors: bool = False,
         output_units: float | str | None = None,
+        use_low_freq_flux: bool = False,
     ) -> Dataset:
         """Calculate the modelled observation points based on site footprint and fluxes.
 
@@ -1117,11 +1118,17 @@ class ModelScenario:
         # Check species and use high time resolution steps if this is carbon dioxide
         if self.species == "co2":
             modelled_obs = self._calc_modelled_obs_HiTRes(
-                sources=sources, output_TS=True, output_fpXflux=output_fp_x_flux
+                sources=sources,
+                output_TS=True,
+                output_fpXflux=output_fp_x_flux,
+                use_low_freq_flux=use_low_freq_flux,
             )
         else:
             modelled_obs = self._calc_modelled_obs_integrated(
-                sources=sources, output_TS=True, output_fpXflux=output_fp_x_flux
+                sources=sources,
+                output_TS=True,
+                output_fpXflux=output_fp_x_flux,
+                use_low_freq_flux=use_low_freq_flux,
             )
 
         # calculate sectoral modelled mf and fp_x_flux
@@ -1137,6 +1144,8 @@ class ModelScenario:
                         ts_name="mf_mod_high_res_sectoral",
                         output_fpXflux=output_fp_x_flux,
                         fp_x_flux_name="fp_x_flux_sectoral",
+                        use_low_freq_flux=use_low_freq_flux,
+                        
                     )
                 else:
                     mod_obs = self._calc_modelled_obs_integrated(
@@ -1145,6 +1154,7 @@ class ModelScenario:
                         ts_name="mf_mod_sectoral",
                         output_fpXflux=output_fp_x_flux,
                         fp_x_flux_name="fp_x_flux_sectoral",
+                        use_low_freq_flux=use_low_freq_flux,
                     )
                 mod_obs = mod_obs.expand_dims({"source": [source]})
                 sectoral_datasets.append(mod_obs)
@@ -1174,6 +1184,7 @@ class ModelScenario:
         ts_name: str = "mf_mod",
         output_fpXflux: bool = False,
         fp_x_flux_name: str = "fp_x_flux",
+        use_low_freq_flux: bool = False,
     ) -> Dataset:
         """Calculate modelled mole fraction timeseries using integrated footprints data.
 
@@ -1201,8 +1212,8 @@ class ModelScenario:
         scenario = self.scenario
 
         flux = self.combine_flux_sources(sources)
-        flux_modelled = fp_x_flux_integrated(scenario, flux)
-
+        #flux_modelled = fp_x_flux_integrated(scenario, flux)
+        flux_modelled = fp_x_flux_integrated(scenario, flux, use_low_freq_flux=use_low_freq_flux)
         data = {}
 
         if output_TS:
@@ -1220,6 +1231,7 @@ class ModelScenario:
         ts_name: str = "mf_mod_high_res",
         output_fpXflux: bool = False,
         fp_x_flux_name: str = "fp_x_flux",
+        use_low_freq_flux: bool = False,
     ) -> Dataset:
         """Calculate modelled mole fraction timeseries using high time resolution
         footprints data and emissions data. This is appropriate for time variable
@@ -1271,10 +1283,14 @@ class ModelScenario:
             fp = self.scenario.fp_HiTRes
         elif "fp_time_resolved" in self.scenario.data_vars:
             fp = self.scenario[["fp_time_resolved", "fp_residual"]]
+        #for INT mode wiith species of CO2
         else:
             return self._calc_modelled_obs_integrated(
-        sources=sources, output_TS=output_TS, output_fpXflux=output_fpXflux
-    )
+                sources=sources,
+                output_TS=output_TS,
+                output_fpXflux=output_fpXflux,
+                use_low_freq_flux=use_low_freq_flux,
+            )
 
         flux_ds = self.combine_flux_sources(sources)
 
@@ -1388,6 +1404,7 @@ class ModelScenario:
         cache: bool = True,
         recalculate: bool = False,
         output_units: str | float | None = None,
+        use_low_freq_flux: bool = False,
     ) -> Dataset:
         """Produce combined object containing aligned footprint and observation data.
         Can also include modelled timeseries data derived from flux.
@@ -1426,6 +1443,7 @@ class ModelScenario:
                 recalculate=recalculate,
                 output_fp_x_flux=calc_fp_x_flux,
                 split_by_sectors=split_by_sectors,
+                use_low_freq_flux=use_low_freq_flux,
             )
 
             combined_dataset = combined_dataset.merge(modelled_obs)

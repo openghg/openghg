@@ -261,7 +261,13 @@ class Footprints(BaseStore):
         # - check time_resolved and short_lifetime values are appropriate for species
         time_resolved = params.get("time_resolved", False)
         short_lifetime = params.get("short_lifetime", False)
-        params["time_resolved"] = check_species_time_resolved(params["species"], time_resolved)
+        # check when user pass True，don't cover when it is False
+        if time_resolved is not False:
+            params["time_resolved"] = check_species_time_resolved(params["species"], time_resolved)
+        else:
+            params["time_resolved"] = False
+        params["short_lifetime"] = check_species_lifetime(params["species"], short_lifetime)
+        #params["time_resolved"] = check_species_time_resolved(params["species"], time_resolved)
         params["short_lifetime"] = check_species_lifetime(params["species"], short_lifetime)
 
         if params.get("time_resolved") and params.get("sort") is True:
