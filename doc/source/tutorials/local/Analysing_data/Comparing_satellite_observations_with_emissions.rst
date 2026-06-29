@@ -17,13 +17,23 @@ Using the tutorial object store
 As in the :ref:`previous tutorials <using-the-tutorial-object-store>`, we will use the
 tutorial object store to avoid cluttering your personal object store.
 
-.. code:: ipython3
+.. jupyter-execute::
 
     from openghg.tutorial import use_tutorial_store
 
     use_tutorial_store()
 
 Omit this step if you're analysing data in your local object store.
+
+.. jupyter-execute::
+
+    %matplotlib inline
+    import matplotlib.pyplot as plt
+
+    import plotly.io as pio
+    pio.renderers.default = "notebook_connected"
+
+For rendering the interactive plots in this tutorial, we will use the ``notebook_connected`` renderer. This allows the interactive plots to be displayed directly in the notebook.
 
 1. Loading data sources into the object store
 ---------------------------------------------
@@ -33,7 +43,7 @@ We begin by adding **satellite observation**, **footprint**, **flux**, and (opti
 
 We'll use helper functions from ``openghg.tutorial`` to populate example data:
 
-.. code:: ipython3
+.. jupyter-execute::
 
     from openghg.tutorial import (
     populate_column_data,
@@ -53,7 +63,7 @@ We'll use helper functions from ``openghg.tutorial`` to populate example data:
 
 We can now create a ``ModelScenario`` linking satellite observations with ancillary inputs.
 
-.. code:: ipython3
+.. jupyter-execute::
 
     from openghg.analyse import ModelScenario
 
@@ -62,12 +72,12 @@ We can now create a ``ModelScenario`` linking satellite observations with ancill
                    platform="satellite",
                    max_level=3,
                    domain="southamerica",
-                   obs_region="brazil"
+                   obs_region="brazil",
                    source="all")
 
 Using these keywords, this will search the object store and attempt to collect and attach observation(satellite), footprint(satellite), flux and boundary conditions data. This collected data will be attached to your created ModelScenario. For the observations this will be stored as the ModelScenario.obs attribute. This will be an ObsColumnData object which contains metadata and data for your observations.
 
-.. code:: ipython3
+.. jupyter-execute::
 
     scenario.obs
 
@@ -80,7 +90,7 @@ To access the undelying xarray Dataset containing the observation data use
 The ``ModelScenario.footprint`` attribute contains the linked
 FootprintData (again, use ``.data`` to extract xarray Dataset):
 
-.. code:: ipython3
+.. jupyter-execute::
 
     scenario.footprint
 
@@ -89,7 +99,7 @@ FluxData. Note that for ``ModelScenario.fluxes`` this can contain
 multiple flux sources and so this is stored as a dictionary linked to
 the source name:
 
-.. code:: ipython3
+.. jupyter-execute::
 
     scenario.fluxes
 
@@ -97,18 +107,18 @@ Finally, this will also search and attempt to add boundary conditions.
 The ``ModelScenario.bc`` attribute can be used to access the
 BoundaryConditionsData if present.
 
-.. code:: ipython3
+.. jupyter-execute::
 
     scenario.bc
 
-.. code:: ipython3
+.. jupyter-execute::
 
     scenario.bc.data.attrs
 
 An interactive plot for the linked observation data can be plotted using
 the ``ModelScenario.plot_timeseries()`` method:
 
-.. code:: ipython3
+.. jupyter-execute::
 
     scenario.plot_timeseries()
 
@@ -116,7 +126,7 @@ You can also set up your own searches and add this data directly.
 One benefit of this interface is to reduce searching the database if the
 same data needs to be used for multiple different scenarios.
 
-.. code:: ipython3
+.. jupyter-execute::
 
     from openghg.retrieve import get_obs_column, get_footprint, get_flux, get_bc
 
@@ -150,7 +160,7 @@ same data needs to be used for multiple different scenarios.
                         bc_input="CAMS",
                         )
 
-.. code:: ipython3
+.. jupyter-execute::
 
     scenario_direct = ModelScenario(obs_column=obs_column_data, footprint=fp_column_data, flux=flux_data, bc=bc_results, platform="satellite", max_level=3)
 
@@ -171,38 +181,38 @@ the linked data to compare outputs. For example we may want to calculate
 modelled observations at our site based on our linked footprint and
 emissions data:
 
-.. code:: ipython3
+.. jupyter-execute::
 
     modelled_observations = scenario.calc_modelled_obs()
 
 This could then be plotted directly using the xarray plotting methods:
 
-.. code:: ipython3
+.. jupyter-execute::
 
-    modelled_observations.plot()  # Can plot using xarray plotting methods
+    modelled_observations.plot.scatter(x="time", y="mf_mod")  # Can plot using xarray plotting methods
 
 The modelled baseline, based on the linked boundary conditions, can also
 be calculated in a similar way:
 
-.. code:: ipython3
+.. jupyter-execute::
 
     modelled_baseline = scenario.calc_modelled_baseline()
-    modelled_baseline.plot()  # Can plot using xarray plotting methods
+    modelled_baseline.plot.scatter(x="time", y="bc_mod")  # Can plot using xarray plotting methods
 
 To compare these modelled observations to the observations
 themselves, the ``ModelScenario.plot_comparison()`` method can be used.
 This will stack the modelled observations and the modelled baseline by
 default to allow comparison:
 
-.. code:: ipython3
+.. jupyter-execute::
 
-    scenario.plot_comparison()
+    scenario.plot_comparison(save_path="./scenario_comparison.html")
 
 The ``ModelScenario.footprints_data_merge()`` method can also be used to
 created a combined output, with all aligned data stored directly within
 an ``xarray.Dataset``:
 
-.. code:: ipython3
+.. jupyter-execute::
 
     combined_dataset = scenario.footprints_data_merge()
     combined_dataset
@@ -218,19 +228,19 @@ observations was required, we could calculate this by setting our
 ``resample_to`` input to ``"1D"`` (matching available pandas time
 aliases):
 
-.. code:: ipython3
+.. jupyter-execute::
 
     modelled_observations_daily = scenario.calc_modelled_obs(resample_to="1D")
-    modelled_observations_daily.plot()
+    modelled_observations_daily.plot.scatter(x="time", y="mf_mod")
 
 Explicit resampling of the data can be also be skipped by using a ``resample_to`` input
 of ``None``. This will align the footprints to the observations by forward filling the
 footprint values. Note: using ``platform="flask"`` will turn on this option as well.
 
-.. code:: ipython3
+.. jupyter-execute::
 
     modelled_observations_align = scenario.calc_modelled_obs(resample_to=None)
-    modelled_observations_align.plot()
+    modelled_observations_align.plot.scatter(x="time", y="mf_mod")
 
 To allow comparisons with multiple flux sources, more than one flux
 source can be linked to your ``ModelScenario``. This can be either be
@@ -238,22 +248,24 @@ done upon creation or can be added using the ``add_flux()`` method. When
 calculating modelled observations, these flux sources will be aligned in
 time and stacked to create a total output:
 
-.. code:: ipython3
+.. jupyter-execute::
 
     scenario.add_flux(species="ch4", domain=domain, source="anthro")
 
-.. code:: ipython3
+.. jupyter-execute::
 
-    scenario.plot_comparison()
+    scenario.plot_comparison(save_path="./scenario_comparison_multiple_sources.html")
+
+The saved HTML file is self-contained and can be opened in any web browser. It preserves all interactivity — you can hover for values, zoom, pan, and toggle traces on/off.
 
 Output for individual sources can also be created by specifying the
 ``sources`` as an input:
 
-.. code:: ipython3
+.. jupyter-execute::
 
     # Included recalculate option to ensure this is updated from cached data.
     modelled_obs_anthro = scenario.calc_modelled_obs(sources="anthro", recalculate=True)
-    modelled_obs_anthro.plot()
+    modelled_obs_anthro.plot.scatter(x="time", y="mf_mod")
 
 
 Note: units are automatically aligned for satellite data, as in the "Working with units" section of :ref:`Comparing observations to emissions`.
@@ -266,10 +278,10 @@ Note: units are automatically aligned for satellite data, as in the "Working wit
 If you're finished with the data in this tutorial you can cleanup the
 tutorial object store using the ``clear_tutorial_store`` function.
 
-.. code:: ipython3
+.. jupyter-execute::
 
     from openghg.tutorial import clear_tutorial_store
 
-.. code:: ipython3
+.. jupyter-execute::
 
     clear_tutorial_store()

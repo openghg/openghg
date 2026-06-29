@@ -8,7 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.18.0...HEAD)
 
 ### Fixed
+
 - Added a dimension dtype checker for H_back dimension to "timedelta64[ns]". Bug occured for dimension "resolution" and dtype "resolution".[PR #1671](https://github.com/openghg/openghg/pull/1671)
+
+### Updated
+
+- Updated the standardisation of AGAGE format data so that rows containing nans are no longer dropped. [PR #1634](https://github.com/openghg/openghg/pull/1634)
+
+### Added
+
+- Added ability to save output of plot_comparison using save_path and ability to pass additional figure modifications.[PR #1672](https://github.com/openghg/openghg/pull/1672)
 
 ## [0.19.0] - 2026-06-11
 
@@ -28,16 +37,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Updated
 
 - Refactored `Datasource` to use `VersionedZarrStore` directly, removed `LocalZarrStore` and `openghg.store.storage`, and moved storage utilities into `openghg.storage`. [PR #1618](https://github.com/openghg/openghg/pull/1618)
+- Updated dependency versions: `black` (26.5.1), `mypy` (2.1.0), `pre-commit` (4.6.0), `filelock` (3.29.0), `h5netcdf` (1.8.1), `msgpack-types` (0.7.0), `rapidfuzz` (3.14.5), `nbsphinx` (0.9.8), `sphinxcontrib-bibtex` (2.7.0), `types-paramiko`, `types-requests` (2.33.0.20260518). Also added a change in dependabot.yml to group all major package version changes into one PR. [PR #1636](https://github.com/openghg/openghg/pull/1636)
 
 ### Added
 
 - Option to set location of openghg log via an environment variable `OPENGHG_LOG_PATH`. [PR #1607](https://github.com/openghg/openghg/pull/1607)
 - Added the ability to standardise GEMINI data using standardise_column.[PR #1501](https://github.com/openghg/openghg/pull/1501)
-
-### Updated
-
-- Updated dependency versions: `black` (26.5.1), `mypy` (2.1.0), `pre-commit` (4.6.0), `filelock` (3.29.0), `h5netcdf` (1.8.1), `msgpack-types` (0.7.0), `rapidfuzz` (3.14.5), `nbsphinx` (0.9.8), `sphinxcontrib-bibtex` (2.7.0), `types-paramiko`, `types-requests` (2.33.0.20260518). Also added a change in dependabot.yml to group all major package version changes into one PR. [PR #1636](https://github.com/openghg/openghg/pull/1636)
-
 
 ## [0.18.0] - 2026-02-18
 
