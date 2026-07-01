@@ -151,7 +151,7 @@ def retrieve_atmospheric(
             # These contain URLs that are case sensitive so skip lowercasing these
             skip_keys = [
                 "citation_string",
-                "instrument_data",
+              #  "instrument_data",
                 "dobj_pid",
                 "dataset_source",
             ]
@@ -300,6 +300,8 @@ def parse_icos_obspack_nc_file(data_info: dict | pd.Series) -> tuple[xr.Dataset,
     # Recast "flag" column to decode bytes and update to same dtype as other data
     dataset["flag"].data = decode(dataset["flag"].astype("bytes_"), "utf-8").astype(object)
 
+    dataset["instrument"] = "combined"
+
     if "south" in dataset["latitude"].attrs["units"]:
         logger.warning(
             "latitude units are in relation to south rathern than north, this may mean the sign on the latitude value should be the opposite."
@@ -320,11 +322,10 @@ def parse_icos_obspack_nc_file(data_info: dict | pd.Series) -> tuple[xr.Dataset,
     dataset["obs_flag"].attrs.pop("units", None)
     dataset["assimilation_concerns"].attrs.pop("units", None)
 
+
     attrs = dataset.attrs
 
-    attrs["instrument"] = "NA"
-    attrs["instrument_data"] = "NA"
-
+    attrs["instrument"] = "combined"
     attrs["measurement_unit"] = units
 
     return dataset, attrs
@@ -450,6 +451,20 @@ def create_icos_attributes(
     # included as a specific value on the appropriate variable.
     attributes["units"] = data_attributes["measurement_unit"]
 
+    attributes["dataset_calibration_scale"] = data_attributes["dataset_calibration_scale"]
+    attributes["dataset_data_frequency"] = data_attributes["dataset_data_frequency"]
+
+    freq_unit = data_attributes["dataset_data_frequency_unit"].lower()
+
+    if freq_unit in ('second', 'seconds'):
+        attributes["sampling_period"] = f"{data_attributes["dataset_data_frequency"]}s"
+
+    elif freq_unit in ('minute', 'minutes'):
+        attributes["sampling_period"] = f"{data_attributes["dataset_data_frequency"]*60}s"
+
+    elif freq_unit in ('hour', 'hours'):
+        attributes["sampling_period"] = f"{data_attributes["dataset_data_frequency"]*3600}s"
+
     if dataset_source == "ICOS Combined":
         attrs_mapping = {
             "sampling_height": "dataset_intake_ht",
@@ -471,7 +486,7 @@ def create_icos_attributes(
             "station_latitude": "latitude",
             "station_longitude": "longitude",
         }
-        remove_attrs = list(attrs_mapping.values())
+        remove_attrs = list(attrs_mapping.values()) 
 
     # Copy across equivalent attributes from downloaded data and apply formatting
     inlet_keys = ["sampling_height", "inlet", "inlet_height_magl", "station_height_masl"]
@@ -495,6 +510,10 @@ def create_icos_attributes(
 
     add_attributes = attributes_requiring_retrieval(species, dobj_uri, station_meta=station_meta)
     attributes.update(add_attributes)
+
+    attributes.pop("instrument_data", None)
+
+    attributes["instrument"] = data_attributes["instrument"]
 
     attributes.update(additional_data)
 
@@ -535,6 +554,10 @@ def create_metadata(
     # Add relevant values from created attributes
     metadata["dataset_source"] = attributes["dataset_source"]
     metadata["species"] = attributes["species"]
+
+    metadata["calibration_scale"] = attributes["dataset_calibration_scale"]
+    metadata["sampling_period"] = attributes["sampling_period"]
+
 
     metadata.update(additional_data)
 
@@ -932,14 +955,12 @@ def _retrieve_remote_dobj(
         to_store: dict[str, Any] = {}
 
         if dataset_source == "ICOS Combined":
-            to_store["instrument"] = "NA"
-            to_store["instrument_data"] = "NA"
+            to_store["instrument"] = "combined"
         else:
             try:
                 instrument_attributes = acq_data["instrument"]
             except KeyError:
-                to_store["instrument"] = "NA"
-                to_store["instrument_data"] = "NA"
+                to_store["instrument"] = "combined"
             else:
                 # Do some tidying of the instrument attributes
                 instruments = set()

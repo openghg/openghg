@@ -13,7 +13,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 unit_mapping = {"1e-6": "ppm", "1e-9": "ppb", "1e-12": "ppt", "1e-15": "ppq", "1e-09": "ppb", "1e-06": "ppm"}
 
 cf_ureg.preprocessors.append(lambda x: "degrees_north" if "degree" and "north" in x.lower() else x)
-cf_ureg.preprocessors.append(lambda x: "degrees_west" if "degree" and "west" in x.lower() else x)
+cf_ureg.preprocessors.append(lambda x: "degrees_east" if "degree" and "east" in x.lower() else x)
 
 # TODO: Consider if degree south and degree east come up change to degrees_north and degrees_west
 # with an inverted sign on the value
