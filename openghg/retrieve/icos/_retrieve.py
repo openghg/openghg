@@ -456,13 +456,13 @@ def create_icos_attributes(
     freq_unit = data_attributes["dataset_data_frequency_unit"].lower()
 
     if freq_unit in ("second", "seconds"):
-        attributes["sampling_period"] = f'{data_attributes["dataset_data_frequency"]}s'
+        attributes["sampling_period"] = str(data_attributes["dataset_data_frequency"])
 
     elif freq_unit in ("minute", "minutes"):
-        attributes["sampling_period"] = f'{data_attributes["dataset_data_frequency"]*60}s'
+        attributes["sampling_period"] = str(data_attributes["dataset_data_frequency"] * 60)
 
     elif freq_unit in ("hour", "hours"):
-        attributes["sampling_period"] = f'{data_attributes["dataset_data_frequency"]*3600}s'
+        attributes["sampling_period"] = str(data_attributes["dataset_data_frequency"] * 3600)
 
     if dataset_source == "ICOS Combined":
         attrs_mapping = {
