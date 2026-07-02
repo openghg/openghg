@@ -151,7 +151,7 @@ def retrieve_atmospheric(
             # These contain URLs that are case sensitive so skip lowercasing these
             skip_keys = [
                 "citation_string",
-              #  "instrument_data",
+                #  "instrument_data",
                 "dobj_pid",
                 "dataset_source",
             ]
@@ -322,7 +322,6 @@ def parse_icos_obspack_nc_file(data_info: dict | pd.Series) -> tuple[xr.Dataset,
     dataset["obs_flag"].attrs.pop("units", None)
     dataset["assimilation_concerns"].attrs.pop("units", None)
 
-
     attrs = dataset.attrs
 
     attrs["instrument"] = "combined"
@@ -456,14 +455,14 @@ def create_icos_attributes(
 
     freq_unit = data_attributes["dataset_data_frequency_unit"].lower()
 
-    if freq_unit in ('second', 'seconds'):
-        attributes["sampling_period"] = f"{data_attributes["dataset_data_frequency"]}s"
+    if freq_unit in ("second", "seconds"):
+        attributes["sampling_period"] = f'{data_attributes["dataset_data_frequency"]}s'
 
-    elif freq_unit in ('minute', 'minutes'):
-        attributes["sampling_period"] = f"{data_attributes["dataset_data_frequency"]*60}s"
+    elif freq_unit in ("minute", "minutes"):
+        attributes["sampling_period"] = f'{data_attributes["dataset_data_frequency"]*60}s'
 
-    elif freq_unit in ('hour', 'hours'):
-        attributes["sampling_period"] = f"{data_attributes["dataset_data_frequency"]*3600}s"
+    elif freq_unit in ("hour", "hours"):
+        attributes["sampling_period"] = f'{data_attributes["dataset_data_frequency"]*3600}s'
 
     if dataset_source == "ICOS Combined":
         attrs_mapping = {
@@ -486,7 +485,7 @@ def create_icos_attributes(
             "station_latitude": "latitude",
             "station_longitude": "longitude",
         }
-        remove_attrs = list(attrs_mapping.values()) 
+        remove_attrs = list(attrs_mapping.values())
 
     # Copy across equivalent attributes from downloaded data and apply formatting
     inlet_keys = ["sampling_height", "inlet", "inlet_height_magl", "station_height_masl"]
@@ -557,7 +556,6 @@ def create_metadata(
 
     metadata["calibration_scale"] = attributes["dataset_calibration_scale"]
     metadata["sampling_period"] = attributes["sampling_period"]
-
 
     metadata.update(additional_data)
 
