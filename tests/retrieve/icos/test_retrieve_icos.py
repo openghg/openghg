@@ -408,7 +408,6 @@ def test_retrieve_icos_standard_compare():
         #ask Joe about file_created as seems to be file_created when using openghg
 
             if at in ['units']:
-                print(data_dobj.attrs[at].replace('µ','u').replace(' mol-1','.mol-¹'))
                 assert data_dobj.attrs[at].replace('µ','u').replace(' mol-1','.mol-¹') == data.attrs[at], f"Attribute {at} mismatch: {data_dobj.attrs[at].replace('µ','u').replace(' mol-1','.mol-¹')} != {data.attrs[at]}"
 
 
