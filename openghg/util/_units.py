@@ -9,6 +9,12 @@ import xarray as xr
 logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
+
+def enable_pint_xarray() -> None:
+    """Import pint_xarray to register the xarray ``.pint`` accessor."""
+    import pint_xarray as _pint_xarray  # noqa: F401
+
+
 # convert scientific notation to volume ratios
 unit_mapping = {"1e-6": "ppm", "1e-9": "ppb", "1e-12": "ppt", "1e-15": "ppq", "1e-09": "ppb", "1e-06": "ppm"}
 

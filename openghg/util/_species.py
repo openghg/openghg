@@ -1,8 +1,9 @@
-import logging
-from typing import Optional, Any
+from __future__ import annotations
 
-from openghg.util import load_json
-from openghg.types import pathType
+import json
+import logging
+from pathlib import Path
+from typing import Any, Optional, cast
 
 __all__ = [
     "get_species_info",
@@ -18,7 +19,7 @@ __all__ = [
 logger = logging.getLogger("openghg.util.species")
 
 
-def get_species_info(species_filepath: pathType | None = None) -> dict[str, Any]:
+def get_species_info(species_filepath: str | Path | None = None) -> dict[str, Any]:
     """Extract data from species info JSON file as a dictionary.
 
     This uses the data stored within openghg_defs/species_info JSON file by default.
@@ -32,14 +33,14 @@ def get_species_info(species_filepath: pathType | None = None) -> dict[str, Any]
 
     fpath = species_info_file if species_filepath is None else species_filepath
 
-    return load_json(path=fpath)
+    return cast(dict[str, Any], json.loads(Path(fpath).read_text()))
 
 
 def synonyms(
     species: str,
     lower: bool = True,
     allow_new_species: bool = True,
-    species_filepath: pathType | None = None,
+    species_filepath: str | Path | None = None,
 ) -> str:
     """Check to see if there are other names that we should be using for
     a particular input. E.g. If CFC-11 or CFC11 was input, go on to use cfc11.
@@ -97,7 +98,7 @@ def synonyms(
 LifetimeType = Optional[str | list[str]]
 
 
-def species_lifetime(species: str | None, species_filepath: pathType | None = None) -> LifetimeType:
+def species_lifetime(species: str | None, species_filepath: str | Path | None = None) -> LifetimeType:
     """Find species lifetime.
     This can either be labelled as "lifetime" or "lifetime_monthly".
 
@@ -196,7 +197,7 @@ def check_species_time_resolved(species: str, time_resolved: bool = False) -> bo
     return time_resolved
 
 
-def molar_mass(species: str, species_filepath: pathType | None = None) -> float:
+def molar_mass(species: str, species_filepath: str | Path | None = None) -> float:
     """Extracts the molar mass of a species.
 
     Args:

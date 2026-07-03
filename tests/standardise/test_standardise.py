@@ -1053,13 +1053,13 @@ def test_standardise_agage_using_filepath():
     """
     Test standardisation of AGAGE data using file path input.
     """
-    thd_path = get_surface_datapath(filename="agage_thd_cfc-11_20240703-test.nc", source_format="GC_nc")
+    thd_path = get_surface_datapath(filename="agage-private_thd_cfc-11_20260113-test.nc", source_format="GC_nc")
 
     results = standardise_surface(
         filepath=thd_path,
         site="thd",
         instrument="gcmd",
-        network="AGAGE",
+        network="AGAGE-PRIVATE",
         source_format="AGAGE",
         sampling_period="1s",
         force=True,
@@ -1068,12 +1068,11 @@ def test_standardise_agage_using_filepath():
 
     assert "cfc11" == results[0].get("species")
 
-    retrieved_data = get_obs_surface(site="thd", species="cfc11", source_format="AGAGE", network="AGAGE")
+    retrieved_data = get_obs_surface(site="thd", species="cfc11", source_format="AGAGE", network="AGAGE-PRIVATE")
 
     assert retrieved_data is not None
-    assert retrieved_data is not None
     assert retrieved_data.metadata["instrument"] == "gcmd"
-    assert retrieved_data.metadata["network"] == "agage"
+    assert retrieved_data.metadata["network"] == "agage-private"
     assert retrieved_data.metadata["source_format"] == "AGAGE"
     assert retrieved_data.metadata["site"] == "thd"
 
@@ -1083,14 +1082,14 @@ def test_standardise_agage_using_dataset():
     Test standardisation of AGAGE data using dataset input.
     """
     thd_dataset = xr.open_dataset(
-        get_surface_datapath(filename="agage_thd_cfc-11_20240703-test.nc", source_format="GC_nc")
+        get_surface_datapath(filename="agage-private_thd_cfc-11_20260113-test.nc", source_format="GC_nc")
     )
 
     results = standardise_surface(
         data=thd_dataset,
         site="thd",
         instrument="gcmd",
-        network="AGAGE",
+        network="AGAGE-PRIVATE",
         source_format="AGAGE",
         sampling_period="1s",
         force=True,
@@ -1099,11 +1098,11 @@ def test_standardise_agage_using_dataset():
 
     assert "cfc11" == results[0].get("species")
 
-    retrieved_data = get_obs_surface(site="thd", species="cfc11", source_format="AGAGE", network="AGAGE")
+    retrieved_data = get_obs_surface(site="thd", species="cfc11", source_format="AGAGE", network="AGAGE-PRIVATE")
 
     assert retrieved_data is not None
     assert retrieved_data.metadata["instrument"] == "gcmd"
-    assert retrieved_data.metadata["network"] == "agage"
+    assert retrieved_data.metadata["network"] == "agage-private"
     assert retrieved_data.metadata["source_format"] == "AGAGE"
     assert retrieved_data.metadata["site"] == "thd"
 

@@ -6,7 +6,8 @@ from pathlib import Path
 from typing import cast
 
 from openghg.types import ConfigFileError
-from openghg.util import openghg_data_path, timestamp_now
+from openghg.util._data import openghg_data_path
+from openghg.util._time import timestamp_now
 
 logger = logging.getLogger("openghg.objectstore")
 logger.setLevel(logging.INFO)  # Have to set level for logger as well as handlerF
@@ -46,7 +47,7 @@ def get_metakeys_defaults_filepath() -> Path:
     Returns:
         Path: Path to default metakeys JSON
     """
-    return openghg_data_path() / "config/objectstore/defaults.json"
+    return cast(Path, openghg_data_path() / "config/objectstore/defaults.json")
 
 
 def get_metakey_defaults() -> dict:
@@ -298,13 +299,13 @@ def find_list_metakeys(
     Returns:
         list: Keys which contain a list type.
     """
-    from openghg.store import data_class_info
-
     list_type = "list"
 
     metakeys_dt = []
     if metakeys is None:
         if data_type is None:
+            from openghg.store import data_class_info
+
             data_types = list(data_class_info().keys())
         elif isinstance(data_type, str):
             data_types = [data_type]

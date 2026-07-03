@@ -7,8 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.18.0...HEAD)
 
+### Updated
+
+- Updated the standardisation of AGAGE format data so that rows containing nans are no longer dropped. [PR #1634](https://github.com/openghg/openghg/pull/1634)
+
+### Added
+
+- Added ability to save output of plot_comparison using save_path and ability to pass additional figure modifications.[PR #1672](https://github.com/openghg/openghg/pull/1672)
+
+## [0.19.0] - 2026-06-11
+
 ### Fixed
 
+- Converted negative surface observation uncertainty values to NaN before optional averaging. [PR #1544](https://github.com/openghg/openghg/pull/1544)
 - Updated the value of `atol` and removed `rtol` from `check_coord_alignment` to process 6km file. [PR #1588](https://github.com/openghg/openghg/pull/1588)
 - Fixed EDGAR parsing for monthly sectoral files by normalising `latitude`/`longitude` coordinates to `lat`/`lon` and raising a clear error when the EDGAR version cannot be inferred from the filename. [PR #1187](https://github.com/openghg/openghg/pull/1187)
 - Updated CAMS boundary-condition transforms to support CO2 vertical coordinates via `height_above_reference_ellipsoid`, pass through the requested domain during interpolation, and correctly parse CAMS filenames with input-observation suffixes such as `surface_inst`. [PR #1601](https://github.com/openghg/openghg/pull/1601)
@@ -17,6 +28,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed "xarray fails to decode time" by using pandas datetime conversion and storing as np.datetime64[ns].[PR #1608](https://github.com/openghg/openghg/pull/1608)
 - Clarified datasource update/versioning behavior for `if_exists`, `save_current`, and overlap handling, including fixes for copied-version metadata and non-overlapping combine updates. [PR #1614](https://github.com/openghg/openghg/pull/1614)
 - Fixed handling of irregular fp time reindexing and missing "calibration_scale", also added the ability to detect "mf_mod_high_res"  for plot_comparison.[PR #1611](https://github.com/openghg/openghg/pull/1611)
+- Fixed object store search and retrieve results to include datasource-managed metadata without mutating datasource records, while keeping raw metastore descriptor metadata authoritative. [PR #1652](https://github.com/openghg/openghg/pull/1652)
+
+### Updated
+
+- Refactored `Datasource` to use `VersionedZarrStore` directly, removed `LocalZarrStore` and `openghg.store.storage`, and moved storage utilities into `openghg.storage`. [PR #1618](https://github.com/openghg/openghg/pull/1618)
 
 ### Added
 
