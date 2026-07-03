@@ -21,7 +21,7 @@ unit_mapping = {"1e-6": "ppm", "1e-9": "ppb", "1e-12": "ppt", "1e-15": "ppq", "1
 cf_ureg.preprocessors.append(lambda x: "degrees_north" if "degree" and "north" in x.lower() else x)
 cf_ureg.preprocessors.append(lambda x: "degrees_east" if "degree" and "east" in x.lower() else x)
 
-# TODO: Consider if degree south and degree east come up change to degrees_north and degrees_west
+# TODO: Consider if degree south and degree west come up change to degrees_north and degrees_east
 # with an inverted sign on the value
 
 cf_ureg.preprocessors.append(lambda x: unit_mapping.get(x, x))
