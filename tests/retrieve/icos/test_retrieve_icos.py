@@ -132,17 +132,6 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
         "dataset_source": "icos",# UPDATED 12/03/2026
     }
 
-    all_keys = set(expected_metadata.keys()).union(set(meta1.keys()))
-    for key in all_keys:
-        print(f"{key:<20}{expected_metadata.get(key, 'None'):<20}{meta1.get(key, 'None'):<20}")
-
-    for md in expected_metadata:
-        print(md)
-        print(expected_metadata[md])
-        print(meta1[md])
-        print(" ")
-
-
     assert expected_metadata.items() <= meta1.items()
     assert "data_owner" in meta1 and "data_owner_email" in meta1
 
@@ -678,4 +667,4 @@ def test_retrieve_eye_ave_par_compare():
     assert "data_owner" in retrieved_data_dobj.metadata and "data_owner_email" in retrieved_data_dobj.metadata and "station_long_name" in retrieved_data_dobj.metadata
     for md in retrieved_data_dobj.metadata:
         if md not in ['data_owner','data_owner_email','station_long_name']:
-            assert retrieved_data_dobj.metadata[md] == retrieved_data.metadata[md], f"Metadata {md} midmatch: {retrieved_data_dobj.metadata[md]} != {retrieved_data.metadata[md]}"
+            assert retrieved_data_dobj.metadata[md] == retrieved_data.metadata[md], f"Metadata {md} mismatch: {retrieved_data_dobj.metadata[md]} != {retrieved_data.metadata[md]}"

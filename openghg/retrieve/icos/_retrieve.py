@@ -4,6 +4,7 @@ import io
 import pandas as pd
 import xarray as xr
 import openghg_defs
+import numpy as np
 
 from openghg.dataobjects import ObsData
 from openghg.objectstore import get_writable_bucket
@@ -300,8 +301,6 @@ def parse_icos_obspack_nc_file(data_info: dict | pd.Series) -> tuple[xr.Dataset,
     # Recast "flag" column to decode bytes and update to same dtype as other data
     dataset["flag"].data = decode(dataset["flag"].astype("bytes_"), "utf-8").astype(object)
 
-    dataset["instrument"] = "combined"
-
     if "south" in dataset["latitude"].attrs["units"]:
         logger.warning(
             "latitude units are in relation to south rathern than north, this may mean the sign on the latitude value should be the opposite."
@@ -309,7 +308,7 @@ def parse_icos_obspack_nc_file(data_info: dict | pd.Series) -> tuple[xr.Dataset,
 
     if "west" in dataset["longitude"].attrs["units"]:
         logger.warning(
-            "longitude units are in relation to west rather than east, this may mean the sign on the latitude value should be the opposite."
+            "longitude units are in relation to west rather than east, this may mean the sign on the longitude value should be the opposite."
         )
 
     dataset["altitude"].attrs["units_comment"] = dataset["altitude"].attrs["units"]
@@ -324,7 +323,6 @@ def parse_icos_obspack_nc_file(data_info: dict | pd.Series) -> tuple[xr.Dataset,
 
     attrs = dataset.attrs
 
-    attrs["instrument"] = "combined"
     attrs["measurement_unit"] = units
 
     return dataset, attrs
@@ -341,13 +339,15 @@ def retrieve_and_parse_icos_data(
 
     if data_format in ("asciiAtcFlaskTimeSer", "asciiAtcProductTimeSer"):
         dataset, data_attributes = parse_icos_text_file(data_info)
-    elif data_format in ("netcdfTimeSeries"):
+    elif data_format == "netcdfTimeSeries":
         if dataset_source == "ICOS Combined":
             dataset, data_attributes = parse_icos_obspack_nc_file(data_info)
         else:
             raise NotImplementedError(
                 f"Unable to parse other netcdf files than 'ICOS Combined'. Current dataset_source: {dataset_source}."
             )
+    else:
+         raise NotImplementedError(f"Unsupported ICOS data_format: {data_format}")
 
     return dataset, data_attributes
 
@@ -405,7 +405,7 @@ def create_icos_attributes(
     data_info: dict | pd.Series,
     data_attributes: dict,
     species: str,
-    additional_data: dict = {},
+    additional_data: dict | None = None,
     station_meta: _data_parsing.Station | None = None,
     dataset_source: str | None = None,
     keep_dataset_source_names: list | None = None,
@@ -415,6 +415,10 @@ def create_icos_attributes(
     """
 
     from openghg.util import format_inlet
+
+    if additional_data is None:
+         additional_data = {}
+
 
     if keep_dataset_source_names is None:
         keep_dataset_source_names = ["ICOS FastTrack", "EYE-AVE-PAR", "ICOS Combined"]
@@ -512,7 +516,32 @@ def create_icos_attributes(
 
     attributes.pop("instrument_data", None)
 
-    attributes["instrument"] = data_attributes["instrument"]
+    # Establish array of the instrument IDs
+    instrument_array = dataset.data_vars["instrument"].values
+
+    # Find the unique instrument IDs
+    unique_vals = np.unique(instrument_array)
+
+    # Determine instrument value based on uniqueness
+    # If no instrument IDs then instrument value should be set to unknown
+    if len(unique_vals) == 0:
+        instrument_value = "unknown"
+    # If 1 instrument ID then instrument value should be set to that value
+    elif len(unique_vals) == 1:
+        # All same - use icos_id_<number>
+        instrument_value = f"icos_id_{int(unique_vals[0])}"
+    # If more than 1 instrument ID than instrument value should be set to combibed
+    else:   
+        # Multiple different values - combine them
+        # Option 1: underscore-separated
+        instrument_value = "combined"
+    
+        # Option 2: comma-separated (alternative)
+        # instrument_value = ",".join([f"icos_id_{int(v)}" for v in sorted(unique_vals)])
+
+    # Apply to both attributes and metadata
+        attributes["instrument"] = instrument_value
+ 
 
     attributes.update(additional_data)
 
@@ -523,12 +552,15 @@ def create_metadata(
     site: str,
     network: str,
     attributes: dict,
-    additional_data: dict = {},
+    additional_data: dict | None = None,
     openghg_site_metadata: dict | None = None,
 ) -> dict:
     """
     Create metadata to be stored in the metastore for ICOS data
     """
+
+    if additional_data is None:
+         additional_data = {}
 
     # Load our site metadata for a few things like the station's long_name that
     # isn't in the ICOS metadata in the way we want it at the momenet - 2023-03-20
@@ -553,6 +585,7 @@ def create_metadata(
     # Add relevant values from created attributes
     metadata["dataset_source"] = attributes["dataset_source"]
     metadata["species"] = attributes["species"]
+    metadata["instrument"] = attributes["instrument"]
 
     metadata["calibration_scale"] = attributes["dataset_calibration_scale"]
     metadata["sampling_period"] = attributes["sampling_period"]
@@ -952,13 +985,17 @@ def _retrieve_remote_dobj(
 
         to_store: dict[str, Any] = {}
 
+        #TODO: Here I have left instrument either to combined or na for the legacy dobj as I
+        # don't think there is info on the actual instrument number ID such as we have in the 
+        # new icoscp_core retrieval. I think currently this doesn't affect legacy vs new retrieval 
+        # test but might
         if dataset_source == "ICOS Combined":
             to_store["instrument"] = "combined"
         else:
             try:
                 instrument_attributes = acq_data["instrument"]
             except KeyError:
-                to_store["instrument"] = "combined"
+                to_store["instrument"] = "unknown"
             else:
                 # Do some tidying of the instrument attributes
                 instruments = set()
