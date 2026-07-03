@@ -20,6 +20,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added Python 3.13 to the CI test matrices, dropped Python 3.10 support, and restricted OpenGHG to Python 3.11-3.13. [PR #1741](https://github.com/openghg/openghg/pull/1741).
 - Removed file and retrieved-data hashing from standardisation. Repeated inputs now follow the normal `if_exists` overlap policy, and data can be standardised again after its datasource is deleted. The deprecated `force` argument remains accepted but is ignored; passing `force=True` emits a `DeprecationWarning`, and callers should use `if_exists` to choose update behaviour. [Issue #1676](https://github.com/openghg/openghg/issues/1676)
+- Updated retrieve_atmospheric to use the new ICOS search interface and added some tests for this. [PR #1565](https://github.com/openghg/openghg/pull/1565)
+- Updated unit preprocessing/definitions (e.g., degrees_* handling and masl/magl.) [PR #1565](https://github.com/openghg/openghg/pull/1565)
+- calibration_scale and sampling_period updated so calibration_scale = dataset_calibration_scale and sampling_period is calculated based on dataset_data_frequency_unit and dataset_data_frequency. [PR #1565](https://github.com/openghg/openghg/pull/1565)
+- Some attributes/metadata removed or improved e.g instrument attr/meta data now has info rather than NA.
+
+### Updated
+
 - Updated the standardisation of AGAGE format data so that rows containing nans are no longer dropped. [PR #1634](https://github.com/openghg/openghg/pull/1634)
 - Updated copilot instructions and added repo graph using graphify.[PR #1684](https://github.com/openghg/openghg/pull/1684)
 - Made small tidy up changes to the attribute and metadata details associated with the Flux data object class. For the input attribute details from file this updates the `source` attribute to be `source_url`, moves details from `file_created` to `original_file_created`, updates `processed_by` to always be "OpenGHG Cloud" (to align with other data types) and corrects the `species` value to contain the correct string rather than the incorrect tuple. For the metadata, the `processed` keyword is removed. [PR #1746](https://github.com/openghg/openghg/pull/1746) and [PR #1769](https://github.com/openghg/openghg/pull/1769)
