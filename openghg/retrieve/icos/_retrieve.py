@@ -347,7 +347,7 @@ def retrieve_and_parse_icos_data(
                 f"Unable to parse other netcdf files than 'ICOS Combined'. Current dataset_source: {dataset_source}."
             )
     else:
-         raise NotImplementedError(f"Unsupported ICOS data_format: {data_format}")
+        raise NotImplementedError(f"Unsupported ICOS data_format: {data_format}")
 
     return dataset, data_attributes
 
@@ -417,8 +417,7 @@ def create_icos_attributes(
     from openghg.util import format_inlet
 
     if additional_data is None:
-         additional_data = {}
-
+        additional_data = {}
 
     if keep_dataset_source_names is None:
         keep_dataset_source_names = ["ICOS FastTrack", "EYE-AVE-PAR", "ICOS Combined"]
@@ -531,17 +530,16 @@ def create_icos_attributes(
         # All same - use icos_id_<number>
         instrument_value = f"icos_id_{int(unique_vals[0])}"
     # If more than 1 instrument ID than instrument value should be set to combibed
-    else:   
+    else:
         # Multiple different values - combine them
         # Option 1: underscore-separated
         instrument_value = "combined"
-    
+
         # Option 2: comma-separated (alternative)
         # instrument_value = ",".join([f"icos_id_{int(v)}" for v in sorted(unique_vals)])
 
-    # Apply to both attributes and metadata
+        # Apply to both attributes and metadata
         attributes["instrument"] = instrument_value
- 
 
     attributes.update(additional_data)
 
@@ -560,7 +558,7 @@ def create_metadata(
     """
 
     if additional_data is None:
-         additional_data = {}
+        additional_data = {}
 
     # Load our site metadata for a few things like the station's long_name that
     # isn't in the ICOS metadata in the way we want it at the momenet - 2023-03-20
@@ -985,9 +983,9 @@ def _retrieve_remote_dobj(
 
         to_store: dict[str, Any] = {}
 
-        #TODO: Here I have left instrument either to combined or na for the legacy dobj as I
-        # don't think there is info on the actual instrument number ID such as we have in the 
-        # new icoscp_core retrieval. I think currently this doesn't affect legacy vs new retrieval 
+        # TODO: Here I have left instrument either to combined or na for the legacy dobj as I
+        # don't think there is info on the actual instrument number ID such as we have in the
+        # new icoscp_core retrieval. I think currently this doesn't affect legacy vs new retrieval
         # test but might
         if dataset_source == "ICOS Combined":
             to_store["instrument"] = "combined"
