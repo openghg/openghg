@@ -117,7 +117,9 @@ def parse_paris(
 
     # Converts H_back values from timestamps to hours back
     if "H_back" in fp_data.dims:
-        fp_data["H_back"] = fp_data.H_back.dt.seconds / 3600.0
+        H_back = fp_data.H_back
+        if H_back.dtype == "timedelta64[ns]":
+            fp_data["H_back"] = H_back.dt.seconds / 3600.0
 
     for attr, new_attr in attribute_rename.items():
         if attr in fp_data:
