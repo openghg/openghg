@@ -16,7 +16,7 @@ from openghg.standardise import standardise_flux, standardise_footprint, standar
 from openghg.types import DataOverlapError
 
 
-def flux_data_read(force=False):
+def flux_data_read(force=False, if_exists="auto"):
     """
     Flux data set up.
     """
@@ -35,6 +35,7 @@ def flux_data_read(force=False):
         domain=domain,
         time_resolved=False,
         force=force,
+        if_exists=if_exists,
         store=store,
     )
 
@@ -75,7 +76,7 @@ def test_database_update_force():
     clear_test_stores()
     flux_data_read()
     # This creates a new version
-    flux_data_read(force=True)
+    flux_data_read(force=True, if_exists="new")
 
     em_param = {}
     em_param["start_date"] = "2012-01-01"
@@ -108,7 +109,7 @@ def bsd_data_read_crds():
     )
 
 
-def bsd_data_read_gcmd(force=False):
+def bsd_data_read_gcmd(force=False, if_exists="auto"):
     """
     Add Bilsdale data GCMD instrument to object store.
      - GCMD: sf6, n2o
@@ -129,6 +130,7 @@ def bsd_data_read_gcmd(force=False):
         network=network,
         instrument=instrument,
         force=force,
+        if_exists=if_exists,
     )
 
 
@@ -500,7 +502,7 @@ def test_obs_data_force_update():
     clear_test_stores()
     # Load BSD data - GCMD data (GCWERKS)
     bsd_data_read_gcmd()
-    bsd_data_read_gcmd(force=True)
+    bsd_data_read_gcmd(force=True, if_exists="new")
 
     # Search for an expected species
     # GCMD data
