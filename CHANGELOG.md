@@ -13,6 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Updated
 
+- Updated retrieve_atmospheric to use the new ICOS search interface and added some tests for this. [PR #1565](https://github.com/openghg/openghg/pull/1565)
+- Updated unit preprocessing/definitions (e.g., degrees_* handling and masl/magl.) [PR #1565](https://github.com/openghg/openghg/pull/1565)
+- calibration_scale and sampling_period updated so calibration_scale = dataset_calibration_scale and sampling_period is calculated based on dataset_data_frequency_unit and dataset_data_frequency. [PR #1565](https://github.com/openghg/openghg/pull/1565)
+- Some attributes/metadata removed or improved e.g instrument attr/meta data now has info rather than NA.
+
+### Updated
+
 - Updated the standardisation of AGAGE format data so that rows containing nans are no longer dropped. [PR #1634](https://github.com/openghg/openghg/pull/1634)
 
 ### Added
