@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Updated
 
 - Updated the standardisation of AGAGE format data so that rows containing nans are no longer dropped. [PR #1634](https://github.com/openghg/openghg/pull/1634)
+- Updated copilot instructions and added repo graph using graphify.[PR #1684](https://github.com/openghg/openghg/pull/1684)
 
 ### Added
 
