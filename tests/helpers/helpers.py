@@ -5,7 +5,14 @@ import shutil
 import tempfile
 from pathlib import Path
 from typing import Dict, List, Union
+from openghg.dataobjects import data_manager
 
+
+def delete_datasources(data_type: str, store: str, **search_kwargs):
+    dm = data_manager(data_type=data_type, store=store, **search_kwargs)
+    uuids = list(dm.metadata)
+    dm.delete_datasource(uuid=uuids)
+    return uuids
 
 def temporary_store_paths() -> Dict[str, Path]:
     # Add some uppercasing and numbers here to enusure paths work

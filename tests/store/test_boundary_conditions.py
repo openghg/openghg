@@ -186,6 +186,13 @@ def test_read_file_yearly():
 
 
 def test_delete_bc_datasource_allows_reimport_without_force():
+    """
+    Check deleting a multi-file boundary condition datasource clears the stored file hashes.
+
+    This reproduces the delete-and-reimport workflow: after deleting the datasource,
+    the same source files should be standardised again without force=True, and the
+    rebuilt latest version should still contain the full combined time range.
+    """
     clear_test_store("user")
     test_datapaths = [
         get_bc_datapath("ch4_EUROPE_201208.nc"),

@@ -9,7 +9,19 @@ import xarray as xr
 from pathlib import Path
 from unittest.mock import patch
 
-from tests.helpers.helpers import print_dict_diff
+from tests.helpers.helpers import delete_datasources
+
+
+def _assert_footprint_data_contains_files(filepaths, **search_kwargs):
+    fp_res = search(data_type="footprints", store="user", **search_kwargs)
+    fp_obs = fp_res.retrieve_all()
+
+    with xr.open_dataset(filepaths[0]) as ds_1, xr.open_dataset(filepaths[1]) as ds_2:
+        expected_time = xr.concat([ds_1, ds_2], dim="time").time
+
+    assert fp_obs.data.time.size == expected_time.size
+    assert fp_obs.data.time.min() == expected_time.min()
+    assert fp_obs.data.time.max() == expected_time.max()
 
 
 @pytest.mark.xfail(reason="Need to add a better way of passing in binary data to the read_file functions.")
@@ -669,6 +681,73 @@ def test_process_footprints():
 
     with xr.open_dataset(file1) as ds, xr.open_dataset(file2) as ds2:
         xr.concat([ds, ds2], dim="time").identical(fp_obs.data)
+
+
+def test_delete_footprint_datasource_allows_reimport_from_filepath_list():
+    """
+    Check deleting a footprint datasource clears hashes for a list of files.
+
+    This uses the grouped multi-file path where netCDF files are opened together.
+    Re-standardising the same file list after deletion should not require force=True,
+    and the rebuilt latest version should contain data from both input files.
+    """
+    clear_test_store(name="user")
+    filepaths = [
+        get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc"),
+        get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc"),
+    ]
+    standardise_kwargs = {
+        "filepath": filepaths,
+        "site": "TAC",
+        "inlet": "100m",
+        "domain": "europe",
+        "model": "UKV",
+        "store": "user",
+        "chunks": {"time": 4},
+    }
+
+    standardise_footprint(**standardise_kwargs)
+    _assert_footprint_data_contains_files(filepaths, site="TAC", domain="europe")
+
+    delete_datasources(data_type="footprints", store="user", site="TAC", domain="europe")
+    proc_results = standardise_footprint(**standardise_kwargs)
+
+    assert proc_results != [{}]
+    _assert_footprint_data_contains_files(filepaths, site="TAC", domain="europe ")
+
+
+def test_delete_footprint_datasource_allows_reimport_from_looped_filepaths():
+    """
+    Check deleting a footprint datasource clears hashes for files processed in a loop.
+
+    This forces per-file processing with concat_nc_files=False. The retrieved latest
+    data is checked against both source files so the test fails if the latest version
+    contains only the final file processed.
+    """
+    clear_test_store(name="user")
+    filepaths = [
+        get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc"),
+        get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc"),
+    ]
+    standardise_kwargs = {
+        "filepath": filepaths,
+        "site": "TAC",
+        "inlet": "100m",
+        "domain": "europe",
+        "model": "UKV",
+        "store": "user",
+        "chunks": {"time": 4},
+        "concat_nc_files": False,
+    }
+
+    standardise_footprint(**standardise_kwargs)
+    _assert_footprint_data_contains_files(filepaths, site="TAC", domain="europe")
+
+    delete_datasources(data_type="footprints", store="user", site="TAC", domain="europe")
+    proc_results = standardise_footprint(**standardise_kwargs)
+
+    assert proc_results != [{}]
+    _assert_footprint_data_contains_files(filepaths, site="TAC", domain="europe")
 
 
 def test_passing_in_different_chunks_to_same_store_works():
