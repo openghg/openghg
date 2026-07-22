@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 from helpers import get_bc_datapath, clear_test_store
+from openghg.dataobjects import data_manager
 from openghg.retrieve import search
 from openghg.standardise import standardise_bc, standardise_from_binary_data
 from openghg.store import BoundaryConditions
@@ -182,6 +183,76 @@ def test_read_file_yearly():
     }
 
     assert expected_metadata.items() <= metadata.items()
+
+
+def test_delete_bc_datasource_allows_reimport_without_force():
+    clear_test_store("user")
+    test_datapaths = [
+        get_bc_datapath("ch4_EUROPE_201208.nc"),
+        get_bc_datapath("ch4_EUROPE_201209.nc"),
+    ]
+    standardise_kwargs = {
+        "store": "user",
+        "filepath": test_datapaths,
+        "species": "ch4",
+        "bc_input": "MOZART",
+        "domain": "EUROPE",
+        "period": "monthly",
+    }
+
+    standardise_bc(**standardise_kwargs)
+    dm = data_manager(
+        data_type="boundary_conditions",
+        store="user",
+        species="ch4",
+        bc_input="MOZART",
+        domain="EUROPE",
+    )
+    uuid = next(iter(dm.metadata))
+
+    dm.delete_datasource(uuid=uuid)
+    proc_results = standardise_bc(**standardise_kwargs)
+
+    assert proc_results != [{}]
+
+    search_results = search(
+        species="ch4", bc_input="MOZART", domain="EUROPE", data_type="boundary_conditions"
+    )
+    bc_data = search_results.retrieve_all()
+
+    assert str(bc_data.data.time.min().values) == "2012-08-01T00:00:00.000000000"
+    assert str(bc_data.data.time.max().values) == "2012-09-01T00:00:00.000000000"
+    assert bc_data.metadata["start_date"] == "2012-08-01 00:00:00+00:00"
+    assert bc_data.metadata["end_date"] == "2012-09-30 23:59:59+00:00"
+
+
+def test_force_bc_multifile_import_keeps_combined_latest_version():
+    clear_test_store("user")
+    test_datapaths = [
+        get_bc_datapath("ch4_EUROPE_201208.nc"),
+        get_bc_datapath("ch4_EUROPE_201209.nc"),
+    ]
+
+    standardise_bc(
+        store="user",
+        filepath=test_datapaths,
+        species="ch4",
+        bc_input="MOZART",
+        domain="EUROPE",
+        period="monthly",
+        force=True,
+        concat_nc_files=False,
+    )
+
+    search_results = search(
+        species="ch4", bc_input="MOZART", domain="EUROPE", data_type="boundary_conditions"
+    )
+    bc_data = search_results.retrieve_all()
+
+    assert str(bc_data.data.time.min().values) == "2012-08-01T00:00:00.000000000"
+    assert str(bc_data.data.time.max().values) == "2012-09-01T00:00:00.000000000"
+    assert bc_data.metadata["start_date"] == "2012-08-01 00:00:00+00:00"
+    assert bc_data.metadata["end_date"] == "2012-09-30 23:59:59+00:00"
 
 
 def test_read_file_co2_no_time_dim():

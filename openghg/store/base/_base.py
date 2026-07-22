@@ -54,6 +54,7 @@ class BaseStore:
         self._stored = False
         # Hashes of previously uploaded files
         self._file_hashes: dict[str, str] = {}
+        self._datasource_file_hashes: dict[str, list[str]] = {}
         # Hashes of previously stored data from other data platforms
         self._retrieved_hashes: dict[str, dict] = {}
 
@@ -61,6 +62,9 @@ class BaseStore:
             data = get_object_from_json(bucket=bucket, key=self.key())
             # Update myself
             self.__dict__.update(data)
+
+        if not hasattr(self, "_datasource_file_hashes"):
+            self._datasource_file_hashes = {}
 
         # self._metastore = DataClassMetaStore(bucket=bucket, data_type=self._data_type)
         self._objectstore = locking_object_store(bucket=bucket, data_type=self._data_type)
@@ -356,10 +360,6 @@ class BaseStore:
             )
             if_exists = "new"
 
-        # Making sure new version will be created by default if force keyword is included.
-        if force and if_exists == "auto":
-            if_exists = "new"
-
         new_version = check_if_need_new_version(if_exists, save_current)
 
         # Format input parameters (specific to data_type)
@@ -431,7 +431,7 @@ class BaseStore:
                         "Unable to standardise files by using xarray concatenation. Will attempt to standardise each file individually."
                     )
                 else:
-                    self.store_hashes(unseen_hashes)
+                    self.store_hashes(unseen_hashes, datasource_uuids=[r["uuid"] for r in results])
                     return results
 
             # If not, loop over multiple filepaths when present
@@ -472,8 +472,8 @@ class BaseStore:
                     continue
 
                 results.extend(datasource_uuids)
-
-            self.store_hashes(unseen_hashes)
+                filepath_hash = {file_hash: path for file_hash, path in unseen_hashes.items() if path == fp}
+                self.store_hashes(filepath_hash, datasource_uuids=[r["uuid"] for r in datasource_uuids])
 
         return results
 
@@ -722,16 +722,56 @@ class BaseStore:
 
         return chunks
 
-    def store_hashes(self, hashes: dict[str, Path]) -> None:
+    def store_hashes(self, hashes: dict[str, Path], datasource_uuids: Sequence[str] | None = None) -> None:
         """Store the hashes of files we've seen before
 
         Args:
-            hahes: Dictionary of hashes
+            hashes: Dictionary of hashes
+            datasource_uuids: Datasource UUIDs created or updated from the files.
         Returns:
             None
         """
         name_only = {k: v.name for k, v in hashes.items()}
         self._file_hashes.update(name_only)
+
+        if datasource_uuids:
+            for uuid in datasource_uuids:
+                existing = set(self._datasource_file_hashes.get(uuid, []))
+                existing.update(hashes)
+                self._datasource_file_hashes[uuid] = sorted(existing)
+
+    def remove_datasource_hashes(self, uuid: str, metadata: dict | None = None) -> None:
+        """Remove file hashes associated with a datasource.
+
+        Older stores do not contain per-datasource hash ownership. In that case,
+        fall back to removing hashes whose stored filename appears in metadata.
+        """
+        hashes = set(self._datasource_file_hashes.pop(uuid, []))
+
+        if not hashes and metadata:
+            filenames = self._metadata_filenames(metadata)
+            hashes = {
+                file_hash
+                for file_hash, filename in self._file_hashes.items()
+                if str(filename) in filenames or Path(str(filename)).name in filenames
+            }
+
+        for file_hash in hashes:
+            self._file_hashes.pop(file_hash, None)
+
+    @staticmethod
+    def _metadata_filenames(metadata: dict) -> set[str]:
+        filenames: set[str] = set()
+        for key in ("file", "files", "filename"):
+            value = metadata.get(key)
+            if value is None:
+                continue
+            if isinstance(value, str):
+                filenames.update(part.strip() for part in value.split(",") if part.strip())
+            elif isinstance(value, Sequence):
+                filenames.update(str(part) for part in value)
+
+        return filenames
 
     def check_hashes(
         self, filepaths: str | Path | list[str] | list[Path], force: bool
