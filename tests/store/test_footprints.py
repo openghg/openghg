@@ -700,20 +700,20 @@ def test_delete_footprint_datasource_allows_reimport_from_filepath_list():
         "filepath": filepaths,
         "site": "TAC",
         "inlet": "100m",
-        "domain": "europe",
+        "domain": "TEST",
         "model": "UKV",
         "store": "user",
         "chunks": {"time": 4},
     }
 
     standardise_footprint(**standardise_kwargs)
-    _assert_footprint_data_contains_files(filepaths, site="TAC", domain="europe")
+    _assert_footprint_data_contains_files(filepaths, site="TAC", domain="TEST")
 
-    delete_datasources(data_type="footprints", store="user", site="TAC", domain="europe")
+    delete_datasources(data_type="footprints", store="user", site="TAC", domain="TEST")
     proc_results = standardise_footprint(**standardise_kwargs)
 
     assert proc_results != [{}]
-    _assert_footprint_data_contains_files(filepaths, site="TAC", domain="europe ")
+    _assert_footprint_data_contains_files(filepaths, site="TAC", domain="TEST")
 
 
 def test_delete_footprint_datasource_allows_reimport_from_looped_filepaths():
@@ -733,7 +733,7 @@ def test_delete_footprint_datasource_allows_reimport_from_looped_filepaths():
         "filepath": filepaths,
         "site": "TAC",
         "inlet": "100m",
-        "domain": "europe",
+        "domain": "TEST",
         "model": "UKV",
         "store": "user",
         "chunks": {"time": 4},
@@ -741,13 +741,13 @@ def test_delete_footprint_datasource_allows_reimport_from_looped_filepaths():
     }
 
     standardise_footprint(**standardise_kwargs)
-    _assert_footprint_data_contains_files(filepaths, site="TAC", domain="europe")
+    _assert_footprint_data_contains_files(filepaths, site="TAC", domain="TEST")
 
-    delete_datasources(data_type="footprints", store="user", site="TAC", domain="europe")
+    delete_datasources(data_type="footprints", store="user", site="TAC", domain="TEST")
     proc_results = standardise_footprint(**standardise_kwargs)
 
     assert proc_results != [{}]
-    _assert_footprint_data_contains_files(filepaths, site="TAC", domain="europe")
+    _assert_footprint_data_contains_files(filepaths, site="TAC", domain="TEST")
 
 
 def test_passing_in_different_chunks_to_same_store_works():

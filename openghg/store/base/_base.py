@@ -148,6 +148,7 @@ class BaseStore:
         filters: Any | None = None,
         chunks: dict | None = None,
         info_metadata: dict | None = None,
+        force: bool = False,
     ) -> list[dict]:
         """
         Standardise input data from a filepath or set of filepaths. This will also
@@ -253,6 +254,7 @@ class BaseStore:
             data=updated_data,
             if_exists=if_exists,
             new_version=new_version,
+            force=force,
             compressor=compressor,
             filters=filters,
         )
@@ -380,6 +382,7 @@ class BaseStore:
                     filters=filters,
                     chunks=chunks,
                     info_metadata=info_metadata,
+                    force=force,
                 )
             except StandardiseError as err:
                 logger.error(f"Unable to standardise dataset. Error: {err}")
@@ -425,6 +428,7 @@ class BaseStore:
                         filters=filters,
                         chunks=chunks,
                         info_metadata=info_metadata,
+                        force=force,
                     )
                 except StandardiseError:
                     logger.warning(
@@ -459,6 +463,7 @@ class BaseStore:
                         filters=filters,
                         chunks=chunks,
                         info_metadata=info_metadata,
+                        force=force,
                     )
                 except ValidationError as err:
                     msg = f"Unable to validate and store data from file: {Path(fp).name}. Error: {err}"
@@ -1010,6 +1015,7 @@ class BaseStore:
         extend_keys: list | None = None,
         if_exists: str = "auto",
         new_version: bool = True,
+        force: bool = False,
         compressor: Any | None = None,
         filters: Any | None = None,
     ) -> list[dict]:
@@ -1032,6 +1038,7 @@ class BaseStore:
                     - "combine" - replace and insert new data into current timeseries
                 new_version: Create a new version for the data and save current
                     data to a previous version.
+                force: Force adding of data even if this is identical to data stored.
                 compressor: Compression for zarr encoding
                 filters: Filters for zarr encoding
             Returns:
@@ -1078,6 +1085,7 @@ class BaseStore:
                     skip_keys=skip_keys,
                     extend_keys=extend_keys,
                     new_version=new_version,
+                    force=force,
                     if_exists=if_exists,
                     compressor=compressor,
                     filters=filters,

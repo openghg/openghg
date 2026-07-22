@@ -59,6 +59,7 @@ def plan_timed_data_update(
     new_version: bool,
     has_existing_data: bool,
     overlapping: bool,
+    force: bool = False,
 ) -> TimedDataUpdatePlan:
     """Plan the concrete store operation after overlap detection."""
     if not has_existing_data:
@@ -74,6 +75,8 @@ def plan_timed_data_update(
 
     if if_exists == "auto":
         if overlapping:
+            if force:
+                return TimedDataUpdatePlan(action="insert", new_version=True)
             return TimedDataUpdatePlan(action="error_overlap", new_version=False)
         return TimedDataUpdatePlan(action="copy_insert" if new_version else "insert", new_version=new_version)
 
@@ -291,6 +294,7 @@ class Datasource(AbstractDatasource[XrDataset]):
         extend_keys: list | None = None,
         new_version: bool = True,
         if_exists: str = "auto",
+        force: bool = False,
         compressor: Any | None = None,
         filters: Any | None = None,
     ) -> None:
@@ -312,6 +316,7 @@ class Datasource(AbstractDatasource[XrDataset]):
                    - raises DataOverlapError if there is an overlap
                 - "new" - creates new version with just new data
                 - "combine" - replace and insert new data into current timeseries
+            force: Force adding overlapping data when if_exists is "auto".
             compressor: Compression for zarr encoding
             filters: Filters for zarr encoding
         Returns:
@@ -327,6 +332,7 @@ class Datasource(AbstractDatasource[XrDataset]):
                 drop_duplicates=drop_duplicates,
                 new_version=new_version,
                 if_exists=if_exists,
+                force=force,
                 compressor=compressor,
                 filters=filters,
             )
@@ -342,6 +348,7 @@ class Datasource(AbstractDatasource[XrDataset]):
         drop_duplicates: bool,
         new_version: bool = True,
         if_exists: str = "auto",
+        force: bool = False,
         compressor: Any | None = None,
         filters: Any | None = None,
     ) -> None:
@@ -360,6 +367,7 @@ class Datasource(AbstractDatasource[XrDataset]):
                    - raises DataOverlapError if there is an overlap
                 - "new" - creates new version with just new data
                 - "combine" - replace and insert new data into current timeseries
+            force: Force adding overlapping data when if_exists is "auto".
             compressor: Compression for zarr encoding
             filters: Filters for zarr encoding
         Returns:
@@ -392,6 +400,7 @@ class Datasource(AbstractDatasource[XrDataset]):
             new_version=new_version,
             has_existing_data=has_existing_data,
             overlapping=overlapping,
+            force=force,
         )
 
         if self._latest_version and not plan.new_version:
