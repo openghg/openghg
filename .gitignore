@@ -140,3 +140,9 @@ doc/build/*
 
 # Logging output
 *.log
+
+# Ignore internal Graphify artifacts and caches
+graphify-out/*
+# Allow the main graph outputs
+!graphify-out/graph.json
+!graphify-out/manifest.json
