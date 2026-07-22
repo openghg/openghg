@@ -465,7 +465,7 @@ def test_transform_and_add_edgar_database(clear_stores):
     species = "ch4"
     default_source = "anthro"
 
-    expected_info = {"species": species, "source": default_source, "domain": domain, "date": date}
+    expected_info = {"species": species, "source": default_source, "domain": domain.lower(), "date": date}
     assert len(proc_results) == 1
     assert expected_info.items() <= proc_results[0].items()
 
