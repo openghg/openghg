@@ -173,13 +173,13 @@ class BoundaryConditions(BaseStore):
         parser_fn = load_transform_parser(data_type=self._data_type, source_format=database)
 
         # Define parameters to pass to the parser function and remaining keys
-        parser_input_parameters, additional_input_parameters = split_function_inputs(
+        fn_input_parameters, additional_input_parameters = split_function_inputs(
             fn_input_parameters, parser_fn
         )
 
         # Call appropriate standardisation function with input parameters
         try:
-            bc_data = parser_fn(**parser_input_parameters)
+            bc_data = parser_fn(**fn_input_parameters)
         except (TypeError, ValueError) as err:
             msg = f"Error during transformation of data(s): {datapath}. Error: {err}"
             logger.exception(msg)
@@ -189,18 +189,8 @@ class BoundaryConditions(BaseStore):
         for mdd in bc_data:
             BoundaryConditions.validate_data(mdd.data)
 
-        required_keys = ("species", "bc_input", "domain")
-
-        if info_metadata:
-            common_keys = set(required_keys) & set(info_metadata.keys())
-
-            if common_keys:
-                raise ValueError(
-                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
-                )
-            else:
-                for parsed_data in bc_data:
-                    parsed_data.metadata.update(info_metadata)
+        # Check to ensure no required keys are being passed through info_metadata dict
+        self.check_info_keys(info_metadata)
 
         # Mop up and add additional keys to metadata which weren't passed to the parser
         bc_data = self.update_metadata(
@@ -211,7 +201,6 @@ class BoundaryConditions(BaseStore):
             data=bc_data,
             if_exists=if_exists,
             new_version=new_version,
-            required_keys=required_keys,
             compressor=compressor,
             filters=filters,
         )
