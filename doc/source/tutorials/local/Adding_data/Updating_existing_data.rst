@@ -16,33 +16,41 @@ By default, if data exists and the time range *does* overlap with existing data,
 Updating data
 -------------
 
-To add updated data to the object store which does overlap on time with current data, when using the ``standarise_*`` functions the user can specify what action to perform in this case using the ``if_exists`` input. This provides the options:
+To add updated data to the object store which does overlap on time with current data, when using the ``standardise_*`` functions the user can specify what action to perform in this case using the ``if_exists`` input. This provides the options:
 
-1. "auto" - combine with previous data if no overlapping data points, raise ``DataOverlap`` error otherwise (default).
-2. "new" - store the newly added data (only)
-3. *"combine" - combine the new and previous data and prefer the new data in the case where the time range overlaps. - to be implemented.*
+1. ``"auto"`` - combine with previous data if there are no overlapping data points, and raise a ``DataOverlapError`` otherwise (default).
+2. ``"new"`` - store only the newly added data.
+3. ``"combine"`` - combine the new and previous data and prefer the new data where the time range overlaps.
 
-By default, using the "new" option will also create a new version of the data. In this way, the previous data will be retained (saved) but the new data will become the details which are accessed by default.
+By default, using the ``"new"`` option will also create a new version of the data. In this way, the previous data will be retained (saved) but the new data will become the details which are accessed by default.
 
 Managing versions
 -----------------
 
-If data files are large or there will be many updates needed, it may not be desirable to save the currently stored data and it may be prefered to delete this rather than retain this as a version. Whether to retain or overwrite the current data can set using the `save_current` input.
+If data files are large or there will be many updates needed, it may not be desirable to save the currently stored data and it may be preferred to delete this rather than retain this as a version. Whether to retain or overwrite the current data can set using the ``save_current`` input.
 
-1. "auto"
+1. ``"auto"``
 
-    a. if data does not overlap, retain current data and version. 
-    b. if data does overlap and ``if_exists="auto"``, raise ``DataOverlap`` error.
+    a. if data does not overlap, retain current data and version.
+    b. if data does overlap and ``if_exists="auto"``, raise ``DataOverlapError``.
     c. if data does overlap and ``if_exists="new"``, save current data and create a new version.
 
-2. "yes" (/"y") - Save the current data and create a new version for the new data.
-3. "no" (/"n") - Do not save the current data and replace with the new data.
+2. ``"yes"`` (or ``"y"``) - Save the current data and create a new version for the new data.
+3. ``"no"`` (or ``"n"``) - Do not save the current data and replace with the new data.
 
 
 Replacing "identical" data
 --------------------------
 
-One check OpenGHG will make will be whether or not an exact copy of this file has been added previously. In this case this will not check within the object store explicitly, and the data will not be added. For the rare cases where this may not be the desired behaviour, the `force` flag using `True` or `False`can be used to bypass this check and attempt to add the data to the object store in the usual way. 
+OpenGHG also keeps a record of file hashes so that an exact copy of a file is not added twice by accident. If a file has already been added, the file will normally be skipped before the object store is checked.
+
+For the rare cases where this may not be the desired behaviour, use ``force=True`` to bypass the file-hash check and attempt to add the data to the object store in the usual way. The ``force`` flag does not replace the other update controls:
+
+* with ``if_exists="auto"``, forced data that overlaps the current data is stored as a new latest version;
+* with ``if_exists="new"``, forced data follows the normal ``"new"`` behaviour;
+* with ``if_exists="combine"``, forced data is combined with the current data, preferring the newly added values at overlapping times.
+
+This means ``force=True`` answers "should OpenGHG try to add this file again?", while ``if_exists`` and ``save_current`` answer "how should OpenGHG update the datasource once it starts adding the data?".
 
 Example workflow
 ----------------
@@ -345,11 +353,12 @@ Selected output:
     ...
     }
 
-By default this will create a new version as shown above.
+With the default ``if_exists="auto"``, ``force=True`` allows the duplicate file to be added and the overlapping data is stored as a new latest version as shown above.
 
-To avoid this pass both the ``force`` and ``save_current`` flag instead:
+To replace the latest version without retaining another copy, pass ``force=True`` together with the normal controls for replacing data:
 
 * ``force=True``
+* ``if_exists="new"``
 * ``save_current=False``
 
 .. code:: ipython3
@@ -359,6 +368,7 @@ To avoid this pass both the ``force`` and ``save_current`` flag instead:
                         site=site,
                         network=network,
                         force=True,
+                        if_exists="new",
                         save_current=False)
 
 .. code:: ipython3
@@ -380,7 +390,56 @@ Selected output:
 
 This should include the same start, end date and latest_version as the previous search output.
 
-6. Cleanup
+6. Combining overlapping updates
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If the new file contains corrections for some times but you want to keep
+the existing data outside the corrected time range, use ``if_exists="combine"``.
+This is different to ``if_exists="new"``, which stores only the newly added
+data in the latest version.
+
+For example, suppose a datasource already contains data for a full year and
+you receive a corrected file for part of that year. Adding the corrected file
+with ``if_exists="combine"`` creates a new latest version by copying the
+current latest version and then inserting the new data into that copy. Where
+the times overlap, the values from the newly added data are preferred.
+
+.. code:: ipython3
+
+    standardise_surface(filepaths=corrected_data,
+                        source_format=source_format,
+                        site=site,
+                        network=network,
+                        if_exists="combine")
+
+When you search and retrieve without specifying a version, OpenGHG retrieves
+this latest combined version:
+
+.. code:: ipython3
+
+    data_search = search_surface(site=site, species="cf4")
+    combined_data = data_search.retrieve()
+
+The retrieved data contains the full combined time series, not only the
+overlapping points from ``corrected_data``. In this example that means the
+unchanged parts of the year are still present, and the corrected values are
+used for the overlapping times.
+
+If ``corrected_data`` is an exact copy of a file that OpenGHG has already
+seen, add ``force=True`` as well. In that case ``force=True`` bypasses the
+duplicate-file check, while ``if_exists="combine"`` still controls how the
+datasource is updated.
+
+.. code:: ipython3
+
+    standardise_surface(filepaths=corrected_data,
+                        source_format=source_format,
+                        site=site,
+                        network=network,
+                        force=True,
+                        if_exists="combine")
+
+7. Cleanup
 ^^^^^^^^^^
 
 If you're finished with the data in this tutorial you can cleanup the

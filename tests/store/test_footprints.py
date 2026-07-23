@@ -750,6 +750,69 @@ def test_delete_footprint_datasource_allows_reimport_from_looped_filepaths():
     _assert_footprint_data_contains_files(filepaths, site="TAC", domain="TEST")
 
 
+def test_footprint_combine_latest_keeps_full_combined_data(tmp_path):
+    """
+    Check if_exists="combine" creates a latest version with the full time range.
+
+    This protects the update path where a corrected, overlapping file is added:
+    the latest version should retain non-overlapping existing data and replace
+    overlapping values with the corrected data.
+    """
+    clear_test_store(name="user")
+    file1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
+    file2 = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
+    standardise_kwargs = {
+        "site": "TAC",
+        "inlet": "100m",
+        "domain": "TEST",
+        "model": "UKV",
+        "store": "user",
+        "chunks": {"time": 4},
+    }
+
+    result_original = standardise_footprint(filepath=[file1, file2], **standardise_kwargs)
+    uuid = result_original[0]["uuid"]
+
+    with xr.open_dataset(file2) as ds_2:
+        corrected = ds_2.isel(time=slice(0, max(1, ds_2.time.size // 2))).load()
+
+    corrected["fp"] = corrected["fp"] + 1.0
+    corrected_path = tmp_path / "TAC-100magl_UKV_TEST_201608_corrected.nc"
+    corrected.to_netcdf(corrected_path)
+
+    result_corrected = standardise_footprint(
+        filepath=corrected_path,
+        if_exists="combine",
+        **standardise_kwargs,
+    )
+
+    assert result_corrected[0]["new"] is False
+    assert result_corrected[0]["uuid"] == uuid
+
+    fp_res = search(
+        site="TAC",
+        domain="TEST",
+        data_type="footprints",
+        store="user",
+    )
+    original_stored = fp_res.retrieve_all(version="v1").data.sortby("time").load()
+    latest = fp_res.retrieve_all()
+    latest_data = latest.data.sortby("time")
+    corrected = corrected.sortby("time")
+
+    assert latest.metadata["latest_version"] == "v2"
+    assert latest_data.time.size == original_stored.time.size
+    assert latest_data.time.min() == original_stored.time.min()
+    assert latest_data.time.max() == original_stored.time.max()
+
+    expected_corrected = original_stored["fp"].sel(time=corrected.time) + 1.0
+    xr.testing.assert_allclose(latest_data["fp"].sel(time=corrected.time), expected_corrected)
+
+    retained = latest_data["fp"].sel(time=original_stored.time).drop_sel(time=corrected.time)
+    expected_retained = original_stored["fp"].drop_sel(time=corrected.time)
+    xr.testing.assert_allclose(retained, expected_retained)
+
+
 def test_passing_in_different_chunks_to_same_store_works():
     file1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
     file2 = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")

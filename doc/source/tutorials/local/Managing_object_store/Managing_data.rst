@@ -289,6 +289,14 @@ To make sure it's gone let's run the search again
 
 An empty dictionary means no results, the deletion worked.
 
+Deleting a ``Datasource`` also removes the file-hash records associated
+with that datasource. This means that if you deleted the wrong
+datasource, or you are rebuilding a store from source files, you can add
+the same files again without passing ``force=True`` solely to bypass the
+duplicate-file check. You should still use the usual ``if_exists`` and
+``save_current`` options when adding files to a datasource that already
+exists.
+
 Tidy up
 -------
 
