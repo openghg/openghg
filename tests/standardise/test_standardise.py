@@ -1094,6 +1094,7 @@ def test_standardise_agage_using_dataset():
         sampling_period="1s",
         force=True,
         store="user",
+        if_exists="combine",
     )
 
     assert "cfc11" == results[0].get("species")
