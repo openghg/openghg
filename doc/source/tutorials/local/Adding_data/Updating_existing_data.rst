@@ -46,7 +46,7 @@ OpenGHG also keeps a record of file hashes so that an exact copy of a file is no
 
 For the rare cases where this may not be the desired behaviour, use ``force=True`` to bypass the file-hash check and attempt to add the data to the object store in the usual way. The ``force`` flag does not replace the other update controls:
 
-* with ``if_exists="auto"``, forced data that overlaps the current data is stored as a new latest version;
+* with ``if_exists="auto"``, forced data that overlaps the current data still raises ``DataOverlapError``;
 * with ``if_exists="new"``, forced data follows the normal ``"new"`` behaviour;
 * with ``if_exists="combine"``, forced data is combined with the current data, preferring the newly added values at overlapping times.
 
@@ -324,9 +324,13 @@ This now contains new data only from 2013 but the version has not changed
 There may be circumstances (e.g. data corruption, testing) where it is necessary to
 replace "identical" data (i.e. the same original input file with the same details).
 
-This can be done using the flag:
+If the same file overlaps the current data, this should be done using
+``force=True`` together with an explicit update option. For example, to
+store the identical file as a new latest version containing only that data,
+use:
 
 * ``force=True``
+* ``if_exists="new"``
 
 .. code:: ipython3
 
@@ -334,7 +338,8 @@ This can be done using the flag:
                         source_format=source_format,
                         site=site,
                         network=network,
-                        force=True)
+                        force=True,
+                        if_exists="new")
 
 .. code:: ipython3
 
@@ -353,7 +358,10 @@ Selected output:
     ...
     }
 
-With the default ``if_exists="auto"``, ``force=True`` allows the duplicate file to be added and the overlapping data is stored as a new latest version as shown above.
+This creates a new latest version as shown above. Passing only ``force=True``
+would bypass the duplicate-file check, but the default ``if_exists="auto"``
+would still raise ``DataOverlapError`` because the file overlaps the current
+data.
 
 To replace the latest version without retaining another copy, pass ``force=True`` together with the normal controls for replacing data:
 

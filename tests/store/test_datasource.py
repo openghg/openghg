@@ -494,8 +494,8 @@ def test_plan_timed_data_update_matrix():
     forced_overlap_plan = plan_timed_data_update(
         if_exists="auto", new_version=False, has_existing_data=True, overlapping=True, force=True
     )
-    assert forced_overlap_plan.action == "insert"
-    assert forced_overlap_plan.new_version is True
+    assert forced_overlap_plan.action == "error_overlap"
+    assert forced_overlap_plan.new_version is False
     assert (
         plan_timed_data_update(
             if_exists="combine", new_version=True, has_existing_data=True, overlapping=False

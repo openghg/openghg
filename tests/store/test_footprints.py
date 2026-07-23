@@ -4,6 +4,7 @@ from openghg.retrieve import search
 from openghg.objectstore import get_writable_bucket
 from openghg.standardise import standardise_footprint, standardise_from_binary_data
 from openghg.store import Footprints, get_metakey_defaults
+from openghg.types import DataOverlapError
 from openghg.util import hash_bytes
 import xarray as xr
 from pathlib import Path
@@ -811,6 +812,40 @@ def test_footprint_combine_latest_keeps_full_combined_data(tmp_path):
     retained = latest_data["fp"].sel(time=original_stored.time).drop_sel(time=corrected.time)
     expected_retained = original_stored["fp"].drop_sel(time=corrected.time)
     xr.testing.assert_allclose(retained, expected_retained)
+
+
+def test_footprint_force_auto_still_errors_on_overlap(tmp_path):
+    """
+    Check force=True only bypasses file hashes and does not change if_exists="auto".
+    """
+    clear_test_store(name="user")
+    file1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
+    file2 = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
+    standardise_kwargs = {
+        "site": "TAC",
+        "inlet": "100m",
+        "domain": "TEST_FORCE_AUTO_OVERLAP",
+        "model": "UKV",
+        "store": "user",
+        "chunks": {"time": 4},
+    }
+
+    standardise_footprint(filepath=[file1, file2], **standardise_kwargs)
+
+    with xr.open_dataset(file2) as ds:
+        overlapping = ds.isel(time=slice(0, max(1, ds.time.size // 2))).load()
+
+    overlapping["fp"] = overlapping["fp"] + 1.0
+    overlapping_path = tmp_path / "TAC-100magl_UKV_TEST_201608_overlap.nc"
+    overlapping.to_netcdf(overlapping_path)
+
+    with pytest.raises(DataOverlapError):
+        standardise_footprint(
+            filepath=overlapping_path,
+            force=True,
+            if_exists="auto",
+            **standardise_kwargs,
+        )
 
 
 def test_passing_in_different_chunks_to_same_store_works():

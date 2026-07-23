@@ -75,8 +75,6 @@ def plan_timed_data_update(
 
     if if_exists == "auto":
         if overlapping:
-            if force:
-                return TimedDataUpdatePlan(action="insert", new_version=True)
             return TimedDataUpdatePlan(action="error_overlap", new_version=False)
         return TimedDataUpdatePlan(action="copy_insert" if new_version else "insert", new_version=new_version)
 
@@ -316,7 +314,7 @@ class Datasource(AbstractDatasource[XrDataset]):
                    - raises DataOverlapError if there is an overlap
                 - "new" - creates new version with just new data
                 - "combine" - replace and insert new data into current timeseries
-            force: Force adding overlapping data when if_exists is "auto".
+            force: Force adding data when the source file has already been seen.
             compressor: Compression for zarr encoding
             filters: Filters for zarr encoding
         Returns:
@@ -367,7 +365,7 @@ class Datasource(AbstractDatasource[XrDataset]):
                    - raises DataOverlapError if there is an overlap
                 - "new" - creates new version with just new data
                 - "combine" - replace and insert new data into current timeseries
-            force: Force adding overlapping data when if_exists is "auto".
+            force: Force adding data when the source file has already been seen.
             compressor: Compression for zarr encoding
             filters: Filters for zarr encoding
         Returns:

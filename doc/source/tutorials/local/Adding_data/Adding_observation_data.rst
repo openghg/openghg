@@ -284,8 +284,9 @@ added using the same `tag`. For example below we show how to add the same data a
                                         force=True)
 
 
-*Note: here we included the force=True keyword as we are adding the same data which has been added in
-a previous step of the tutorial - see "Updating existing data" tutorial for more details of this.*
+*Note: here we included the ``force=True`` keyword because these same source files were added in
+a previous step of the tutorial. This bypasses the duplicate-file check; see the
+:ref:`updating_existing_data` tutorial for how ``force``, ``if_exists`` and ``save_current`` work together.*
 
 As will be covered in the :ref:`2. Searching for data` section, these keywords can then used when searching the
 object store. For the `tag` keyword this can be used to return all data which includes the chosen tag.
