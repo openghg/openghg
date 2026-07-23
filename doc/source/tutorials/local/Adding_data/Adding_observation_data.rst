@@ -273,7 +273,8 @@ added using the same `tag`. For example below we show how to add the same data a
                                        site="TAC",
                                        network="DECC",
                                        tag="project1",
-                                       force=True)
+                                       force=True,
+                                       if_exists="combine")
 
     agage_results = standardise_surface(filepath=capegrim_tuple,
                                         source_format="GCWERKS",
