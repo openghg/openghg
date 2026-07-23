@@ -297,6 +297,21 @@ duplicate-file check. You should still use the usual ``if_exists`` and
 ``save_current`` options when adding files to a datasource that already
 exists.
 
+A single input file can create more than one datasource, for example one
+datasource per species. Deleting any one of those datasources invalidates
+the file's duplicate-file record, so the same file can be added again
+without ``force=True``. OpenGHG then parses the file, recreates the missing
+datasource, and skips the surviving datasources already associated with
+that file. Their data and versions are left unchanged.
+
+Stores created before file-hash ownership was recorded cannot reconstruct
+the exact links between old hashes and datasources. OpenGHG migrates these
+records conservatively by treating the old hashes as shared by the
+datasources that already exist. Deleting one of those datasources still
+invalidates the duplicate-file record, allowing the file to be added again
+without ``force=True``; existing datasources linked during migration are
+skipped while the deleted one is rebuilt.
+
 Tidy up
 -------
 

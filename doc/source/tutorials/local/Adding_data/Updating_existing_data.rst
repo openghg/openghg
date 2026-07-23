@@ -266,7 +266,7 @@ If we wanted to update the data but did *not* want to retain the current latest 
 of the data we can do this using the flags:
 
 * ``if_exists="new"``
-* ``save_current=False``
+* ``save_current="no"``
 
 We can test this by downloading data for the same site from 2013.
 
@@ -288,7 +288,7 @@ We can test this by downloading data for the same site from 2013.
                         site=site,
                         network=network,
                         if_exists="new",
-                        save_current=False)
+                        save_current="no")
 
 Searching should return one datasource as before:
 
@@ -367,7 +367,7 @@ To replace the latest version without retaining another copy, pass ``force=True`
 
 * ``force=True``
 * ``if_exists="new"``
-* ``save_current=False``
+* ``save_current="no"``
 
 .. code:: ipython3
 
@@ -377,7 +377,7 @@ To replace the latest version without retaining another copy, pass ``force=True`
                         network=network,
                         force=True,
                         if_exists="new",
-                        save_current=False)
+                        save_current="no")
 
 .. code:: ipython3
 
