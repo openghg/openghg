@@ -328,17 +328,15 @@ class DataManager:
         dtype = self._check_datatypes(uuid=uuid)
 
         with self.objectstore(data_type=dtype) as objstore:
-            from openghg.store.base import BaseStore
+            from openghg.store import get_data_class
 
-            store_cls = BaseStore._registry.get(dtype)
-            data_class_store = store_cls(bucket=self._bucket) if store_cls is not None else None
+            store_cls = get_data_class(dtype)
+            data_class_store = store_cls(bucket=self._bucket)
             for uid in uuid:
                 objstore.delete(uid)
-                if data_class_store is not None:
-                    data_class_store.remove_datasource_hashes(uid, metadata=self.metadata.get(uid, {}))
+                data_class_store.remove_datasource_hashes(uid)
                 logger.info(f"Deleted Datasource with UUID {uid}.")
-            if data_class_store is not None:
-                data_class_store.save()
+            data_class_store.save()
 
 
 def data_manager(data_type: str, store: str, **kwargs: dict) -> DataManager:

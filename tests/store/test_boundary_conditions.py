@@ -87,6 +87,7 @@ def test_read_file_monthly():
         domain="EUROPE",
         period="monthly",
         force=True,
+        if_exists="combine",
     )
 
     assert len(proc_results) == 1
@@ -234,20 +235,26 @@ def test_delete_bc_datasource_allows_reimport_without_force():
 
 
 def test_force_bc_multifile_import_keeps_combined_latest_version():
+    """Forced multi-file combine should retain the complete latest time range."""
     clear_test_store("user")
     test_datapaths = [
         get_bc_datapath("ch4_EUROPE_201208.nc"),
         get_bc_datapath("ch4_EUROPE_201209.nc"),
     ]
 
+    standardise_kwargs = {
+        "store": "user",
+        "filepath": test_datapaths,
+        "species": "ch4",
+        "bc_input": "MOZART",
+        "domain": "EUROPE",
+        "period": "monthly",
+    }
+    standardise_bc(**standardise_kwargs)
     standardise_bc(
-        store="user",
-        filepath=test_datapaths,
-        species="ch4",
-        bc_input="MOZART",
-        domain="EUROPE",
-        period="monthly",
+        **standardise_kwargs,
         force=True,
+        if_exists="combine",
         concat_nc_files=False,
     )
 

@@ -1,4 +1,11 @@
+import subprocess
+import sys
+import textwrap
+from pathlib import Path
+from unittest.mock import patch
+
 import pytest
+import xarray as xr
 from helpers import get_footprint_datapath, clear_test_store
 from openghg.retrieve import search
 from openghg.objectstore import get_writable_bucket
@@ -6,9 +13,6 @@ from openghg.standardise import standardise_footprint, standardise_from_binary_d
 from openghg.store import Footprints, get_metakey_defaults
 from openghg.types import DataOverlapError
 from openghg.util import hash_bytes
-import xarray as xr
-from pathlib import Path
-from unittest.mock import patch
 
 from tests.helpers.helpers import delete_datasources
 
@@ -751,6 +755,59 @@ def test_delete_footprint_datasource_allows_reimport_from_looped_filepaths():
     _assert_footprint_data_contains_files(filepaths, site="TAC", domain="TEST")
 
 
+def test_delete_datasource_cleans_hashes_in_fresh_process():
+    """Deleting a datasource in a fresh process should still clean file hashes."""
+    clear_test_store(name="user")
+    filepath = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
+    result = standardise_footprint(
+        filepath=filepath,
+        site="TAC",
+        inlet="100m",
+        domain="TEST_FRESH_PROCESS_DELETE",
+        model="UKV",
+        store="user",
+    )
+    uuid = result[0]["uuid"]
+    bucket = get_writable_bucket(name="user")
+
+    with Footprints(bucket=bucket) as store:
+        file_hash = next(iter(store._file_hashes))
+        assert file_hash in store._datasource_file_hashes[uuid]
+
+    config = {
+        "object_store": {"user": {"path": bucket, "permissions": "rw"}},
+        "user_id": "test-id-123",
+        "config_version": "2",
+    }
+    script = f"""
+        from unittest.mock import patch
+
+        config = {config!r}
+        with patch("openghg.objectstore._local_store.read_local_config", return_value=config):
+            from openghg.dataobjects import data_manager
+            from openghg.store.base import BaseStore
+
+            assert "footprints" not in BaseStore._registry
+            dm = data_manager(
+                data_type="footprints",
+                store="user",
+                site="TAC",
+                domain="TEST_FRESH_PROCESS_DELETE",
+            )
+            dm.delete_datasource(uuid={uuid!r})
+    """
+    completed = subprocess.run(
+        [sys.executable, "-c", textwrap.dedent(script)],
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+
+    with Footprints(bucket=bucket) as store:
+        assert file_hash not in store._file_hashes
+
+
 def test_footprint_combine_latest_keeps_full_combined_data(tmp_path):
     """
     Check if_exists="combine" creates a latest version with the full time range.
@@ -849,6 +906,7 @@ def test_footprint_force_auto_still_errors_on_overlap(tmp_path):
 
 
 def test_passing_in_different_chunks_to_same_store_works():
+    """Chunked footprint imports should tolerate different chunk layouts."""
     file1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
     file2 = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
 
@@ -883,8 +941,8 @@ def test_passing_in_different_chunks_to_same_store_works():
 
 
 def test_pass_empty_dict_means_full_dimension_chunks():
+    """An empty chunk dict should expand to full-dimension chunks."""
     file1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
-    file2 = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
 
     bucket = get_writable_bucket(name="user")
 
@@ -905,8 +963,8 @@ def test_pass_empty_dict_means_full_dimension_chunks():
 
 
 def test_footprints_chunking_schema():
+    """The footprint chunking schema should accept the expected payload."""
     file1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
-    file2 = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
 
     bucket = get_writable_bucket(name="user")
 

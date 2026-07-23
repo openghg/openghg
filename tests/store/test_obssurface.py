@@ -21,6 +21,7 @@ from openghg.objectstore import (
     set_object_from_json,
 )
 from openghg.objectstore import get_datasource, open_object_store
+from openghg.dataobjects import data_manager
 from openghg.retrieve import get_obs_surface, search_surface
 from openghg.standardise import standardise_from_binary_data, standardise_surface
 from openghg.store import ObsSurface
@@ -46,6 +47,18 @@ def min_uuids_fixture():
     min_uuids = filt(one_min_res, file="tac.picarro.1minute.100m.test.dat")
 
     return min_uuids
+
+
+@pytest.fixture
+def pre_upgrade_surface_store(min_uuids_fixture):
+    """Persist a store in the format used before hash ownership was added."""
+    bucket = get_writable_bucket(name="user")
+    stored_obj = get_object_from_json(bucket=bucket, key=ObsSurface.key())
+    file_hashes = stored_obj["_file_hashes"].copy()
+    stored_obj.pop("_datasource_file_hashes")
+    set_object_from_json(bucket=bucket, key=ObsSurface.key(), data=stored_obj)
+
+    return bucket, min_uuids_fixture, file_hashes
 
 
 @pytest.fixture
@@ -88,6 +101,82 @@ def test_metadata_tac_crds(min_uuids_fixture, hourly_uuids_fixture, bucket):
 
             with datasource.get_data(version="latest") as data:
                 assert attributes_checker_obssurface(data.attrs, species=species)
+
+
+def test_pre_upgrade_hashes_are_conservatively_reconciled(pre_upgrade_surface_store):
+    """A deleted datasource from a pre-upgrade shared file should be re-importable."""
+    bucket, original_results, file_hashes = pre_upgrade_surface_store
+    uuids = [result["uuid"] for result in original_results]
+    assert len(uuids) > 1
+
+    with ObsSurface(bucket=bucket) as migrated_store:
+        for uuid in uuids:
+            assert set(migrated_store._datasource_file_hashes[uuid]) == set(file_hashes)
+
+    dm = data_manager(data_type="surface", site="tac", network="decc", store="user")
+    dm.delete_datasource(uuid=uuids[0])
+
+    with ObsSurface(bucket=bucket) as partially_deleted_store:
+        assert partially_deleted_store._file_hashes == {}
+        assert uuids[0] not in partially_deleted_store._datasource_file_hashes
+        for uuid in uuids[1:]:
+            assert set(partially_deleted_store._datasource_file_hashes[uuid]) == set(file_hashes)
+
+    filepath = get_surface_datapath("tac.picarro.1minute.100m.test.dat", source_format="CRDS")
+    reimported = standardise_surface(
+        store="user",
+        filepath=filepath,
+        site="tac",
+        network="decc",
+        source_format="CRDS",
+    )
+
+    assert len(reimported) == 1
+    assert reimported[0]["new"] is True
+    assert reimported[0]["species"] == original_results[0]["species"]
+    assert reimported[0]["uuid"] != uuids[0]
+
+    with ObsSurface(bucket=bucket) as rebuilt_store:
+        assert rebuilt_store._file_hashes == file_hashes
+        assert all(uuid in rebuilt_store._datasource_file_hashes for uuid in uuids[1:])
+        assert reimported[0]["uuid"] in rebuilt_store._datasource_file_hashes
+
+
+def test_deleted_datasource_from_multispecies_file_can_be_reimported(min_uuids_fixture):
+    """Re-import a deleted species while leaving shared-file datasources unchanged."""
+    bucket = get_writable_bucket(name="user")
+    uuids = [result["uuid"] for result in min_uuids_fixture]
+    assert len(uuids) > 1
+
+    with ObsSurface(bucket=bucket) as store:
+        file_hash = next(iter(store._file_hashes))
+        assert all(file_hash in store._datasource_file_hashes[uuid] for uuid in uuids)
+
+    dm = data_manager(data_type="surface", site="tac", network="decc", store="user")
+    dm.delete_datasource(uuid=uuids[0])
+
+    with ObsSurface(bucket=bucket) as store:
+        assert file_hash not in store._file_hashes
+        assert all(file_hash in store._datasource_file_hashes[uuid] for uuid in uuids[1:])
+
+    filepath = get_surface_datapath("tac.picarro.1minute.100m.test.dat", source_format="CRDS")
+    reimported = standardise_surface(
+        store="user",
+        filepath=filepath,
+        site="tac",
+        network="decc",
+        source_format="CRDS",
+    )
+
+    assert len(reimported) == 1
+    assert reimported[0]["new"] is True
+    assert reimported[0]["species"] == min_uuids_fixture[0]["species"]
+    assert reimported[0]["uuid"] != uuids[0]
+
+    with ObsSurface(bucket=bucket) as store:
+        assert file_hash in store._file_hashes
+        assert all(file_hash in store._datasource_file_hashes[uuid] for uuid in uuids[1:])
+        assert file_hash in store._datasource_file_hashes[reimported[0]["uuid"]]
 
 
 # TODO: review this test, it seems to be testing the objectstore (or metastore)

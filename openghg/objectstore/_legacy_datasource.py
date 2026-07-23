@@ -59,7 +59,6 @@ def plan_timed_data_update(
     new_version: bool,
     has_existing_data: bool,
     overlapping: bool,
-    force: bool = False,
 ) -> TimedDataUpdatePlan:
     """Plan the concrete store operation after overlap detection."""
     if not has_existing_data:
@@ -292,7 +291,6 @@ class Datasource(AbstractDatasource[XrDataset]):
         extend_keys: list | None = None,
         new_version: bool = True,
         if_exists: str = "auto",
-        force: bool = False,
         compressor: Any | None = None,
         filters: Any | None = None,
     ) -> None:
@@ -314,7 +312,6 @@ class Datasource(AbstractDatasource[XrDataset]):
                    - raises DataOverlapError if there is an overlap
                 - "new" - creates new version with just new data
                 - "combine" - replace and insert new data into current timeseries
-            force: Force adding data when the source file has already been seen.
             compressor: Compression for zarr encoding
             filters: Filters for zarr encoding
         Returns:
@@ -330,7 +327,6 @@ class Datasource(AbstractDatasource[XrDataset]):
                 drop_duplicates=drop_duplicates,
                 new_version=new_version,
                 if_exists=if_exists,
-                force=force,
                 compressor=compressor,
                 filters=filters,
             )
@@ -346,7 +342,6 @@ class Datasource(AbstractDatasource[XrDataset]):
         drop_duplicates: bool,
         new_version: bool = True,
         if_exists: str = "auto",
-        force: bool = False,
         compressor: Any | None = None,
         filters: Any | None = None,
     ) -> None:
@@ -365,7 +360,6 @@ class Datasource(AbstractDatasource[XrDataset]):
                    - raises DataOverlapError if there is an overlap
                 - "new" - creates new version with just new data
                 - "combine" - replace and insert new data into current timeseries
-            force: Force adding data when the source file has already been seen.
             compressor: Compression for zarr encoding
             filters: Filters for zarr encoding
         Returns:
@@ -398,7 +392,6 @@ class Datasource(AbstractDatasource[XrDataset]):
             new_version=new_version,
             has_existing_data=has_existing_data,
             overlapping=overlapping,
-            force=force,
         )
 
         if self._latest_version and not plan.new_version:
@@ -445,7 +438,12 @@ class Datasource(AbstractDatasource[XrDataset]):
                 raise ValueError("Cannot update empty Zarr store.")
             self._ensure_store_version(version_str, copy_current=True)
             self._store.upsert(data)
-            date_keys = [get_representative_daterange_str(self.get_data(version=version_str))]
+            date_keys = [
+                get_representative_daterange_str(
+                    self.get_data(version=version_str),
+                    period=self.period,
+                )
+            ]
 
         self._data_type = data_type
         self.add_metadata_key(key="data_type", value=data_type)

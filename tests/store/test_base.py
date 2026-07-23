@@ -1,13 +1,15 @@
 from openghg.store.base import BaseStore
 from openghg.objectstore import get_writable_bucket
-from helpers import get_footprint_datapath
+from helpers import clear_test_store, get_footprint_datapath
 
 
 def test_default_metakey_is_class_attribute():
+    """BaseStore should expose the default metakey from the class."""
     assert BaseStore.metakey() == ""
 
 
 def test_files_checked_and_hashed():
+    """check_hashes should distinguish seen and unseen files correctly."""
     file1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
     file2 = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
 
@@ -40,3 +42,23 @@ def test_files_checked_and_hashed():
 
     assert "3920587db1d5e5c1455842d54238eaaa8a47b3df" in seen
     assert "944374a2bf570f54c9066ed4a7bb7e4108a31280" in seen
+
+
+def test_shared_file_hash_invalidated_when_any_owner_is_removed():
+    """Deleting one owner should invalidate the hash but retain survivor provenance."""
+    clear_test_store("user")
+    filepath = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
+    file_hash = "shared-file-hash"
+    bucket = get_writable_bucket(name="user")
+    store = BaseStore(bucket=bucket)
+
+    store.store_hashes({file_hash: filepath}, datasource_uuids=["first", "second"])
+    store.remove_datasource_hashes("first")
+
+    assert file_hash not in store._file_hashes
+    assert file_hash in store._datasource_file_hashes["second"]
+
+    store.remove_datasource_hashes("second")
+
+    assert file_hash not in store._file_hashes
+    assert store._datasource_file_hashes == {}

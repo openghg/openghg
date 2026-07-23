@@ -1,3 +1,4 @@
+import inspect
 import uuid
 
 import numpy as np
@@ -112,6 +113,7 @@ def datasets_with_overlap():
 
 
 def test_add_data(data, datasource):
+    """add_data should store the parsed dataset and its metadata."""
     d = datasource
 
     metadata = data["ch4"]["metadata"]
@@ -152,6 +154,7 @@ def test_add_data(data, datasource):
 
 
 def test_versioning(datasource):
+    """Adding a non-overlapping update should create a new version."""
     min_tac_filepath = get_surface_datapath(filename="tac.picarro.1minute.100m.min.dat", source_format="CRDS")
     detailed_tac_filepath = get_surface_datapath(
         filename="tac.picarro.1minute.100m.201407.dat", source_format="CRDS"
@@ -473,6 +476,7 @@ def test_add_data_with_gaps_check_stored_dataset(datasets_with_gaps, datasource)
 
 
 def test_plan_timed_data_update_matrix():
+    """plan_timed_data_update should map each overlap case to the right action."""
     assert (
         plan_timed_data_update(
             if_exists="auto", new_version=False, has_existing_data=True, overlapping=False
@@ -491,11 +495,6 @@ def test_plan_timed_data_update_matrix():
         ).action
         == "error_overlap"
     )
-    forced_overlap_plan = plan_timed_data_update(
-        if_exists="auto", new_version=False, has_existing_data=True, overlapping=True, force=True
-    )
-    assert forced_overlap_plan.action == "error_overlap"
-    assert forced_overlap_plan.new_version is False
     assert (
         plan_timed_data_update(
             if_exists="combine", new_version=True, has_existing_data=True, overlapping=False
@@ -516,7 +515,16 @@ def test_plan_timed_data_update_matrix():
     )
 
 
+def test_datasource_add_data_keeps_positional_parameter_order():
+    """Public add_data callers should keep the existing positional ordering."""
+    parameters = list(inspect.signature(Datasource.add_data).parameters)
+
+    assert parameters[-4:] == ["new_version", "if_exists", "compressor", "filters"]
+    assert "force" not in parameters
+
+
 def test_combine_nonoverlapping_new_version_copies_current_data(datasource, datasets_with_gaps):
+    """combine should carry forward untouched data into a new version."""
     data_a, data_b, _ = datasets_with_gaps
     attributes = create_attributes()
 
@@ -535,6 +543,7 @@ def test_combine_nonoverlapping_new_version_copies_current_data(datasource, data
 
 
 def test_combine_nonoverlapping_read_only_does_not_create_version(datasource, datasets_with_gaps):
+    """Read-only combine requests should not create a persisted version."""
     data_a, data_b, _ = datasets_with_gaps
     attributes = create_attributes()
 
@@ -554,6 +563,7 @@ def test_combine_nonoverlapping_read_only_does_not_create_version(datasource, da
 
 
 def test_new_nonoverlapping_version_does_not_mutate_previous_date_keys(datasource, datasets_with_gaps):
+    """Creating a new version should leave the older date keys unchanged."""
     data_a, data_b, _ = datasets_with_gaps
     attributes = create_attributes()
 
@@ -571,6 +581,7 @@ def test_new_nonoverlapping_version_does_not_mutate_previous_date_keys(datasourc
 
 
 def test_auto_overlap_does_not_create_orphan_version(datasource, datasets_with_overlap):
+    """auto overlap handling should not leave behind an orphaned version."""
     data_a, data_b, _ = datasets_with_overlap
     attributes = create_attributes()
 
@@ -587,6 +598,7 @@ def test_auto_overlap_does_not_create_orphan_version(datasource, datasets_with_o
 
 
 def test_combine_overlapping_new_version_uses_new_version_date_keys(datasource, datasets_with_overlap):
+    """Combined overlaps should refresh the new version's date keys."""
     data_a, data_b, _ = datasets_with_overlap
     attributes = create_attributes()
 
@@ -600,11 +612,12 @@ def test_combine_overlapping_new_version_uses_new_version_date_keys(datasource, 
         "2012-01-01-00:00:00+00:00_2012-01-31-00:00:59+00:00",
     ]
     assert d.all_data_keys()["v2"] == [
-        "2012-01-01-00:00:00+00:00_2012-04-30-00:00:00+00:00",
+        "2012-01-01-00:00:00+00:00_2012-04-30-00:00:59+00:00",
     ]
 
 
 def test_overlap_detection_uses_latest_version_after_getting_old_version(datasource, datasets_with_gaps):
+    """Overlap detection should still consult the latest stored version."""
     data_a, data_b, data_c = datasets_with_gaps
     attributes = create_attributes()
 
@@ -623,7 +636,7 @@ def test_overlap_detection_uses_latest_version_after_getting_old_version(datasou
 
 
 def test_add_data_with_overlap_check_stored_dataset(datasource, datasets_with_overlap):
-    """Check that we can add data with overlaps."""
+    """Overlapping data should be compared against the stored dataset."""
     data_a, data_b, data_c = datasets_with_overlap
 
     attributes = create_attributes()
@@ -647,7 +660,7 @@ def test_add_data_with_overlap_check_stored_dataset(datasource, datasets_with_ov
 
 
 def test_error_if_overlap_and_not_combine(datasource, datasets_with_overlap):
-    """Check that we can get an error if we add overlapping data with if_exists == "auto"."""
+    """Non-combine overlap updates should raise a DataOverlapError."""
     data_a, data_b, _ = datasets_with_overlap
 
     attributes = create_attributes()
@@ -663,13 +676,7 @@ def test_error_if_overlap_and_not_combine(datasource, datasets_with_overlap):
 # TODO: fix attribute handling so this doesn't happen!
 # this is tracked in Issue #923
 def test_attributes_overwritten_on_combine(datasource, datasets_with_overlap):
-    """Test that shows attributes are overwritten when writing to zarr.
-
-    We probably want to change this, but we'll need to add code to do it.
-
-    NOTE: the specific choice of datasets and the use of `if_exists == "combine"` doesn't
-    matter for this test.
-    """
+    """Document that combine currently replaces existing dataset attributes."""
     data_a, data_b, _ = datasets_with_overlap
 
     attributes = create_attributes()
@@ -686,7 +693,7 @@ def test_attributes_overwritten_on_combine(datasource, datasets_with_overlap):
 
 
 def test_add_data_out_of_order_no_combine(datasource, datasets_with_gaps):
-    """Check that data is retrieved in order, even if it is added out of order."""
+    """Non-overlapping data should be stored in time order regardless of insertion order."""
     data_a, data_b, data_c = datasets_with_gaps
     attributes = create_attributes()
 
@@ -711,6 +718,7 @@ def test_add_data_out_of_order_no_combine(datasource, datasets_with_gaps):
 
 
 def test_bytes_stored(data, bucket, datasource):
+    """Stored data should stay below the expected serialized size threshold."""
     d = datasource
     d.add_data(metadata=data["ch4"]["metadata"], data=data["ch4"]["data"], data_type="surface")
     d.save()

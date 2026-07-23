@@ -63,13 +63,11 @@ class BaseStore:
             # Update myself
             self.__dict__.update(data)
 
-        if not hasattr(self, "_datasource_file_hashes"):
-            self._datasource_file_hashes = {}
-
         # self._metastore = DataClassMetaStore(bucket=bucket, data_type=self._data_type)
         self._objectstore = locking_object_store(bucket=bucket, data_type=self._data_type)
         self._bucket = bucket
         self._datasource_uuids = cast(list[str], self._objectstore.get_uuids())
+        self._reconcile_file_hash_ownership()
 
     def __init_subclass__(cls) -> None:
         if cls._data_type == "":
@@ -148,7 +146,7 @@ class BaseStore:
         filters: Any | None = None,
         chunks: dict | None = None,
         info_metadata: dict | None = None,
-        force: bool = False,
+        skip_hashes: set[str] | None = None,
     ) -> list[dict]:
         """
         Standardise input data from a filepath or set of filepaths. This will also
@@ -184,6 +182,9 @@ class BaseStore:
                 https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
 
             info_metadata: Allows to pass in additional tags to describe the data. e.g {"comment":"Quality checks have been applied"}
+            skip_hashes: File hashes used to skip parsed datasources that already
+                own every hash. This is used when a shared file is reprocessed
+                after one of its datasources has been deleted.
         Returns:
             list[dict]: List of datasources and their uuids
 
@@ -249,12 +250,16 @@ class BaseStore:
             parsed_data, additional_input_parameters, additional_metadata=info_metadata
         )
 
+        if skip_hashes:
+            updated_data = self._exclude_datasources_owning_hashes(updated_data, skip_hashes)
+            if not updated_data:
+                return []
+
         # Create Datasources, save them to the object store and get their UUIDs
         datasource_uuids = self.assign_data(
             data=updated_data,
             if_exists=if_exists,
             new_version=new_version,
-            force=force,
             compressor=compressor,
             filters=filters,
         )
@@ -382,7 +387,6 @@ class BaseStore:
                     filters=filters,
                     chunks=chunks,
                     info_metadata=info_metadata,
-                    force=force,
                 )
             except StandardiseError as err:
                 logger.error(f"Unable to standardise dataset. Error: {err}")
@@ -428,7 +432,7 @@ class BaseStore:
                         filters=filters,
                         chunks=chunks,
                         info_metadata=info_metadata,
-                        force=force,
+                        skip_hashes=set(unseen_hashes) if not force else None,
                     )
                 except StandardiseError:
                     logger.warning(
@@ -463,7 +467,11 @@ class BaseStore:
                         filters=filters,
                         chunks=chunks,
                         info_metadata=info_metadata,
-                        force=force,
+                        skip_hashes=(
+                            {file_hash for file_hash, path in unseen_hashes.items() if path == fp}
+                            if not force
+                            else None
+                        ),
                     )
                 except ValidationError as err:
                     msg = f"Unable to validate and store data from file: {Path(fp).name}. Error: {err}"
@@ -745,38 +753,58 @@ class BaseStore:
                 existing.update(hashes)
                 self._datasource_file_hashes[uuid] = sorted(existing)
 
-    def remove_datasource_hashes(self, uuid: str, metadata: dict | None = None) -> None:
-        """Remove file hashes associated with a datasource.
+    def _reconcile_file_hash_ownership(self) -> None:
+        """Conservatively migrate and reconcile persisted file-hash ownership.
 
-        Older stores do not contain per-datasource hash ownership. In that case,
-        fall back to removing hashes whose stored filename appears in metadata.
+        Stores created before ownership was recorded only contain the global
+        hash-to-filename mapping. Exact ownership cannot be reconstructed, so
+        unowned hashes are associated with every existing datasource. Ownership
+        entries whose global hash has been invalidated are retained so surviving
+        datasources can be skipped when a shared file is reprocessed.
+        """
+        existing_uuids = set(self._datasource_uuids)
+        ownership = {
+            uuid: sorted(set(hashes))
+            for uuid, hashes in self._datasource_file_hashes.items()
+            if uuid in existing_uuids and hashes
+        }
+        owned_hashes = {file_hash for hashes in ownership.values() for file_hash in hashes}
+        unowned_hashes = set(self._file_hashes) - owned_hashes
+
+        if unowned_hashes:
+            for uuid in existing_uuids:
+                ownership[uuid] = sorted(set(ownership.get(uuid, [])) | unowned_hashes)
+
+            if not existing_uuids:
+                for file_hash in unowned_hashes:
+                    self._file_hashes.pop(file_hash, None)
+
+        self._datasource_file_hashes = ownership
+
+    def remove_datasource_hashes(self, uuid: str) -> None:
+        """Invalidate hashes linked to a deleted datasource.
+
+        Other datasource ownership entries are retained. If a shared file is
+        added again, those entries allow already-present datasources to be
+        skipped while the deleted datasource is recreated.
         """
         hashes = set(self._datasource_file_hashes.pop(uuid, []))
-
-        if not hashes and metadata:
-            filenames = self._metadata_filenames(metadata)
-            hashes = {
-                file_hash
-                for file_hash, filename in self._file_hashes.items()
-                if str(filename) in filenames or Path(str(filename)).name in filenames
-            }
 
         for file_hash in hashes:
             self._file_hashes.pop(file_hash, None)
 
-    @staticmethod
-    def _metadata_filenames(metadata: dict) -> set[str]:
-        filenames: set[str] = set()
-        for key in ("file", "files", "filename"):
-            value = metadata.get(key)
-            if value is None:
-                continue
-            if isinstance(value, str):
-                filenames.update(part.strip() for part in value.split(",") if part.strip())
-            elif isinstance(value, Sequence):
-                filenames.update(str(part) for part in value)
+    def _exclude_datasources_owning_hashes(
+        self, data: MutableSequence[MetadataAndData], hashes: set[str]
+    ) -> list[MetadataAndData]:
+        """Exclude parsed data already represented by all supplied file hashes."""
+        required_keys = self.get_lookup_keys(data=data)
+        lookup_results = self.datasource_lookup(data=data, required_keys=required_keys)
 
-        return filenames
+        return [
+            parsed_data
+            for uuid, parsed_data in zip(lookup_results, data)
+            if uuid is None or not hashes.issubset(self._datasource_file_hashes.get(uuid, []))
+        ]
 
     def check_hashes(
         self, filepaths: str | Path | list[str] | list[Path], force: bool
@@ -1015,7 +1043,6 @@ class BaseStore:
         extend_keys: list | None = None,
         if_exists: str = "auto",
         new_version: bool = True,
-        force: bool = False,
         compressor: Any | None = None,
         filters: Any | None = None,
     ) -> list[dict]:
@@ -1038,7 +1065,6 @@ class BaseStore:
                     - "combine" - replace and insert new data into current timeseries
                 new_version: Create a new version for the data and save current
                     data to a previous version.
-                force: Force adding of data even if this is identical to data stored.
                 compressor: Compression for zarr encoding
                 filters: Filters for zarr encoding
             Returns:
@@ -1085,7 +1111,6 @@ class BaseStore:
                     skip_keys=skip_keys,
                     extend_keys=extend_keys,
                     new_version=new_version,
-                    force=force,
                     if_exists=if_exists,
                     compressor=compressor,
                     filters=filters,

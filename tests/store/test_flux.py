@@ -420,6 +420,7 @@ def test_search_flux_uses_raw_source_when_datasource_has_duplicate_source(clear_
         source=indexed_source,
         domain="europe",
         force=True,
+        if_exists="new",
     )
     assert updated_results[0]["uuid"] == uuid
     assert updated_results[0]["new"] is False

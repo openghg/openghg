@@ -155,6 +155,10 @@ class ZarrStore(Store, Generic[ZST]):
                 # otherwise, select non-overlaps
                 data = self._overlap_determiner.select_nonoverlaps(data, self.append_dim)
 
+            if data.sizes.get(self.append_dim) == 0:
+                logger.warning("No data to insert.")
+                return None
+
             data.to_zarr(
                 store=self.store,
                 mode="a",

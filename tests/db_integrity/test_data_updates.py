@@ -16,10 +16,8 @@ from openghg.standardise import standardise_flux, standardise_footprint, standar
 from openghg.types import DataOverlapError
 
 
-def flux_data_read(force=False):
-    """
-    Flux data set up.
-    """
+def flux_data_read(force=False, if_exists="auto"):
+    """Import the baseline flux dataset used by the database update tests."""
     # Emissions data
     # Anthropogenic ch4 (methane) data from 2012 for EUROPE
     source1 = "anthro"
@@ -35,14 +33,13 @@ def flux_data_read(force=False):
         domain=domain,
         time_resolved=False,
         force=force,
+        if_exists=if_exists,
         store=store,
     )
 
 
 def test_database_update_repeat():
-    """
-    Test object store can handle the same date (flux data) being added twice.
-    """
+    """Repeated flux imports should keep the original version stable."""
     clear_test_stores()
     # Attempt to add same data to the database twice
     flux_datapath1 = get_flux_datapath("ch4-anthro_EUROPE_2012.nc")
@@ -67,15 +64,12 @@ def test_database_update_repeat():
 
 
 def test_database_update_force():
-    """
-    Test object store can update identical data, and create a new version
-    when force keyword is used.
-    """
+    """force should allow a new version for identical flux data."""
     # Attempt to add same data to the database twice
     clear_test_stores()
     flux_data_read()
     # This creates a new version
-    flux_data_read(force=True)
+    flux_data_read(force=True, if_exists="new")
 
     em_param = {}
     em_param["start_date"] = "2012-01-01"
@@ -95,10 +89,7 @@ def test_database_update_force():
 
 
 def bsd_data_read_crds():
-    """
-    Add Bilsdale *minutely* data for CRDS instrument to object store.
-     - CRDS: ch4, co2, co
-    """
+    """Import the Bilsdale CRDS dataset used by the integrity tests."""
     site = "bsd"
     network = "DECC"
     source_format1 = "CRDS"
@@ -108,11 +99,8 @@ def bsd_data_read_crds():
     )
 
 
-def bsd_data_read_gcmd(force=False):
-    """
-    Add Bilsdale data GCMD instrument to object store.
-     - GCMD: sf6, n2o
-    """
+def bsd_data_read_gcmd(force=False, if_exists="auto"):
+    """Import the Bilsdale GCMD dataset used by the integrity tests."""
     site = "bsd"
     network = "DECC"
     source_format2 = "GCWERKS"
@@ -129,15 +117,12 @@ def bsd_data_read_gcmd(force=False):
         network=network,
         instrument=instrument,
         force=force,
+        if_exists=if_exists,
     )
 
 
 def bsd_small_edit_data_read(if_exists="auto"):
-    """
-    Add overlapping Bilsdale GCMD data to the object store:
-     - Same data
-     - Small difference header details (should create different hash)
-    """
+    """Import a small metadata edit that should produce a different hash."""
     site = "bsd"
     network = "DECC"
     source_format2 = "GCWERKS"
@@ -159,10 +144,7 @@ def bsd_small_edit_data_read(if_exists="auto"):
 
 
 def bsd_diff_data_read(if_exists="auto", save_current="auto"):
-    """
-    Add overlapping Bilsdale GCMD data to the object store:
-     - Small difference in data values (should create different hash)
-    """
+    """Import overlapping data with a value change that should alter hashes."""
     site = "bsd"
     network = "DECC"
     source_format2 = "GCWERKS"
@@ -184,10 +166,7 @@ def bsd_diff_data_read(if_exists="auto", save_current="auto"):
 
 
 def bsd_diff_date_range_read(overwrite=False):
-    """
-    Add overlapping Bilsdale GCMD data to the object store:
-     - Small difference in data date range (should create different hash)
-    """
+    """Import overlapping data with a date-range change to exercise hashing."""
     site = "bsd"
     network = "DECC"
     source_format2 = "GCWERKS"
@@ -500,7 +479,7 @@ def test_obs_data_force_update():
     clear_test_stores()
     # Load BSD data - GCMD data (GCWERKS)
     bsd_data_read_gcmd()
-    bsd_data_read_gcmd(force=True)
+    bsd_data_read_gcmd(force=True, if_exists="new")
 
     # Search for an expected species
     # GCMD data

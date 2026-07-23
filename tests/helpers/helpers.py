@@ -14,6 +14,7 @@ def delete_datasources(data_type: str, store: str, **search_kwargs):
     dm.delete_datasource(uuid=uuids)
     return uuids
 
+
 def temporary_store_paths() -> Dict[str, Path]:
     # Add some uppercasing and numbers here to enusure paths work
     # with other characters - see https://github.com/openghg/openghg/issues/701
@@ -22,9 +23,9 @@ def temporary_store_paths() -> Dict[str, Path]:
     base_tmp = Path(tempfile.gettempdir()) / f"openghg-testing-{user}"
 
     return {
-        "user": base_tmp / f"openghg_testing-STORE_123",
-        "group": base_tmp / f"openghg_testing_group_store",
-        "shared": base_tmp / f"openghg_testing_shared_store",
+        "user": base_tmp / "openghg_testing-STORE_123",
+        "group": base_tmp / "openghg_testing_group_store",
+        "shared": base_tmp / "openghg_testing_shared_store",
     }
 
 
