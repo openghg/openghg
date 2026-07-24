@@ -539,7 +539,7 @@ def create_icos_attributes(
         # instrument_value = ",".join([f"icos_id_{int(v)}" for v in sorted(unique_vals)])
 
         # Apply to both attributes and metadata
-        attributes["instrument"] = instrument_value
+    attributes["instrument"] = instrument_value
 
     attributes.update(additional_data)
 
