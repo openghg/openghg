@@ -202,12 +202,13 @@ def test_retrieved_prevents_storing_twice(mock_retrieve_remote, caplog):
 
 @pytest.mark.icos
 def test_force_does_not_bypass_overlap_policy(mock_retrieve_remote, caplog):
-    """The compatibility force argument does not change overlap handling."""
+    """Deprecated force warns and does not change overlap handling."""
     clear_test_stores()
 
     retrieve_atmospheric(site="tac", store="user", update_mismatch="metadata")
     caplog.clear()
-    retrieve_atmospheric(site="tac", store="user", force=True, update_mismatch="metadata")
+    with pytest.warns(DeprecationWarning, match=r"force.*deprecated.*if_exists"):
+        retrieve_atmospheric(site="tac", store="user", force=True, update_mismatch="metadata")
 
     assert "Skipping data that overlaps existing data" in caplog.text
 

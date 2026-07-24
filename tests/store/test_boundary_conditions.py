@@ -180,6 +180,56 @@ def test_restandardise_boundary_conditions_after_datasource_deletion():
         assert original_data[data_var].equals(recreated_data.data[data_var])
 
 
+def test_looped_combine_with_ignored_force_retains_all_boundary_condition_files():
+    """Looped combine updates retain every source month when deprecated force is ignored."""
+    test_datapaths = [
+        get_bc_datapath("ch4_EUROPE_201208.nc"),
+        get_bc_datapath("ch4_EUROPE_201209.nc"),
+    ]
+    standardise_kwargs = {
+        "store": "user",
+        "species": "ch4",
+        "bc_input": "MOZART",
+        "domain": "EUROPE",
+        "period": "monthly",
+    }
+
+    standardise_bc(filepath=test_datapaths, **standardise_kwargs)
+    standardise_bc(
+        filepath=test_datapaths,
+        concat_nc_files=False,
+        force=True,
+        if_exists="combine",
+        **standardise_kwargs,
+    )
+
+    retrieved_data = search(
+        species="ch4",
+        bc_input="MOZART",
+        domain="europe",
+        data_type="boundary_conditions",
+        store="user",
+    ).retrieve_all()
+    with open_dataset(test_datapaths[0]) as august_data, open_dataset(test_datapaths[1]) as september_data:
+        expected_data = concat([august_data, september_data], dim="time").load()
+
+    assert expected_data.time.equals(retrieved_data.data.time)
+    for data_var in ["vmr_n", "vmr_e", "vmr_s", "vmr_w"]:
+        assert expected_data[data_var].equals(retrieved_data.data[data_var])
+
+    expected_metadata = {
+        "species": "ch4",
+        "bc_input": "mozart",
+        "domain": "europe",
+        "data_type": "boundary_conditions",
+        "time_period": "1 month",
+        "start_date": "2012-08-01 00:00:00+00:00",
+        "end_date": "2012-09-30 23:59:59+00:00",
+    }
+    for key, value in expected_metadata.items():
+        assert retrieved_data.metadata[key] == value
+
+
 def test_read_file_yearly():
     test_datapath = get_bc_datapath("n2o_EUROPE_2012.nc")
 
