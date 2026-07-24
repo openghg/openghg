@@ -24,6 +24,7 @@ def retrieve_atmospheric(
     store: str | None = None,
     update_mismatch: str = "never",
     force: bool = False,
+    if_exists: str = "auto",
 ) -> ObsData | list[ObsData] | None:
     """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
     data will be retrieved from the ICOS Carbon Portal. Data retrieval from the Carbon Portal may take a short time.
@@ -54,7 +55,10 @@ def retrieve_atmospheric(
                 - "never" - don't update mismatches and raise an AttrMismatchError
                 - "from_source" / "attributes" - update mismatches based on attributes from ICOS Header
                 - "from_definition" / "metadata" - update mismatches based on input metadata
-        force: Force adding of data even if this is identical to data stored (checked based on previously retrieved file hashes).
+        force: Deprecated compatibility argument. This value is ignored.
+        if_exists: What to do if data already exists. ``"auto"`` skips overlapping
+            data, ``"new"`` creates a version containing only the retrieved data,
+            and ``"combine"`` updates the current timeseries with the retrieved data.
     Returns:
         ObsData, list[ObsData] or None
     """
@@ -114,7 +118,7 @@ def retrieve_atmospheric(
 
         bucket = get_writable_bucket(name=store)
         with ObsSurface(bucket=bucket) as obs:
-            obs.store_data(data=standardised_data, force=force)
+            obs.store_data(data=standardised_data, if_exists=if_exists)
 
         # Create the expected ObsData type
         obs_data = []
@@ -474,9 +478,6 @@ def _retrieve_remote(
                 "comment"
             ] = "ICOS LTR as defined by Yver Kwok et al., 2015, doi:10.5194/amt-8-3867-2015"
 
-        # So there isn't an easy way of getting a hash of a Dataset, can we do something
-        # simple here we can compare data that's being added? Then we'll be able to make sure
-        # ObsSurface.store_data won't accept data it's already seen
         data_key = f"key-{n}"
         # TODO - do we need both attributes and metadata here?
         standardised_data[data_key] = {

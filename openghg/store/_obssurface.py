@@ -127,8 +127,6 @@ class ObsSurface(BaseStore):
         # from collections import defaultdict
         # from openghg.standardise.surface import parse_aqmesh
         # from openghg.store import assign_data
-        # from openghg.util import hash_file
-
         # filepath = Path(filepath)
         # metadata_filepath = Path(metadata_filepath)
 
@@ -146,15 +144,6 @@ class ObsSurface(BaseStore):
         # for site, site_data in processed_data.items():
         #     metadata = site_data["metadata"]
         #     measurement_data = site_data["data"]
-
-        #     file_hash = hash_file(filepath=filepath)
-
-        #     if self.seen_hash(file_hash=file_hash) and not force:
-        #         raise ValueError(
-        #             f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]}.\n"
-        #              "If necessary, use force=True to bypass this to add this data."
-        #         )
-        #         break
 
         #     combined = {site: {"data": measurement_data, "metadata": metadata}}
 
@@ -188,10 +177,6 @@ class ObsSurface(BaseStore):
 
         #     # Record the Datasources we've created / appended to
         #     self.add_datasources(uuids=datasource_uuids, data=combined, metastore=self._metastore)
-
-        #     # Store the hash as the key for easy searching, store the filename as well for
-        #     # ease of checking by user
-        #     self.set_hash(file_hash=file_hash, filename=filepath.name)
 
         # return results
 
@@ -387,11 +372,11 @@ class ObsSurface(BaseStore):
             if_exists: What to do if existing data is present.
                 - "auto" - checks new and current data for timeseries overlap
                    - adds data if no overlap
-                   - raises DataOverlapError if there is an overlap
+                   - logs and skips each item that overlaps
                 - "new" - creates new version with just new data
                 - "combine" - replace and insert new data into current timeseries
             overwrite: Deprecated. This will use options for if_exists="new".
-            force: Force adding of data even if this is identical to data stored (checked based on previously retrieved file hashes).
+            force: Deprecated compatibility argument. This value is ignored.
             required_metakeys: Keys in the metadata we should use to store this metadata in the object store
                 if None it defaults to:
                     {"species", "site", "station_long_name", "inlet", "instrument",
@@ -415,10 +400,6 @@ class ObsSurface(BaseStore):
         # obs = ObsSurface.load()
         # metastore = load_metastore(key=obs._metakey)
 
-        # Making sure data can be force overwritten if force keyword is included.
-        if force and if_exists == "auto":
-            if_exists = "new"
-
         if required_metakeys is None:
             required_metakeys = (
                 "species",
@@ -436,7 +417,6 @@ class ObsSurface(BaseStore):
         # This adds the parsed data to new or existing Datasources by performing a lookup
         # in the metastore
 
-        # Workaround to maintain old behavior without using hashes
         # TODO: when zarr store updates are made, make default to combine any
         # new data with the existing, ignoring new data that overlaps
         datasource_uuids = []
@@ -458,9 +438,3 @@ class ObsSurface(BaseStore):
                 datasource_uuids.extend(datasource_uuid)
 
         return datasource_uuids
-
-    def seen_hash(self, file_hash: str) -> bool:
-        return file_hash in self._file_hashes
-
-    def set_hash(self, file_hash: str, filename: str) -> None:
-        self._file_hashes[file_hash] = filename

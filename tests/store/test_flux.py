@@ -6,18 +6,19 @@ from openghg.retrieve import search, search_flux
 from openghg.store import Flux
 from openghg.standardise import standardise_flux, standardise_from_binary_data
 from openghg.transform import transform_flux_data
-from openghg.util import hash_bytes
 from pandas import Timestamp
 from xarray import open_dataset
 from typing import Any, Union
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def clear_stores():
+    """Start each flux test with empty writable stores."""
     clear_test_stores()
 
 
 def test_read_binary_data(mocker, clear_stores):
+    """Binary flux data can be standardised using filename metadata."""
     clear_test_stores()
 
     test_datapath = get_flux_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
@@ -31,10 +32,9 @@ def test_read_binary_data(mocker, clear_stores):
         "time_resolved": False,
     }
 
-    sha1_hash = hash_bytes(data=binary_data)
     filename = test_datapath.name
 
-    file_metadata = {"filename": filename, "sha1_hash": sha1_hash, "compressed": False}
+    file_metadata = {"filename": filename, "compressed": False}
 
     results = standardise_from_binary_data(
         store="user",
@@ -50,6 +50,7 @@ def test_read_binary_data(mocker, clear_stores):
 
 
 def test_read_file(caplog):
+    """A flux file is standardised and stored with the expected chunking."""
     clear_test_stores()
     test_datapath = get_flux_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
 
@@ -60,7 +61,6 @@ def test_read_file(caplog):
         source="gpp-cardamom",
         domain="europe",
         time_resolved=False,
-        force=True,  # For ease, make sure we can add the same data.
     )
 
     assert len(proc_results) == 1
@@ -419,7 +419,7 @@ def test_search_flux_uses_raw_source_when_datasource_has_duplicate_source(clear_
         species="ch4",
         source=indexed_source,
         domain="europe",
-        force=True,
+        if_exists="new",
     )
     assert updated_results[0]["uuid"] == uuid
     assert updated_results[0]["new"] is False

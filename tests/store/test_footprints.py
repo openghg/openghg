@@ -4,7 +4,6 @@ from openghg.retrieve import search
 from openghg.objectstore import get_writable_bucket
 from openghg.standardise import standardise_footprint, standardise_from_binary_data
 from openghg.store import Footprints, get_metakey_defaults
-from openghg.util import hash_bytes
 import xarray as xr
 from pathlib import Path
 from unittest.mock import patch
@@ -12,8 +11,15 @@ from unittest.mock import patch
 from tests.helpers.helpers import print_dict_diff
 
 
+@pytest.fixture(autouse=True)
+def clear_store():
+    """Start each footprint test with an empty writable store."""
+    clear_test_store("user")
+
+
 @pytest.mark.xfail(reason="Need to add a better way of passing in binary data to the read_file functions.")
 def test_read_footprint_co2_from_data(mocker):
+    """Binary footprint data can be standardised using filename metadata."""
     # fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
     fake_uuids = [f"test-uuid-{n}" for n in range(100, 150)]
     mocker.patch("uuid.uuid4", side_effect=fake_uuids)
@@ -32,10 +38,9 @@ def test_read_footprint_co2_from_data(mocker):
     }
 
     binary_data = datapath.read_bytes()
-    sha1_hash = hash_bytes(data=binary_data)
     filename = datapath.name
 
-    file_metadata = {"filename": filename, "sha1_hash": sha1_hash, "compressed": True}
+    file_metadata = {"filename": filename, "compressed": True}
 
     # Expect co2 data to be high time resolution
     # - could include time_resolved=True but don't need to as this will be set automatically
@@ -672,6 +677,7 @@ def test_process_footprints():
 
 
 def test_passing_in_different_chunks_to_same_store_works():
+    """Non-overlapping footprint files can use different chunk sizes."""
     file1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
     file2 = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
 
@@ -683,7 +689,6 @@ def test_passing_in_different_chunks_to_same_store_works():
         model="UKV",
         store="user",
         chunks={"time": 4},
-        force=True,
     )
     standardise_footprint(
         filepath=file2,
@@ -693,7 +698,6 @@ def test_passing_in_different_chunks_to_same_store_works():
         model="UKV",
         store="user",
         chunks={"time": 2},
-        force=True,
     )
 
     # Get the footprints data

@@ -151,7 +151,7 @@ def standardise_surface(
              - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
              - "n" / "no" - Allow current data to updated / deleted
         overwrite: Deprecated. This will use options for if_exists="new".
-        force: Force adding of data even if this is identical to data stored.
+        force: Deprecated compatibility argument. This value is ignored.
         compression: Enable compression in the store
         compressor: A custom compressor to use. If None, this will default to
             `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
@@ -211,7 +211,6 @@ def standardise_surface(
         update_mismatch=update_mismatch,
         if_exists=if_exists,
         save_current=save_current,
-        force=force,
         compression=compression,
         compressor=compressor,
         filters=filters,
@@ -278,7 +277,7 @@ def standardise_column(
             - "yes" or "y": Save current data as a separate version.
             - "no" or "n": Allow updates or deletion of current data.
         overwrite: Deprecated. Replaced by `if_exists="new"`.
-        force: Forces the addition of data even if it's identical to the existing data.
+        force: Deprecated compatibility argument. This value is ignored.
         compression: Enables or disables compression during data storage (default is True).
         compressor: Custom compression method. Defaults to `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.)`.
@@ -316,7 +315,6 @@ def standardise_column(
         overwrite=overwrite,
         if_exists=if_exists,
         save_current=save_current,
-        force=force,
         compression=compression,
         compressor=compressor,
         filters=filters,
@@ -374,7 +372,7 @@ def standardise_bc(
              - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
              - "n" / "no" - Allow current data to updated / deleted
         overwrite: Deprecated. This will use options for if_exists="new".
-        force: Force adding of data even if this is identical to data stored.
+        force: Deprecated compatibility argument. This value is ignored.
         compression: Enable compression in the store
         compressor: A custom compressor to use. If None, this will default to
             `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
@@ -408,7 +406,6 @@ def standardise_bc(
         overwrite=overwrite,
         if_exists=if_exists,
         save_current=save_current,
-        force=force,
         compression=compression,
         compressor=compressor,
         filters=filters,
@@ -499,7 +496,7 @@ def standardise_footprint(
              - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
              - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
              - "n" / "no" - Allow current data to updated / deleted        overwrite: Deprecated. This will use options for if_exists="new".
-        force: Force adding of data even if this is identical to data stored.
+        force: Deprecated compatibility argument. This value is ignored.
         sort: Sort data in by time
         drop_duplicates: Drop duplicate timestamps, keeping the first value
         compression: Enable compression in the store
@@ -562,7 +559,6 @@ def standardise_footprint(
         overwrite=overwrite,
         if_exists=if_exists,
         save_current=save_current,
-        force=force,
         compression=compression,
         compressor=compressor,
         filters=filters,
@@ -632,7 +628,7 @@ def standardise_flux(
              - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
              - "n" / "no" - Allow current data to updated / deleted
         overwrite: Deprecated. This will use options for if_exists="new".
-        force: Force adding of data even if this is identical to data stored.
+        force: Deprecated compatibility argument. This value is ignored.
         compression: Enable compression in the store
         compressor: A custom compressor to use. If None, this will default to
             `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
@@ -674,7 +670,6 @@ def standardise_flux(
         overwrite=overwrite,
         if_exists=if_exists,
         save_current=save_current,
-        force=force,
         compression=compression,
         compressor=compressor,
         filters=filters,
@@ -729,7 +724,7 @@ def standardise_eulerian(
         overwrite: Deprecated. This will use options for if_exists="new".
         store: Name of object store to write to, required if user has access to more than one
         writable store
-        force: Force adding of data even if this is identical to data stored.
+        force: Deprecated compatibility argument. This value is ignored.
         compression: Enable compression in the store
         compressor: A custom compressor to use. If None, this will default to
             `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
@@ -761,7 +756,6 @@ def standardise_eulerian(
         tag=tag,
         overwrite=overwrite,
         if_exists=if_exists,
-        force=force,
         save_current=save_current,
         compression=compression,
         compressor=compressor,
@@ -865,7 +859,7 @@ def standardise_flux_timeseries(
             - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
             - "n" / "no" - Allow current data to updated / deleted
         overwrite: Deprecated. This will use options for if_exists="new".
-        force: Force adding of data even if this is identical to data stored.
+        force: Deprecated compatibility argument. This value is ignored.
         compressor: A custom compressor to use. If None, this will default to
             `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
@@ -902,7 +896,6 @@ def standardise_flux_timeseries(
         overwrite=overwrite,
         if_exists=if_exists,
         save_current=save_current,
-        force=force,
         compressor=compressor,
         filters=filters,
         period=period,
@@ -925,7 +918,24 @@ def standardise_site_met(
     chunks: dict | None = None,
     compressor: Any | None = None,
 ) -> list[dict]:
-    """ """
+    """Standardise site meteorology data and store it in the object store.
+
+    Args:
+        filepath: Path to the site meteorology data.
+        site: Site code or name.
+        network: Measurement network name.
+        met_source: Source of the meteorology data.
+        source_format: Input data format.
+        if_exists: What to do if existing data is present.
+        save_current: Whether to retain the current data as a previous version.
+        store: Name of the object store to write to.
+        force: Deprecated compatibility argument. This value is ignored.
+        chunks: Chunking schema to use when storing the data.
+        compressor: Custom compressor to use when storing the data.
+
+    Returns:
+        Details of the datasource UUIDs for the processed data.
+    """
 
     return standardise(
         data_type="site_met",
@@ -937,7 +947,6 @@ def standardise_site_met(
         if_exists=if_exists,
         store=store,
         save_current=save_current,
-        force=force,
         chunks=chunks,
         compressor=compressor,
     )

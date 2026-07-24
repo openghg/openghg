@@ -34,10 +34,6 @@ from ._file import open_nc_fn as open_nc_fn
 from ._file import open_time_nc_fn as open_time_nc_fn
 from ._file import read_header as read_header
 from ._function_inputs import split_function_inputs as split_function_inputs
-from ._hashing import hash_bytes as hash_bytes
-from ._hashing import hash_file as hash_file
-from ._hashing import hash_retrieved_data as hash_retrieved_data
-from ._hashing import hash_string as hash_string
 from ._inlet import extract_height_name as extract_height_name
 from ._inlet import extract_inlet_value as extract_inlet_value
 from ._inlet import format_inlet as format_inlet

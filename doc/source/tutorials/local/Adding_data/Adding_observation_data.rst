@@ -273,7 +273,7 @@ added using the same `tag`. For example below we show how to add the same data a
                                        site="TAC",
                                        network="DECC",
                                        tag="project1",
-                                       force=True)
+                                       if_exists="new")
 
     agage_results = standardise_surface(filepath=capegrim_tuple,
                                         source_format="GCWERKS",
@@ -281,11 +281,11 @@ added using the same `tag`. For example below we show how to add the same data a
                                         network="AGAGE",
                                         instrument="medusa",
                                         tag=["project1", "project2"],
-                                        force=True)
+                                        if_exists="new")
 
 
-*Note: here we included the force=True keyword as we are adding the same data which has been added in
-a previous step of the tutorial - see "Updating existing data" tutorial for more details of this.*
+*Note: here we included ``if_exists="new"`` because the same data was added in a
+previous step of the tutorial. See the "Updating existing data" tutorial for details.*
 
 As will be covered in the :ref:`2. Searching for data` section, these keywords can then used when searching the
 object store. For the `tag` keyword this can be used to return all data which includes the chosen tag.
