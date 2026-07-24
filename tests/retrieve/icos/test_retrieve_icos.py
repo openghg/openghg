@@ -207,9 +207,10 @@ def test_force_does_not_bypass_overlap_policy(mock_retrieve_remote, caplog):
 
     retrieve_atmospheric(site="tac", store="user", update_mismatch="metadata")
     caplog.clear()
-    with pytest.warns(DeprecationWarning, match=r"force.*deprecated.*if_exists"):
+    with pytest.warns(DeprecationWarning, match=r"force.*deprecated.*if_exists") as caught_warnings:
         retrieve_atmospheric(site="tac", store="user", force=True, update_mismatch="metadata")
 
+    assert len(caught_warnings) == 1
     assert "Skipping data that overlaps existing data" in caplog.text
 
 

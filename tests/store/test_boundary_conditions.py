@@ -181,7 +181,7 @@ def test_restandardise_boundary_conditions_after_datasource_deletion():
 
 
 def test_looped_combine_with_ignored_force_retains_all_boundary_condition_files():
-    """Looped combine updates retain every source month when deprecated force is ignored."""
+    """Ignored force warns while looped combine retains every source month."""
     test_datapaths = [
         get_bc_datapath("ch4_EUROPE_201208.nc"),
         get_bc_datapath("ch4_EUROPE_201209.nc"),
@@ -195,13 +195,15 @@ def test_looped_combine_with_ignored_force_retains_all_boundary_condition_files(
     }
 
     standardise_bc(filepath=test_datapaths, **standardise_kwargs)
-    standardise_bc(
-        filepath=test_datapaths,
-        concat_nc_files=False,
-        force=True,
-        if_exists="combine",
-        **standardise_kwargs,
-    )
+    with pytest.warns(DeprecationWarning, match=r"force.*deprecated.*if_exists") as caught_warnings:
+        standardise_bc(
+            filepath=test_datapaths,
+            concat_nc_files=False,
+            force=True,
+            if_exists="combine",
+            **standardise_kwargs,
+        )
+    assert sum("force argument is deprecated" in str(warning.message) for warning in caught_warnings) == 1
 
     retrieved_data = search(
         species="ch4",

@@ -9,6 +9,7 @@ from openghg.standardise.meta import align_metadata_attributes
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.types import pathType, MetadataAndData, DataOverlapError
+from openghg.util._deprecation import _warn_if_force_ignored
 from collections import defaultdict
 
 logger = logging.getLogger("openghg.store")
@@ -376,7 +377,8 @@ class ObsSurface(BaseStore):
                 - "new" - creates new version with just new data
                 - "combine" - replace and insert new data into current timeseries
             overwrite: Deprecated. This will use options for if_exists="new".
-            force: Deprecated compatibility argument. This value is ignored.
+            force: Deprecated and ignored. Use ``if_exists`` to control overlap
+                handling. Passing ``True`` emits a deprecation warning.
             required_metakeys: Keys in the metadata we should use to store this metadata in the object store
                 if None it defaults to:
                     {"species", "site", "station_long_name", "inlet", "instrument",
@@ -386,9 +388,15 @@ class ObsSurface(BaseStore):
                 See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+
+        Warns:
+            DeprecationWarning: If ``force`` is ``True``.
+
         Returns:
             list of dicts containing details of stored data, or None
         """
+        _warn_if_force_ignored(force)
+
         if overwrite and if_exists == "auto":
             logger.warning(
                 "Overwrite flag is deprecated in preference to `if_exists` input."

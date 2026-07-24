@@ -24,6 +24,7 @@ from openghg.types import (
     ValidationError,
     MetadataAndData,
 )
+from openghg.util._deprecation import _warn_if_force_ignored
 from openghg.util._strings import to_lowercase
 from openghg.util._time import timestamp_now
 from openghg.util._util import normalise_to_filepath_list
@@ -314,7 +315,8 @@ class BaseStore:
                 - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
                 - "n" / "no" - Allow current data to updated / deleted
             overwrite: Deprecated. This will use options for if_exists="new".
-            force: Deprecated compatibility argument. This value is ignored.
+            force: Deprecated and ignored. Use ``if_exists`` to control overlap
+                handling. Passing ``True`` emits a deprecation warning.
             compressor: A custom compressor to use. If None, this will default to
                 `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
@@ -340,9 +342,15 @@ class BaseStore:
             **kwargs: Specific keywords associated with the data type. See
                 the openghg.standardise.standardise_* functions for details
                 of what keywords are expected for this.
+
+        Warns:
+            DeprecationWarning: If ``force`` is ``True``.
+
         Returns:
             list[dict]: Details of the datasource uuids for the processed files.
         """
+
+        _warn_if_force_ignored(force)
 
         from openghg.store.spec import check_parser
         from openghg.util import (

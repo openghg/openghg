@@ -3,10 +3,10 @@ from openghg.dataobjects import ObsData
 from openghg.objectstore import get_writable_bucket
 from openghg.standardise.meta import dataset_formatter, align_metadata_attributes
 from openghg.util import load_json
+from openghg.util._deprecation import _warn_if_force_ignored
 from openghg.types import convert_to_list_of_metadata_and_data, MetadataAndData, MetadataFormatError
 import openghg_defs
 import logging
-import warnings
 
 logger = logging.getLogger("openghg.retrieve")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -61,8 +61,10 @@ def retrieve_atmospheric(
         if_exists: What to do if data already exists. ``"auto"`` skips overlapping
             data, ``"new"`` creates a version containing only the retrieved data,
             and ``"combine"`` updates the current timeseries with the retrieved data.
+
     Warns:
         DeprecationWarning: If ``force`` is ``True``.
+
     Returns:
         ObsData, list[ObsData] or None
     """
@@ -70,12 +72,7 @@ def retrieve_atmospheric(
     from openghg.store import ObsSurface
     from openghg.util import to_lowercase, format_data_level
 
-    if force:
-        warnings.warn(
-            "The force argument is deprecated and ignored; use if_exists to control overlap handling.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
+    _warn_if_force_ignored(force)
 
     # ICOS: Potentially a different constraint for data_level to general constraint ([1, 2], rather than [0, 1, 2, 3])
     if not 1 <= int(data_level) <= 2:

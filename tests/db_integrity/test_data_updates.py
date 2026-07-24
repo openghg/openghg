@@ -40,7 +40,7 @@ def flux_data_read(if_exists="auto"):
 
 
 def test_database_update_repeat():
-    """Repeated identical flux data raises DataOverlapError and preserves version v1."""
+    """Ignored force warns, raises DataOverlapError, and preserves version v1."""
     clear_test_stores()
     # Attempt to add same data to the database twice
     flux_datapath1 = get_flux_datapath("ch4-anthro_EUROPE_2012.nc")
@@ -48,8 +48,10 @@ def test_database_update_repeat():
     kwargs = {"store": "user", "time_resolved": False, "store": "user"}
 
     standardise_flux(*args, **kwargs)
-    with pytest.raises(DataOverlapError):
-        standardise_flux(*args, force=True, **kwargs)
+    with pytest.warns(DeprecationWarning, match=r"force.*deprecated.*if_exists") as caught_warnings:
+        with pytest.raises(DataOverlapError):
+            standardise_flux(*args, force=True, **kwargs)
+    assert len(caught_warnings) == 1
 
     # Search for the data we just added
     em_param = {}
