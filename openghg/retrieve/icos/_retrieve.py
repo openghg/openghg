@@ -349,6 +349,29 @@ def retrieve_and_parse_icos_data(
     else:
         raise NotImplementedError(f"Unsupported ICOS data_format: {data_format}")
 
+     # Ensure all required keys exist in data_attributes with sensible defaults
+    defaults = {
+        "dataset_calibration_scale": "unknown",
+        "dataset_data_frequency": "unknown",
+        "dataset_data_frequency_unit": "unknown",
+        "measurement_unit": "unknown",
+        "sampling_heights": "unknown",
+        "altitude": "unknown",
+        "station_name": "unknown",
+        "latitude": "unknown",
+        "longitude": "unknown",
+        "dataset_intake_ht": "unknown",
+        "site_name": "unknown",
+        "site_latitude": "unknown",
+        "site_longitude": "unknown",
+        "site_elevation": "unknown",
+    }
+    
+    for key, default_value in defaults.items():
+        if key not in data_attributes:
+            data_attributes[key] = default_value
+
+
     return dataset, data_attributes
 
 
@@ -467,6 +490,10 @@ def create_icos_attributes(
     elif freq_unit in ("hour", "hours"):
         attributes["sampling_period"] = str(data_attributes["dataset_data_frequency"] * 3600)
 
+    else:
+        # Fallback if frequency unit is unknown or doesn't match
+        attributes["sampling_period"] = "not_set"
+
     if dataset_source == "ICOS Combined":
         attrs_mapping = {
             "sampling_height": "dataset_intake_ht",
@@ -515,30 +542,41 @@ def create_icos_attributes(
 
     attributes.pop("instrument_data", None)
 
-    # Establish array of the instrument IDs
-    instrument_array = dataset.data_vars["instrument"].values
+    try:
+        # Establish array of the instrument IDs
+        instrument_array = dataset.data_vars["instrument"].values
 
-    # Find the unique instrument IDs
-    unique_vals = np.unique(instrument_array)
+        # Find the unique instrument IDs
+        unique_vals = np.unique(instrument_array)
 
-    # Determine instrument value based on uniqueness
-    # If no instrument IDs then instrument value should be set to unknown
-    if len(unique_vals) == 0:
-        instrument_value = "unknown"
-    # If 1 instrument ID then instrument value should be set to that value
-    elif len(unique_vals) == 1:
-        # All same - use icos_id_<number>
-        instrument_value = f"icos_id_{int(unique_vals[0])}"
-    # If more than 1 instrument ID than instrument value should be set to combibed
-    else:
-        # Multiple different values - combine them
-        # Option 1: underscore-separated
-        instrument_value = "combined"
+        # Determine instrument value based on uniqueness
+        # If no instrument IDs then instrument value should be set to unknown
+        if len(unique_vals) == 0:
+            instrument_value = "unknown"
+        # If 1 instrument ID then instrument value should be set to that value
+        elif len(unique_vals) == 1:
+            # All same - use icos_id_<number>
+            instrument_value = f"icos_id_{int(unique_vals[0])}"
+        # If more than 1 instrument ID than instrument value should be set to combibed
+        else:
+            # Multiple different values - combine them
+            # Option 1: underscore-separated
+            instrument_value = "combined"
 
-        # Option 2: comma-separated (alternative)
-        # instrument_value = ",".join([f"icos_id_{int(v)}" for v in sorted(unique_vals)])
+            # Option 2: comma-separated (alternative)
+            # instrument_value = ",".join([f"icos_id_{int(v)}" for v in sorted(unique_vals)])
 
-        # Apply to both attributes and metadata
+            # Apply to both attributes and metadata
+    except KeyError:
+        # If 'instrument' variable doesn't exist in dataset, check attributes
+        # (it may have been added by attributes_requiring_retrieval)
+        if "instrument" not in attributes:
+            instrument_value = "unknown"
+        else:
+            # Use the value from attributes (already set by attributes_requiring_retrieval)
+            instrument_value = attributes["instrument"]
+
+
     attributes["instrument"] = instrument_value
 
     attributes.update(additional_data)
@@ -693,6 +731,7 @@ def _retrieve_remote(
     # TODO: ALSO: Do we need to / could filter by "ATMO_" station first?
     # Previous: For some reason they have separate station record pages that contain "ATMO_"
 
+
     data_object_info = _queries.dobj_info(
         site=site,
         data_level=data_level,
@@ -705,6 +744,11 @@ def _retrieve_remote(
         format_info=True,  # May or may not need this?
     )
 
+
+    print(f"Total rows from dobj_info: {len(data_object_info)}")
+    print(f"Columns: {data_object_info.columns.tolist()}")
+    print(data_object_info.to_string())
+    
     # Load our site metadata for a few things like the station's long_name that
     # isn't in the ICOS metadata in the way we want it at the momenet - 2023-03-20
     site_info_fpath = openghg_defs.site_info_file
