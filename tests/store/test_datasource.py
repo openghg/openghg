@@ -582,6 +582,7 @@ def test_auto_overlap_does_not_create_orphan_version(datasource, datasets_with_o
 
 
 def test_combine_overlapping_new_version_uses_new_version_date_keys(datasource, datasets_with_overlap):
+    """Combining overlaps derives the new version date key using the datasource period."""
     data_a, data_b, _ = datasets_with_overlap
     attributes = create_attributes()
 
@@ -595,7 +596,7 @@ def test_combine_overlapping_new_version_uses_new_version_date_keys(datasource, 
         "2012-01-01-00:00:00+00:00_2012-01-31-00:00:59+00:00",
     ]
     assert d.all_data_keys()["v2"] == [
-        "2012-01-01-00:00:00+00:00_2012-04-30-00:00:00+00:00",
+        "2012-01-01-00:00:00+00:00_2012-04-30-00:00:59+00:00",
     ]
 
 

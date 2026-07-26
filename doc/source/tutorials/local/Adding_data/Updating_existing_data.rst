@@ -31,18 +31,22 @@ If data files are large or there will be many updates needed, it may not be desi
 
 1. "auto"
 
-    a. if data does not overlap, retain current data and version. 
-    b. if data does overlap and ``if_exists="auto"``, raise ``DataOverlap`` error.
+    a. if data does not overlap, retain current data and version.
+    b. if data does overlap and ``if_exists="auto"``, raise ``DataOverlapError``.
     c. if data does overlap and ``if_exists="new"``, save current data and create a new version.
 
 2. "yes" (/"y") - Save the current data and create a new version for the new data.
 3. "no" (/"n") - Do not save the current data and replace with the new data.
 
 
-Replacing "identical" data
---------------------------
+Repeating input data
+--------------------
 
-One check OpenGHG will make will be whether or not an exact copy of this file has been added previously. In this case this will not check within the object store explicitly, and the data will not be added. For the rare cases where this may not be the desired behaviour, the `force` flag using `True` or `False`can be used to bypass this check and attempt to add the data to the object store in the usual way. 
+OpenGHG does not identify repeated input files separately from their data. Repeating an
+input therefore follows the same ``if_exists`` overlap policy as any other update. With
+the default ``if_exists="auto"``, overlapping data raises a ``DataOverlapError``. Use
+``if_exists="new"`` to replace the latest data with the repeated input, or
+``if_exists="combine"`` to combine it with the current data.
 
 Example workflow
 ----------------
@@ -63,7 +67,7 @@ affect your use of OpenGHG outside of this tutorial.
 .. code:: ipython3
 
     from openghg.tutorial import use_tutorial_store
-    
+
     use_tutorial_store()
 
 Since this workflow relies on using an empty object store, we also recommend
@@ -197,7 +201,7 @@ This has combined the details from both files that were added to the object stor
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If we wanted to use the same flags but add new data only, we can do this using the input flag:
- 
+
 * ``if_exists="new"``
 
 By default this will also create a new version, retaining the original data as a previous
@@ -310,15 +314,13 @@ Selected output:
 This now contains new data only from 2013 but the version has not changed
 (indicating the previous version data has not been retained).
 
-5. Replacing "identical" data
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+5. Repeating input data
+^^^^^^^^^^^^^^^^^^^^^^^
 
-There may be circumstances (e.g. data corruption, testing) where it is necessary to
-replace "identical" data (i.e. the same original input file with the same details).
+There may be circumstances (e.g. data corruption or testing) where it is necessary to
+replace data using the same original input file. Choose the update explicitly with:
 
-This can be done using the flag:
-
-* ``force=True``
+* ``if_exists="new"``
 
 .. code:: ipython3
 
@@ -326,7 +328,7 @@ This can be done using the flag:
                         source_format=source_format,
                         site=site,
                         network=network,
-                        force=True)
+                        if_exists="new")
 
 .. code:: ipython3
 
@@ -345,12 +347,13 @@ Selected output:
     ...
     }
 
-By default this will create a new version as shown above.
+By default, ``if_exists="new"`` creates a new version as shown above.
 
-To avoid this pass both the ``force`` and ``save_current`` flag instead:
+To replace the latest version without retaining the current version, also pass
+``save_current="n"``:
 
-* ``force=True``
-* ``save_current=False``
+* ``if_exists="new"``
+* ``save_current="n"``
 
 .. code:: ipython3
 
@@ -358,8 +361,8 @@ To avoid this pass both the ``force`` and ``save_current`` flag instead:
                         source_format=source_format,
                         site=site,
                         network=network,
-                        force=True,
-                        save_current=False)
+                        if_exists="new",
+                        save_current="n")
 
 .. code:: ipython3
 

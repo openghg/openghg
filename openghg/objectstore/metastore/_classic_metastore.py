@@ -34,7 +34,6 @@ from filelock import FileLock as _FileLock
 from openghg.objectstore import exists, get_object, get_object_lock_path, set_object_from_json
 from openghg.objectstore.metastore import TinyDBMetaStore
 from openghg.types import MetastoreError
-from openghg.util import hash_string
 from tinydb.middlewares import Middleware
 from typing_extensions import Self
 
@@ -151,16 +150,24 @@ class SafetyCachingMiddleware(Middleware):
         """
         super().__init__(storage_cls)
         self.cache = None  # in-memory version of database
-        self.database_hash = None  # hash taken when database first read
+        self.database_state = None  # state when database first read
         self.writes_made = False  # flag to check if writes made
+
+    @staticmethod
+    def _serialise_state(data: dict | None) -> str:
+        """Return a stable, type-sensitive representation of database state."""
+        return json.dumps(data, sort_keys=True, separators=(",", ":"))
 
     def read(self):
         """Read the database from the cache, if present, otherwise load
-        the database from the underlying storage and save a hash of the result.
+        the database from the underlying storage and save its initial state.
+
+        Returns:
+            The cached TinyDB mapping, or ``None`` if it has not been initialised.
         """
         if self.cache is None:
             self.cache = self.storage.read()
-            self.database_hash = hash_string(str(self.cache))
+            self.database_state = self._serialise_state(self.cache)
 
         return self.cache
 
@@ -177,14 +184,15 @@ class SafetyCachingMiddleware(Middleware):
         """Close the database. If writes have been made, and the underlying
         file has not changed, writes will be saved to disk at this point.
 
-        Raises: MetaStoreError if writes have been made and the underlying file *has* been changed.
+        Raises:
+            MetastoreError: If the backing store changed after the initial read.
         """
         if self.writes_made:
             # we know that the cache is a dictionary of dictionaries
             self.cache = cast(dict[str, dict[str, Any]], self.cache)
 
-            # check if stored hash matches current hash
-            if self.database_hash == hash_string(str(self.storage.read())):
+            # Check that the stored state still matches the current state.
+            if self.database_state == self._serialise_state(self.storage.read()):
                 # if underlying file not changed, write data
                 self.storage.write(self.cache)
             else:
@@ -196,6 +204,7 @@ class SafetyCachingMiddleware(Middleware):
         # then the cache should be empty, otherwise if the metastore instance is reused
         # it won't reflect the actual state of the metastore. (This is an edge case.)
         self.cache = None
+        self.database_state = None
         self.writes_made = False
 
         # let underlying storage clean up

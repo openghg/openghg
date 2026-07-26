@@ -24,7 +24,7 @@ from openghg.objectstore import get_datasource, open_object_store
 from openghg.retrieve import get_obs_surface, search_surface
 from openghg.standardise import standardise_from_binary_data, standardise_surface
 from openghg.store import ObsSurface
-from openghg.types import MetadataAndData, StandardiseError
+from openghg.types import DataOverlapError, MetadataAndData, StandardiseError
 from openghg.util import create_daterange_str, clean_string
 from pandas import Timestamp
 
@@ -797,7 +797,9 @@ def test_obs_schema(species, obs_variable):
     # TODO: Could also add checks for dims and dtypes?
 
 
-def test_check_obssurface_same_file_skips():
+def test_obssurface_same_data_raises_on_overlap():
+    """Repeated surface files raise under the default overlap policy."""
+    clear_test_stores()
     filepath = get_surface_datapath(filename="bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
 
     results = standardise_surface(
@@ -806,58 +808,8 @@ def test_check_obssurface_same_file_skips():
 
     assert results
 
-    results = standardise_surface(
-        store="user", filepath=filepath, source_format="CRDS", site="bsd", network="DECC"
-    )
-
-    assert not results[0]
-
-
-def test_check_obssurface_multi_file_same_skip():
-    """
-    BUGFIX: Previously only the last file in the filepath list was saved
-    as a hash. This is to check that when multiple files are passed to
-    standardise_surface, check that the first file
-    """
-
-    clear_test_stores()
-
-    filepaths = [
-        get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220929.nc", source_format="openghg"),
-        get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220928.nc", source_format="openghg"),
-    ]
-
-    results = standardise_surface(
-        store="user",
-        filepath=filepaths,
-        source_format="OPENGHG",
-        site="tac",
-        network="DECC",
-        instrument="picarro",
-        sampling_period="1h",
-        if_exists="new",
-        update_mismatch="metadata",
-    )
-
-    assert results
-
-    filepath_repeat = get_surface_datapath(
-        "DECC-picarro_TAC_20130131_co2-185m-20220929.nc", source_format="openghg"
-    )
-
-    results = standardise_surface(
-        store="user",
-        filepath=filepath_repeat,
-        source_format="OPENGHG",
-        site="tac",
-        network="DECC",
-        instrument="picarro",
-        sampling_period="1h",
-        if_exists="new",
-        update_mismatch="metadata",
-    )
-
-    assert not results[0]
+    with pytest.raises(DataOverlapError):
+        standardise_surface(store="user", filepath=filepath, source_format="CRDS", site="bsd", network="DECC")
 
 
 def test_gcwerks_fp_not_a_tuple_raises():

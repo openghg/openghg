@@ -6,6 +6,7 @@ import warnings
 
 from openghg.objectstore import get_writable_bucket
 from openghg.util import sort_by_filenames
+from openghg.util._deprecation import _warn_if_force_ignored
 from openghg.types import multiPathType
 from numcodecs import Blosc
 import logging
@@ -151,7 +152,8 @@ def standardise_surface(
              - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
              - "n" / "no" - Allow current data to updated / deleted
         overwrite: Deprecated. This will use options for if_exists="new".
-        force: Force adding of data even if this is identical to data stored.
+        force: Deprecated and ignored. Use ``if_exists`` to control overlap
+            handling. Passing ``True`` emits a deprecation warning.
         compression: Enable compression in the store
         compressor: A custom compressor to use. If None, this will default to
             `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
@@ -168,11 +170,17 @@ def standardise_surface(
             - None - check all file extensions and set to True is all are ".nc" or ".nc4"
             - True - attempt to open concatenated if all files are recognised as netcdf files.
             - False - open and standardise each file individually.
+
+    Warns:
+        DeprecationWarning: If ``force`` is ``True``.
+
     Returns:
         dict: Dictionary of result data
     """
     from openghg.standardise.surface import check_gcwerks_input
     from openghg.util import check_filepath
+
+    _warn_if_force_ignored(force)
 
     if filepath is not None:
         if source_format.lower() == "gcwerks":
@@ -211,7 +219,6 @@ def standardise_surface(
         update_mismatch=update_mismatch,
         if_exists=if_exists,
         save_current=save_current,
-        force=force,
         compression=compression,
         compressor=compressor,
         filters=filters,
@@ -278,7 +285,8 @@ def standardise_column(
             - "yes" or "y": Save current data as a separate version.
             - "no" or "n": Allow updates or deletion of current data.
         overwrite: Deprecated. Replaced by `if_exists="new"`.
-        force: Forces the addition of data even if it's identical to the existing data.
+        force: Deprecated and ignored. Use ``if_exists`` to control overlap
+            handling. Passing ``True`` emits a deprecation warning.
         compression: Enables or disables compression during data storage (default is True).
         compressor: Custom compression method. Defaults to `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.)`.
@@ -294,9 +302,15 @@ def standardise_column(
             - None - check all file extensions and set to True is all are ".nc" or ".nc4"
             - True - attempt to open concatenated if all files are recognised as netcdf files.
             - False - open and standardise each file individually.
+
+    Warns:
+        DeprecationWarning: If ``force`` is ``True``.
+
     Returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
+
+    _warn_if_force_ignored(force)
 
     return standardise(
         store=store,
@@ -316,7 +330,6 @@ def standardise_column(
         overwrite=overwrite,
         if_exists=if_exists,
         save_current=save_current,
-        force=force,
         compression=compression,
         compressor=compressor,
         filters=filters,
@@ -374,7 +387,8 @@ def standardise_bc(
              - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
              - "n" / "no" - Allow current data to updated / deleted
         overwrite: Deprecated. This will use options for if_exists="new".
-        force: Force adding of data even if this is identical to data stored.
+        force: Deprecated and ignored. Use ``if_exists`` to control overlap
+            handling. Passing ``True`` emits a deprecation warning.
         compression: Enable compression in the store
         compressor: A custom compressor to use. If None, this will default to
             `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
@@ -390,9 +404,15 @@ def standardise_bc(
             - None - check all file extensions and set to True is all are ".nc" or ".nc4"
             - True - attempt to open concatenated if all files are recognised as netcdf files.
             - False - open and standardise each file individually.
+
+    Warns:
+        DeprecationWarning: If ``force`` is ``True``.
+
     Returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
+
+    _warn_if_force_ignored(force)
 
     return standardise(
         store=store,
@@ -408,7 +428,6 @@ def standardise_bc(
         overwrite=overwrite,
         if_exists=if_exists,
         save_current=save_current,
-        force=force,
         compression=compression,
         compressor=compressor,
         filters=filters,
@@ -499,7 +518,8 @@ def standardise_footprint(
              - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
              - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
              - "n" / "no" - Allow current data to updated / deleted        overwrite: Deprecated. This will use options for if_exists="new".
-        force: Force adding of data even if this is identical to data stored.
+        force: Deprecated and ignored. Use ``if_exists`` to control overlap
+            handling. Passing ``True`` emits a deprecation warning.
         sort: Sort data in by time
         drop_duplicates: Drop duplicate timestamps, keeping the first value
         compression: Enable compression in the store
@@ -516,10 +536,16 @@ def standardise_footprint(
             - False - open and standardise each file individually.
         inner_domain: For nested domains, specify the inner part of the domain (e.g. "6km").
             When both ``domain`` and ``inner_domain`` are provided, they are combined as ``"{domain}{inner_domain}"`` (e.g. "EUROPE6km") to form the full domain identifier used for the footprint metadata. However it is written as {domain}-{inner_domain} in the metadata.
+
+    Warns:
+        DeprecationWarning: If ``force`` or ``high_time_resolution`` is ``True``.
+
     Returns:
         dict / None: Dictionary containing confirmation of standardisation process. None
         if file already processed.
     """
+    _warn_if_force_ignored(force)
+
     if high_time_resolution:
         warnings.warn(
             "This argument is deprecated and will be replaced in future versions with time_resolved.",
@@ -562,7 +588,6 @@ def standardise_footprint(
         overwrite=overwrite,
         if_exists=if_exists,
         save_current=save_current,
-        force=force,
         compression=compression,
         compressor=compressor,
         filters=filters,
@@ -632,7 +657,8 @@ def standardise_flux(
              - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
              - "n" / "no" - Allow current data to updated / deleted
         overwrite: Deprecated. This will use options for if_exists="new".
-        force: Force adding of data even if this is identical to data stored.
+        force: Deprecated and ignored. Use ``if_exists`` to control overlap
+            handling. Passing ``True`` emits a deprecation warning.
         compression: Enable compression in the store
         compressor: A custom compressor to use. If None, this will default to
             `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
@@ -644,9 +670,15 @@ def standardise_flux(
             - None - check all file extensions and set to True is all are ".nc" or ".nc4"
             - True - attempt to open concatenated if all files are recognised as netcdf files.
             - False - open and standardise each file individually.
-    returns:
+
+    Warns:
+        DeprecationWarning: If ``force`` or ``high_time_resolution`` is ``True``.
+
+    Returns:
         dict: Dictionary of Datasource UUIDs data assigned to
     """
+
+    _warn_if_force_ignored(force)
 
     if high_time_resolution:
         warnings.warn(
@@ -674,7 +706,6 @@ def standardise_flux(
         overwrite=overwrite,
         if_exists=if_exists,
         save_current=save_current,
-        force=force,
         compression=compression,
         compressor=compressor,
         filters=filters,
@@ -729,7 +760,8 @@ def standardise_eulerian(
         overwrite: Deprecated. This will use options for if_exists="new".
         store: Name of object store to write to, required if user has access to more than one
         writable store
-        force: Force adding of data even if this is identical to data stored.
+        force: Deprecated and ignored. Use ``if_exists`` to control overlap
+            handling. Passing ``True`` emits a deprecation warning.
         compression: Enable compression in the store
         compressor: A custom compressor to use. If None, this will default to
             `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
@@ -745,9 +777,15 @@ def standardise_eulerian(
             - None - check all file extensions and set to True is all are ".nc" or ".nc4"
             - True - attempt to open concatenated if all files are recognised as netcdf files.
             - False - open and standardise each file individually.
+
+    Warns:
+        DeprecationWarning: If ``force`` is ``True``.
+
     Returns:
         dict: Dictionary of result data
     """
+    _warn_if_force_ignored(force)
+
     return standardise(
         store=store,
         data_type="eulerian_model",
@@ -761,7 +799,6 @@ def standardise_eulerian(
         tag=tag,
         overwrite=overwrite,
         if_exists=if_exists,
-        force=force,
         save_current=save_current,
         compression=compression,
         compressor=compressor,
@@ -865,7 +902,8 @@ def standardise_flux_timeseries(
             - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
             - "n" / "no" - Allow current data to updated / deleted
         overwrite: Deprecated. This will use options for if_exists="new".
-        force: Force adding of data even if this is identical to data stored.
+        force: Deprecated and ignored. Use ``if_exists`` to control overlap
+            handling. Passing ``True`` emits a deprecation warning.
         compressor: A custom compressor to use. If None, this will default to
             `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
@@ -876,9 +914,15 @@ def standardise_flux_timeseries(
             - None - check all file extensions and set to True is all are ".nc" or ".nc4"
             - True - attempt to open concatenated if all files are recognised as netcdf files.
             - False - open and standardise each file individually.
+
+    Warns:
+        DeprecationWarning: If ``force`` is ``True``.
+
     Returns:
         dict: Dictionary of datasource UUIDs data assigned to
     """
+
+    _warn_if_force_ignored(force)
 
     if domain is not None:
         logger.warning(
@@ -902,7 +946,6 @@ def standardise_flux_timeseries(
         overwrite=overwrite,
         if_exists=if_exists,
         save_current=save_current,
-        force=force,
         compressor=compressor,
         filters=filters,
         period=period,
@@ -925,7 +968,30 @@ def standardise_site_met(
     chunks: dict | None = None,
     compressor: Any | None = None,
 ) -> list[dict]:
-    """ """
+    """Standardise site meteorology data and store it in the object store.
+
+    Args:
+        filepath: Path to the site meteorology data.
+        site: Site code or name.
+        network: Measurement network name.
+        met_source: Source of the meteorology data.
+        source_format: Input data format.
+        if_exists: What to do if existing data is present.
+        save_current: Whether to retain the current data as a previous version.
+        store: Name of the object store to write to.
+        force: Deprecated and ignored. Use ``if_exists`` to control overlap
+            handling. Passing ``True`` emits a deprecation warning.
+        chunks: Chunking schema to use when storing the data.
+        compressor: Custom compressor to use when storing the data.
+
+    Warns:
+        DeprecationWarning: If ``force`` is ``True``.
+
+    Returns:
+        Details of the datasource UUIDs for the processed data.
+    """
+
+    _warn_if_force_ignored(force)
 
     return standardise(
         data_type="site_met",
@@ -937,7 +1003,6 @@ def standardise_site_met(
         if_exists=if_exists,
         store=store,
         save_current=save_current,
-        force=force,
         chunks=chunks,
         compressor=compressor,
     )

@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Updated
 
+- Removed file and retrieved-data hashing from standardisation. Repeated inputs now follow the normal `if_exists` overlap policy, and data can be standardised again after its datasource is deleted. The deprecated `force` argument remains accepted but is ignored; passing `force=True` emits a `DeprecationWarning`, and callers should use `if_exists` to choose update behaviour. [Issue #1676](https://github.com/openghg/openghg/issues/1676)
 - Updated the standardisation of AGAGE format data so that rows containing nans are no longer dropped. [PR #1634](https://github.com/openghg/openghg/pull/1634)
 - Updated copilot instructions and added repo graph using graphify.[PR #1684](https://github.com/openghg/openghg/pull/1684)
 

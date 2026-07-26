@@ -4,7 +4,6 @@
 # First we want to get the path to the old style object store
 import logging
 import inspect
-import json
 from pathlib import Path
 import re
 import tinydb
@@ -12,7 +11,6 @@ import dask
 
 import openghg.standardise
 from openghg.standardise import standardise
-from openghg.objectstore import get_writable_bucket
 from openghg.objectstore.metastore import open_metastore
 from openghg.objectstore.metastore._classic_metastore import BucketKeyStorage
 
@@ -37,7 +35,7 @@ def convert_store(
         for the compressor
         to_convert: List of storage classes to convert, if None will convert all storage classes
     """
-    from openghg.store import data_class_info, get_data_class
+    from openghg.store import data_class_info
 
     # Tell dask to use the sync scheduler as I was getting Dask queue/thread hanging issues
     # when running this locally
@@ -139,8 +137,6 @@ def convert_store(
                     else:
                         standardise_kwargs[k] = None
 
-            # The number of Datasources converted
-            n_converted = 0
             # An error will be raised if we get daterange overlaps, we'll just warn the user
             overlap_msg = f"Data overlap error for {data_type} data with UUID {uuid}"
 
@@ -156,8 +152,6 @@ def convert_store(
                     )
                 except DataOverlapError:
                     logger.warning(overlap_msg)
-                else:
-                    n_converted += 1
 
             elif data_type == "footprints":
                 if standardise_kwargs["time_resolved"]:
@@ -174,8 +168,6 @@ def convert_store(
                     )
                 except DataOverlapError:
                     logger.warning(overlap_msg)
-                else:
-                    n_converted += 1
             else:
                 for data_file in data_filepaths:
                     try:
@@ -190,29 +182,6 @@ def convert_store(
                         logger.warning(overlap_msg)
                     except ValueError as e:
                         logger.warning(f"Error standardising {data_type} data with UUID {uuid}: {e}")
-                    else:
-                        n_converted += 1
-
-        # We only want to update the file hashes if we've converted some data
-        if n_converted > 0:
-            # TODO - remember to copy the file hashes and data storage class members over!
-            # First we need to get the path of the object
-            key_root = storage_classes[data_type]["_root"]
-            key_uuid = storage_classes[data_type]["_uuid"]
-
-            if data_type == "flux":
-                key_root = "Emissions"
-
-            dlcass_datapath = old_store_path.joinpath(key_root, "uuid", f"{key_uuid}._data")
-
-            old_dclass_data = json.loads(dlcass_datapath.read_text())
-            old_file_hashes = old_dclass_data["_file_hashes"]
-
-            current_dclass = get_data_class(data_type=data_type)
-            bucket = get_writable_bucket(name=store_out)
-
-            with current_dclass(bucket=bucket) as dclass:
-                dclass._file_hashes.update(old_file_hashes)
 
         logger.info(f"Finished converting {data_type} data.")
 

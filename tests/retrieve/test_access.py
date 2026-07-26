@@ -16,7 +16,7 @@ from openghg.retrieve import (
 )
 from openghg.retrieve._access import _sanitise_negative_uncertainties
 from openghg.types import SearchError
-from openghg.util import compress, compress_str, hash_bytes
+from openghg.util import compress, compress_str
 from pandas import Timedelta, Timestamp
 
 # a = [
@@ -293,6 +293,7 @@ def test_timeslice_slices_correctly_exclusive():
 
 @pytest.mark.xfail(reason="Mark this for removal. Our cloud functions will need an overhaul.")
 def test_get_obs_surface_cloud(mocker, monkeypatch):
+    """Cloud observation payload metadata need only describe compression."""
     monkeypatch.setenv("OPENGHG_HUB", "1")
 
     n_days = 100
@@ -308,15 +309,13 @@ def test_get_obs_surface_cloud(mocker, monkeypatch):
 
     for_transfer = mock_obs.to_data()
 
-    sha1_hash = hash_bytes(data=for_transfer["data"])
-
     to_return = {
         "found": True,
         "data": compress(data=for_transfer["data"]),
         "metadata": compress_str(s=for_transfer["metadata"]),
         "file_metadata": {
-            "data": {"sha1_hash": sha1_hash, "compression_type": "gzip"},
-            "metadata": {"sha1_hash": False, "compression_type": "bz2"},
+            "data": {"compression_type": "gzip"},
+            "metadata": {"compression_type": "bz2"},
         },
     }
 

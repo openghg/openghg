@@ -94,17 +94,6 @@ def data_read():
     flux_datapath3 = get_flux_datapath("co2-rtot-cardamom-2hr_TEST_2014.nc")
 
     standardise_flux(
-        store="user",
-        filepath=flux_datapath3,
-        species="co2",
-        source=source3,
-        domain="TEST",
-        high_time_resolution=True,
-    )
-
-    flux_datapath3 = get_flux_datapath("co2-rtot-cardamom-2hr_TEST_2014.nc")
-
-    standardise_flux(
         filepath=flux_datapath3,
         species="co2",
         source=source3,
@@ -138,29 +127,6 @@ def data_read():
         time_resolved=False,
         period="1 month",
         store="user",
-    )
-    # Ocean flux for CO2
-    #  - monthly (cut down data to 1 month)
-    source4 = "ocean"
-    flux_datapath4a = get_flux_datapath("co2-nemo-ocean-mth_TEST_2014.nc")
-    flux_datapath4b = get_flux_datapath("co2-nemo-ocean-mth_TEST_2013.nc")
-
-    standardise_flux(
-        store="user",
-        filepath=flux_datapath4a,
-        species="co2",
-        source=source4,
-        domain="TEST",
-        high_time_resolution=False,
-    )
-
-    standardise_flux(
-        store="user",
-        filepath=flux_datapath4b,
-        species="co2",
-        source=source4,
-        domain="TEST",
-        high_time_resolution=False,
     )
 
     # Boundary conditions data

@@ -11,16 +11,6 @@ These are used to export data to a format readable by the `OpenGHG data dashboar
 
 .. autofunction:: openghg.util.to_dashboard_mobile
 
-Hashing
-=======
-
-These handle hashing of data (usually with SHA1)
-
-.. autofunction:: openghg.util.hash_file
-
-.. autofunction:: openghg.util.hash_string
-
-
 String manipulation
 ===================
 
