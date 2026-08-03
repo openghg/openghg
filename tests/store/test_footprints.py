@@ -749,7 +749,7 @@ def _footprint_version_summary(domain: str) -> dict:
 def test_standardise_footprint_filepath_list_matches_loop(
     tmp_path, if_exists, overlapping, expected_error, expected_latest, expected_time_count
 ):
-    """List input and repeated calls apply the same ``if_exists`` policy."""
+    """List input and repeated calls match for these PARIS footprint fixtures."""
     file1 = get_footprint_datapath("MHD-10magl_NAME_UKV_TEST_inert_PARIS-format_201301.nc")
     file2 = _write_shifted_footprint(
         file1,

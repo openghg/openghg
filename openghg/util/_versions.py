@@ -172,6 +172,10 @@ def check_if_need_new_version(if_exists: str = "auto", save_current: str = "auto
     Check combination of if_exists and save_current keywords to determine
     whether a new version should be created.
 
+    ``if_exists`` determines the contents of the resulting latest version;
+    ``save_current`` determines whether that result is written to a new version
+    or into the current latest version.
+
     Output related to these parameters:
         - if_exists="auto", save_current="auto"
            - new_version=False (default) - If both values are set
@@ -195,19 +199,28 @@ def check_if_need_new_version(if_exists: str = "auto", save_current: str = "auto
     Returns:
         bool: Whether new version should be created
     """
+    if if_exists not in ["auto", "combine", "new"]:
+        raise ValueError("Invalid if_exists option. Please use 'auto', 'new', or 'combine'.")
+
+    if save_current not in ["auto", "y", "yes", "n", "no"]:
+        raise ValueError("Invalid save_current option. Please use 'auto', 'y', 'yes', 'n', or 'no'.")
+
     # Determining whether a new version should be created based on inputs.
     if if_exists == "auto" and save_current == "auto":
         # Add new (non-overlapping) data on the same version
-        new_version = False
-    elif if_exists != "auto" and save_current == "auto":
+        return False
+
+    if if_exists != "auto" and save_current == "auto":
         # If data could be modified based on if_exists input
         # default to creating a new version.
-        new_version = True
-    elif save_current in ["y", "yes"]:
-        # Otherwise match new version to the save_current input.
-        new_version = True
-    elif save_current in ["n", "no"]:
-        # Otherwise match new version to the save_current input.
-        new_version = False
+        return True
 
-    return new_version
+    if save_current in ["y", "yes"]:
+        # Otherwise match new version to the save_current input.
+        return True
+
+    if save_current in ["n", "no"]:
+        # Otherwise match new version to the save_current input.
+        return False
+
+    raise ValueError("Invalid save_current option. Please use 'auto', 'y', 'yes', 'n', or 'no'.")
