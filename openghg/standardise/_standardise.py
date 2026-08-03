@@ -229,8 +229,8 @@ def standardise_surface(
 
 
 def standardise_column(
-    filepath: str | Path | list[str] | list[Path],
-    species: str,
+    filepath: str | Path | list[str] | list[Path] | None = None,
+    species: str | None = None,
     platform: str = "satellite",
     obs_region: str | None = None,
     site: str | None = None,
@@ -253,6 +253,7 @@ def standardise_column(
     chunks: dict | None = None,
     info_metadata: dict | None = None,
     concat_nc_files: bool | None = None,
+    data: xr.Dataset | None = None,
 ) -> list[dict]:
     """Read column observation file
 
@@ -316,6 +317,7 @@ def standardise_column(
         store=store,
         data_type="column",
         filepath=filepath,
+        data=data,
         species=species,
         platform=platform,
         obs_region=obs_region,
@@ -341,10 +343,10 @@ def standardise_column(
 
 
 def standardise_bc(
-    filepath: str | Path | list[str] | list[Path],
-    species: str,
-    bc_input: str,
-    domain: str,
+    filepath: str | Path | list[str] | list[Path] | None = None,
+    species: str | None = None,
+    bc_input: str | None = None,
+    domain: str | None = None,
     source_format: str = "openghg",
     period: str | tuple | None = None,
     continuous: bool = True,
@@ -360,6 +362,7 @@ def standardise_bc(
     chunks: dict | None = None,
     info_metadata: dict | None = None,
     concat_nc_files: bool | None = None,
+    data: xr.Dataset | None = None,
 ) -> list[dict]:
     """Standardise boundary condition data and store it in the object store.
 
@@ -418,6 +421,7 @@ def standardise_bc(
         store=store,
         data_type="boundary_conditions",
         filepath=filepath,
+        data=data,
         species=species,
         bc_input=bc_input,
         domain=domain,
@@ -438,9 +442,9 @@ def standardise_bc(
 
 
 def standardise_footprint(
-    filepath: str | Path | list[str] | list[Path],
-    model: str,
-    domain: str,
+    filepath: str | Path | list[str] | list[Path] | None = None,
+    model: str | None = None,
+    domain: str | None = None,
     site: str | None = None,
     satellite: str | None = None,
     obs_region: str | None = None,
@@ -474,6 +478,7 @@ def standardise_footprint(
     sort_files: bool = False,
     concat_nc_files: bool | None = None,
     inner_domain: str | None = None,
+    data: xr.Dataset | None = None,
 ) -> list[dict]:
     """Reads footprint data files and returns the UUIDs of the Datasources
     the processed data has been assigned to
@@ -558,13 +563,14 @@ def standardise_footprint(
     elif isinstance(filepath, Path):
         filepath = [filepath]
 
-    if sort_files:
+    if sort_files and filepath is not None:
         filepath = sort_by_filenames(filepath=filepath)
 
     return standardise(
         store=store,
         data_type="footprints",
         filepath=filepath,
+        data=data,
         site=site,
         domain=domain,
         model=model,
@@ -600,10 +606,10 @@ def standardise_footprint(
 
 
 def standardise_flux(
-    filepath: str | Path | list[str] | list[Path],
-    species: str,
-    source: str,
-    domain: str,
+    filepath: str | Path | list[str] | list[Path] | None = None,
+    species: str | None = None,
+    source: str | None = None,
+    domain: str | None = None,
     database: str | None = None,
     source_format: str = "openghg",
     database_version: str | None = None,
@@ -624,6 +630,7 @@ def standardise_flux(
     filters: Any | None = None,
     info_metadata: dict | None = None,
     concat_nc_files: bool | None = None,
+    data: xr.Dataset | None = None,
 ) -> list[dict]:
     """Process flux / emissions data
 
@@ -691,6 +698,7 @@ def standardise_flux(
         data_type="flux",
         store=store,
         filepath=filepath,
+        data=data,
         source_format=source_format,
         species=species,
         source=source,
@@ -715,9 +723,9 @@ def standardise_flux(
 
 
 def standardise_eulerian(
-    filepath: str | Path | list[str] | list[Path],
-    model: str,
-    species: str,
+    filepath: str | Path | list[str] | list[Path] | None = None,
+    model: str | None = None,
+    species: str | None = None,
     source_format: str = "openghg",
     start_date: str | None = None,
     end_date: str | None = None,
@@ -734,6 +742,7 @@ def standardise_eulerian(
     chunks: dict | None = None,
     info_metadata: dict | None = None,
     concat_nc_files: bool | None = None,
+    data: xr.Dataset | None = None,
 ) -> list[dict]:
     """Read Eulerian model output
 
@@ -790,6 +799,7 @@ def standardise_eulerian(
         store=store,
         data_type="eulerian_model",
         filepath=filepath,
+        data=data,
         source_format=source_format,
         model=model,
         species=species,
@@ -956,9 +966,9 @@ def standardise_flux_timeseries(
 
 
 def standardise_site_met(
-    filepath: str | Path,
-    site: str,
-    network: str,
+    filepath: str | Path | None = None,
+    site: str | None = None,
+    network: str | None = None,
     met_source: str | None = None,
     source_format: str = "ecmwf",
     if_exists: str = "auto",
@@ -967,6 +977,7 @@ def standardise_site_met(
     force: bool = False,
     chunks: dict | None = None,
     compressor: Any | None = None,
+    data: xr.Dataset | None = None,
 ) -> list[dict]:
     """Standardise site meteorology data and store it in the object store.
 
@@ -996,6 +1007,7 @@ def standardise_site_met(
     return standardise(
         data_type="site_met",
         filepath=filepath,
+        data=data,
         site=site,
         network=network,
         met_source=met_source,

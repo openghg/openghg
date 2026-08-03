@@ -1,12 +1,13 @@
 from pathlib import Path
 from typing import cast
 from collections.abc import MutableMapping
+import xarray as xr
 
 from openghg.util import open_time_nc_fn
 
 
 def parse_openghg(
-    filepath: str | Path | list[str] | list[Path],
+    filepath: str | Path | list[str] | list[Path] | None = None,
     satellite: str | None = None,
     domain: str | None = None,
     selection: str | None = None,
@@ -16,6 +17,7 @@ def parse_openghg(
     instrument: str | None = None,
     platform: str = "satellite",
     chunks: dict | None = None,
+    data: xr.Dataset | None = None,
     **kwargs: str,
 ) -> dict:
     """
@@ -62,9 +64,12 @@ def parse_openghg(
     from openghg.standardise.meta import define_species_label
     from openghg.util import clean_string
 
-    xr_open_fn, filepath = open_time_nc_fn(filepath)
-
-    data = xr_open_fn(filepath).chunk(chunks if chunks is not None else {})
+    if data is None:
+        if filepath is None:
+            raise ValueError("Please specify either `filepath` or `data`.")
+        xr_open_fn, filepath = open_time_nc_fn(filepath)
+        data = xr_open_fn(filepath)
+    data = data.chunk(chunks if chunks is not None else {})
 
     # TODO: Remove this once ragged arrays from xarray is handled
     if "exposure_id" in data:

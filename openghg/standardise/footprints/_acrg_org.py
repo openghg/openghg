@@ -19,11 +19,11 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_acrg_org(
-    filepath: str | Path | list[str] | list[Path],
-    domain: str,
-    model: str,
-    inlet: str,
-    species: str,
+    filepath: str | Path | list[str] | list[Path] | None = None,
+    domain: str | None = None,
+    model: str | None = None,
+    inlet: str | None = None,
+    species: str | None = None,
     obs_region: str | None = None,
     site: str | None = None,
     satellite: str | None = None,
@@ -35,6 +35,7 @@ def parse_acrg_org(
     time_resolved: bool = False,
     high_time_resolution: bool = False,
     short_lifetime: bool = False,
+    data: Dataset | None = None,
 ) -> dict:
     """
     Read and parse input emissions data in original ACRG format.
@@ -69,9 +70,17 @@ def parse_acrg_org(
         )
         time_resolved = high_time_resolution
 
-    xr_open_fn, filepath = open_time_nc_fn(filepath, domain, sel_month=True)
+    if domain is None or model is None or inlet is None:
+        raise ValueError("`domain`, `model`, and `inlet` must be specified.")
+    species = species or "inert"
 
-    fp_data = xr_open_fn(filepath)
+    if data is None:
+        if filepath is None:
+            raise ValueError("Please specify either `filepath` or `data`.")
+        xr_open_fn, filepath = open_time_nc_fn(filepath, domain, sel_month=True)
+        fp_data = xr_open_fn(filepath)
+    else:
+        fp_data = data
 
     time_resolved = check_species_time_resolved(species, time_resolved)
     short_lifetime = check_species_lifetime(species, short_lifetime)

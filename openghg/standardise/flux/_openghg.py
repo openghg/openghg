@@ -1,5 +1,6 @@
 from pathlib import Path
 import warnings
+import xarray as xr
 
 from openghg.util import timestamp_now, open_time_nc_fn
 from openghg.store import infer_date_range, update_zero_dim
@@ -7,10 +8,10 @@ from openghg.standardise.meta import assign_flux_attributes
 
 
 def parse_openghg(
-    filepath: str | Path | list[str] | list[Path],
-    species: str,
-    source: str,
-    domain: str,
+    filepath: str | Path | list[str] | list[Path] | None = None,
+    species: str | None = None,
+    source: str | None = None,
+    domain: str | None = None,
     database: str | None = None,
     database_version: str | None = None,
     model: str | None = None,
@@ -19,6 +20,7 @@ def parse_openghg(
     period: str | tuple | None = None,
     chunks: dict | None = None,
     continuous: bool = True,
+    data: xr.Dataset | None = None,
 ) -> dict:
     """
     Read and parse input flux / emissions data already in OpenGHG format.
@@ -50,9 +52,15 @@ def parse_openghg(
         )
         time_resolved = high_time_resolution
 
-    xr_open_fn, filepath = open_time_nc_fn(filepath, domain)
+    if species is None or source is None or domain is None:
+        raise ValueError("`species`, `source`, and `domain` must be specified.")
 
-    em_data = xr_open_fn(filepath).chunk(chunks if chunks is not None else {})
+    if data is None:
+        if filepath is None:
+            raise ValueError("Please specify either `filepath` or `data`.")
+        xr_open_fn, filepath = open_time_nc_fn(filepath, domain)
+        data = xr_open_fn(filepath)
+    em_data = data.chunk(chunks if chunks is not None else {})
 
     # Some attributes are numpy types we can't serialise to JSON so convert them
     # to their native types here

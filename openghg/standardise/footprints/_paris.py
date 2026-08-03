@@ -19,11 +19,11 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_paris(
-    filepath: str | Path | list[str] | list[Path],
-    domain: str,
-    model: str,
-    inlet: str,
-    species: str,
+    filepath: str | Path | list[str] | list[Path] | None = None,
+    domain: str | None = None,
+    model: str | None = None,
+    inlet: str | None = None,
+    species: str | None = None,
     obs_region: str | None = None,
     site: str | None = None,
     satellite: str | None = None,
@@ -36,6 +36,7 @@ def parse_paris(
     high_time_resolution: bool = False,
     short_lifetime: bool = False,
     inner_domain: str | None = None,
+    data: Dataset | None = None,
 ) -> dict:
     """
     Read and parse input footprints data in "paris" format.
@@ -71,11 +72,19 @@ def parse_paris(
         )
         time_resolved = high_time_resolution
 
+    if domain is None or model is None or inlet is None:
+        raise ValueError("`domain`, `model`, and `inlet` must be specified.")
+    species = species or "inert"
+
     if inner_domain:
         domain = f"{domain}-{inner_domain}"
-    xr_open_fn, filepath = open_time_nc_fn(filepath, domain)
-
-    fp_data = xr_open_fn(filepath)
+    if data is None:
+        if filepath is None:
+            raise ValueError("Please specify either `filepath` or `data`.")
+        xr_open_fn, filepath = open_time_nc_fn(filepath, domain)
+        fp_data = xr_open_fn(filepath)
+    else:
+        fp_data = data
 
     time_resolved = check_species_time_resolved(species, time_resolved)
     short_lifetime = check_species_lifetime(species, short_lifetime)
