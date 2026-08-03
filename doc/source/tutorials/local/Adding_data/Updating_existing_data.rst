@@ -13,7 +13,7 @@ When adding data to the object store, two checks will be made against currently 
 By default, this is an exact check for matching time-coordinate values rather
 than a check that the start and end date ranges intersect.
 
-If the data exists but there are no matching time-coordinate values, this data
+If the data exists but there are no matching time-coordinate values, the new data
 will be added, grouped with the previous data and associated with the same
 keywords when using the default ``if_exists="auto"`` policy.
 
