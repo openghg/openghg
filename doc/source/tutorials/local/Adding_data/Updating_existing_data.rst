@@ -29,13 +29,12 @@ input. This provides the options:
 3. ``"combine"`` - combine the new and previous data and prefer the new data where
    the time range overlaps.
 
-By default, using the ``"new"`` option will also create a new version of the
-data. In this way, the previous data will be retained (saved) but the new data
-will become the details which are accessed by default. This is deliberate: use
-``if_exists="auto"`` for adding non-overlapping files to the current time series,
-or ``if_exists="combine"`` when new files should be merged with current data.
-Passing a list of filepaths to a ``standardise_*`` function and calling the same
-function repeatedly in a loop both apply this same ``if_exists`` policy.
+These choices are deliberate versioning behaviour, not a special case of how
+files are passed in. Passing a list of filepaths to a ``standardise_*`` function
+and calling the same function repeatedly in a loop both apply this same
+``if_exists`` policy. For a growing time series, use ``if_exists="auto"`` for
+non-overlapping files or ``if_exists="combine"`` when new files should be merged
+with current data.
 
 Managing versions
 -----------------

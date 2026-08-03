@@ -132,14 +132,10 @@ species.
 
     standardise_footprint(data_file_fp, site="TAC", domain="EUROPE", inlet="100m", model="NAME")
 
-When adding multiple footprint files for the same site, inlet, domain and model,
-the ``if_exists`` option controls whether the latest retrieved data is extended
-or replaced. The default ``if_exists="auto"`` appends non-overlapping time
-periods and raises an error for overlaps. Use ``if_exists="combine"`` when new
-footprint files should be merged with the current data, replacing overlapping
-time points with the new values. Use ``if_exists="new"`` only when the latest
-version should contain the newly added data only. See
-:ref:`updating_existing_data` for the full update and versioning behaviour.
+When adding further footprint files for different time periods, the default
+``if_exists="auto"`` is usually the right choice. Use
+:ref:`updating_existing_data` before changing this option, especially if the new
+files overlap with data already in the object store.
 
 
 .. parsed-literal::
