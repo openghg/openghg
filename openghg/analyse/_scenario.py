@@ -52,7 +52,11 @@ import xarray as xr
 from pandas import Timestamp
 from xarray import Dataset
 
-from openghg.analyse._modelled_obs import fp_x_flux_integrated, fp_x_flux_time_resolved
+from openghg.analyse._modelled_obs import (
+    fp_x_flux_integrated,
+    fp_x_flux_time_resolved,
+    make_integrated_low_freq_flux,
+)
 from openghg.dataobjects import BoundaryConditionsData, FluxData, FootprintData, ObsData, ObsColumnData
 from openghg.retrieve import (
     get_obs_surface,
@@ -699,8 +703,8 @@ class ModelScenario:
             input dataset with aligned units
 
         """
-        #if output_units is None:
-         #   output_units = self.units or "mol/mol"  # use mol/mol if obs units are not available
+        # if output_units is None:
+        #     output_units = self.units or "mol/mol"  # use mol/mol if obs units are not available
         if output_units is None:
             output_units = self.units or "mol/mol"
 
@@ -709,13 +713,14 @@ class ModelScenario:
         for dv in data_vars:
             unit = ds[dv].attrs.get("units")
             if unit in ("1", None):
-               ds[dv].attrs["units"] = "mol/mol"
+                ds[dv].attrs["units"] = "mol/mol"
             if ds[dv].attrs.get("units") is not None and "time" in ds[dv].dims:
                 to_convert.append(dv)
 
         target_units = {dv: output_units for dv in to_convert}
         result = ds.pint.quantify().pint.to(target_units).pint.dequantify()
         return cast(xr.Dataset, result)
+
     def _check_data_is_present(self, need: str | Sequence | None = None) -> None:
         """Check whether correct data types have been included. This should
         be used by functions to check whether they can perform the requested
@@ -1217,7 +1222,10 @@ class ModelScenario:
         if use_low_freq_flux is None:
             use_low_freq_flux = self.species == "co2"
 
-        flux_modelled = fp_x_flux_integrated(scenario, flux, use_low_freq_flux=use_low_freq_flux)
+        if use_low_freq_flux:
+            flux = make_integrated_low_freq_flux(flux)
+
+        flux_modelled = fp_x_flux_integrated(scenario, flux)
         data = {}
 
         if output_TS:

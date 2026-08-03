@@ -9,7 +9,7 @@ import pandas as pd
 import pytest
 import xarray as xr
 
-from openghg.analyse import ModelScenario
+from openghg.analyse import ModelScenario, make_integrated_low_freq_flux
 from openghg.analyse._modelled_obs import (
     fp_x_flux_integrated,
     fp_x_flux_time_resolved,
@@ -343,11 +343,17 @@ def test_modelled_obs_integrated_co2_uses_integrated_pipeline(
     assert "mf_mod" in combined
     assert "mf_mod_high_res" not in combined
 
-    expected = fp_x_flux_integrated(
-        combined,
-        scenario.combine_flux_sources(),
-        use_low_freq_flux=True,
-    ).pint.quantify().sum(["lat", "lon"]).pint.dequantify()
+    flux = scenario.combine_flux_sources()
+    flux_monthly = make_integrated_low_freq_flux(flux)
+    expected_flux = flux.flux.resample({"time": "1MS"}).mean().to_dataset(name="flux")
+    xr.testing.assert_allclose(flux_monthly, expected_flux)
+
+    expected = (
+        fp_x_flux_integrated(combined, flux_monthly)
+        .pint.quantify()
+        .sum(["lat", "lon"])
+        .pint.dequantify()
+    )
     xr.testing.assert_allclose(combined.mf_mod, expected)
 
 

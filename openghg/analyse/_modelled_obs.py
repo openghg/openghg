@@ -9,41 +9,22 @@ from openghg.analyse._alignment import time_of_day_offset
 from openghg.analyse._utils import reindex_on_dims
 
 
-def fp_x_flux_integrated(
-    footprint: xr.Dataset, flux: xr.Dataset, use_low_freq_flux: bool = False
-) -> xr.DataArray:
+def fp_x_flux_integrated(footprint: xr.Dataset, flux: xr.Dataset) -> xr.DataArray:
     """Calculate footprint times flux.
 
     Args:
         footprint: footprint data; should have `fp` data variable.
         flux: flux data; should have `flux` data variable.
-        use_low_freq_flux: if True, average flux to monthly frequency before
-            multiplying with the footprint, instead of matching a single
-            instantaneous flux snapshot via forward-fill. Needed for species
-            with strong diurnal flux cycles (e.g. CO2/NEP) where the footprint
-            represents a long time-integrated quantity (e.g. 720h).
 
     Returns:
         DataArray containing footprint times flux.
 
     """
     flux = reindex_on_dims(flux, footprint, ["lat", "lon"])
-    if use_low_freq_flux:
-        flux_var = flux.flux if isinstance(flux, xr.Dataset) else flux
-        # An integrated footprint does not have an "H_back" dimension, so we cannot reuse
-        # _make_low_freq_flux (which pads the flux time range based on
-        # H_back). Instead, directly resample to monthly mean and align
-        # to the footprint's release times.
-        flux_low_freq = (
-            flux_var.resample(time="1MS")
-            .mean()
-            .reindex_like(footprint.fp, method="ffill")
-        )
-        flux = flux_low_freq.to_dataset(name="flux")
-    else:
-        # align separately on time
-        # TODO: if method="nearest" was acceptable, then we could align all coordinates at once with reindex_like
-        flux = flux.reindex_like(footprint, method="ffill")
+    # align separately on time
+    # TODO: if method="nearest" was acceptable, then we could align all coordinates at once with reindex_like
+    flux = flux.reindex_like(footprint, method="ffill")
+
     # align chunks for time after filling
     fp_time_chunks = footprint.fp.chunksizes.get("time")
     if fp_time_chunks is not None:
@@ -52,6 +33,13 @@ def fp_x_flux_integrated(
 
     result = footprint.fp.pint.quantify() * flux.flux.pint.quantify()
     return cast(xr.DataArray, result.pint.dequantify())
+
+
+def make_integrated_low_freq_flux(flux: xr.DataArray | xr.Dataset) -> xr.Dataset:
+    """Create monthly-mean flux for integrated footprint calculations."""
+    flux_var = flux.flux if isinstance(flux, xr.Dataset) else flux
+    flux_low_freq = flux_var.resample({"time": "1MS"}).mean()
+    return flux_low_freq.to_dataset(name="flux")
 
 
 # helper functions for time-resolved calculation
