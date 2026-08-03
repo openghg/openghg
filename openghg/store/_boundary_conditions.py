@@ -131,7 +131,7 @@ class BoundaryConditions(BaseStore):
 
     def transform_data(
         self,
-        datapath: pathType,
+        datapath: pathType | None,
         database: str,
         if_exists: str = "auto",
         save_current: str = "auto",
@@ -139,6 +139,7 @@ class BoundaryConditions(BaseStore):
         compressor: Any | None = None,
         filters: Any | None = None,
         info_metadata: dict | None = None,
+        data: Any | None = None,
         **kwargs: dict,
     ) -> list[dict]:
         """Read and transform a cams boundary conditions data. This will find the appropriate parser function to use for the database specified. The necessary inputs are determined by which database is being used.
@@ -160,7 +161,12 @@ class BoundaryConditions(BaseStore):
 
         new_version = check_if_need_new_version(if_exists, save_current)
 
-        fn_input_parameters["datapath"] = Path(datapath)
+        if data is not None:
+            fn_input_parameters["data"] = data
+        elif datapath is not None:
+            fn_input_parameters["datapath"] = Path(datapath)
+        else:
+            raise ValueError("Please specify exactly one of `datapath` or `data`.")
 
         transform_parsers = define_transform_parsers()[self._data_type]
 

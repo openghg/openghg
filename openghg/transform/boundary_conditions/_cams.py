@@ -12,6 +12,7 @@ from openghg.util import (
     find_domain,
     normalise_to_filepath_list,
     open_time_nc_fn,
+    get_data,
     timestamp_now,
     cf_ureg,
 )
@@ -22,7 +23,7 @@ logger = logging.getLogger("openghg.transform.boundary_conditions")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-def get_cams_data_units(ds: xr.DataArray, species: str) -> str:
+def get_cams_data_units(ds: xr.Dataset, species: str) -> str:
     """Get unit of CAMS dataset.
     Args:
         ds: dataset from raw cams data from which extract the units
@@ -339,7 +340,7 @@ def set_units(ds: xr.Dataset, units: str) -> None:
 def parse_cams(
     bc_input: str,
     domain: str,
-    datapath: pathlib.Path,
+    datapath: str | pathlib.Path | list[str] | list[pathlib.Path] | None = None,
     species: str | None = None,
     period: str | None = None,
     cams_version: str | None = None,
@@ -347,6 +348,7 @@ def parse_cams(
     get_footprint_kwargs: dict | None = None,
     continuous: bool = True,
     chunks: dict | None = None,
+    data: xr.Dataset | None = None,
 ) -> dict:
     """
     Parses the boundary conditions directly from the cams raw files and adds data and metadata.
@@ -372,15 +374,25 @@ def parse_cams(
         Dict: Dictionary of "species_bc_input_domain" : data, metadata, attributes
     """
 
-    xr_open_fn, filepath = open_time_nc_fn(datapath)
-
-    filepath_list = normalise_to_filepath_list(datapath)
-    cams_version, species, input_observations = _check_and_set_params(
-        filepath_list, cams_version, species, input_observations
-    )
+    if data is None:
+        if datapath is None:
+            raise ValueError("Please specify either `datapath` or `data`.")
+        xr_open_fn, datapath = open_time_nc_fn(datapath)
+        filepath_list = normalise_to_filepath_list(datapath)
+        cams_version, species, input_observations = _check_and_set_params(
+            filepath_list, cams_version, species, input_observations
+        )
+    else:
+        filepath_list = []
+        species = species or data.attrs.get("species")
+        cams_version = cams_version or data.attrs.get("CAMS_version", "unknown")
+        input_observations = input_observations or data.attrs.get("CAMS_input_observations", "unknown")
+        if species is None:
+            raise ValueError("Species must be specified when transforming direct data.")
 
     units = None
-    with xr_open_fn(filepath).chunk(chunks) as ds:
+    with get_data(dataset=data, filepath=datapath) as ds:
+        ds = ds.chunk(chunks)
 
         units = get_cams_data_units(ds, species)
         ds = ds.sortby(list(ds.dims))

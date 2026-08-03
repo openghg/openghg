@@ -102,7 +102,7 @@ class Flux(BaseStore):
 
     def transform_data(
         self,
-        datapath: pathType,
+        datapath: pathType | None,
         database: str,
         if_exists: str = "auto",
         save_current: str = "auto",
@@ -110,6 +110,7 @@ class Flux(BaseStore):
         compressor: Any | None = None,
         filters: Any | None = None,
         info_metadata: dict | None = None,
+        data: Any | None = None,
         **kwargs: dict,
     ) -> list[dict]:
         """
@@ -160,7 +161,12 @@ class Flux(BaseStore):
 
         # Format input parameters (specific to data_type)
         fn_input_parameters = self.format_inputs(**kwargs)
-        fn_input_parameters["datapath"] = Path(datapath)
+        if data is not None:
+            fn_input_parameters["data"] = data
+        elif datapath is not None:
+            fn_input_parameters["datapath"] = Path(datapath)
+        else:
+            raise ValueError("Please specify exactly one of `datapath` or `data`.")
 
         transform_parsers = define_transform_parsers()[self._data_type]
 

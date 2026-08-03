@@ -7,16 +7,18 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
+import xarray as xr
 
 from openghg.objectstore import get_writable_bucket
 from openghg.store import get_data_class
 
 
 def transform_flux_data(
-    datapath: str | Path,
-    database: str,
+    datapath: str | Path | None = None,
+    database: str | None = None,
     overwrite: bool = False,
     store: str | None = None,
+    data: xr.Dataset | None = None,
     **kwargs: Any,
 ) -> list[dict]:
     """Read and transform a flux / emissions database. This will find the appropriate
@@ -42,15 +44,18 @@ def transform_flux_data(
     dclass = get_data_class("flux")
 
     with dclass(bucket) as dc:
-        result = dc.transform_data(datapath=datapath, database=database, overwrite=overwrite, **kwargs)
+        result = dc.transform_data(
+            datapath=datapath, database=database, data=data, overwrite=overwrite, **kwargs
+        )
     return result
 
 
 def transform_bc_data(
-    datapath: str | Path,
-    database: str,
+    datapath: str | Path | None = None,
+    database: str | None = None,
     overwrite: bool = False,
     store: str | None = None,
+    data: xr.Dataset | None = None,
     **kwargs: Any,
 ) -> list[dict]:
     """Read and transform a boundary conditions cams. This will find the appropriate parser function to use for the database specified. The necessary inputs are determined by which database is being used.
@@ -74,5 +79,7 @@ def transform_bc_data(
     dclass = get_data_class("boundary_conditions")
 
     with dclass(bucket) as dc:
-        result = dc.transform_data(datapath=datapath, database=database, overwrite=overwrite, **kwargs)
+        result = dc.transform_data(
+            datapath=datapath, database=database, data=data, overwrite=overwrite, **kwargs
+        )
     return result
