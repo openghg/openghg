@@ -219,7 +219,7 @@ class Footprints(BaseStore):
 
         # Checking inputs
         # - check time_resolved details are set in preference to high_time_resolution
-        if params.get("high_time_resolution") is not None:
+        if params.get("high_time_resolution"):
             warnings.warn(
                 "This argument is deprecated and will be replaced in future versions with time_resolved.",
                 DeprecationWarning,
@@ -259,15 +259,16 @@ class Footprints(BaseStore):
             params["species"] = synonyms(species)
 
         # - check time_resolved and short_lifetime values are appropriate for species
-        time_resolved = params.get("time_resolved", False)
+        time_resolved = params.get("time_resolved")
         short_lifetime = params.get("short_lifetime", False)
-        # check when user pass True，don't cover when it is False
-        if time_resolved is not False:
+        if time_resolved is None:
+            # Preserve the historical default for CO2, while allowing callers to
+            # explicitly select the integrated-footprint pipeline with False.
+            params["time_resolved"] = check_species_time_resolved(params["species"])
+        elif time_resolved:
             params["time_resolved"] = check_species_time_resolved(params["species"], time_resolved)
         else:
             params["time_resolved"] = False
-        params["short_lifetime"] = check_species_lifetime(params["species"], short_lifetime)
-        #params["time_resolved"] = check_species_time_resolved(params["species"], time_resolved)
         params["short_lifetime"] = check_species_lifetime(params["species"], short_lifetime)
 
         if params.get("time_resolved") and params.get("sort") is True:
