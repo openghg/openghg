@@ -4,6 +4,8 @@ from openghg.retrieve import search
 from openghg.objectstore import get_writable_bucket
 from openghg.standardise import standardise_footprint, standardise_from_binary_data
 from openghg.store import Footprints, get_metakey_defaults
+from openghg.types import DataOverlapError
+import pandas as pd
 import xarray as xr
 from pathlib import Path
 from unittest.mock import patch
@@ -674,6 +676,105 @@ def test_process_footprints():
 
     with xr.open_dataset(file1) as ds, xr.open_dataset(file2) as ds2:
         xr.concat([ds, ds2], dim="time").identical(fp_obs.data)
+
+
+def _write_shifted_footprint(filepath: Path, output_path: Path, days: int) -> Path:
+    with xr.open_dataset(filepath) as ds:
+        shifted = ds.assign_coords(time=ds.time + pd.Timedelta(days=days))
+        shifted.to_netcdf(output_path)
+
+    return output_path
+
+
+def _standardise_paris_footprints(
+    filepaths: list[Path], *, domain: str, if_exists: str, use_filepath_list: bool
+) -> str | None:
+    kwargs = {
+        "site": "MHD",
+        "inlet": "10m",
+        "domain": domain,
+        "model": "NAME",
+        "met_model": "UKV",
+        "species": "inert",
+        "source_format": "paris",
+        "store": "user",
+        "if_exists": if_exists,
+        "compression": False,
+        "chunks": {"time": 4},
+    }
+
+    try:
+        if use_filepath_list:
+            standardise_footprint(filepath=filepaths, **kwargs)
+        else:
+            for filepath in filepaths:
+                standardise_footprint(filepath=filepath, **kwargs)
+    except DataOverlapError as err:
+        return type(err).__name__
+
+    return None
+
+
+def _footprint_version_summary(domain: str) -> dict:
+    fp_res = search(
+        site="MHD",
+        domain=domain,
+        model="NAME",
+        species="inert",
+        data_type="footprints",
+        store="user",
+    )
+    fp_obs = fp_res.retrieve_all()
+
+    return {
+        "latest_version": fp_obs.metadata["latest_version"],
+        "versions": fp_obs.metadata["versions"],
+        "time_count": fp_obs.data.time.size,
+        "start": str(fp_obs.data.time.values[0]),
+        "end": str(fp_obs.data.time.values[-1]),
+    }
+
+
+@pytest.mark.parametrize(
+    "if_exists,overlapping,expected_error,expected_latest,expected_time_count",
+    [
+        ("auto", False, None, "v1", 98),
+        ("new", False, None, "v2", 49),
+        ("combine", False, None, "v2", 98),
+        ("auto", True, "DataOverlapError", "v1", 49),
+        ("new", True, None, "v2", 49),
+        ("combine", True, None, "v2", 73),
+    ],
+)
+def test_standardise_footprint_filepath_list_matches_loop(
+    tmp_path, if_exists, overlapping, expected_error, expected_latest, expected_time_count
+):
+    """List input and repeated calls match for these PARIS footprint fixtures."""
+    file1 = get_footprint_datapath("MHD-10magl_NAME_UKV_TEST_inert_PARIS-format_201301.nc")
+    file2 = _write_shifted_footprint(
+        file1,
+        tmp_path / f"MHD-10magl_NAME_UKV_TEST_inert_PARIS-format_{if_exists}_{overlapping}.nc",
+        days=1 if overlapping else 31,
+    )
+    filepaths = [file1, file2]
+
+    summaries = {}
+    errors = {}
+
+    for use_filepath_list in (False, True):
+        clear_test_store("user")
+        mode = "list" if use_filepath_list else "loop"
+        domain = f"TEST_FOOTPRINT_{if_exists}_{overlapping}_{mode}"
+
+        errors[mode] = _standardise_paris_footprints(
+            filepaths, domain=domain, if_exists=if_exists, use_filepath_list=use_filepath_list
+        )
+        summaries[mode] = _footprint_version_summary(domain)
+
+    assert errors == {"loop": expected_error, "list": expected_error}
+    assert summaries["loop"] == summaries["list"]
+    assert summaries["loop"]["latest_version"] == expected_latest
+    assert summaries["loop"]["time_count"] == expected_time_count
 
 
 def test_passing_in_different_chunks_to_same_store_works():

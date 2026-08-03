@@ -132,10 +132,10 @@ species.
 
     standardise_footprint(data_file_fp, site="TAC", domain="EUROPE", inlet="100m", model="NAME")
 
-
-.. parsed-literal::
-
-    WARNING:openghg.store:This file has been uploaded previously with the filename : TAC-100magl_UKV_EUROPE_201607.nc - skipping.
+When adding further footprint files for different time periods, the default
+``if_exists="auto"`` is usually the right choice. Use
+:ref:`updating_existing_data` before changing this option, especially if the new
+files share time-coordinate values with data already in the object store.
 
 
 This standardised data can then be accessed and retrieved from the
@@ -301,11 +301,6 @@ at the edges of the “EUROPE” domain. They were created using the `CAMS clima
     from openghg.standardise import standardise_bc
 
     standardise_bc(data_file_bc, species="ch4", domain="EUROPE", bc_input="CAMS")
-
-
-.. parsed-literal::
-
-    WARNING:openghg.store:This file has been uploaded previously with the filename : ch4_EUROPE_201607.nc - skipping.
 
 
 User defined keywords: ``source`` and ``bc_input``
