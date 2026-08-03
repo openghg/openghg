@@ -855,6 +855,50 @@ def test_standardise_footprint_satellite(caplog):
     assert data.metadata["domain"] == domain.lower()
 
 
+@pytest.mark.parametrize(
+    "site,satellite,obs_region",
+    [
+        ("oco2_china", None, None),
+        (None, "oco2", "china"),
+    ],
+)
+def test_standardise_integrated_co2_footprint_for_site_or_satellite(site, satellite, obs_region):
+    """An explicit integrated CO2 footprint uses the integrated storage schema."""
+    clear_test_store("user")
+    datapath = get_footprint_datapath("oco2-CHINA_20220401_b0_001-column_NAME_UMG_EASTASIA_co2_202204.nc")
+
+    standardise_footprint(
+        filepath=datapath,
+        source_format="paris",
+        site=site,
+        satellite=satellite,
+        obs_region=obs_region,
+        model="name",
+        domain="eastasia",
+        inlet="column",
+        species="co2",
+        time_resolved=False,
+        continuous=False,
+        store="user",
+    )
+
+    if site is not None:
+        data = get_footprint(site=site, domain="eastasia", model="name", store="user")
+    else:
+        data = get_footprint(
+            satellite=satellite,
+            obs_region=obs_region,
+            domain="eastasia",
+            model="name",
+            store="user",
+        )
+
+    assert data.metadata["time_resolved"] == "False"
+    assert "fp" in data.data
+    assert "fp_time_resolved" not in data.data
+    assert "fp_residual" not in data.data
+
+
 def test_icos_corso_l1_flask_data():
     """
     Test icos corso strandardisation flow for data_level l1 and flask measurement.
