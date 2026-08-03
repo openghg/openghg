@@ -9,31 +9,48 @@ When adding data to the object store, two checks will be made against currently 
 1. Whether data has the same set of distinct keywords.
 2. Whether the time range for the data being added overlaps with the current time range for that data.
 
-If the data exists but the time range does not overlap, this data will be added, grouped with the previous data and associated with the same keywords.
+If the data exists but the time range does not overlap, this data will be added,
+grouped with the previous data and associated with the same keywords when using
+the default ``if_exists="auto"`` policy.
 
 By default, if data exists and the time range *does* overlap with existing data, the data will not be added and this will produce a ``DataOverlapError``.
 
 Updating data
 -------------
 
-To add updated data to the object store which does overlap on time with current data, when using the ``standarise_*`` functions the user can specify what action to perform in this case using the ``if_exists`` input. This provides the options:
+To add updated data to the object store, when using the ``standardise_*``
+functions the user can specify what action to perform using the ``if_exists``
+input. This provides the options:
 
-1. "auto" - combine with previous data if no overlapping data points, raise ``DataOverlap`` error otherwise (default).
-2. "new" - store the newly added data (only)
-3. *"combine" - combine the new and previous data and prefer the new data in the case where the time range overlaps. - to be implemented.*
+1. ``"auto"`` - add to the current data if there are no overlapping data points;
+   raise ``DataOverlapError`` otherwise (default).
+2. ``"new"`` - create a new latest version containing the newly added data only.
+   Previous versions are retained unless ``save_current="n"`` is also used.
+3. ``"combine"`` - combine the new and previous data and prefer the new data where
+   the time range overlaps.
 
-By default, using the "new" option will also create a new version of the data. In this way, the previous data will be retained (saved) but the new data will become the details which are accessed by default.
+By default, using the ``"new"`` option will also create a new version of the
+data. In this way, the previous data will be retained (saved) but the new data
+will become the details which are accessed by default. This is deliberate: use
+``if_exists="auto"`` for adding non-overlapping files to the current time series,
+or ``if_exists="combine"`` when new files should be merged with current data.
+Passing a list of filepaths to a ``standardise_*`` function and calling the same
+function repeatedly in a loop both apply this same ``if_exists`` policy.
 
 Managing versions
 -----------------
 
-If data files are large or there will be many updates needed, it may not be desirable to save the currently stored data and it may be prefered to delete this rather than retain this as a version. Whether to retain or overwrite the current data can set using the `save_current` input.
+If data files are large or there will be many updates needed, it may not be
+desirable to save the currently stored data and it may be preferred to delete
+this rather than retain it as a version. Whether to retain or overwrite the
+current data can be set using the ``save_current`` input.
 
 1. "auto"
 
     a. if data does not overlap, retain current data and version.
     b. if data does overlap and ``if_exists="auto"``, raise ``DataOverlapError``.
-    c. if data does overlap and ``if_exists="new"``, save current data and create a new version.
+    c. if data does overlap and ``if_exists="new"`` or ``if_exists="combine"``,
+       save current data and create a new version.
 
 2. "yes" (/"y") - Save the current data and create a new version for the new data.
 3. "no" (/"n") - Do not save the current data and replace with the new data.
