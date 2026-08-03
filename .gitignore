@@ -84,6 +84,7 @@ celerybeat-schedule
 # Environments
 .env
 .venv
+.pixi/
 env/
 venv/
 ENV/
@@ -119,7 +120,7 @@ services/hugs_service/credentials
 .DS_Store
 
 # NetCDF files
-# *.nc # Removed since we need to test footprints, emissions files etc. which will be in netcdf format 
+# *.nc # Removed since we need to test footprints, emissions files etc. which will be in netcdf format
 # Directory currently used for testing
 # reading and writing to the object store
 test_tmp/
@@ -139,3 +140,9 @@ doc/build/*
 
 # Logging output
 *.log
+
+# Ignore internal Graphify artifacts and caches
+graphify-out/*
+# Allow the main graph outputs
+!graphify-out/graph.json
+!graphify-out/manifest.json

@@ -1504,6 +1504,8 @@ class ModelScenario:
         platform: str | None = None,
         cache: bool = True,
         recalculate: bool = False,
+        save_path: str | None = None,
+        **save_kwargs: Any,
     ) -> Any:
         """Plot comparison between observation and modelled timeseries data.
 
@@ -1521,6 +1523,9 @@ class ModelScenario:
             platform: Observation platform used to decide whether to resample e.g. "satellite", "insitu", "flask"
             cache: Cache this data after calculation. Default = True.
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
+            save_path: Path to save the figure. If None, the figure will not be saved.
+            save_kwargs: Additional keyword arguments to pass to the save function. These will be passed to the plotly write_html or write_image functions depending on the file extension of save_path.
+            example: width=1000, height=600, scale=2,
 
         Returns:
             Plotly Figure
@@ -1578,7 +1583,29 @@ class ModelScenario:
 
         fig.add_trace(go.Scatter(x=x_data, y=y_data, mode="lines", name=label))
 
+        if save_path is not None:
+            self._save_fig(fig, save_path, **save_kwargs)
+
         return fig
+
+    @staticmethod
+    def _save_fig(fig: Any, save_path: str, **save_kwargs: Any) -> None:
+        """Save a plotly figure to disk, dispatching on file extension."""
+        from pathlib import Path
+
+        path = Path(save_path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+
+        suffix = path.suffix.lower()
+        if suffix == ".html":
+            fig.write_html(str(path), **save_kwargs)
+        elif suffix in (".png", ".jpg", ".jpeg", ".svg", ".pdf", ".webp"):
+            fig.write_image(str(path), **save_kwargs)
+        else:
+            raise ValueError(
+                f"Unsupported file extension '{suffix}'. "
+                "Use .html for interactive, or .png/.jpg/.svg/.pdf/.webp for static images."
+            )
 
 
 # def footprints_data_merge(data: Union[dict, ObsData],

@@ -6,7 +6,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 from types import TracebackType
-from typing import Any, TypeVar
+from typing import Any, TypeVar, cast
 from collections.abc import MutableSequence, Sequence, Callable
 import warnings
 
@@ -17,14 +17,17 @@ from xarray import Dataset
 from openghg.objectstore import get_object_from_json, exists, set_object_from_json
 from openghg.objectstore import locking_object_store
 from openghg.store._data_schema import DataSchema
-from openghg.store.storage import ChunkingSchema, chunk_size_in_megabytes
+from openghg.storage import ChunkingSchema, chunk_size_in_megabytes
 from openghg.types import (
     DatasourceLookupError,
     StandardiseError,
     ValidationError,
     MetadataAndData,
 )
-from openghg.util import timestamp_now, to_lowercase, hash_file, normalise_to_filepath_list
+from openghg.util._deprecation import _warn_if_force_ignored
+from openghg.util._strings import to_lowercase
+from openghg.util._time import timestamp_now
+from openghg.util._util import normalise_to_filepath_list
 
 from .._metakeys_config import get_metakeys
 
@@ -49,26 +52,37 @@ class BaseStore:
 
         self._creation_datetime = str(timestamp_now())
         self._stored = False
-        # Hashes of previously uploaded files
-        self._file_hashes: dict[str, str] = {}
-        # Hashes of previously stored data from other data platforms
-        self._retrieved_hashes: dict[str, dict] = {}
 
         if exists(bucket=bucket, key=self.key()):
             data = get_object_from_json(bucket=bucket, key=self.key())
             # Update myself
             self.__dict__.update(data)
+            self.__dict__.pop("_file_hashes", None)
+            self.__dict__.pop("_retrieved_hashes", None)
 
         # self._metastore = DataClassMetaStore(bucket=bucket, data_type=self._data_type)
         self._objectstore = locking_object_store(bucket=bucket, data_type=self._data_type)
         self._bucket = bucket
-        self._datasource_uuids = self._objectstore.get_uuids()
+        self._datasource_uuids = cast(list[str], self._objectstore.get_uuids())
 
     def __init_subclass__(cls) -> None:
         if cls._data_type == "":
             raise ClassDefinitionError(
                 f"Subclass {cls.__name__} of `BaseStore` must set the `_data_type` attribute."
             )
+
+        try:
+            from openghg.store.spec import get_data_type_class_target
+
+            builtin_module, builtin_class = get_data_type_class_target(cls._data_type)
+        except ValueError:
+            pass
+        else:
+            if (cls.__module__, cls.__name__) != (builtin_module, builtin_class):
+                raise ClassDefinitionError(
+                    f"Subclass {cls.__name__} uses reserved built-in `_data_type` {cls._data_type}. Please set a unique data type."
+                )
+
         if cls._data_type in BaseStore._registry:
             raise ClassDefinitionError(
                 f"Subclass {BaseStore._registry[cls._data_type]} already uses `_data_type` {cls._data_type}. Please set a unique data type."
@@ -104,9 +118,16 @@ class BaseStore:
         set_object_from_json(bucket=self._bucket, key=self.key(), data=self.to_data())
 
     def to_data(self) -> dict:
+        """Return serialisable store state without runtime or legacy hash fields."""
         # We don't need to store the metadata store, it has its own location
         # QUESTION - Is this cleaner than the previous specifying
-        DO_NOT_STORE = ["_objectstore", "_bucket", "_datasource_uuids"]
+        DO_NOT_STORE = [
+            "_objectstore",
+            "_bucket",
+            "_datasource_uuids",
+            "_file_hashes",
+            "_retrieved_hashes",
+        ]
         return {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
 
     def read_raw_data(
@@ -237,6 +258,7 @@ class BaseStore:
             filters=filters,
         )
 
+        filepaths: list[Path] | Path | None = None
         if filepath is not None:
             filepaths = normalise_to_filepath_list(filepath)
         else:
@@ -293,7 +315,8 @@ class BaseStore:
                 - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
                 - "n" / "no" - Allow current data to updated / deleted
             overwrite: Deprecated. This will use options for if_exists="new".
-            force: Force adding of data even if this is identical to data stored.
+            force: Deprecated and ignored. Use ``if_exists`` to control overlap
+                handling. Passing ``True`` emits a deprecation warning.
             compressor: A custom compressor to use. If None, this will default to
                 `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
@@ -319,9 +342,15 @@ class BaseStore:
             **kwargs: Specific keywords associated with the data type. See
                 the openghg.standardise.standardise_* functions for details
                 of what keywords are expected for this.
+
+        Warns:
+            DeprecationWarning: If ``force`` is ``True``.
+
         Returns:
             list[dict]: Details of the datasource uuids for the processed files.
         """
+
+        _warn_if_force_ignored(force)
 
         from openghg.store.spec import check_parser
         from openghg.util import (
@@ -337,10 +366,6 @@ class BaseStore:
                 "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
                 "See documentation for details of these inputs and options."
             )
-            if_exists = "new"
-
-        # Making sure new version will be created by default if force keyword is included.
-        if force and if_exists == "auto":
             if_exists = "new"
 
         new_version = check_if_need_new_version(if_exists, save_current)
@@ -372,14 +397,6 @@ class BaseStore:
         # Make sure filepaths contains Path objects
         if filepath is not None:
             filepaths = normalise_to_filepath_list(filepath)
-
-            # Check hashes of previous files (included after any filepath(s) formatting)
-            _, unseen_hashes = self.check_hashes(filepaths=filepaths, force=force)
-
-            if not unseen_hashes:
-                return [{}]
-
-            filepaths = list(unseen_hashes.values())
 
             # Check if filepaths are all netcdf files
             file_extensions = [fp.suffix for fp in filepaths]
@@ -414,7 +431,6 @@ class BaseStore:
                         "Unable to standardise files by using xarray concatenation. Will attempt to standardise each file individually."
                     )
                 else:
-                    self.store_hashes(unseen_hashes)
                     return results
 
             # If not, loop over multiple filepaths when present
@@ -455,8 +471,6 @@ class BaseStore:
                     continue
 
                 results.extend(datasource_uuids)
-
-            self.store_hashes(unseen_hashes)
 
         return results
 
@@ -548,7 +562,7 @@ class BaseStore:
                 if isinstance(filepaths, list):
                     msg = f"Unable to validate and store data from grouped files: {', '.join([fp.name for fp in filepaths])}. Error: {err}"
                 elif isinstance(filepaths, Path):
-                    msg = f"Unable to validate and store data from file: {filepath.name}. Error: {err}"
+                    msg = f"Unable to validate and store data from file: {filepaths.name}. Error: {err}"
                 else:
                     msg = f"Unable to validate and store supplied data. Error: {err}"
                 logger.error(msg)
@@ -577,7 +591,7 @@ class BaseStore:
         """
         Extract the expected inputs for the schema method.
         """
-        from openghg.util import get_parameters
+        from openghg.util._registry import get_parameters
 
         fn = self.schema
         inputs = get_parameters(fn)
@@ -588,7 +602,7 @@ class BaseStore:
         """
         Extract the expected inputs for the chunking_schema method.
         """
-        from openghg.util import get_parameters
+        from openghg.util._registry import get_parameters
 
         fn = self.chunking_schema
         inputs = get_parameters(fn)
@@ -704,69 +718,6 @@ class BaseStore:
             chunks["time"] = new_chunk_size
 
         return chunks
-
-    def store_hashes(self, hashes: dict[str, Path]) -> None:
-        """Store the hashes of files we've seen before
-
-        Args:
-            hahes: Dictionary of hashes
-        Returns:
-            None
-        """
-        name_only = {k: v.name for k, v in hashes.items()}
-        self._file_hashes.update(name_only)
-
-    def check_hashes(
-        self, filepaths: str | Path | list[str] | list[Path], force: bool
-    ) -> tuple[dict[str, Path], dict[str, Path]]:
-        """Check the hashes of the files passed against the hashes of previously
-        uploaded files. Two dictionaries are returned, one containing the hashes
-        of files we've seen before and one containing the hashes of files we haven't.
-
-        A warning is logged if we've seen any of the files before
-
-        Args:
-            filepaths: List of filepaths
-            force: If force is True then we will expect to process all the filepaths, not just the
-            unseen ones
-        Returns:
-            tuple: seen files, unseen files
-        """
-        if isinstance(filepaths, str):
-            filepaths = [Path(filepaths)]
-        elif isinstance(filepaths, Path):
-            filepaths = [filepaths]
-        elif isinstance(filepaths, list):
-            filepaths = [Path(filepath) for filepath in filepaths]
-
-        unseen: dict[str, Path] = {}
-        seen: dict[str, Path] = {}
-
-        for filepath in filepaths:
-            file_hash = hash_file(filepath=filepath)
-            if file_hash in self._file_hashes:
-                seen[file_hash] = filepath
-            else:
-                unseen[file_hash] = filepath
-
-        if force:
-            unseen = {**seen, **unseen}
-
-        if seen:
-            logger.warning("Skipping previously standardised files, see log for list.")
-            seen_files_msg = "\n".join([str(v) for v in seen.values()])
-            logger.debug(f"We've seen the following files before:\n{seen_files_msg}")
-
-            if unseen:
-                logger.info(f"Processing {len(unseen)} files of {len(filepaths)}.")
-
-        if unseen:
-            to_process = "\n".join([str(v) for v in unseen.values()])
-            logger.debug(f"Processing the following files:\n{to_process}")
-        else:
-            logger.info("No new files to process.")
-
-        return seen, unseen
 
     def add_metakeys(self, force: bool = False) -> dict:
         """

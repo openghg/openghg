@@ -1,5 +1,3 @@
-import pytest
-import pandas as pd
 import numpy as np
 import pandas as pd
 import pytest
@@ -16,9 +14,11 @@ from openghg.standardise import standardise_flux, standardise_footprint, standar
 from openghg.types import DataOverlapError
 
 
-def flux_data_read(force=False):
-    """
-    Flux data set up.
+def flux_data_read(if_exists="auto"):
+    """Set up flux data.
+
+    Args:
+        if_exists: Overlap policy forwarded to ``standardise_flux``.
     """
     # Emissions data
     # Anthropogenic ch4 (methane) data from 2012 for EUROPE
@@ -34,15 +34,13 @@ def flux_data_read(force=False):
         source=source1,
         domain=domain,
         time_resolved=False,
-        force=force,
+        if_exists=if_exists,
         store=store,
     )
 
 
 def test_database_update_repeat():
-    """
-    Test object store can handle the same date (flux data) being added twice.
-    """
+    """Ignored force warns, raises DataOverlapError, and preserves version v1."""
     clear_test_stores()
     # Attempt to add same data to the database twice
     flux_datapath1 = get_flux_datapath("ch4-anthro_EUROPE_2012.nc")
@@ -50,7 +48,10 @@ def test_database_update_repeat():
     kwargs = {"store": "user", "time_resolved": False, "store": "user"}
 
     standardise_flux(*args, **kwargs)
-    standardise_flux(*args, **kwargs)
+    with pytest.warns(DeprecationWarning, match=r"force.*deprecated.*if_exists") as caught_warnings:
+        with pytest.raises(DataOverlapError):
+            standardise_flux(*args, force=True, **kwargs)
+    assert len(caught_warnings) == 1
 
     # Search for the data we just added
     em_param = {}
@@ -66,16 +67,13 @@ def test_database_update_repeat():
     assert flux.metadata["latest_version"] == "v1"
 
 
-def test_database_update_force():
-    """
-    Test object store can update identical data, and create a new version
-    when force keyword is used.
-    """
+def test_database_update_new_version():
+    """Explicitly adding identical data as new creates a new version."""
     # Attempt to add same data to the database twice
     clear_test_stores()
     flux_data_read()
     # This creates a new version
-    flux_data_read(force=True)
+    flux_data_read(if_exists="new")
 
     em_param = {}
     em_param["start_date"] = "2012-01-01"
@@ -108,10 +106,11 @@ def bsd_data_read_crds():
     )
 
 
-def bsd_data_read_gcmd(force=False):
-    """
-    Add Bilsdale data GCMD instrument to object store.
-     - GCMD: sf6, n2o
+def bsd_data_read_gcmd(if_exists="auto"):
+    """Add Bilsdale GCMD data for SF6 and N2O.
+
+    Args:
+        if_exists: Overlap policy forwarded to ``standardise_surface``.
     """
     site = "bsd"
     network = "DECC"
@@ -128,7 +127,7 @@ def bsd_data_read_gcmd(force=False):
         site=site,
         network=network,
         instrument=instrument,
-        force=force,
+        if_exists=if_exists,
     )
 
 
@@ -136,7 +135,7 @@ def bsd_small_edit_data_read(if_exists="auto"):
     """
     Add overlapping Bilsdale GCMD data to the object store:
      - Same data
-     - Small difference header details (should create different hash)
+     - Small difference in header details
     """
     site = "bsd"
     network = "DECC"
@@ -161,7 +160,7 @@ def bsd_small_edit_data_read(if_exists="auto"):
 def bsd_diff_data_read(if_exists="auto", save_current="auto"):
     """
     Add overlapping Bilsdale GCMD data to the object store:
-     - Small difference in data values (should create different hash)
+     - Small difference in data values
     """
     site = "bsd"
     network = "DECC"
@@ -186,7 +185,7 @@ def bsd_diff_data_read(if_exists="auto", save_current="auto"):
 def bsd_diff_date_range_read(overwrite=False):
     """
     Add overlapping Bilsdale GCMD data to the object store:
-     - Small difference in data date range (should create different hash)
+     - Small difference in data date range
     """
     site = "bsd"
     network = "DECC"
@@ -281,7 +280,7 @@ def test_obs_data_read_header_diff_update():
     Steps:
      - BSD CRDS minutely data added
      - BSD GCMD data added
-     - BSD GCMD different data added - header changed so hash will be different but data will be the same
+     - BSD GCMD different data added - header changed but data will be the same
     Expect that GCMD (and CRDS) data can still be accessed.
     """
     clear_test_stores()
@@ -351,7 +350,7 @@ def test_obs_data_read_data_diff():
     bsd_data_read_crds()
     # Load BSD data - GCMD data (GCWERKS)
     bsd_data_read_gcmd()
-    # Load BSD data - GCMD data (GCWERKS) with edit to data values (will produce different hash)
+    # Load BSD data - GCMD data (GCWERKS) with edited data values
     # Including if_exists="new", save_current="auto" by default --> new_version will be True
     bsd_diff_data_read(if_exists="new")
 
@@ -421,7 +420,7 @@ def test_obs_data_read_data_new_version():
     clear_test_stores()
     # Load BSD data - GCMD data (GCWERKS)
     bsd_data_read_gcmd()
-    # Load BSD data - GCMD data (GCWERKS) with edit to data values (will produce different hash)
+    # Load BSD data - GCMD data (GCWERKS) with edited data values
     # Including if_exists="new", save_current="y" --> new_version will be True
     bsd_diff_data_read(if_exists="new", save_current="y")
 
@@ -451,7 +450,7 @@ def test_obs_data_read_data_overwrite_version():
     clear_test_stores()
     # Load BSD data - GCMD data (GCWERKS)
     bsd_data_read_gcmd()
-    # Load BSD data - GCMD data (GCWERKS) with edit to data values (will produce different hash)
+    # Load BSD data - GCMD data (GCWERKS) with edited data values
     # Including if_exists="new", save_current="n" --> new_version will be False
     # So this should just overwrite the data in that version
     bsd_diff_data_read(if_exists="new", save_current="n")
@@ -492,15 +491,12 @@ def test_obs_data_read_data_overwrite_version():
 # TODO: Add test for different time values as well.
 
 
-def test_obs_data_force_update():
-    """
-    Loading same obs surface data twice and checking if using the force=True
-    keyword allows the same data to be added again and a new version created.
-    """
+def test_obs_data_explicit_new_version():
+    """Explicitly adding the same surface data as new creates a new version."""
     clear_test_stores()
     # Load BSD data - GCMD data (GCWERKS)
     bsd_data_read_gcmd()
-    bsd_data_read_gcmd(force=True)
+    bsd_data_read_gcmd(if_exists="new")
 
     # Search for an expected species
     # GCMD data

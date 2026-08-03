@@ -9,6 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Added a dimension dtype checker for H_back dimension to "timedelta64[ns]". Bug occured for dimension "resolution" and dtype "resolution".[PR #1671](https://github.com/openghg/openghg/pull/1671)
+- Added config-driven metadata key handling for transformed flux and boundary condition data: removed hard-coded required-key lookups.[PR #1686](https://github.com/openghg/openghg/pull/1686)
+
+### Updated
+
+- Removed file and retrieved-data hashing from standardisation. Repeated inputs now follow the normal `if_exists` overlap policy, and data can be standardised again after its datasource is deleted. The deprecated `force` argument remains accepted but is ignored; passing `force=True` emits a `DeprecationWarning`, and callers should use `if_exists` to choose update behaviour. [Issue #1676](https://github.com/openghg/openghg/issues/1676)
+- Updated the standardisation of AGAGE format data so that rows containing nans are no longer dropped. [PR #1634](https://github.com/openghg/openghg/pull/1634)
+- Updated copilot instructions and added repo graph using graphify.[PR #1684](https://github.com/openghg/openghg/pull/1684)
+
+### Added
+
+- Added ability to save output of plot_comparison using save_path and ability to pass additional figure modifications.[PR #1672](https://github.com/openghg/openghg/pull/1672)
+- Added more tests and explanation in the tutorial regarding if_exists behaviour.[PR #1693](https://github.com/openghg/openghg/pull/1693)
+
+## [0.19.0] - 2026-06-11
+
+### Fixed
+
+- Converted negative surface observation uncertainty values to NaN before optional averaging. [PR #1544](https://github.com/openghg/openghg/pull/1544)
 - Ensured explicitly integrated CO2 site and satellite footprints are standardised and modelled through the integrated-footprint pathway, while preserving the time-resolved default for CO2 footprints. [PR #1678](https://github.com/openghg/openghg/pull/1678)
 - Updated the value of `atol` and removed `rtol` from `check_coord_alignment` to process 6km file. [PR #1588](https://github.com/openghg/openghg/pull/1588)
 - Fixed EDGAR parsing for monthly sectoral files by normalising `latitude`/`longitude` coordinates to `lat`/`lon` and raising a clear error when the EDGAR version cannot be inferred from the filename. [PR #1187](https://github.com/openghg/openghg/pull/1187)
@@ -18,6 +37,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed "xarray fails to decode time" by using pandas datetime conversion and storing as np.datetime64[ns].[PR #1608](https://github.com/openghg/openghg/pull/1608)
 - Clarified datasource update/versioning behavior for `if_exists`, `save_current`, and overlap handling, including fixes for copied-version metadata and non-overlapping combine updates. [PR #1614](https://github.com/openghg/openghg/pull/1614)
 - Fixed handling of irregular fp time reindexing and missing "calibration_scale", also added the ability to detect "mf_mod_high_res"  for plot_comparison.[PR #1611](https://github.com/openghg/openghg/pull/1611)
+- Fixed object store search and retrieve results to include datasource-managed metadata without mutating datasource records, while keeping raw metastore descriptor metadata authoritative. [PR #1652](https://github.com/openghg/openghg/pull/1652)
+
+### Updated
+
+- Refactored `Datasource` to use `VersionedZarrStore` directly, removed `LocalZarrStore` and `openghg.store.storage`, and moved storage utilities into `openghg.storage`. [PR #1618](https://github.com/openghg/openghg/pull/1618)
+- Updated dependency versions: `black` (26.5.1), `mypy` (2.1.0), `pre-commit` (4.6.0), `filelock` (3.29.0), `h5netcdf` (1.8.1), `msgpack-types` (0.7.0), `rapidfuzz` (3.14.5), `nbsphinx` (0.9.8), `sphinxcontrib-bibtex` (2.7.0), `types-paramiko`, `types-requests` (2.33.0.20260518). Also added a change in dependabot.yml to group all major package version changes into one PR. [PR #1636](https://github.com/openghg/openghg/pull/1636)
 
 ### Added
 

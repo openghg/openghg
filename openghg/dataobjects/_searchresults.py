@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 import logging
-from typing import Any, TypeVar
+from typing import Any, TYPE_CHECKING, TypeVar
 from collections.abc import Iterable
 
-from openghg.dataobjects import ObsData
-from pandas import DataFrame
+if TYPE_CHECKING:
+    from pandas import DataFrame
+    from openghg.dataobjects._obsdata import ObsData
 
 __all__ = ["SearchResults"]
 
@@ -33,6 +36,8 @@ class SearchResults:
     ):
         # db = tinydb.TinyDB(tinydb.storages.MemoryStorage)
         if metadata is not None:
+            from pandas import DataFrame
+
             self.metadata = metadata
             # db.insert_multiple([m for m in metadata.values()])
             self.results = (
@@ -55,6 +60,8 @@ class SearchResults:
         self._end_date = end_date
 
     def __str__(self) -> str:
+        from pandas import DataFrame
+
         SearchResults.df_to_table_console_output(df=DataFrame.from_dict(data=self.metadata))
 
         return f"Found {len(self.results)} results.\nView the results DataFrame using the results property."
@@ -169,6 +176,8 @@ class SearchResults:
         Returns:
             ObsData / List[ObsData]: ObsData object(s)
         """
+        from openghg.dataobjects._obsdata import ObsData
+
         results = []
         for uuid in uuids:
             metadata = self.metadata[uuid]

@@ -1,22 +1,24 @@
 import pytest
 import os
 from helpers import clear_test_stores, get_flux_datapath, filt
+from openghg.objectstore import get_writable_bucket, open_object_store
 from openghg.retrieve import search, search_flux
 from openghg.store import Flux
 from openghg.standardise import standardise_flux, standardise_from_binary_data
 from openghg.transform import transform_flux_data
-from openghg.util import hash_bytes
 from pandas import Timestamp
 from xarray import open_dataset
 from typing import Any, Union
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def clear_stores():
+    """Start each flux test with empty writable stores."""
     clear_test_stores()
 
 
 def test_read_binary_data(mocker, clear_stores):
+    """Binary flux data can be standardised using filename metadata."""
     clear_test_stores()
 
     test_datapath = get_flux_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
@@ -30,10 +32,9 @@ def test_read_binary_data(mocker, clear_stores):
         "time_resolved": False,
     }
 
-    sha1_hash = hash_bytes(data=binary_data)
     filename = test_datapath.name
 
-    file_metadata = {"filename": filename, "sha1_hash": sha1_hash, "compressed": False}
+    file_metadata = {"filename": filename, "compressed": False}
 
     results = standardise_from_binary_data(
         store="user",
@@ -49,6 +50,7 @@ def test_read_binary_data(mocker, clear_stores):
 
 
 def test_read_file(caplog):
+    """A flux file is standardised and stored with the expected chunking."""
     clear_test_stores()
     test_datapath = get_flux_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
 
@@ -59,7 +61,6 @@ def test_read_file(caplog):
         source="gpp-cardamom",
         domain="europe",
         time_resolved=False,
-        force=True,  # For ease, make sure we can add the same data.
     )
 
     assert len(proc_results) == 1
@@ -373,6 +374,57 @@ def test_add_edgar_v8_database(clear_stores, source):
     assert metadata.items() >= expected_metadata.items()
 
 
+def test_search_flux_uses_raw_source_when_datasource_has_duplicate_source(clear_stores):
+    """Reproduce issue #1649 without allowing Datasource metadata to shadow source."""
+    test_datapath = get_flux_datapath("ch4-anthro_EUROPE_2012.nc")
+    displayed_source = "edgarv80_wetchartsv131"
+    indexed_source = f"{displayed_source}_v1"
+
+    proc_results = standardise_flux(
+        store="user",
+        filepath=test_datapath,
+        species="ch4",
+        source=indexed_source,
+        domain="europe",
+    )
+    uuid = proc_results[0]["uuid"]
+
+    bucket = get_writable_bucket("user")
+    with open_object_store(bucket=bucket, data_type="flux", mode="rw") as objstore:
+        datasource = objstore.get_datasource(uuid)
+        datasource.add_metadata({"source": displayed_source})
+        datasource.save()
+
+    all_results = search_flux(domain="europe", species="ch4", store="user").results
+    assert indexed_source in set(all_results.source)
+    assert displayed_source not in set(all_results.source)
+
+    filtered = search_flux(
+        domain="europe",
+        species="ch4",
+        store="user",
+        source=indexed_source,
+    ).results
+    assert len(filtered) > 0
+
+    with open_object_store(bucket=bucket, data_type="flux", mode="r") as objstore:
+        retrieved = objstore.retrieve(domain="europe", species="ch4", source=indexed_source)
+
+    assert len(retrieved) == 1
+    assert retrieved[0].metadata["source"] == indexed_source
+
+    updated_results = standardise_flux(
+        store="user",
+        filepath=test_datapath,
+        species="ch4",
+        source=indexed_source,
+        domain="europe",
+        if_exists="new",
+    )
+    assert updated_results[0]["uuid"] == uuid
+    assert updated_results[0]["new"] is False
+
+
 def test_edgar_v8_raises_error():
     """
     Test to check if incorrect data variable is present in processing file then it should raise value error for v8.0 file
@@ -413,7 +465,7 @@ def test_transform_and_add_edgar_database(clear_stores):
     species = "ch4"
     default_source = "anthro"
 
-    expected_info = {"species": species, "source": default_source, "domain": domain, "date": date}
+    expected_info = {"species": species, "source": default_source, "domain": domain.lower(), "date": date}
     assert len(proc_results) == 1
     assert expected_info.items() <= proc_results[0].items()
 

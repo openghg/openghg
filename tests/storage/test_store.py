@@ -239,6 +239,16 @@ def test_insert_ignore_overlap(store_name, request, ds1, ds4):
     np.testing.assert_equal(store.get().x.values, expected)
 
 
+def test_zarr_insert_ignore_exact_overlap_skips_append(zarr_memory_store, ds1, mocker):
+    """Test that ignoring an exact overlap does not attempt an empty Zarr append."""
+    zarr_memory_store.insert(ds1)
+    to_zarr = mocker.spy(xr.Dataset, "to_zarr")
+
+    zarr_memory_store.insert(ds1, on_overlap="ignore")
+
+    to_zarr.assert_not_called()
+
+
 @pytest.mark.parametrize("store_name", store_names)
 def test_update(store_name, request, ds1, twice_ds1):
     store = request.getfixturevalue(store_name)
@@ -456,3 +466,66 @@ def test_delete_data_from_old_version(store_name, request, ds1):
     # check out v2 and test that it is not empty
     store.checkout_version("v2")
     assert store
+
+
+def test_versioned_zarr_bytes_stored_compression(tmp_path):
+    """Test bytes stored with different compression settings."""
+    from helpers import get_footprint_datapath
+
+    datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
+    original_size = datapath.stat().st_size
+
+    store = get_versioned_zarr_directory_store(path=tmp_path)
+
+    with xr.open_dataset(datapath) as ds:
+        store.create_version("v1", checkout=True)
+        store.insert(ds)
+        uncompressed_bytes = store.bytes_stored()
+        expected_uncompressed_bytes = 444382
+        np.testing.assert_allclose(uncompressed_bytes, expected_uncompressed_bytes, rtol=0.01)
+
+    store.delete_version("v1")
+
+    compressor = Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)
+    store.compressor = compressor
+    with xr.open_dataset(datapath) as ds:
+        store.create_version("v1", checkout=True)
+        store.insert(ds)
+        compressed_bytes = store.bytes_stored()
+        expected_compressed_bytes = 292896
+        np.testing.assert_allclose(compressed_bytes, expected_compressed_bytes, rtol=0.01)
+        assert compressed_bytes < original_size
+        assert compressed_bytes < uncompressed_bytes
+
+
+def test_versioned_zarr_append_loop_has_no_missing_data(tmp_path):
+    """Check repeated appends do not lose values when source chunks share target chunks."""
+    duration = 820
+    chunk_size = 403
+
+    rng = np.random.default_rng(seed=2**32 - 1)
+
+    datasets = []
+    for i in range(3):
+        ds = xr.Dataset(
+            {
+                "x": (["time"], rng.normal(0, 1, duration)),
+                "y": (["time"], rng.normal(0, 1, duration)),
+            },
+            coords={"time": duration * i + np.arange(duration)},
+            attrs={},
+        )
+        datasets.append(ds.chunk({"time": chunk_size}))
+
+    for i in range(10):
+        store = get_versioned_zarr_directory_store(path=tmp_path / f"test-store-{i}")
+        store.create_version("v1", checkout=True)
+
+        for ds in datasets:
+            store.insert(ds)
+
+        retrieved = store.get()
+        missing = retrieved.isnull().sum().compute()
+        total_missing = sum(dict(missing).values())
+
+        assert total_missing == 0.0

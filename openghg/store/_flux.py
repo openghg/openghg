@@ -10,7 +10,7 @@ from xarray import DataArray
 
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
-from openghg.store.storage import ChunkingSchema
+from openghg.storage import ChunkingSchema
 from openghg.types import pathType
 from openghg.util import synonyms
 
@@ -146,9 +146,8 @@ class Flux(BaseStore):
 
         TODO: Could allow Callable[..., Dataset] type for a pre-defined function be passed
         """
-        import inspect
         from openghg.store.spec import define_transform_parsers
-        from openghg.util import load_transform_parser, check_if_need_new_version
+        from openghg.util import load_transform_parser, check_if_need_new_version, split_function_inputs
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -159,7 +158,9 @@ class Flux(BaseStore):
 
         new_version = check_if_need_new_version(if_exists, save_current)
 
-        datapath = Path(datapath)
+        # Format input parameters (specific to data_type)
+        fn_input_parameters = self.format_inputs(**kwargs)
+        fn_input_parameters["datapath"] = Path(datapath)
 
         transform_parsers = define_transform_parsers()[self._data_type]
 
@@ -171,14 +172,12 @@ class Flux(BaseStore):
         # Load the data retrieve object
         parser_fn = load_transform_parser(data_type=self._data_type, source_format=database)
 
-        # Find all parameters that can be accepted by parse function
-        all_param = list(inspect.signature(parser_fn).parameters.keys())
+        # Define parameters to pass to the parser function and remaining keys
+        fn_input_parameters, additional_input_parameters = split_function_inputs(
+            fn_input_parameters, parser_fn
+        )
 
-        # Define parameters to pass to the parser function from kwargs
-        param: dict[Any, Any] = {key: value for key, value in kwargs.items() if key in all_param}
-        param["datapath"] = datapath  # Add datapath explicitly (for now)
-
-        flux_data = parser_fn(**param)
+        flux_data = parser_fn(**fn_input_parameters)
 
         chunks = self.check_chunks(
             ds=flux_data[0].data,
@@ -194,32 +193,26 @@ class Flux(BaseStore):
                 mdd.data = mdd.data.chunk(chunks)
             Flux.validate_data(mdd.data)
 
-        required_keys = ("species", "source", "domain")
+        # Check to ensure no required keys are being passed through info_metadata dict
+        self.check_info_keys(info_metadata)
 
-        if info_metadata:
-            common_keys = set(required_keys) & set(info_metadata.keys())
-
-            if common_keys:
-                raise ValueError(
-                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
-                )
-            else:
-                for parsed_data in flux_data:
-                    parsed_data.metadata.update(info_metadata)
+        # Mop up and add additional keys to metadata which weren't passed to the parser
+        flux_data = self.update_metadata(
+            flux_data, additional_input_parameters, additional_metadata=info_metadata
+        )
 
         datasource_uuids = self.assign_data(
             data=flux_data,
             if_exists=if_exists,
             new_version=new_version,
-            required_keys=required_keys,
             compressor=compressor,
             filters=filters,
         )
 
         # "date" used to be part of the "keys" in the old datasource_uuids format
-        if "date" in param:
+        if "date" in fn_input_parameters:
             for du in datasource_uuids:
-                du["date"] = param["date"]
+                du["date"] = fn_input_parameters["date"]
 
         return datasource_uuids
 

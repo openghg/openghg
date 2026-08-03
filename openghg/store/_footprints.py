@@ -6,7 +6,7 @@ import numpy as np
 
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
-from openghg.store.storage import ChunkingSchema
+from openghg.storage import ChunkingSchema
 from openghg.util import check_species_lifetime, check_species_time_resolved, synonyms
 
 __all__ = ["Footprints"]
@@ -65,13 +65,7 @@ class Footprints(BaseStore):
     #     # Load in the metadata store
     #     metastore = load_metastore(key=fp._metakey)
 
-    #     sha1_hash = file_metadata["sha1_hash"]
     #     overwrite = metadata.get("overwrite", False)
-
-    #     if sha1_hash in fp._file_hashes and not overwrite:
-    #         print(
-    #             f"This file has been uploaded previously with the filename : {fp._file_hashes[sha1_hash]} - skipping."
-    #         )
 
     #     data_buf = BytesIO(binary_data)
     #     fp_data = open_dataset(data_buf)
@@ -163,9 +157,6 @@ class Footprints(BaseStore):
     #     )
 
     #     fp.add_datasources(uuids=datasource_uuids, data=footprint_data, metastore=metastore)
-
-    #     # Record the file hash in case we see this file again
-    #     fp._file_hashes[sha1_hash] = filename
 
     #     fp.save()
 

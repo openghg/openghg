@@ -11,6 +11,7 @@ on:
     branches: [master, devel]
     paths-ignore:
       - 'CHANGELOG.md'
+  workflow_dispatch:
 
 jobs:
   test:
@@ -26,7 +27,7 @@ jobs:
         os: ["ubuntu-latest"]
         python-version: ["3.10", "3.11", "3.12"]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: mamba-org/setup-micromamba@v3
         with:
           environment-file: environment.yaml
