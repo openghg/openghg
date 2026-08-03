@@ -1,4 +1,5 @@
 import pytest
+import xarray as xr
 from helpers import get_footprint_datapath
 from openghg.standardise.footprints import parse_acrg_org
 from openghg.types import ParseError
@@ -54,6 +55,24 @@ def test_parse_acrg_org_site_key():
 
     expected_key = f"{site}_{domain}_{model}_{inlet}"
     assert expected_key in result
+
+
+def test_parse_acrg_org_data():
+    """Test parsing ACRG footprint data supplied directly."""
+    filepath = get_footprint_datapath("WAO-20magl_UKV_rn_TEST_201801.nc")
+
+    with xr.open_dataset(filepath) as dataset:
+        result = parse_acrg_org(
+            data=dataset.load(),
+            model="NAME",
+            inlet="20m",
+            species="Rn",
+            domain="BRAZIL",
+            site="WAO",
+        )
+
+    assert "WAO_BRAZIL_NAME_20m" in result
+    assert result["WAO_BRAZIL_NAME_20m"]["metadata"]["data_type"] == "footprints"
 
 
 def test_parse_acrg_org_satellite_key():

@@ -157,6 +157,27 @@ def _write_mock_co2_cams_file(tmp_path, filename: str) -> xr.Dataset:
     return ds
 
 
+def test_parse_cams_data(monkeypatch, tmp_path):
+    """Test transforming a CAMS dataset supplied directly."""
+    dataset = _write_mock_co2_cams_file(tmp_path, "cams73_v23r1_co2_conc_surface_inst_202101.nc")
+
+    monkeypatch.setattr(
+        "openghg.transform.boundary_conditions._cams.find_domain",
+        lambda domain: (
+            np.array([0.0, 1.0], dtype=float),
+            np.array([0.0, 1.0], dtype=float),
+            1.0,
+            1.0,
+        ),
+    )
+
+    results = parse_cams(data=dataset, bc_input="cams_test", domain="TESTDOMAIN", species="co2")
+
+    metadata = results["co2_cams_test_TESTDOMAIN"]["metadata"]
+    assert metadata["domain"] == "TESTDOMAIN"
+    assert metadata["species"] == "co2"
+
+
 def test_cams_to_domain_uses_altitude_for_ch4(monkeypatch):
     class DummyFootprint:
         def __init__(self):

@@ -87,6 +87,24 @@ def test_parse_edgar_raw(folder, version, species, mean_raw_flux):
     assert metadata.items() >= expected_metadata.items()
 
 
+def test_parse_edgar_data():
+    """Test transforming an EDGAR dataset supplied directly."""
+    folder = get_flux_datapath("EDGAR/yearly/v6.0_CH4")
+    filepath = next(folder.glob("*.nc"))
+
+    with xr.open_dataset(filepath) as dataset:
+        result = parse_edgar(
+            data=dataset.load(),
+            date="2015",
+            species="ch4",
+            source="anthro",
+            edgar_version="v6.0",
+        )
+
+    assert "ch4_anthro_globaledgar_2015" in result
+    assert result["ch4_anthro_globaledgar_2015"]["data"].attrs["domain"] == "globaledgar"
+
+
 @pytest.mark.xesmf
 def test_parse_edgar_domain():
     """

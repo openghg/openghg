@@ -1,3 +1,4 @@
+import xarray as xr
 from helpers import get_flux_datapath
 from openghg.standardise.flux import parse_openghg
 from pandas import Timestamp
@@ -31,3 +32,19 @@ def test_parse_openghg_multi_file():
     time = data["time"]
     assert time[0] == Timestamp("2012-01-01")
     assert time[-1] == Timestamp("2013-01-01")
+
+
+def test_parse_openghg_data():
+    """Test parsing an OpenGHG flux dataset supplied directly."""
+    filepath = get_flux_datapath(filename="co2-gpp-cardamom_EUROPE_2013.nc")
+
+    with xr.open_dataset(filepath) as dataset:
+        results = parse_openghg(
+            data=dataset.load(),
+            domain="EUROPE",
+            species="co2",
+            source="anthro",
+        )
+
+    assert "co2_anthro_EUROPE" in results
+    assert results["co2_anthro_EUROPE"]["data"].time[0] == Timestamp("2013-01-01")
