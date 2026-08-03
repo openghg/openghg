@@ -9,7 +9,9 @@ from openghg.analyse._alignment import time_of_day_offset
 from openghg.analyse._utils import reindex_on_dims
 
 
-def fp_x_flux_integrated(footprint: xr.Dataset, flux: xr.Dataset, use_low_freq_flux: bool = False) -> xr.DataArray:
+def fp_x_flux_integrated(
+    footprint: xr.Dataset, flux: xr.Dataset, use_low_freq_flux: bool = False
+) -> xr.DataArray:
     """Calculate footprint times flux.
 
     Args:
@@ -28,7 +30,7 @@ def fp_x_flux_integrated(footprint: xr.Dataset, flux: xr.Dataset, use_low_freq_f
     flux = reindex_on_dims(flux, footprint, ["lat", "lon"])
     if use_low_freq_flux:
         flux_var = flux.flux if isinstance(flux, xr.Dataset) else flux
-        # fp_int does not have an "H_back" dimension, so we cannot reuse
+        # An integrated footprint does not have an "H_back" dimension, so we cannot reuse
         # _make_low_freq_flux (which pads the flux time range based on
         # H_back). Instead, directly resample to monthly mean and align
         # to the footprint's release times.
@@ -42,10 +44,6 @@ def fp_x_flux_integrated(footprint: xr.Dataset, flux: xr.Dataset, use_low_freq_f
         # align separately on time
         # TODO: if method="nearest" was acceptable, then we could align all coordinates at once with reindex_like
         flux = flux.reindex_like(footprint, method="ffill")
-    # align separately on time
-    # TODO: if method="nearest" was acceptable, then we could align all coordinates at once with reindex_like
-    #flux = flux.reindex_like(footprint, method="ffill")
-    
     # align chunks for time after filling
     fp_time_chunks = footprint.fp.chunksizes.get("time")
     if fp_time_chunks is not None:
