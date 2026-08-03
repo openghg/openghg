@@ -1073,7 +1073,7 @@ class ModelScenario:
         output_fp_x_flux: bool = False,
         split_by_sectors: bool = False,
         output_units: float | str | None = None,
-        use_low_freq_flux: bool = False,
+        use_low_freq_flux: bool | None = None,
     ) -> Dataset:
         """Calculate the modelled observation points based on site footprint and fluxes.
 
@@ -1097,6 +1097,9 @@ class ModelScenario:
               different flux sources. The total mf_mod and fp_x_flux are available under their usual names.
             output_units: target units; if None, then obs. units will be used,
               or "mol/mol" if these are not present.
+            use_low_freq_flux: For integrated footprints, use monthly-mean fluxes
+              instead of the flux at the release time. Defaults to True for an
+              integrated CO2 footprint and False otherwise.
 
         Returns:
             xarray.Dataset: Modelled observation values along the time axis, optionally with "fp x flux".
@@ -1145,7 +1148,6 @@ class ModelScenario:
                         output_fpXflux=output_fp_x_flux,
                         fp_x_flux_name="fp_x_flux_sectoral",
                         use_low_freq_flux=use_low_freq_flux,
-                        
                     )
                 else:
                     mod_obs = self._calc_modelled_obs_integrated(
@@ -1184,7 +1186,7 @@ class ModelScenario:
         ts_name: str = "mf_mod",
         output_fpXflux: bool = False,
         fp_x_flux_name: str = "fp_x_flux",
-        use_low_freq_flux: bool = False,
+        use_low_freq_flux: bool | None = None,
     ) -> Dataset:
         """Calculate modelled mole fraction timeseries using integrated footprints data.
 
@@ -1212,7 +1214,9 @@ class ModelScenario:
         scenario = self.scenario
 
         flux = self.combine_flux_sources(sources)
-        #flux_modelled = fp_x_flux_integrated(scenario, flux)
+        if use_low_freq_flux is None:
+            use_low_freq_flux = self.species == "co2"
+
         flux_modelled = fp_x_flux_integrated(scenario, flux, use_low_freq_flux=use_low_freq_flux)
         data = {}
 
@@ -1231,7 +1235,7 @@ class ModelScenario:
         ts_name: str = "mf_mod_high_res",
         output_fpXflux: bool = False,
         fp_x_flux_name: str = "fp_x_flux",
-        use_low_freq_flux: bool = False,
+        use_low_freq_flux: bool | None = None,
     ) -> Dataset:
         """Calculate modelled mole fraction timeseries using high time resolution
         footprints data and emissions data. This is appropriate for time variable
@@ -1283,7 +1287,6 @@ class ModelScenario:
             fp = self.scenario.fp_HiTRes
         elif "fp_time_resolved" in self.scenario.data_vars:
             fp = self.scenario[["fp_time_resolved", "fp_residual"]]
-        #for INT mode wiith species of CO2
         else:
             return self._calc_modelled_obs_integrated(
                 sources=sources,
@@ -1404,7 +1407,7 @@ class ModelScenario:
         cache: bool = True,
         recalculate: bool = False,
         output_units: str | float | None = None,
-        use_low_freq_flux: bool = False,
+        use_low_freq_flux: bool | None = None,
     ) -> Dataset:
         """Produce combined object containing aligned footprint and observation data.
         Can also include modelled timeseries data derived from flux.
