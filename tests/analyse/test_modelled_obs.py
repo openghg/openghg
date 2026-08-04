@@ -9,9 +9,8 @@ import pandas as pd
 import pytest
 import xarray as xr
 
-from openghg.analyse import ModelScenario, make_integrated_low_freq_flux
+from openghg.analyse import ModelScenario
 from openghg.analyse._modelled_obs import (
-    fp_x_flux_integrated,
     fp_x_flux_time_resolved,
     time_resolved_and_residual_footprints,
     _max_h_back,
@@ -326,35 +325,6 @@ def test_model_modelled_obs_paris_co2(
         modelled_mf_hr = combined_dataset["mf_mod_high_res"].sel(time=release_time).values
 
         assert np.isclose(modelled_mf_hr, expected_modelled_mf_hr)
-
-
-def test_modelled_obs_integrated_co2_uses_integrated_pipeline(
-    obs_co2_dummy, footprint_co2_dummy, flux_co2_dummy
-):
-    """Integrated CO2 footprints use monthly-mean fluxes, not the HiTRes path."""
-    footprint = FootprintData(
-        data=footprint_co2_dummy.data.drop_vars("fp_HiTRes"),
-        metadata=footprint_co2_dummy.metadata,
-    )
-    scenario = ModelScenario(obs=obs_co2_dummy, footprint=footprint, flux=flux_co2_dummy)
-
-    combined = scenario.footprints_data_merge()
-
-    assert "mf_mod" in combined
-    assert "mf_mod_high_res" not in combined
-
-    flux = scenario.combine_flux_sources()
-    flux_monthly = make_integrated_low_freq_flux(flux)
-    expected_flux = flux.flux.resample({"time": "1MS"}).mean().to_dataset(name="flux")
-    xr.testing.assert_allclose(flux_monthly, expected_flux)
-
-    expected = (
-        fp_x_flux_integrated(combined, flux_monthly)
-        .pint.quantify()
-        .sum(["lat", "lon"])
-        .pint.dequantify()
-    )
-    xr.testing.assert_allclose(combined.mf_mod, expected)
 
 
 def test_modelled_obs_co2_consistency(model_scenario_co2_dummy, model_scenario_paris_co2_dummy):

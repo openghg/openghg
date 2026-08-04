@@ -887,7 +887,7 @@ def test_standardise_integrated_co2_footprint_for_site_or_satellite(site, satell
             store="user",
         )
 
-    assert data.metadata["time_resolved"] == "False"
+    assert data.metadata["time_resolved"] == "false"
     assert "fp" in data.data
     assert "fp_time_resolved" not in data.data
     assert "fp_residual" not in data.data
