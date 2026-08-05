@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added support for passing in-memory `xarray.Dataset` objects to supported standardisation and transformation parsers, including object-store retrieval and forward `ModelScenario` coverage.
 - Added ability to save output of plot_comparison using save_path and ability to pass additional figure modifications.[PR #1672](https://github.com/openghg/openghg/pull/1672)
 - Added more tests and explanation in the tutorial regarding if_exists behaviour.[PR #1693](https://github.com/openghg/openghg/pull/1693)
 
