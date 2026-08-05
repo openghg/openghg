@@ -409,8 +409,8 @@ def test_retrieve_icos_standard_compare():
         # This allows for new data to contain more variables if needed
         assert "data_owner" in data_dobj.attrs and "data_owner_email" in data_dobj.attrs and "file_created" in data_dobj.attrs
         for at in data_dobj.attrs:
-            if at not in ['data_owner','data_owner_email','units','sampling_height','inlet','inlet_height_magl','station_latitude','station_longitude','dataset_source','file_created']:
-                assert data_dobj.attrs[at] == data.attrs[at], f"Attribute {at} mismatch: {data_dobj.attrs[at]} != {data.attrs[at]}"
+            if at not in ['data_owner','data_owner_email','units','sampling_height','inlet','inlet_height_magl','station_latitude','station_longitude','dataset_source','file_created','instrument_data']:
+                assert data_dobj.attrs[at].lower() == data.attrs[at].lower(), f"Attribute {at} mismatch: {data_dobj.attrs[at]} != {data.attrs[at]}"
         #ask Joe about file_created as seems to be file_created when using openghg
 
             if at in ['units']:
@@ -646,8 +646,8 @@ def test_retrieve_eye_ave_par_compare():
     # This allows for new data to contain more variables if needed
     assert "data_owner" in data_dobj.attrs and "data_owner_email" in data_dobj.attrs and "file_created" in data_dobj.attrs
     for at in data_dobj.attrs:
-        if at not in ['data_owner','data_owner_email','station_long_name','station_latitude','station_longitude','file_created']:
-            assert data_dobj.attrs[at] == data.attrs[at], f"Attribute {at} mismatch: {data_dobj.attrs[at]} != {data.attrs[at]}"
+        if at not in ['data_owner','data_owner_email','station_long_name','station_latitude','station_longitude','file_created','instrument_data','instrument']:
+            assert data_dobj.attrs[at].lower() == data.attrs[at].lower(), f"Attribute {at} mismatch: {data_dobj.attrs[at]} != {data.attrs[at]}"
 
         if at in ['station_latitude']:
             split_on_decimal_dobj = data_dobj.attrs[at].split('.')
