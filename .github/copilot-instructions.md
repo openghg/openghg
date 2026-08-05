@@ -1,8 +1,10 @@
 # OpenGHG Copilot Instructions
 
 OpenGHG is a Python package for greenhouse gas data processing, standardisation,
-storage, retrieval, analysis, and plotting. Keep changes small, scientific-data
-safe, and consistent with the surrounding module patterns.
+storage, retrieval, analysis, and plotting. Limit each change to the minimum
+files required to satisfy the task. Do not refactor unrelated code in the same
+edit. Keep changes scientific-data safe and consistent with the surrounding
+module patterns.
 
 ## First Checks
 
@@ -42,7 +44,11 @@ safe, and consistent with the surrounding module patterns.
 
 ## Environment
 
-Use `uv` for agent-run environment setup:
+Use `uv` for agent-run environment setup. Fallback order:
+
+1. Use `uv` (preferred).
+2. If `uv` is unavailable, use an already-active Conda or Micromamba environment.
+3. Do not create new Pixi environments.
 
 ```bash
 uv sync --extra dev
@@ -56,14 +62,11 @@ uv sync --all-extras
 python -c "import openghg"
 ```
 
-Do not create Pixi environments during automated agent runs; Pixi environment
-creation can halt or take too long. Use Conda or Micromamba only if uv is
-unavailable and the task cannot be validated otherwise.
-
 ## Validation
 
-Run the smallest useful validation for the change. Prefer targeted tests over the
-full test suite.
+Run, at minimum, `compileall` and the single test file most directly covering
+the changed code. Add `black --check` and `flake8` if formatting or style was
+touched. If a change affects typing, include `mypy` for the affected module.
 
 ```bash
 uv run python -m compileall -q openghg
@@ -83,6 +86,13 @@ flake8 openghg
 mypy openghg
 pytest tests/path/to/test_file.py
 ```
+
+If a validation check reports failures unrelated to the current change
+(pre-existing issues), note them in the report but do not fix them unless the
+task explicitly asks for it.
+
+Do not trigger GitHub Actions CI workflows. Run only the local validation
+commands listed in the Validation section.
 
 Special test handling:
 
