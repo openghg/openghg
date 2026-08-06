@@ -5,11 +5,11 @@ All notable changes to OpenGHG will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/openghg/openghg/compare/0.18.0...HEAD)
+## [Unreleased](https://github.com/openghg/openghg/compare/0.19.0...HEAD)
 
 ### Fixed
 
-- Ensured explicitly integrated CO2 site and satellite footprints are standardised and modelled through the integrated-footprint pathway, while preserving the time-resolved default for CO2 footprints. [PR #1678](https://github.com/openghg/openghg/pull/1678)
+- Ensured explicitly integrated CO2 site and satellite footprints are standardised and modelled through the integrated-footprint pathway, while preserving the time-resolved default for CO2 footprints. [PR #1698](https://github.com/openghg/openghg/pull/1698)
 - Added a dimension dtype checker for H_back dimension to "timedelta64[ns]". Bug occured for dimension "resolution" and dtype "resolution".[PR #1671](https://github.com/openghg/openghg/pull/1671)
 - Added config-driven metadata key handling for transformed flux and boundary condition data: removed hard-coded required-key lookups.[PR #1686](https://github.com/openghg/openghg/pull/1686)
 
@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added a tutorial for adding CO2 satellite data, including how integrated footprints differ from time-resolved footprints in OpenGHG. [PR #1678](https://github.com/openghg/openghg/pull/1678)
+- Added a tutorial for adding CO2 satellite data, including how integrated footprints differ from time-resolved footprints in OpenGHG. [PR #1698](https://github.com/openghg/openghg/pull/1698)
 - Added ability to save output of plot_comparison using save_path and ability to pass additional figure modifications.[PR #1672](https://github.com/openghg/openghg/pull/1672)
 - Added more tests and explanation in the tutorial regarding if_exists behaviour.[PR #1693](https://github.com/openghg/openghg/pull/1693)
 
