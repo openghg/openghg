@@ -2,6 +2,7 @@
 
 import numpy as np
 import pandas as pd
+import pytest
 import xarray as xr
 
 from openghg.analyse import ModelScenario, make_integrated_low_freq_flux
@@ -9,8 +10,9 @@ from openghg.analyse._modelled_obs import fp_x_flux_integrated
 from openghg.dataobjects import FluxData, FootprintData, ObsData
 
 
-def test_modelled_obs_integrated_co2_uses_integrated_pipeline():
-    """Integrated CO2 footprints use monthly-mean fluxes, not the HiTRes path."""
+@pytest.fixture
+def integrated_co2_scenario():
+    """Create a minimal integrated-CO2 scenario for modelled-observation tests."""
     obs = ObsData(
         data=xr.Dataset(
             {"mf": ("time", np.ones(2))},
@@ -50,7 +52,12 @@ def test_modelled_obs_integrated_co2_uses_integrated_pipeline():
     flux.data.lat.attrs["units"] = "degrees_north"
     flux.data.lon.attrs["units"] = "degrees_east"
 
-    scenario = ModelScenario(obs=obs, footprint=footprint, flux=flux)
+    return ModelScenario(obs=obs, footprint=footprint, flux=flux)
+
+
+def test_modelled_obs_integrated_co2_uses_integrated_pipeline(integrated_co2_scenario):
+    """Integrated CO2 footprints use monthly-mean fluxes, not the HiTRes path."""
+    scenario = integrated_co2_scenario
     combined = scenario.footprints_data_merge()
 
     assert "mf_mod" in combined
@@ -68,3 +75,27 @@ def test_modelled_obs_integrated_co2_uses_integrated_pipeline():
         .pint.dequantify()
     )
     xr.testing.assert_allclose(combined.mf_mod, expected)
+
+
+def test_modelled_obs_integrated_co2_split_by_sectors_retains_total(integrated_co2_scenario):
+    """Sector splitting retains integrated totals and labels the sectoral outputs."""
+    scenario = integrated_co2_scenario
+    second_flux = FluxData(
+        data=scenario.fluxes["TESTSOURCE"].data.copy(deep=True),
+        metadata={"species": "co2", "source": "TESTSOURCE2", "domain": "TESTDOMAIN"},
+    )
+    scenario.add_flux(flux=second_flux)
+
+    combined = scenario.footprints_data_merge(
+        calc_fp_x_flux=True,
+        split_by_sectors=True,
+        calc_bc=False,
+    )
+
+    assert combined.mf_mod.dims == ("time",)
+    assert combined.mf_mod_sectoral.dims == ("source", "time")
+    assert combined.fp_x_flux.dims == ("lat", "lon", "time")
+    assert combined.fp_x_flux_sectoral.dims == ("source", "lat", "lon", "time")
+    assert combined.source.values.tolist() == ["TESTSOURCE", "TESTSOURCE2"]
+    xr.testing.assert_allclose(combined.mf_mod_sectoral.sum("source"), combined.mf_mod)
+    xr.testing.assert_allclose(combined.fp_x_flux_sectoral.sum("source"), combined.fp_x_flux)

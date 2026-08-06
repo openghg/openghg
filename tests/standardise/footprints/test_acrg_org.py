@@ -56,6 +56,27 @@ def test_parse_acrg_org_site_key():
     assert expected_key in result
 
 
+def test_parse_acrg_org_integrated_co2_drops_time_resolved_variables():
+    """Explicit integrated CO2 parsing retains fp without HiTRes variables or dimensions."""
+    datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
+
+    result = parse_acrg_org(
+        filepath=datapath,
+        site="TAC",
+        inlet="100m",
+        model="NAME",
+        met_model="UKV",
+        species="co2",
+        domain="TEST",
+        time_resolved=False,
+    )
+
+    data = result["TAC_TEST_NAME_100m"]["data"]
+    assert "fp" in data
+    assert "fp_HiTRes" not in data
+    assert "H_back" not in data.dims
+
+
 def test_parse_acrg_org_satellite_key():
     """
     Tests the key created in the parser output for satellite data
