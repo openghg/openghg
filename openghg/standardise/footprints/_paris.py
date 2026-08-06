@@ -32,7 +32,7 @@ def parse_paris(
     period: str | tuple | None = None,
     continuous: bool = True,
     high_spatial_resolution: bool = False,
-    time_resolved: bool = False,
+    time_resolved: bool | None = None,
     high_time_resolution: bool = False,
     short_lifetime: bool = False,
     inner_domain: str | None = None,
@@ -54,8 +54,9 @@ def parse_paris(
         period: Period of measurements. Only needed if this can not be inferred from the time coords
         continuous: Whether time stamps have to be continuous.
         high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.
-        time_resolved: Indicate footprints are high time resolution (include H_back dimension)
-            Note this will be set to True automatically if species="co2" (Carbon Dioxide).
+        time_resolved: Indicate whether footprints are time resolved (include an
+            H_back dimension). For CO2, the default (None) selects time-resolved
+            footprints. Set this explicitly to False to parse the integrated fp.
         high_time_resolution:  This argument is deprecated and will be replaced in future versions with time_resolved.
         short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
             Note this will be set to True if species has an associated lifetime.
@@ -77,7 +78,10 @@ def parse_paris(
 
     fp_data = xr_open_fn(filepath)
 
-    time_resolved = check_species_time_resolved(species, time_resolved)
+    if time_resolved is None:
+        time_resolved = check_species_time_resolved(species)
+    elif time_resolved:
+        time_resolved = check_species_time_resolved(species, time_resolved)
     short_lifetime = check_species_lifetime(species, short_lifetime)
 
     # Mapping NAME 2025 processed footprint variables to pre-2025
@@ -99,6 +103,15 @@ def parse_paris(
         dv_rename["srr_time_resolved"] = "fp_time_resolved"
         dv_rename["srr_residual"] = "fp_residual"
         dim_rename["resolution"] = "H_back"
+    else:
+        drop_vars = [v for v in ["srr_time_resolved", "srr_residual"] if v in fp_data]
+        if drop_vars:
+            fp_data = fp_data.drop_vars(drop_vars)
+        if "resolution" in fp_data.dims:
+            if fp_data.sizes["resolution"] == 1:
+                fp_data = fp_data.squeeze("resolution", drop=True)
+            else:
+                fp_data = fp_data.drop_dims("resolution")
 
     try:
         # Ignore type - dv_rename type should be fine as a dict but mypy unhappy.
