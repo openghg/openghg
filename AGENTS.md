@@ -70,6 +70,8 @@ Prefer `uv` for agent-run setup and commands. Fallback order:
 2. If `uv` is unavailable, use an already-active Conda or Micromamba environment.
 3. Do not create new Pixi environments.
 
+Never run `sudo` commands.
+
 ```bash
 uv sync --extra dev
 uv run python -c "import openghg"

@@ -6,8 +6,10 @@ files required to satisfy the task. Do not refactor unrelated code in the same
 edit. Keep changes scientific-data safe and consistent with the surrounding
 module patterns.
 
-## First Checks
+If an automated analysis run reports a JSON parse error, retry the analysis —
+the error is often transient or caused by an incomplete previous run.
 
+## First Checks
 - Use `graphify-out/` for a quick map of the repository before broad searches:
   - `graphify-out/graph.json` Maps how modules, components, and files import one another. Data flow and impact analysis.
   - `graphify-out/manifest.json` Defines the project name, description, version, and global entry points. API surfaces and asset paths(configs).
@@ -49,6 +51,8 @@ Use `uv` for agent-run environment setup. Fallback order:
 1. Use `uv` (preferred).
 2. If `uv` is unavailable, use an already-active Conda or Micromamba environment.
 3. Do not create new Pixi environments.
+
+Never run `sudo` commands.
 
 ```bash
 uv sync --extra dev
