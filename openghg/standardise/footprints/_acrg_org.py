@@ -78,6 +78,12 @@ def parse_acrg_org(
         time_resolved = check_species_time_resolved(species)
     elif time_resolved:
         time_resolved = check_species_time_resolved(species, time_resolved)
+
+    if time_resolved is False:
+        drop_vars = [name for name in ("fp_HiTRes", "H_back") if name in fp_data]
+        if drop_vars:
+            fp_data = fp_data.drop_vars(drop_vars)
+
     short_lifetime = check_species_lifetime(species, short_lifetime)
 
     dv_rename = {

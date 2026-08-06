@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Ensured explicitly integrated CO2 site and satellite footprints are standardised and modelled through the integrated-footprint pathway, while preserving the time-resolved default for CO2 footprints. [PR #1678](https://github.com/openghg/openghg/pull/1678)
 - Added a dimension dtype checker for H_back dimension to "timedelta64[ns]". Bug occured for dimension "resolution" and dtype "resolution".[PR #1671](https://github.com/openghg/openghg/pull/1671)
 - Added config-driven metadata key handling for transformed flux and boundary condition data: removed hard-coded required-key lookups.[PR #1686](https://github.com/openghg/openghg/pull/1686)
 
@@ -20,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added a tutorial for adding CO2 satellite data, including how integrated footprints differ from time-resolved footprints in OpenGHG. [PR #1678](https://github.com/openghg/openghg/pull/1678)
 - Added ability to save output of plot_comparison using save_path and ability to pass additional figure modifications.[PR #1672](https://github.com/openghg/openghg/pull/1672)
 - Added more tests and explanation in the tutorial regarding if_exists behaviour.[PR #1693](https://github.com/openghg/openghg/pull/1693)
 
@@ -28,7 +30,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Converted negative surface observation uncertainty values to NaN before optional averaging. [PR #1544](https://github.com/openghg/openghg/pull/1544)
-- Ensured explicitly integrated CO2 site and satellite footprints are standardised and modelled through the integrated-footprint pathway, while preserving the time-resolved default for CO2 footprints. [PR #1678](https://github.com/openghg/openghg/pull/1678)
 - Updated the value of `atol` and removed `rtol` from `check_coord_alignment` to process 6km file. [PR #1588](https://github.com/openghg/openghg/pull/1588)
 - Fixed EDGAR parsing for monthly sectoral files by normalising `latitude`/`longitude` coordinates to `lat`/`lon` and raising a clear error when the EDGAR version cannot be inferred from the filename. [PR #1187](https://github.com/openghg/openghg/pull/1187)
 - Updated CAMS boundary-condition transforms to support CO2 vertical coordinates via `height_above_reference_ellipsoid`, pass through the requested domain during interpolation, and correctly parse CAMS filenames with input-observation suffixes such as `surface_inst`. [PR #1601](https://github.com/openghg/openghg/pull/1601)
@@ -46,7 +47,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added a tutorial for adding CO2 satellite data, including how integrated footprints differ from time-resolved footprints in OpenGHG. [PR #1678](https://github.com/openghg/openghg/pull/1678)
 - Option to set location of openghg log via an environment variable `OPENGHG_LOG_PATH`. [PR #1607](https://github.com/openghg/openghg/pull/1607)
 - Added the ability to standardise GEMINI data using standardise_column.[PR #1501](https://github.com/openghg/openghg/pull/1501)
 

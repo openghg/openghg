@@ -134,7 +134,8 @@ class ModelScenario:
         flux: FluxData | dict[str, FluxData] | None = None,
         bc: BoundaryConditionsData | None = None,
         store: str | None = None,
-    ):
+        time_resolved: bool | None = None,
+    ) -> None:
         """Create a ModelScenario instance based on a set of keywords to be
         or directly supplied objects. This can be created as an empty class to be
         populated.
@@ -175,6 +176,9 @@ class ModelScenario:
         flux: Supply FluxData object directly (e.g. from get_flux() function).
         bc: Supply BoundaryConditionsData object directly.
         store: Name of object store to retrieve data from.
+        time_resolved: Whether to filter retrieved footprints by time resolution.
+            ``True`` selects time-resolved footprints, ``False`` selects integrated
+            footprints, and ``None`` does not filter on footprint resolution.
 
         Returns:
             None
@@ -258,6 +262,7 @@ class ModelScenario:
             species=species,
             footprint=footprint,
             store=store,
+            time_resolved=time_resolved,
         )
 
         # Add flux data (directly or through keywords)
@@ -451,8 +456,35 @@ class ModelScenario:
         network: str | None = None,
         footprint: FootprintData | None = None,
         store: str | None = None,
+        time_resolved: bool | None = None,
     ) -> None:
-        """Add footprint data based on keywords or direct FootprintData object."""
+        """Add footprint data based on keywords or a supplied data object.
+
+        Args:
+            site: Site code, such as ``"TAC"``.
+            inlet: Observation inlet value, such as ``"100m"``.
+            height: Alias for ``inlet``.
+            domain: Domain name for the footprints.
+            model: Model used to create the footprints, such as ``"NAME"``.
+            satellite: Satellite name for satellite footprints.
+            obs_region: Geographic region covered by satellite footprints.
+            met_model: Meteorological model used to create the footprints.
+            start_date: Start of the date range to retrieve.
+            end_date: End of the date range to retrieve.
+            species: Species code. This is required for species-specific
+                footprints, including CO2.
+            fp_inlet: Footprint release-height option when it differs from the
+                observation inlet.
+            network: Observation network used when inferring the release height.
+            footprint: Footprint data to attach directly instead of retrieving it.
+            store: Name of the object store from which to retrieve data.
+            time_resolved: Whether to filter retrieved footprints by time resolution.
+                ``True`` selects time-resolved footprints, ``False`` selects integrated
+                footprints, and ``None`` does not filter on footprint resolution.
+
+        Returns:
+            None. The selected footprint is stored on this scenario.
+        """
         from openghg.util import (
             species_lifetime,
             extract_height_name,
@@ -519,6 +551,7 @@ class ModelScenario:
                     "start_date": start_date,
                     "end_date": end_date,
                     "store": store,
+                    "time_resolved": time_resolved,
                 }
 
                 # Check whether general inert footprint should be extracted (suitable for long-lived species)
@@ -690,17 +723,20 @@ class ModelScenario:
     ) -> Dataset:
         """Align units in dataset with obs units.
 
-        Units will only be updated for data variables that: 1) already have units, 2) have a "time" dimension.
+        Units will only be updated for data variables that: 1) have units and 2) have
+        a ``"time"`` dimension. Variables whose names end with
+        ``"_number_of_observations"`` are never converted, including when explicitly
+        listed in ``data_vars``. The input dataset is not modified.
 
         Args:
             ds: dataset to align units on
             output_units: target units; if None, then obs. units will be used,
               or "mol/mol" if these are not present.
             data_vars: data variables to convert; if None, all data variables satisfying the
-              conditions 1) and 2) will be converted.
+              conditions above will be converted.
 
         Returns:
-            input dataset with aligned units
+            A dataset with aligned units.
 
         """
         # if output_units is None:
@@ -712,9 +748,8 @@ class ModelScenario:
         data_vars = data_vars or ds.data_vars
         for dv in data_vars:
             unit = ds[dv].attrs.get("units")
-            if unit in ("1", None):
-                ds[dv].attrs["units"] = "mol/mol"
-            if ds[dv].attrs.get("units") is not None and "time" in ds[dv].dims:
+            is_observation_count = str(dv).endswith("_number_of_observations")
+            if unit is not None and "time" in ds[dv].dims and not is_observation_count:
                 to_convert.append(dv)
 
         target_units = {dv: output_units for dv in to_convert}
@@ -1123,8 +1158,14 @@ class ModelScenario:
             modelled_obs = cast(Dataset, self.modelled_obs)
             return modelled_obs
 
-        # Check species and use high time resolution steps if this is carbon dioxide
-        if self.species == "co2":
+        if self.scenario is None:
+            raise ValueError("Combined data must have been defined before calculating modelled observations.")
+
+        time_resolved_footprint = any(
+            name in self.scenario.data_vars for name in ("fp_HiTRes", "fp_time_resolved")
+        )
+
+        if time_resolved_footprint:
             modelled_obs = self._calc_modelled_obs_HiTRes(
                 sources=sources,
                 output_TS=True,
@@ -1145,7 +1186,7 @@ class ModelScenario:
             sectoral_datasets = []
 
             for source in sources:
-                if self.species == "co2":
+                if time_resolved_footprint:
                     mod_obs = self._calc_modelled_obs_HiTRes(
                         sources=source,
                         output_TS=True,
@@ -1299,7 +1340,9 @@ class ModelScenario:
             return self._calc_modelled_obs_integrated(
                 sources=sources,
                 output_TS=output_TS,
+                ts_name=ts_name,
                 output_fpXflux=output_fpXflux,
+                fp_x_flux_name=fp_x_flux_name,
                 use_low_freq_flux=use_low_freq_flux,
             )
 
@@ -1437,6 +1480,8 @@ class ModelScenario:
             cache: Cache this data after calculation. Default = True.
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
             output_units: units to use for obs, or any data that should have the same units as obs (e.g. `mf_mod`).
+            use_low_freq_flux: For integrated footprints, use monthly-mean fluxes instead
+                of the flux at release time. ``None`` enables this for CO2 only.
 
         Returns:
             xarray.Dataset: Combined dataset containing footprint and observation data

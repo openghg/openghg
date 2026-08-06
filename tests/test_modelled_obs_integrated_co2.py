@@ -10,6 +10,56 @@ from openghg.analyse._modelled_obs import fp_x_flux_integrated
 from openghg.dataobjects import FluxData, FootprintData, ObsData
 
 
+def test_convert_units_preserves_unitless_observation_counts():
+    """Converting mole fractions to ppm must not alter unitless observation counts."""
+    dataset = xr.Dataset(
+        {
+            "mf": ("time", [1.0]),
+            "mf_number_of_observations": ("time", [2]),
+        },
+        coords={"time": pd.to_datetime(["2012-01-01"])},
+    )
+    dataset.mf.attrs["units"] = "1"
+    dataset.mf_number_of_observations.attrs["units"] = "1"
+    original = dataset.copy(deep=True)
+
+    converted = ModelScenario().convert_units(dataset, output_units="ppm")
+
+    xr.testing.assert_identical(dataset, original)
+    xr.testing.assert_identical(
+        converted.mf_number_of_observations, original.mf_number_of_observations
+    )
+    assert converted.mf.item() == pytest.approx(1_000_000)
+
+
+def test_add_footprint_forwards_time_resolved_selector(monkeypatch):
+    """Footprint keyword retrieval must distinguish integrated and time-resolved data."""
+    captured_keywords = None
+    captured_data_type = None
+
+    def capture_keywords(self, keywords, data_type):
+        """Capture retrieval keywords without accessing an object store."""
+        nonlocal captured_keywords, captured_data_type
+        captured_keywords = keywords
+        captured_data_type = data_type
+        return None
+
+    monkeypatch.setattr(ModelScenario, "_get_data", capture_keywords)
+    scenario = ModelScenario()
+
+    scenario.add_footprint(
+        site="tac",
+        fp_inlet="100m",
+        domain="TEST",
+        species="co2",
+        time_resolved=False,
+    )
+
+    assert captured_data_type == "footprint"
+    assert captured_keywords is not None
+    assert all(keywords["time_resolved"] is False for keywords in captured_keywords)
+
+
 @pytest.fixture
 def integrated_co2_scenario():
     """Create a minimal integrated-CO2 scenario for modelled-observation tests."""

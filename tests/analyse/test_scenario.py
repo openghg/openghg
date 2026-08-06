@@ -892,52 +892,6 @@ def test_model_scenario_units(model_scenario_ch4_dummy):
     assert model_scenario_ch4_dummy.units == "1e-9"
 
 
-def test_convert_units_preserves_unitless_observation_counts(obs_ch4_dummy):
-    """Converting mole fractions to ppm must not alter unitless observation counts."""
-    dataset = obs_ch4_dummy.data.assign(
-        mf_number_of_observations=("time", np.arange(obs_ch4_dummy.data.sizes["time"]) + 1)
-    )
-    dataset.mf_number_of_observations.attrs["units"] = "1"
-    original = dataset.copy(deep=True)
-    scenario = ModelScenario()
-    scenario.add_obs(obs=ObsData(data=dataset, metadata=obs_ch4_dummy.metadata))
-
-    converted = scenario.convert_units(dataset, output_units="ppm")
-
-    xr.testing.assert_identical(dataset, original)
-    xr.testing.assert_identical(
-        converted.mf_number_of_observations, original.mf_number_of_observations
-    )
-
-
-def test_add_footprint_forwards_time_resolved_selector(monkeypatch):
-    """Footprint keyword retrieval must distinguish integrated and time-resolved data."""
-    captured_keywords = None
-    captured_data_type = None
-
-    def capture_keywords(self, keywords, data_type):
-        """Capture retrieval keywords without accessing an object store."""
-        nonlocal captured_keywords, captured_data_type
-        captured_keywords = keywords
-        captured_data_type = data_type
-        return None
-
-    monkeypatch.setattr(ModelScenario, "_get_data", capture_keywords)
-    scenario = ModelScenario()
-
-    scenario.add_footprint(
-        site="tac",
-        fp_inlet="100m",
-        domain="TEST",
-        species="co2",
-        time_resolved=False,
-    )
-
-    assert captured_data_type == "footprint"
-    assert captured_keywords is not None
-    assert all(keywords["time_resolved"] is False for keywords in captured_keywords)
-
-
 def test_model_resample_ch4(model_scenario_ch4_dummy):
     """Test expected resample values for obs with known dummy data"""
     combined_dataset = model_scenario_ch4_dummy.combine_obs_footprint()

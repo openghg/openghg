@@ -104,6 +104,7 @@ integrated calculation.
         source="natural",
         platform="satellite",
         max_level=17,
+        time_resolved=False,
     )
 
     modelled_observations = scenario.calc_modelled_obs()
