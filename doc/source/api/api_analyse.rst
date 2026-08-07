@@ -39,6 +39,12 @@ spatial grid size.
 
 .. autofunction:: openghg.analyse.fp_x_flux_keep_space
 
+For data pipelines that already guarantee monotonic release time, spatial
+alignment, float/NaN policy, source selection, and compatible Dask chunks, the
+computation-only entry point avoids the wrapper's sorting and rechunking.
+
+.. autofunction:: openghg.analyse.fp_x_flux_keep_space_core
+
 .. autofunction:: openghg.analyse.write_fp_x_flux_keep_space_zarr
 
 Numba compiles the kernel on first use in each process. For benchmarks or a

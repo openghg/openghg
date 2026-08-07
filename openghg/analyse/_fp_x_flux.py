@@ -76,7 +76,7 @@ def _split_footprint(fp: xr.DataArray | xr.Dataset) -> xr.Dataset:
 
 def _reindex_space(data: xr.DataArray, footprint: xr.Dataset) -> xr.DataArray:
     indexers = {dim: footprint.coords[dim] for dim in SPATIAL_DIMS}
-    if all(data.coords[dim].identical(indexers[dim]) for dim in SPATIAL_DIMS):
+    if all(data.coords[dim].equals(indexers[dim]) for dim in SPATIAL_DIMS):
         return data
     try:
         return data.interp(indexers)
@@ -499,6 +499,162 @@ def _normalise_time_selector(selector: xr.DataArray | Sequence[Any]) -> np.ndarr
     return cast(np.ndarray, index.to_numpy(dtype="datetime64[ns]"))
 
 
+def _select_result_times(
+    result: xr.DataArray,
+    time_selector: xr.DataArray | Sequence[Any] | None,
+) -> xr.DataArray:
+    if time_selector is None:
+        return result
+    selected_times = _normalise_time_selector(time_selector)
+    missing = pd.DatetimeIndex(selected_times).difference(pd.DatetimeIndex(result["time"].values))
+    if len(missing):
+        raise ValueError(f"time_selector contains {len(missing)} timestamp(s) outside the result time grid.")
+    return result.sel(time=selected_times)
+
+
+def _validate_core_inputs(
+    fp_ds: xr.Dataset,
+    fp_time_resolved: xr.DataArray,
+    fp_residual: xr.DataArray,
+    flux: xr.DataArray,
+) -> None:
+    required_resolved = {"time", "lat", "lon", "H_back"}
+    missing_resolved = required_resolved - set(fp_time_resolved.dims)
+    if missing_resolved:
+        raise ValueError(f"Core time-resolved footprint is missing dimensions: {sorted(missing_resolved)}")
+    required_residual = {"time", "lat", "lon"}
+    missing_residual = required_residual - set(fp_residual.dims)
+    if missing_residual:
+        raise ValueError(f"Core residual footprint is missing dimensions: {sorted(missing_residual)}")
+    if "source" not in flux.dims:
+        raise ValueError("Core flux input must include a 'source' dimension.")
+    missing_flux = {"time", "lat", "lon"} - set(flux.dims)
+    if missing_flux:
+        raise ValueError(f"Core flux is missing dimensions: {sorted(missing_flux)}")
+    if not all(hasattr(array.data, "chunks") for array in (fp_time_resolved, fp_residual, flux)):
+        raise ValueError("Core inputs must be Dask-backed and pre-chunked.")
+    time_ns = np.asarray(fp_ds["time"].values, dtype="datetime64[ns]").astype(np.int64)
+    if time_ns.size > 1 and np.any(np.diff(time_ns) < 0):
+        raise ValueError("Core footprint time must be monotonic non-decreasing.")
+    if fp_time_resolved.chunksizes["H_back"] != (fp_time_resolved.sizes["H_back"],):
+        raise ValueError("Core footprint input must use a single H_back chunk.")
+    for dim in ("time", *SPATIAL_DIMS):
+        if not fp_time_resolved[dim].identical(fp_residual[dim]):
+            raise ValueError(f"Core resolved and residual footprint {dim!r} coordinates must be identical.")
+        if fp_time_resolved.chunksizes[dim] != fp_residual.chunksizes[dim]:
+            raise ValueError(f"Core resolved and residual footprint {dim!r} chunks must match.")
+    for dim in SPATIAL_DIMS:
+        if not fp_time_resolved[dim].equals(flux[dim]):
+            raise ValueError(f"Core footprint and flux {dim!r} coordinate indexes must match exactly.")
+        if fp_time_resolved.chunksizes[dim] != flux.chunksizes[dim]:
+            raise ValueError(f"Core footprint and flux {dim!r} chunks must match.")
+
+
+def fp_x_flux_keep_space_core(
+    footprint: xr.Dataset,
+    flux: xr.DataArray,
+    *,
+    time_selector: xr.DataArray | Sequence[Any] | None = None,
+) -> xr.DataArray:
+    """Run the keep-space operator on monotonic, aligned, pre-chunked inputs.
+
+    This is the computation-only entry point for prepared on-disk data. It
+    does not sort, spatially align, cast, fill missing values, select sources,
+    or rechunk. Footprint time must be monotonic non-decreasing; footprint and
+    flux spatial coordinates and chunks must match; ``H_back`` must be one
+    chunk; and flux must already contain a ``source`` dimension.
+
+    Use :func:`fp_x_flux_keep_space` for arbitrary user inputs. That wrapper
+    establishes this contract, restores non-monotonic input order, and applies
+    requested output chunks.
+
+    Args:
+        footprint: Dataset containing pre-chunked ``fp_time_resolved`` and
+            ``fp_residual`` variables.
+        flux: Pre-aligned, pre-chunked, source-resolved flux.
+        time_selector: Optional timestamps retained after the full operator is
+            constructed.
+
+    Returns:
+        A lazy, dimensionless DataArray ordered as ``source, lat, lon, time``.
+    """
+    _require_numba()
+    fp_ds = _split_footprint(footprint)
+    fp_time_resolved = cast(xr.DataArray, fp_ds["fp_time_resolved"])
+    fp_residual = cast(xr.DataArray, fp_ds["fp_residual"])
+    _validate_core_inputs(fp_ds, fp_time_resolved, fp_residual, flux)
+
+    flux_step_hours = _validate_interval_start_time(flux["time"], label="Flux")
+    low_frequency_flux = _low_frequency_flux(flux, fp_ds)
+    if flux_step_hours > _h_back_window_hours(fp_time_resolved):
+        kernel_name = "low_frequency_keep_space"
+        resolved = fp_time_resolved.sum("H_back") * low_frequency_flux
+    else:
+        flux_hourly = _forward_fill_flux_hourly(flux, step_hours=flux_step_hours)
+        if _uses_regular_halo_kernel(fp_time_resolved["time"], flux_hourly["time"]):
+            kernel_name = "numba_block_keep_space"
+            lags = _hourly_lags(fp_time_resolved)
+            max_lag = int(lags.max(initial=0))
+            flux_halo = _flux_with_halo(flux_hourly, fp_time_resolved)
+            fp_padded = _pad_footprint_left(fp_time_resolved, pad_hours=max_lag)
+            resolved_data = da.blockwise(
+                _resolved_keep_space_block,
+                "tyxs",
+                fp_padded.data,
+                "tyxh",
+                flux_halo.data,
+                "tyxs",
+                dtype=fp_padded.dtype,
+                concatenate=True,
+                adjust_chunks={
+                    "t": fp_padded.data.chunks[0],
+                    "y": fp_padded.data.chunks[1],
+                    "x": fp_padded.data.chunks[2],
+                    "s": flux_halo.data.chunks[3],
+                },
+                lag_indices=lags,
+                meta=np.array((), dtype=fp_padded.dtype),
+            )
+            resolved = xr.DataArray(
+                resolved_data,
+                dims=("time", "lat", "lon", "source"),
+                coords={
+                    "time": fp_padded["time"],
+                    "lat": fp_padded["lat"],
+                    "lon": fp_padded["lon"],
+                    "source": flux_hourly["source"],
+                },
+            ).isel(time=slice(max_lag, None))
+            resolved = resolved.assign_coords(time=fp_ds["time"])
+        else:
+            kernel_name = "numba_indexed_keep_space"
+            resolved = _resolved_keep_space_indexed(
+                fp_time_resolved,
+                flux_hourly,
+                step_hours=1,
+            )
+
+    result = cast(
+        xr.DataArray,
+        (resolved + fp_residual * low_frequency_flux).transpose(*REQUIRED_OUTPUT_DIMS),
+    )
+    result = _attach_source_coordinates(result, flux)
+    result.name = "fp_x_flux"
+    result.attrs.update(
+        {
+            "units": "1",
+            "operator": FP_X_FLUX_OPERATOR,
+            "operator_version": FP_X_FLUX_OPERATOR_VERSION,
+            "kernel": kernel_name,
+            "flux_time_alignment": FLUX_TIME_ALIGNMENT,
+            "description": "Footprint times source-resolved flux, retaining latitude and longitude.",
+            "flux_units": flux.attrs.get("units", ""),
+            "footprint_units": fp_time_resolved.attrs.get("units", ""),
+        }
+    )
+    return _select_result_times(result, time_selector)
+
+
 def fp_x_flux_keep_space(  # noqa: PLR0913
     footprint: xr.DataArray | xr.Dataset,
     flux: xr.DataArray | xr.Dataset,
@@ -571,127 +727,54 @@ def fp_x_flux_keep_space(  # noqa: PLR0913
         if len(source_labels) != flux_da.sizes["source"]:
             raise ValueError("source_labels must contain one label per selected source.")
         flux_da = flux_da.assign_coords(source=list(source_labels))
-    flux_step_hours = _validate_interval_start_time(flux_da["time"], label="Flux")
-    low_frequency_flux = _low_frequency_flux(flux_da, fp_ds)
     flux_metadata = flux_da
     restore_time_order: np.ndarray | None = None
+
+    sort_order = np.argsort(fp_time_resolved["time"].values, kind="stable")
+    if not np.array_equal(sort_order, np.arange(sort_order.size)):
+        restore_time_order = np.argsort(sort_order)
+        fp_time_resolved = fp_time_resolved.isel(time=sort_order)
+        fp_residual = fp_residual.isel(time=sort_order)
+
+    flux_step_hours = _validate_interval_start_time(flux_da["time"], label="Flux")
+    uses_low_frequency_kernel = flux_step_hours > _h_back_window_hours(fp_time_resolved)
+    hourly_flux = (
+        flux_da
+        if uses_low_frequency_kernel
+        else _forward_fill_flux_hourly(flux_da, step_hours=flux_step_hours)
+    )
+    use_regular_kernel = not uses_low_frequency_kernel and _uses_regular_halo_kernel(
+        fp_time_resolved["time"], hourly_flux["time"]
+    )
     compute_time_chunk = time_chunk or fp_time_resolved.sizes["time"]
-
-    if flux_step_hours > _h_back_window_hours(fp_time_resolved):
-        kernel_name = "low_frequency_keep_space"
-        fp_time_resolved, fp_residual, flux_da = _chunk_inputs(
-            fp_time_resolved,
-            fp_residual,
-            flux_da,
-            time_chunk=time_chunk,
-            lat_chunk=lat_chunk,
-            lon_chunk=lon_chunk,
-            source_chunk=source_chunk,
-            minimum_time_chunk=1,
+    if not use_regular_kernel:
+        compute_time_chunk = time_chunk or min(
+            DEFAULT_IRREGULAR_TIME_CHUNK,
+            fp_time_resolved.sizes["time"],
         )
-        resolved = fp_time_resolved.sum("H_back") * low_frequency_flux
-    else:
-        flux_da = _forward_fill_flux_hourly(flux_da, step_hours=flux_step_hours)
-        aligned_flux_step_hours = 1
-        use_regular_kernel = _uses_regular_halo_kernel(
-            fp_time_resolved["time"],
-            flux_da["time"],
-        )
-        if not use_regular_kernel:
-            compute_time_chunk = time_chunk or min(
-                DEFAULT_IRREGULAR_TIME_CHUNK,
-                fp_time_resolved.sizes["time"],
-            )
-            sort_order = np.argsort(fp_time_resolved["time"].values, kind="stable")
-            if not np.array_equal(sort_order, np.arange(sort_order.size)):
-                restore_time_order = np.argsort(sort_order)
-                fp_time_resolved = fp_time_resolved.isel(time=sort_order)
-                fp_residual = fp_residual.isel(time=sort_order)
-                low_frequency_flux = low_frequency_flux.isel(time=sort_order)
 
-        fp_time_resolved, fp_residual, flux_da = _chunk_inputs(
-            fp_time_resolved,
-            fp_residual,
-            flux_da,
-            time_chunk=compute_time_chunk,
-            lat_chunk=lat_chunk,
-            lon_chunk=lon_chunk,
-            source_chunk=source_chunk,
-            minimum_time_chunk=(
-                int(_hourly_lags(fp_time_resolved).max(initial=0)) if use_regular_kernel else 1
-            ),
-        )
-        if use_regular_kernel:
-            kernel_name = "numba_block_keep_space"
-            lags = _hourly_lags(fp_time_resolved)
-            max_lag = int(lags.max(initial=0))
-            flux_halo = _flux_with_halo(flux_da, fp_time_resolved)
-            fp_padded = _pad_footprint_left(fp_time_resolved, pad_hours=max_lag)
-
-            resolved_data = da.blockwise(
-                _resolved_keep_space_block,
-                "tyxs",
-                fp_padded.data,
-                "tyxh",
-                flux_halo.data,
-                "tyxs",
-                dtype=fp_padded.dtype,
-                concatenate=True,
-                adjust_chunks={
-                    "t": fp_padded.data.chunks[0],
-                    "y": fp_padded.data.chunks[1],
-                    "x": fp_padded.data.chunks[2],
-                    "s": flux_halo.data.chunks[3],
-                },
-                lag_indices=lags,
-                meta=np.array((), dtype=fp_padded.dtype),
-            )
-            resolved = xr.DataArray(
-                resolved_data,
-                dims=("time", "lat", "lon", "source"),
-                coords={
-                    "time": fp_padded["time"],
-                    "lat": fp_padded["lat"],
-                    "lon": fp_padded["lon"],
-                    "source": flux_da["source"],
-                },
-            ).isel(time=slice(max_lag, None))
-            resolved = resolved.assign_coords(time=fp_ds["time"])
-        else:
-            kernel_name = "numba_indexed_keep_space"
-            resolved = _resolved_keep_space_indexed(
-                fp_time_resolved,
-                flux_da,
-                step_hours=aligned_flux_step_hours,
-            )
-    residual = fp_residual * low_frequency_flux
-    result = cast(xr.DataArray, (resolved + residual).transpose(*REQUIRED_OUTPUT_DIMS))
+    fp_time_resolved, fp_residual, flux_da = _chunk_inputs(
+        fp_time_resolved,
+        fp_residual,
+        flux_da,
+        time_chunk=compute_time_chunk,
+        lat_chunk=lat_chunk,
+        lon_chunk=lon_chunk,
+        source_chunk=source_chunk,
+        minimum_time_chunk=(int(_hourly_lags(fp_time_resolved).max(initial=0)) if use_regular_kernel else 1),
+    )
+    prepared_footprint = xr.Dataset({"fp_time_resolved": fp_time_resolved, "fp_residual": fp_residual})
+    result = fp_x_flux_keep_space_core(prepared_footprint, flux_da)
     if restore_time_order is not None:
         result = result.isel(time=restore_time_order).assign_coords(time=fp_ds["time"])
     result = _attach_source_coordinates(result, flux_metadata)
-    result.name = "fp_x_flux"
     result.attrs.update(
         {
-            "units": "1",
-            "operator": FP_X_FLUX_OPERATOR,
-            "operator_version": FP_X_FLUX_OPERATOR_VERSION,
-            "kernel": kernel_name,
             "fillna_zero": fillna_zero,
-            "flux_time_alignment": FLUX_TIME_ALIGNMENT,
             "compute_time_chunk": compute_time_chunk,
-            "description": "Footprint times source-resolved flux, retaining latitude and longitude.",
-            "flux_units": flux_da.attrs.get("units", ""),
-            "footprint_units": fp_time_resolved.attrs.get("units", ""),
         }
     )
-    if time_selector is not None:
-        selected_times = _normalise_time_selector(time_selector)
-        missing = pd.DatetimeIndex(selected_times).difference(pd.DatetimeIndex(result["time"].values))
-        if len(missing):
-            raise ValueError(
-                f"time_selector contains {len(missing)} timestamp(s) outside the result time grid."
-            )
-        result = result.sel(time=selected_times)
+    result = _select_result_times(result, time_selector)
     output_chunks = {
         dim: size
         for dim, size in (
@@ -699,7 +782,7 @@ def fp_x_flux_keep_space(  # noqa: PLR0913
                 "time",
                 (
                     compute_time_chunk
-                    if time_chunk is None and kernel_name == "numba_indexed_keep_space"
+                    if time_chunk is None and result.attrs["kernel"] == "numba_indexed_keep_space"
                     else time_chunk
                 ),
             ),

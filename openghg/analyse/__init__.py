@@ -2,6 +2,7 @@ from ._alignment import combine_datasets
 from ._fp_x_flux import (
     align_flux_to_time_targets,
     fp_x_flux_keep_space,
+    fp_x_flux_keep_space_core,
     warm_numba_fp_x_flux,
     write_fp_x_flux_keep_space_zarr,
 )

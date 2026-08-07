@@ -10,6 +10,7 @@ import xarray as xr
 from openghg.analyse import (
     align_flux_to_time_targets,
     fp_x_flux_keep_space,
+    fp_x_flux_keep_space_core,
     warm_numba_fp_x_flux,
     write_fp_x_flux_keep_space_zarr,
 )
@@ -322,6 +323,58 @@ def test_irregular_release_times_default_to_bounded_time_chunks() -> None:
 
     assert result.attrs["compute_time_chunk"] == 32
     assert result.chunksizes["time"] == (32, 8)
+
+
+def test_prepared_core_matches_wrapper_without_sorting_or_rechunking() -> None:
+    footprint, flux = _inputs()
+    times = pd.to_datetime(
+        [
+            "2021-01-01 03:37",
+            "2021-01-01 05:23",
+            "2021-01-01 07:58",
+            "2021-01-01 09:01",
+            "2021-01-01 11:42",
+        ]
+    )
+    footprint = footprint.assign_coords(time=times).chunk({"time": 2, "lat": 1, "lon": 1, "H_back": -1})
+    flux = flux.chunk({"lat": 1, "lon": 1, "source": 1})
+
+    core_result = fp_x_flux_keep_space_core(footprint, flux)
+    wrapped_result = fp_x_flux_keep_space(
+        footprint,
+        flux,
+        time_chunk=2,
+        lat_chunk=1,
+        lon_chunk=1,
+        source_chunk=1,
+    )
+
+    assert core_result.attrs["kernel"] == "numba_indexed_keep_space"
+    xr.testing.assert_allclose(core_result.compute(), wrapped_result.compute())
+
+
+def test_prepared_core_rejects_non_monotonic_release_time() -> None:
+    footprint, flux = _inputs()
+    footprint = footprint.assign_coords(time=footprint["time"].values[[0, 2, 1, 3, 4]]).chunk(
+        {"time": 2, "lat": 1, "lon": 1, "H_back": -1}
+    )
+    flux = flux.chunk({"lat": 1, "lon": 1, "source": 1})
+
+    with pytest.raises(ValueError, match="monotonic non-decreasing"):
+        fp_x_flux_keep_space_core(footprint, flux)
+
+
+def test_wrapper_sorts_hourly_releases_for_core_then_restores_input_order() -> None:
+    footprint, flux = _inputs()
+    order = [0, 2, 1, 4, 3]
+    footprint = footprint.isel(time=order)
+
+    result = fp_x_flux_keep_space(footprint, flux, time_chunk=2)
+    expected = _reference(footprint, flux)
+
+    assert result.attrs["kernel"] == "numba_block_keep_space"
+    np.testing.assert_array_equal(result["time"], footprint["time"])
+    xr.testing.assert_allclose(result.compute(), expected)
 
 
 def test_irregular_release_time_selector_is_applied_after_complete_result() -> None:
