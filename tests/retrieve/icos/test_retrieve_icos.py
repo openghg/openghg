@@ -125,14 +125,14 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
         "data_level": "2",
         "site": "wao",
         "inlet": "10.0m", # UPDATED 12/03/2026
-        "inlet_height_magl": "10.0", # UPDATED 12/03/2026
+        "inlet_height_magl": "10.0", # UPDATED 12/03/2026 then updated again 17/08/26
         "instrument": "multiple",
         "sampling_period": "not_set",
         "calibration_scale": "unknown",
         # "data_owner": "andrew manning",
         # "data_owner_email": "a.manning@uea.ac.uk",
         "station_height_masl": 17.0,
-        "dataset_source": "icos",# UPDATED 12/03/2026
+        "dataset_source": "euroObspack",# UPDATED to icos 12/03/2026 then updated to euroObspack 7/08/2026 
     }
 
     #assert expected_metadata.items() <= meta1.items()
@@ -410,7 +410,7 @@ def test_retrieve_icos_standard_compare():
         assert "data_owner" in data_dobj.attrs and "data_owner_email" in data_dobj.attrs and "file_created" in data_dobj.attrs
         for at in data_dobj.attrs:
             if at not in ['data_owner','data_owner_email','units','sampling_height','inlet','inlet_height_magl','station_latitude','station_longitude','dataset_source','file_created','instrument_data']:
-                assert data_dobj.attrs[at].lower() == data.attrs[at].lower(), f"Attribute {at} mismatch: {data_dobj.attrs[at]} != {data.attrs[at]}"
+               assert data_dobj.attrs[at].lower() == data.attrs[at].lower(), f"Attribute {at} mismatch: {data_dobj.attrs[at]} != {data.attrs[at]}"
         #ask Joe about file_created as seems to be file_created when using openghg
 
             if at in ['units']:
