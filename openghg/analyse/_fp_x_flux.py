@@ -23,7 +23,7 @@ except ImportError:  # pragma: no cover - exercised in base installs without the
 
 SPATIAL_DIMS = ("lat", "lon")
 REQUIRED_OUTPUT_DIMS = ("source", "lat", "lon", "time")
-FP_X_FLUX_OPERATOR = "openghg.analyse.fp_x_flux_keep_space"
+FP_X_FLUX_OPERATOR = "openghg.analyse.fp_x_flux"
 FP_X_FLUX_OPERATOR_VERSION = 1
 
 _P = ParamSpec("_P")
@@ -38,14 +38,16 @@ def _numba_kernel(function: Callable[_P, _R]) -> Callable[_P, _R]:
 
 
 def _require_numba() -> None:
+    """Raise an informative error when the optional Numba dependency is absent."""
     if njit is None:
         raise ImportError(
-            "fp_x_flux_keep_space requires the optional Numba dependency. "
+            "fp_x_flux requires the optional Numba dependency. "
             "Install OpenGHG with `pip install 'openghg[fp-x-flux]'`."
         )
 
 
 def _as_flux_data_array(flux: xr.DataArray | xr.Dataset) -> xr.DataArray:
+    """Extract the flux DataArray from a supported xarray input."""
     if isinstance(flux, xr.Dataset):
         if "flux" not in flux:
             raise ValueError("Flux Dataset must contain a 'flux' variable.")
@@ -54,6 +56,19 @@ def _as_flux_data_array(flux: xr.DataArray | xr.Dataset) -> xr.DataArray:
 
 
 def _split_footprint(fp: xr.DataArray | xr.Dataset) -> xr.Dataset:
+    """Return separate time-resolved and residual footprint variables.
+
+    Args:
+        fp: A Dataset with separate footprint variables, or a legacy DataArray
+            whose final ``H_back`` slice contains the residual footprint.
+
+    Returns:
+        A Dataset containing ``fp_time_resolved`` and ``fp_residual``.
+
+    Raises:
+        ValueError: If the required variables, dimension, or lag slices are
+            missing.
+    """
     if isinstance(fp, xr.Dataset):
         missing = {"fp_time_resolved", "fp_residual"} - set(fp.data_vars)
         if missing:
@@ -73,6 +88,16 @@ def _split_footprint(fp: xr.DataArray | xr.Dataset) -> xr.Dataset:
 
 
 def _reindex_space(data: xr.DataArray, footprint: xr.Dataset) -> xr.DataArray:
+    """Align a DataArray to the footprint latitude and longitude coordinates.
+
+    Args:
+        data: Data to align spatially.
+        footprint: Footprint Dataset providing the target coordinates.
+
+    Returns:
+        The original data when coordinates match, otherwise spatially
+        interpolated or nearest-neighbour reindexed data.
+    """
     indexers = {dim: footprint.coords[dim] for dim in SPATIAL_DIMS}
     if all(data.coords[dim].identical(indexers[dim]) for dim in SPATIAL_DIMS):
         return data
@@ -89,6 +114,21 @@ def _prepare_inputs(
     cast_float32: bool,
     fillna_zero: bool,
 ) -> tuple[xr.Dataset, xr.DataArray, xr.DataArray, xr.DataArray]:
+    """Validate, spatially align, and normalise footprint and flux inputs.
+
+    Args:
+        fp: Time-resolved and residual footprint data.
+        flux: Source-resolved flux data.
+        cast_float32: Whether to cast footprint and flux values to float32.
+        fillna_zero: Whether to replace missing values with zero.
+
+    Returns:
+        The prepared footprint Dataset, time-resolved footprint, residual
+        footprint, and flux DataArray.
+
+    Raises:
+        ValueError: If an input is missing a required dimension or variable.
+    """
     fp_ds = _split_footprint(fp)
     flux_da = _as_flux_data_array(flux)
 
@@ -121,6 +161,18 @@ def _prepare_inputs(
 
 
 def _hourly_lags(fp_time_resolved: xr.DataArray) -> np.ndarray:
+    """Convert the footprint lag coordinate to non-negative integer hours.
+
+    Args:
+        fp_time_resolved: Time-resolved footprint with an ``H_back`` coordinate.
+
+    Returns:
+        The lag values as an integer NumPy array.
+
+    Raises:
+        ValueError: If lag units are not hours or values are not non-negative
+            whole hours.
+    """
     lag_coord = fp_time_resolved["H_back"]
     units = str(lag_coord.attrs.get("units", "hours")).lower()
     if units not in {"h", "hr", "hour", "hours"}:
@@ -133,6 +185,19 @@ def _hourly_lags(fp_time_resolved: xr.DataArray) -> np.ndarray:
 
 
 def _regular_time_step_hours(time: xr.DataArray, *, label: str) -> int:
+    """Determine the whole-hour step of a regular time coordinate.
+
+    Args:
+        time: Time coordinate to inspect.
+        label: Human-readable input label used in error messages.
+
+    Returns:
+        The coordinate step in hours, or one for a singleton coordinate.
+
+    Raises:
+        ValueError: If the coordinate is decreasing, irregular, or not spaced
+            by a whole number of hours.
+    """
     if time.size < 2:
         return 1
     diffs_ns = np.diff(time.values.astype("datetime64[ns]")).astype("timedelta64[ns]").astype(np.int64)
@@ -143,6 +208,7 @@ def _regular_time_step_hours(time: xr.DataArray, *, label: str) -> int:
 
 
 def _h_back_window_hours(fp_time_resolved: xr.DataArray) -> int:
+    """Calculate the total time span represented by the footprint lags."""
     lags = np.sort(_hourly_lags(fp_time_resolved))
     if lags.size < 2:
         return int(lags.max(initial=0)) + 1
@@ -151,6 +217,16 @@ def _h_back_window_hours(fp_time_resolved: xr.DataArray) -> int:
 
 
 def _forward_fill_flux_hourly(flux: xr.DataArray, *, step_hours: int) -> xr.DataArray:
+    """Forward-fill regularly spaced coarse flux onto an hourly time grid.
+
+    Args:
+        flux: Flux data on a regular time grid.
+        step_hours: Native flux time step in hours.
+
+    Returns:
+        The unchanged flux for hourly input, otherwise hourly forward-filled
+        flux with the original attributes.
+    """
     if step_hours == 1:
         return flux
     end = flux["time"].values[-1] + np.timedelta64(step_hours, "h")
@@ -161,6 +237,7 @@ def _forward_fill_flux_hourly(flux: xr.DataArray, *, step_hours: int) -> xr.Data
 
 
 def _padded_flux_bounds(fp_time_resolved: xr.DataArray) -> tuple[np.datetime64, np.datetime64]:
+    """Return footprint time bounds extended backwards by the maximum lag."""
     max_lag = int(_hourly_lags(fp_time_resolved).max(initial=0))
     start = fp_time_resolved["time"].values[0] - np.timedelta64(max_lag, "h")
     end = fp_time_resolved["time"].values[-1]
@@ -168,6 +245,7 @@ def _padded_flux_bounds(fp_time_resolved: xr.DataArray) -> tuple[np.datetime64, 
 
 
 def _low_frequency_flux(flux: xr.DataArray, fp_ds: xr.Dataset) -> xr.DataArray:
+    """Calculate monthly mean flux aligned to the footprint time coordinate."""
     # Resample before selecting the footprint period so edge months use all
     # available input values rather than a partial-month mean.
     monthly = flux.resample(time="1MS").mean()
@@ -175,11 +253,23 @@ def _low_frequency_flux(flux: xr.DataArray, fp_ds: xr.Dataset) -> xr.DataArray:
 
 
 @_numba_kernel
-def _resolved_keep_space_block(
+def _resolved_block(
     fp_block: np.ndarray,
     flux_block: np.ndarray,
     lag_indices: np.ndarray,
 ) -> np.ndarray:
+    """Multiply one footprint block by its lag-aligned flux block.
+
+    Args:
+        fp_block: Footprint values ordered by time, latitude, longitude, and lag.
+        flux_block: Flux values including the left time halo and ordered by
+            time, latitude, longitude, and source.
+        lag_indices: Integer hourly offsets for the footprint lag axis.
+
+    Returns:
+        Source-resolved products ordered by time, latitude, longitude, and
+        source.
+    """
     nt, ny, nx, nh = fp_block.shape
     ns = flux_block.shape[3]
     out = np.empty((nt, ny, nx, ns), dtype=fp_block.dtype)
@@ -198,6 +288,19 @@ def _resolved_keep_space_block(
 
 
 def _chunks_with_minimum_tail(length: int, target: int | None, minimum: int) -> tuple[int, ...]:
+    """Build chunk sizes while preventing an undersized final chunk.
+
+    Args:
+        length: Total axis length.
+        target: Preferred chunk size, or None for a single chunk.
+        minimum: Minimum permitted size of the final chunk.
+
+    Returns:
+        Chunk sizes that cover the complete axis.
+
+    Raises:
+        ValueError: If the requested target chunk size is not positive.
+    """
     if target is None or target >= length:
         return (length,)
     if target <= 0:
@@ -221,6 +324,20 @@ def _chunk_inputs(
     lon_chunk: int | None,
     source_chunk: int | None,
 ) -> tuple[xr.DataArray, xr.DataArray, xr.DataArray]:
+    """Apply compatible Dask chunks to footprint and flux arrays.
+
+    Args:
+        fp_time_resolved: Time-resolved footprint data.
+        fp_residual: Residual footprint data.
+        flux: Source-resolved flux data.
+        time_chunk: Preferred footprint time chunk size.
+        lat_chunk: Preferred latitude chunk size.
+        lon_chunk: Preferred longitude chunk size.
+        source_chunk: Preferred flux source chunk size.
+
+    Returns:
+        The chunked time-resolved footprint, residual footprint, and flux.
+    """
     max_lag = int(_hourly_lags(fp_time_resolved).max(initial=0))
     time_chunks = _chunks_with_minimum_tail(fp_time_resolved.sizes["time"], time_chunk, max_lag)
     fp_chunks: dict[str, Any] = {
@@ -243,6 +360,16 @@ def _pad_footprint_left(
     *,
     pad_hours: int,
 ) -> xr.DataArray:
+    """Prepend zero-valued hours to the first footprint time chunk.
+
+    Args:
+        fp_time_resolved: Chunked time-resolved footprint data.
+        pad_hours: Number of zero-valued hours to prepend.
+
+    Returns:
+        The padded footprint with its original chunk boundaries preserved after
+        the enlarged first chunk.
+    """
     if pad_hours == 0:
         return fp_time_resolved
     original_chunks = tuple(int(value) for value in fp_time_resolved.chunksizes["time"])
@@ -255,6 +382,18 @@ def _pad_footprint_left(
 
 
 def _flux_with_halo(flux: xr.DataArray, fp_time_resolved: xr.DataArray) -> xr.DataArray:
+    """Create lag-aware overlapping flux blocks for the resolved kernel.
+
+    Args:
+        flux: Chunked hourly source-resolved flux data.
+        fp_time_resolved: Chunked time-resolved footprint data.
+
+    Returns:
+        Flux blocks with a left overlap equal to the maximum footprint lag.
+
+    Raises:
+        ValueError: If flux does not cover the full footprint time and lag range.
+    """
     lags = _hourly_lags(fp_time_resolved)
     max_lag = int(lags.max(initial=0))
     start, end = _padded_flux_bounds(fp_time_resolved)
@@ -288,6 +427,15 @@ def _flux_with_halo(flux: xr.DataArray, fp_time_resolved: xr.DataArray) -> xr.Da
 
 
 def _attach_source_coordinates(result: xr.DataArray, flux: xr.DataArray) -> xr.DataArray:
+    """Copy compatible source-dependent coordinates from flux to a result.
+
+    Args:
+        result: Computed footprint-times-flux result.
+        flux: Flux input containing source metadata coordinates.
+
+    Returns:
+        The result with compatible, previously absent coordinates attached.
+    """
     coordinates: dict[str, xr.DataArray] = {}
     for name, coordinate in flux.coords.items():
         if not isinstance(name, str):
@@ -300,12 +448,13 @@ def _attach_source_coordinates(result: xr.DataArray, flux: xr.DataArray) -> xr.D
 
 
 def _normalise_time_selector(selector: xr.DataArray | Sequence[Any]) -> np.ndarray:
+    """Convert a time selector to unique, non-missing nanosecond timestamps."""
     values = selector.values if isinstance(selector, xr.DataArray) else selector
     index = pd.DatetimeIndex(pd.to_datetime(np.asarray(values).reshape(-1))).dropna().drop_duplicates()
     return cast(np.ndarray, index.to_numpy(dtype="datetime64[ns]"))
 
 
-def fp_x_flux_keep_space(  # noqa: PLR0913
+def fp_x_flux(  # noqa: PLR0913
     footprint: xr.DataArray | xr.Dataset,
     flux: xr.DataArray | xr.Dataset,
     *,
@@ -380,7 +529,7 @@ def fp_x_flux_keep_space(  # noqa: PLR0913
     flux_metadata = flux_da
 
     if flux_step_hours > _h_back_window_hours(fp_time_resolved):
-        kernel_name = "low_frequency_keep_space"
+        kernel_name = "low_frequency"
         fp_time_resolved, fp_residual, flux_da = _chunk_inputs(
             fp_time_resolved,
             fp_residual,
@@ -392,7 +541,7 @@ def fp_x_flux_keep_space(  # noqa: PLR0913
         )
         resolved = fp_time_resolved.sum("H_back") * low_frequency_flux
     else:
-        kernel_name = "numba_block_keep_space"
+        kernel_name = "numba_block"
         flux_da = _forward_fill_flux_hourly(flux_da, step_hours=flux_step_hours)
 
         fp_time_resolved, fp_residual, flux_da = _chunk_inputs(
@@ -410,7 +559,7 @@ def fp_x_flux_keep_space(  # noqa: PLR0913
         fp_padded = _pad_footprint_left(fp_time_resolved, pad_hours=max_lag)
 
         resolved_data = da.blockwise(
-            _resolved_keep_space_block,
+            _resolved_block,
             "tyxs",
             fp_padded.data,
             "tyxh",
@@ -466,19 +615,25 @@ def fp_x_flux_keep_space(  # noqa: PLR0913
 
 
 def warm_numba_fp_x_flux() -> str:
-    """Compile the Numba keep-space kernel in the current process.
+    """Compile the Numba footprint-times-flux kernel in the current process.
 
     This is optional. It is mainly useful with ``distributed.Client.run`` to
     remove first-call compilation cost from every Dask worker.
+
+    Returns:
+        A confirmation message after the kernel has compiled successfully.
+
+    Raises:
+        ImportError: If the optional Numba dependency is not installed.
     """
     _require_numba()
     fp = np.zeros((1, 1, 1, 1), dtype=np.float32)
     flux = np.zeros((1, 1, 1, 1), dtype=np.float32)
-    _resolved_keep_space_block(fp, flux, np.zeros(1, dtype=np.int64))
+    _resolved_block(fp, flux, np.zeros(1, dtype=np.int64))
     return "numba fp_x_flux kernel ready"
 
 
-def write_fp_x_flux_keep_space_zarr(  # noqa: PLR0913
+def write_fp_x_flux_zarr(  # noqa: PLR0913
     result: xr.DataArray,
     output_path: str | Path,
     *,
@@ -486,11 +641,27 @@ def write_fp_x_flux_keep_space_zarr(  # noqa: PLR0913
     provenance: Mapping[str, Any],
     overwrite: bool = False,
 ) -> Path:
-    """Atomically persist a keep-space result as consolidated float32 ppm Zarr.
+    """Atomically persist an fp-times-flux result as consolidated float32 ppm Zarr.
 
     A JSON manifest is written beside the store. ``provenance`` is supplied by
     the caller because OpenGHG cannot infer record versions, checksums, or an
     observation-selector identity from arbitrary xarray inputs.
+
+    Args:
+        result: Dimensionless spatially resolved result to persist.
+        output_path: Destination path for the Zarr store.
+        output_chunks: Optional output chunk sizes keyed by dimension.
+        provenance: Footprint, flux, and observation-selector provenance to
+            record in the adjacent JSON manifest.
+        overwrite: Whether to atomically replace an existing store.
+
+    Returns:
+        The path of the written Zarr store.
+
+    Raises:
+        ValueError: If result dimensions or units are invalid, or required
+            provenance entries are missing.
+        FileExistsError: If the destination exists and overwrite is false.
     """
     if set(result.dims) != set(REQUIRED_OUTPUT_DIMS):
         raise ValueError(f"Result must contain exactly the dimensions {REQUIRED_OUTPUT_DIMS!r}.")

@@ -8,9 +8,9 @@ import pytest
 import xarray as xr
 
 from openghg.analyse import (
-    fp_x_flux_keep_space,
+    fp_x_flux,
     warm_numba_fp_x_flux,
-    write_fp_x_flux_keep_space_zarr,
+    write_fp_x_flux_zarr,
 )
 from openghg.analyse._modelled_obs import fp_x_flux_time_resolved
 
@@ -21,6 +21,11 @@ def data_read() -> None:
 
 
 def _inputs() -> tuple[xr.Dataset, xr.DataArray]:
+    """Create representative footprint and source-resolved flux inputs.
+
+    Returns:
+        A footprint Dataset and source-resolved flux DataArray for unit tests.
+    """
     fp_time = pd.date_range("2021-01-01 03:00", periods=5, freq="h")
     flux_time = pd.date_range("2021-01-01", periods=40, freq="h")
     lat = np.array([51.0, 52.0], dtype=np.float32)
@@ -57,6 +62,15 @@ def _inputs() -> tuple[xr.Dataset, xr.DataArray]:
 
 
 def _reference(footprint: xr.Dataset, flux: xr.DataArray) -> xr.DataArray:
+    """Calculate the expected spatially resolved result directly with xarray.
+
+    Args:
+        footprint: Time-resolved and residual footprint data.
+        flux: Source-resolved flux data.
+
+    Returns:
+        The directly calculated source-resolved result.
+    """
     resolved = None
     for lag in footprint["H_back"].values:
         fp_lag = footprint["fp_time_resolved"].sel(H_back=lag, drop=True)
@@ -69,6 +83,15 @@ def _reference(footprint: xr.Dataset, flux: xr.DataArray) -> xr.DataArray:
 
 
 def _existing_time_resolved_reference(footprint: xr.Dataset, flux: xr.DataArray) -> xr.DataArray:
+    """Calculate a source-resolved result with the existing operator.
+
+    Args:
+        footprint: Time-resolved and residual footprint data.
+        flux: Flux data with or without a source dimension.
+
+    Returns:
+        Existing operator results combined along the source dimension.
+    """
     if "source" not in flux.dims:
         return fp_x_flux_time_resolved(footprint, flux).expand_dims(source=["source"])
     results = [
@@ -83,9 +106,10 @@ def _assert_value_parity(actual: xr.DataArray, expected: xr.DataArray) -> None:
     xr.testing.assert_allclose(actual.reset_coords(drop=True), expected.reset_coords(drop=True))
 
 
-def test_fp_x_flux_keep_space_matches_reference_and_preserves_source_metadata() -> None:
+def test_fp_x_flux_matches_reference_and_preserves_source_metadata() -> None:
+    """Match direct values while preserving source-dependent coordinates."""
     footprint, flux = _inputs()
-    result = fp_x_flux_keep_space(footprint, flux, time_chunk=2, lat_chunk=1, lon_chunk=1, source_chunk=1)
+    result = fp_x_flux(footprint, flux, time_chunk=2, lat_chunk=1, lon_chunk=1, source_chunk=1)
 
     assert hasattr(result.data, "__dask_graph__")
     assert result.dims == ("source", "lat", "lon", "time")
@@ -97,29 +121,32 @@ def test_fp_x_flux_keep_space_matches_reference_and_preserves_source_metadata() 
     xr.testing.assert_allclose(result.compute(), _reference(footprint, flux))
 
 
-def test_fp_x_flux_keep_space_matches_existing_time_resolved_method() -> None:
+def test_fp_x_flux_matches_existing_time_resolved_method() -> None:
+    """Match the existing time-resolved operator for each source."""
     footprint, flux = _inputs()
 
-    result = fp_x_flux_keep_space(footprint, flux).compute()
+    result = fp_x_flux(footprint, flux).compute()
     expected = _existing_time_resolved_reference(footprint, flux)
 
     _assert_value_parity(result, expected.astype(np.float32))
 
 
 def test_time_selector_is_applied_to_finished_lazy_result() -> None:
+    """Apply observation-time selection after constructing the lazy result."""
     footprint, flux = _inputs()
     selected = footprint["time"].values[[1, 3]]
 
-    result = fp_x_flux_keep_space(footprint, flux, time_selector=selected, time_chunk=2)
+    result = fp_x_flux(footprint, flux, time_selector=selected, time_chunk=2)
 
     assert result["time"].values.tolist() == selected.tolist()
     xr.testing.assert_allclose(result.compute(), _reference(footprint, flux).sel(time=selected))
 
 
 def test_sources_can_be_selected_and_relabelled() -> None:
+    """Select requested sources and replace their output labels."""
     footprint, flux = _inputs()
 
-    result = fp_x_flux_keep_space(footprint, flux, sources=["ff"], source_labels=["fossil_fuel"])
+    result = fp_x_flux(footprint, flux, sources=["ff"], source_labels=["fossil_fuel"])
 
     assert result["source"].values.tolist() == ["fossil_fuel"]
     assert result["sector"].values.tolist() == ["FF"]
@@ -128,10 +155,11 @@ def test_sources_can_be_selected_and_relabelled() -> None:
 
 
 def test_single_source_flux_without_source_dimension_is_supported() -> None:
+    """Support flux inputs without an explicit source dimension."""
     footprint, flux = _inputs()
     single_flux = flux.sel(source="bio", drop=True)
 
-    result = fp_x_flux_keep_space(footprint, single_flux, source_labels=["biosphere"])
+    result = fp_x_flux(footprint, single_flux, source_labels=["biosphere"])
     expected = fp_x_flux_time_resolved(footprint, single_flux).expand_dims(source=["biosphere"])
 
     assert result.dims == ("source", "lat", "lon", "time")
@@ -140,38 +168,50 @@ def test_single_source_flux_without_source_dimension_is_supported() -> None:
 
 @pytest.mark.parametrize("step_hours", [2, 24])
 def test_regular_coarse_flux_matches_existing_time_resolved_method(step_hours: int) -> None:
+    """Match the existing operator for regularly spaced coarse flux.
+
+    Args:
+        step_hours: Flux time step used by the parameterized test case.
+    """
     footprint, flux = _inputs()
     end = flux["time"].values[-1] + np.timedelta64(1, "h")
     coarse_time = pd.date_range(flux["time"].values[0], end, freq=f"{step_hours}h", inclusive="left")
     coarse_flux = flux.reindex(time=coarse_time, method="nearest")
 
-    result = fp_x_flux_keep_space(footprint, coarse_flux).compute()
+    result = fp_x_flux(footprint, coarse_flux).compute()
     expected = _existing_time_resolved_reference(footprint, coarse_flux)
 
     _assert_value_parity(result, expected.astype(np.float32))
 
 
 def test_time_selector_rejects_times_outside_footprint_grid() -> None:
+    """Reject selected timestamps that are absent from the result grid."""
     footprint, flux = _inputs()
 
     with pytest.raises(ValueError, match="outside the result time grid"):
-        fp_x_flux_keep_space(footprint, flux, time_selector=["2022-01-01"])
+        fp_x_flux(footprint, flux, time_selector=["2022-01-01"])
 
 
 def test_flux_must_include_complete_lag_halo() -> None:
+    """Require flux coverage extending through the full lag halo."""
     footprint, flux = _inputs()
     flux = flux.sel(time=slice(footprint["time"].values[0], None))
 
     with pytest.raises(ValueError, match="complete footprint lag halo"):
-        fp_x_flux_keep_space(footprint, flux)
+        fp_x_flux(footprint, flux)
 
 
-def test_write_fp_x_flux_keep_space_zarr_writes_ppm_and_manifest(tmp_path) -> None:
+def test_write_fp_x_flux_zarr_writes_ppm_and_manifest(tmp_path) -> None:
+    """Write ppm values and required provenance to Zarr and JSON.
+
+    Args:
+        tmp_path: Pytest-provided temporary directory.
+    """
     footprint, flux = _inputs()
-    result = fp_x_flux_keep_space(footprint, flux, time_selector=footprint["time"].values[[0, 2]])
+    result = fp_x_flux(footprint, flux, time_selector=footprint["time"].values[[0, 2]])
     path = tmp_path / "cache.zarr"
 
-    returned = write_fp_x_flux_keep_space_zarr(
+    returned = write_fp_x_flux_zarr(
         result,
         path,
         output_chunks={"source": 1, "time": 1},
@@ -193,4 +233,5 @@ def test_write_fp_x_flux_keep_space_zarr_writes_ppm_and_manifest(tmp_path) -> No
 
 
 def test_warm_numba_fp_x_flux() -> None:
+    """Compile the Numba kernel and return its readiness message."""
     assert warm_numba_fp_x_flux() == "numba fp_x_flux kernel ready"
