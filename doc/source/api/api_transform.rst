@@ -11,9 +11,18 @@ Regridding
 
 .. autofunction:: openghg.transform.regrid_uniform_cc
 
-Emissions
-=========
+Transform entry points
+======================
 
-Transform emissions data
+Transform emissions or boundary-condition data and store the result.
 
-.. autofunction:: openghg.transform.emissions.parse_edgar
+.. autofunction:: openghg.transform.transform_flux_data
+
+.. autofunction:: openghg.transform.transform_bc_data
+
+Database parsers
+================
+
+.. autofunction:: openghg.transform.flux.parse_edgar
+
+.. autofunction:: openghg.transform.boundary_conditions.parse_cams

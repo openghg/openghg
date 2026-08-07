@@ -1211,10 +1211,8 @@ def test_standardise_co2_games_using_dataset():
     assert retrieved_data.metadata["dataset_source"] == "PTEN"
 
 
-def test_standardise_6km_footprints():
-    """Test standardisation of 6km resolution footprints with associated metadata keys."""
-
-    filepath = get_footprint_datapath("IMP-26magl_NAME_UKV_EUROPE-6km_co2_202301.nc")
+def test_standardise_6km_footprints(tmp_path):
+    """Test a synthetic PARIS 6 km footprint retains inner-domain metadata on retrieval."""
     site = "IMP"
     model = "NAME"
     network = "UKV"
@@ -1223,6 +1221,27 @@ def test_standardise_6km_footprints():
     inner_domain = "6km"
     source_format = "paris"
     store = "user"
+    latitude, longitude = find_domain(f"{domain}-{inner_domain}")[:2]
+    filepath = tmp_path / "IMP-26magl_NAME_UKV_EUROPE-6km_co2_202301.nc"
+    shape = (2, latitude.size, longitude.size)
+    footprint = xr.Dataset(
+        data_vars={
+            "srr": (("time", "latitude", "longitude"), np.ones(shape, dtype=np.float32)),
+            "srr_time_resolved": (
+                ("time", "latitude", "longitude", "resolution"),
+                np.ones((*shape, 1), dtype=np.float32),
+            ),
+            "srr_residual": (("time", "latitude", "longitude"), np.zeros(shape, dtype=np.float32)),
+        },
+        coords={
+            "time": np.array(["2023-01-01T00:00", "2023-01-01T01:00"], dtype="datetime64[ns]"),
+            "latitude": latitude,
+            "longitude": longitude,
+            "resolution": np.array([1.0], dtype=np.float32),
+        },
+        attrs={"lpdm_native_output_unit": "ppm s"},
+    )
+    footprint.to_netcdf(filepath)
     results = standardise_footprint(
         filepath=filepath,
         site=site,
@@ -1237,7 +1256,7 @@ def test_standardise_6km_footprints():
         chunks={"time": 200, "lat": 200, "lon": 200},
     )
 
-    assert "co2" == results[0].get("species")
+    assert results[0].get("species") == "co2"
     assert "europe-6km" in results[0].get("domain")
 
     retrieved_data = get_footprint(

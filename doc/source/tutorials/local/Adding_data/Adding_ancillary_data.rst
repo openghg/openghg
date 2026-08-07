@@ -86,6 +86,45 @@ for our different types so these can be added to the object store.
     Downloading ch4_EUROPE_201607.tar.gz: 100%|██████████| 77.4k/77.4k [00:00<00:00, 4.22MB/s]
 
 
+Adding an in-memory dataset
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The native NetCDF parsers also accept an ``xarray.Dataset`` through the
+``data`` argument. Use this when the data has already been opened or processed
+in Python; ``data`` and ``filepath`` are alternatives, so provide exactly one.
+This is available for footprints, fluxes, boundary conditions, Eulerian model
+output, site meteorology, and OpenGHG-formatted column data.
+
+For example, a flux dataset can be loaded and stored without writing a second
+copy to disk:
+
+.. code:: ipython3
+
+    import xarray as xr
+    from openghg.standardise import standardise_flux
+
+    with xr.open_dataset(data_file_flux) as dataset:
+        flux_data = dataset.load()
+
+    standardise_flux(
+        data=flux_data,
+        species="ch4",
+        domain="EUROPE",
+        source="anthro",
+    )
+
+The same pattern applies to the other ancillary data types, with their usual
+metadata arguments, for example ``standardise_bc(data=bc_data, ...)`` and
+``standardise_footprint(data=footprint_data, ...)``. Data added this way is
+stored and retrieved in the same way as data supplied by file path.
+
+.. code:: ipython3
+
+    from openghg.retrieve import get_flux
+
+    flux_data = get_flux(species="ch4", domain="EUROPE", source="anthro")
+
+
 Data domains
 ~~~~~~~~~~~~
 

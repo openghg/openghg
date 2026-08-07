@@ -1,5 +1,6 @@
 import logging
 
+import xarray as xr
 from helpers import get_bc_datapath
 from openghg.standardise.boundary_conditions import parse_openghg
 
@@ -21,6 +22,18 @@ def test_parse_openghg():
     assert "mozart" in metadata["bc_input"]
     assert "europe" in metadata["domain"]
     assert "ch4" in metadata["species"]
+
+
+def test_parse_openghg_data():
+    """Test parsing boundary conditions supplied as an xarray dataset."""
+    filepath = get_bc_datapath(filename="ch4_EUROPE_201208.nc")
+
+    with xr.open_dataset(filepath) as dataset:
+        results = parse_openghg(data=dataset.load(), species="ch4", bc_input="MOZART", domain="EUROPE")
+
+    metadata = results["ch4_mozart_europe"]["metadata"]
+    assert metadata["bc_input"] == "mozart"
+    assert metadata["domain"] == "europe"
 
 
 def test_parse_openghg_multi_file_1():

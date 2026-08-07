@@ -1,274 +1,276 @@
+"""Explicit object-store data bundles for analyse integration tests.
+
+Fixtures in this module populate the default ``user`` store and return that
+store name so consumers can pass it to retrieval functions. Request the
+narrowest bundle that supplies a test's stored-data requirements:
+
+* ``tac_surface_store``: TAC 2012 CRDS surface observations (CH4 and CO2).
+* ``tac_ch4_store``: TAC surface, anthropogenic and waste fluxes, boundary
+  conditions, and the European footprint.
+* ``tac_co2_store``: TAC surface, natural and ocean fluxes, boundary
+  conditions, and the CO2 footprint.
+* ``wao_radon_store``: WAO radon surface observations and footprint.
+* ``satellite_cams_store``: GOSAT column observations and CAMS footprint.
+* ``satellite_name_store``: GOSAT column observations, NAME footprint, and
+  South American flux.
+
+Synthetic tests should not request any of these fixtures. The bundles are
+session-scoped and intended for read-only consumers, so tests that clear or
+mutate an object store must use isolated store configuration rather than
+invalidating them.
+"""
+
 import pytest
 from helpers import (
-    clear_test_stores,
     get_bc_datapath,
+    get_column_datapath,
     get_flux_datapath,
     get_footprint_datapath,
     get_surface_datapath,
-    get_column_datapath,
 )
+
 from openghg.standardise import (
     standardise_bc,
+    standardise_column,
     standardise_flux,
     standardise_footprint,
     standardise_surface,
-    standardise_column,
 )
 
 
-@pytest.fixture(scope="module", autouse=True)
-def data_read():
+@pytest.fixture(scope="session")
+def tac_surface_store(default_test_store: str) -> str:
+    """Populate the default session store with TAC 2012 surface observations.
+
+    Args:
+        default_test_store: Writable store name to populate.
+
+    Returns:
+        The populated store name.
     """
-    Data set up for running tests for these sets of modules.
+    filepath = get_surface_datapath(filename="tac.picarro.1minute.100m.201208.dat", source_format="CRDS")
+    standardise_surface(
+        store=default_test_store,
+        filepath=filepath,
+        source_format="CRDS",
+        site="tac",
+        network="DECC",
+    )
+    return default_test_store
+
+
+@pytest.fixture(scope="session")
+def tac_ch4_store(tac_surface_store: str) -> str:
+    """Extend the TAC surface store with the CH4 scenario data.
+
+    Args:
+        tac_surface_store: Session store containing TAC surface observations.
+
+    Returns:
+        The populated store name.
     """
-    clear_test_stores()
+    store = tac_surface_store
+    for source, filename in (
+        ("anthro", "ch4-anthro_EUROPE_2012.nc"),
+        ("waste", "ch4-ukghg-waste_EUROPE_2012.nc"),
+    ):
+        standardise_flux(
+            store=store,
+            filepath=get_flux_datapath(filename),
+            species="ch4",
+            source=source,
+            domain="EUROPE",
+            time_resolved=False,
+        )
 
-    # Files for creating forward model (mf_mod) for methane and carbon dioxide at TAC site
-
-    # Observation data
-    #  - TAC at 100m for 201208 and 201407
-    #  - Includes CH4 and CO2 data
-    site1 = "tac"
-    network1 = "DECC"
-    source_format1 = "CRDS"
-
-    tac_path1 = get_surface_datapath(filename="tac.picarro.1minute.100m.201208.dat", source_format="CRDS")
-    tac_path2 = get_surface_datapath(filename="tac.picarro.1minute.100m.201407.dat", source_format="CRDS")
-    tac_filepaths = [tac_path1, tac_path2]
-
-    # WAO data for radon from 2021-12-04 (data level 1 (NRT product) from ICOS)
-    # - This has been standardised through openghg already from download.
-    # - This data was then output to a netcdf file we can read.
-    site2 = "wao"
-    network2 = "ICOS"
-    source_format2 = "OPENGHG"
-
-    wao_path = get_surface_datapath(
-        filename="wao_rn_icos_standardised_2021-12-04.nc", source_format="OPENGHG"
-    )
-
-    standardise_surface(
-        store="user", filepath=tac_filepaths, source_format=source_format1, site=site1, network=network1
-    )
-    standardise_surface(
-        store="user",
-        filepath=wao_path,
-        source_format=source_format2,
-        site=site2,
-        network=network2,
-        inlet="10m",
-        update_mismatch="metadata",
-    )
-
-    # Emissions / Flux data
-    # Anthropogenic ch4 (methane) data from 2012 for EUROPE
-    source1 = "anthro"
-    domain = "EUROPE"
-    flux_datapath1 = get_flux_datapath("ch4-anthro_EUROPE_2012.nc")
-
-    standardise_flux(
-        store="user",
-        filepath=flux_datapath1,
-        species="ch4",
-        source=source1,
-        domain=domain,
-        high_time_resolution=False,
-    )
-
-    # Waste data for CH4 (from UKGHG model)
-    source2 = "waste"
-    flux_datapath2 = get_flux_datapath("ch4-ukghg-waste_EUROPE_2012.nc")
-
-    standardise_flux(
-        store="user",
-        filepath=flux_datapath2,
-        species="ch4",
-        source=source2,
-        domain=domain,
-        high_time_resolution=False,
-    )
-
-    # Natural sources for CO2 (R-total from Cardamom)
-    #  - 2 hourly (high resolution?)
-    source3 = "natural-rtot"
-    flux_datapath3 = get_flux_datapath("co2-rtot-cardamom-2hr_TEST_2014.nc")
-
-    standardise_flux(
-        filepath=flux_datapath3,
-        species="co2",
-        source=source3,
-        domain="TEST",
-        time_resolved=True,
-        store="user",
-    )
-
-    # Ocean flux for CO2
-    #  - monthly (cut down data to 1 month)
-    source4 = "ocean"
-
-    flux_datapath4a = get_flux_datapath("co2-nemo-ocean-mth_TEST_2013.nc")
-    flux_datapath4b = get_flux_datapath("co2-nemo-ocean-mth_TEST_2014.nc")
-
-    standardise_flux(
-        filepath=flux_datapath4a,
-        species="co2",
-        source=source4,
-        domain="TEST",
-        time_resolved=False,
-        period="1 month",
-        store="user",
-    )
-
-    standardise_flux(
-        filepath=flux_datapath4b,
-        species="co2",
-        source=source4,
-        domain="TEST",
-        time_resolved=False,
-        period="1 month",
-        store="user",
-    )
-
-    # Boundary conditions data
-    # CH4
-    bc_filepath1 = get_bc_datapath("ch4_EUROPE_201208.nc")
     standardise_bc(
-        store="user",
-        filepath=bc_filepath1,
+        store=store,
+        filepath=get_bc_datapath("ch4_EUROPE_201208.nc"),
         species="ch4",
         domain="EUROPE",
         bc_input="MOZART",
         period="monthly",
     )
+    standardise_footprint(
+        store=store,
+        filepath=get_footprint_datapath("TAC-100magl_EUROPE_201208.nc"),
+        site="tac",
+        model="NAME",
+        network="DECC",
+        height="100m",
+        domain="EUROPE",
+    )
+    return store
 
-    # CO2
-    bc_filepath1 = get_bc_datapath("co2_TEST_201407.nc")
+
+@pytest.fixture(scope="session")
+def tac_co2_store(default_test_store: str) -> str:
+    """Populate the default session store with the TAC CO2 scenario data.
+
+    Args:
+        default_test_store: Writable store name to populate.
+
+    Returns:
+        The populated store name.
+    """
+    store = default_test_store
+    standardise_surface(
+        store=store,
+        filepath=get_surface_datapath(filename="tac.picarro.1minute.100m.201407.dat", source_format="CRDS"),
+        source_format="CRDS",
+        site="tac",
+        network="DECC",
+    )
+
+    standardise_flux(
+        store=store,
+        filepath=get_flux_datapath("co2-rtot-cardamom-2hr_TEST_2014.nc"),
+        species="co2",
+        source="natural-rtot",
+        domain="TEST",
+        time_resolved=True,
+    )
+    for filename in (
+        "co2-nemo-ocean-mth_TEST_2013.nc",
+        "co2-nemo-ocean-mth_TEST_2014.nc",
+    ):
+        standardise_flux(
+            store=store,
+            filepath=get_flux_datapath(filename),
+            species="co2",
+            source="ocean",
+            domain="TEST",
+            time_resolved=False,
+            period="1 month",
+        )
+
     standardise_bc(
-        store="user",
-        filepath=bc_filepath1,
+        store=store,
+        filepath=get_bc_datapath("co2_TEST_201407.nc"),
         species="co2",
         domain="TEST",
         bc_input="MOZART",
         period="monthly",
     )
-
-    # Footprint data
-    # TAC footprint from 2012-08 - 2012-09 at 100m
-    height1 = "100m"
-    model1 = "NAME"
-
-    fp_datapath1 = get_footprint_datapath("TAC-100magl_EUROPE_201208.nc")
     standardise_footprint(
-        store="user",
-        filepath=fp_datapath1,
-        site=site1,
-        model=model1,
-        network=network1,
-        height=height1,
-        domain=domain,
-    )
-
-    # TAC footprint from 2014-07 - 2014-09 at 100m for CO2 (high time resolution)
-    fp_datapath2 = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
-    standardise_footprint(
-        store="user",
-        filepath=fp_datapath2,
-        site=site1,
-        model=model1,
-        network=network1,
+        store=store,
+        filepath=get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc"),
+        site="tac",
+        model="NAME",
+        network="DECC",
         met_model="UKV",
-        height=height1,
+        height="100m",
         domain="TEST",
         species="co2",
     )
+    return store
 
-    # WAO radon footprint from 2021-12-04
-    # - cut down from full file to one day
-    # - cut down to only include TEST domain rather than full EUROPE
-    fp_height2 = "20m"
-    model2 = "NAME"
-    domain2 = "TEST"
-    species2 = "rn"  # Species-specific footprint for short-lived species.
 
-    fp_datapath2 = get_footprint_datapath("WAO-20magl_UKV_rn_TEST_202112.nc")
-    standardise_footprint(
-        store="user",
-        filepath=fp_datapath2,
-        site=site2,
-        model=model2,
-        network=network2,
-        height=fp_height2,
-        domain=domain2,
-        species=species2,
-    )
+@pytest.fixture(scope="session")
+def wao_radon_store(default_test_store: str) -> str:
+    """Populate the default session store with WAO radon data.
 
-    # Populating with satellite data for ObsColumn
-    filepath = get_column_datapath(filename="gosat-fts_gosat_20170318_ch4-column.nc")
+    Args:
+        default_test_store: Writable store name to populate.
 
-    satellite = "GOSAT"
-    selection = "LAND"
-    species = "CH4"
-    obs_region = "BRAZIL"
-    domain = "SOUTHAMERICA"
-
-    standardise_column(
-        filepath=filepath,
+    Returns:
+        The populated store name.
+    """
+    store = default_test_store
+    standardise_surface(
+        store=store,
+        filepath=get_surface_datapath(
+            filename="wao_rn_icos_standardised_2021-12-04.nc", source_format="OPENGHG"
+        ),
         source_format="OPENGHG",
-        satellite=satellite,
-        species=species,
-        obs_region=obs_region,
-        selection=selection,
-        store="user",
+        site="wao",
+        network="ICOS",
+        inlet="10m",
+        update_mismatch="metadata",
     )
-
-    # Populating with satellite data for footprints
-    datapath = get_footprint_datapath("GOSAT-BRAZIL-column_SOUTHAMERICA_201004_compressed.nc")
-
-    satellite = "GOSAT"
-    network = "GOSAT"
-    domain = "SOUTHAMERICA"
-    obs_region = "BRAZIL"
-
     standardise_footprint(
-        filepath=datapath,
-        satellite=satellite,
-        network=network,
+        store=store,
+        filepath=get_footprint_datapath("WAO-20magl_UKV_rn_TEST_202112.nc"),
+        site="wao",
+        model="NAME",
+        network="ICOS",
+        height="20m",
+        domain="TEST",
+        species="rn",
+    )
+    return store
+
+
+@pytest.fixture(scope="session")
+def satellite_cams_store(default_test_store: str) -> str:
+    """Populate the default session store with GOSAT/CAMS validation data.
+
+    Args:
+        default_test_store: Writable store name to populate.
+
+    Returns:
+        The populated store name.
+    """
+    store = default_test_store
+    standardise_column(
+        store=store,
+        filepath=get_column_datapath(filename="gosat-fts_gosat_20170318_ch4-column.nc"),
+        source_format="OPENGHG",
+        satellite="GOSAT",
+        species="CH4",
+        obs_region="BRAZIL",
+        selection="LAND",
+    )
+    standardise_footprint(
+        store=store,
+        filepath=get_footprint_datapath("GOSAT-BRAZIL-column_SOUTHAMERICA_201004_compressed.nc"),
+        satellite="GOSAT",
+        network="GOSAT",
         model="CAMS",
         inlet="column",
         period="1S",
-        domain=domain,
-        obs_region=obs_region,
+        domain="SOUTHAMERICA",
+        obs_region="BRAZIL",
         selection="LAND",
-        store="user",
         continuous=False,
     )
+    return store
 
-    # Testing footprint realignment with obs column data
 
-    col_filepath = get_column_datapath("gosat-fts_gosat_20160101_ch4-column.nc")
-    col_fp_filepath = get_footprint_datapath("GOSAT-BRAZIL-column_SOUTHAMERICA_201601.nc")
-    flux_filepath = get_flux_datapath(
-        "ch4-all_SOUTHAMERICA_2016_SWAMPS-v32-5_Saunois-Annual-Mean_20160101.nc"
-    )
+@pytest.fixture(scope="session")
+def satellite_name_store(default_test_store: str) -> str:
+    """Populate the default session store with GOSAT/NAME merge data.
 
+    Args:
+        default_test_store: Writable store name to populate.
+
+    Returns:
+        The populated store name.
+    """
+    store = default_test_store
     standardise_column(
-        filepath=col_filepath,
+        store=store,
+        filepath=get_column_datapath("gosat-fts_gosat_20160101_ch4-column.nc"),
         species="ch4",
         platform="satellite",
         satellite="gosat",
         obs_region="brazil",
         network="gosat",
-        store="user",
     )
-
     standardise_footprint(
-        filepath=col_fp_filepath,
+        store=store,
+        filepath=get_footprint_datapath("GOSAT-BRAZIL-column_SOUTHAMERICA_201601.nc"),
         model="name",
         domain="southamerica",
         satellite="gosat",
         obs_region="brazil",
         inlet="column",
-        store="user",
     )
-
-    standardise_flux(filepath=flux_filepath, species="ch4", source="all", domain="southamerica", store="user")
+    standardise_flux(
+        store=store,
+        filepath=get_flux_datapath("ch4-all_SOUTHAMERICA_2016_SWAMPS-v32-5_Saunois-Annual-Mean_20160101.nc"),
+        species="ch4",
+        source="all",
+        domain="southamerica",
+    )
+    return store

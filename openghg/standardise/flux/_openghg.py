@@ -1,16 +1,17 @@
 from pathlib import Path
 import warnings
+import xarray as xr
 
-from openghg.util import timestamp_now, open_time_nc_fn
+from openghg.util import timestamp_now, open_time_nc_fn, preprocess_nc_data
 from openghg.store import infer_date_range, update_zero_dim
 from openghg.standardise.meta import assign_flux_attributes
 
 
 def parse_openghg(
-    filepath: str | Path | list[str] | list[Path],
-    species: str,
-    source: str,
-    domain: str,
+    filepath: str | Path | list[str] | list[Path] | None = None,
+    species: str | None = None,
+    source: str | None = None,
+    domain: str | None = None,
     database: str | None = None,
     database_version: str | None = None,
     model: str | None = None,
@@ -19,12 +20,16 @@ def parse_openghg(
     period: str | tuple | None = None,
     chunks: dict | None = None,
     continuous: bool = True,
+    data: xr.Dataset | None = None,
 ) -> dict:
     """
     Read and parse input flux / emissions data already in OpenGHG format.
 
     Args:
-        filepath: Path to the flux file.
+        filepath: Path to the flux file. Specify either ``filepath`` or
+            ``data``.
+        data: In-memory flux dataset. It receives the same time-coordinate and
+            domain alignment checks as file input.
         species: Name of species
         source: Source of the emissions data
         domain: Geographic domain
@@ -39,8 +44,13 @@ def parse_openghg(
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
             To disable chunking pass in an empty dictionary.
         continuous: Flag indicating whether the data is continuous or not
+
     Returns:
         dict: Dictionary of data
+
+    Raises:
+        ValueError: If no input is supplied, required metadata is missing, or
+            the dataset coordinates do not match the selected domain.
     """
 
     if high_time_resolution:
@@ -50,9 +60,17 @@ def parse_openghg(
         )
         time_resolved = high_time_resolution
 
-    xr_open_fn, filepath = open_time_nc_fn(filepath, domain)
+    if species is None or source is None or domain is None:
+        raise ValueError("`species`, `source`, and `domain` must be specified.")
 
-    em_data = xr_open_fn(filepath).chunk(chunks if chunks is not None else {})
+    if data is None:
+        if filepath is None:
+            raise ValueError("Please specify either `filepath` or `data`.")
+        xr_open_fn, filepath = open_time_nc_fn(filepath, domain)
+        data = xr_open_fn(filepath)
+    else:
+        data = preprocess_nc_data(data, realign_on_domain=domain, check_coords="time")
+    em_data = data.chunk(chunks if chunks is not None else {})
 
     # Some attributes are numpy types we can't serialise to JSON so convert them
     # to their native types here

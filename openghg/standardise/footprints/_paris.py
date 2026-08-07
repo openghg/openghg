@@ -10,6 +10,7 @@ from openghg.util import (
     check_species_lifetime,
     timestamp_now,
     open_time_nc_fn,
+    preprocess_nc_data,
 )
 from openghg.store import infer_date_range, update_zero_dim
 from openghg.types import ParseError
@@ -19,11 +20,11 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_paris(
-    filepath: str | Path | list[str] | list[Path],
-    domain: str,
-    model: str,
-    inlet: str,
-    species: str,
+    filepath: str | Path | list[str] | list[Path] | None = None,
+    domain: str | None = None,
+    model: str | None = None,
+    inlet: str | None = None,
+    species: str | None = None,
     obs_region: str | None = None,
     site: str | None = None,
     satellite: str | None = None,
@@ -36,12 +37,16 @@ def parse_paris(
     high_time_resolution: bool = False,
     short_lifetime: bool = False,
     inner_domain: str | None = None,
+    data: Dataset | None = None,
 ) -> dict:
     """
     Read and parse input footprints data in "paris" format.
 
     Args:
-        filepath: Path of file to load
+        filepath: Path of file to load. Specify either ``filepath`` or
+            ``data``.
+        data: In-memory PARIS footprint dataset. Time and domain preprocessing
+            matches the file-input path without mutating the caller's dataset.
         domain: Domain of footprints
         model: Model used to create footprint (e.g. NAME or FLEXPART)
         inlet: Height above ground level in metres. Format 'NUMUNIT' e.g. "10m"
@@ -61,8 +66,13 @@ def parse_paris(
         short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
             Note this will be set to True if species has an associated lifetime.
         inner_domain: If the footprints are for an inner domain. This will affect the expected dimensions of the data and how these are stored in the output Dataset.
+
     Returns:
         dict: Dictionary of data
+
+    Raises:
+        ValueError: If no input is supplied, required metadata is missing, or
+            the dataset coordinates do not match the selected domain.
     """
 
     if high_time_resolution:
@@ -72,11 +82,19 @@ def parse_paris(
         )
         time_resolved = high_time_resolution
 
+    if domain is None or model is None or inlet is None:
+        raise ValueError("`domain`, `model`, and `inlet` must be specified.")
+    species = species or "inert"
+
     if inner_domain:
         domain = f"{domain}-{inner_domain}"
-    xr_open_fn, filepath = open_time_nc_fn(filepath, domain)
-
-    fp_data = xr_open_fn(filepath)
+    if data is None:
+        if filepath is None:
+            raise ValueError("Please specify either `filepath` or `data`.")
+        xr_open_fn, filepath = open_time_nc_fn(filepath, domain)
+        fp_data = xr_open_fn(filepath)
+    else:
+        fp_data = preprocess_nc_data(data, realign_on_domain=domain, check_coords="time")
 
     if time_resolved is None:
         time_resolved = check_species_time_resolved(species)
