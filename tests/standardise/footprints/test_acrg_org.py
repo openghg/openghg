@@ -1,4 +1,5 @@
 import pytest
+import numpy as np
 import xarray as xr
 from helpers import get_footprint_datapath
 from openghg.standardise.footprints import parse_acrg_org
@@ -73,6 +74,32 @@ def test_parse_acrg_org_data():
 
     assert "WAO_BRAZIL_NAME_20m" in result
     assert result["WAO_BRAZIL_NAME_20m"]["metadata"]["data_type"] == "footprints"
+
+
+def test_parse_acrg_org_data_selects_month_without_mutating_input():
+    """Direct ACRG input applies month selection without changing caller data."""
+    filepath = get_footprint_datapath("WAO-20magl_UKV_rn_TEST_201801.nc")
+
+    with xr.open_dataset(filepath) as dataset:
+        january_data = dataset.load()
+
+    february_point = january_data.isel(time=[0]).assign_coords(time=[np.datetime64("2018-02-01")])
+    input_data = xr.concat([january_data, february_point], dim="time")
+    original_data = input_data.copy(deep=True)
+
+    result = parse_acrg_org(
+        data=input_data,
+        model="NAME",
+        inlet="20m",
+        species="Rn",
+        domain="BRAZIL",
+        site="WAO",
+    )
+
+    parsed_data = result["WAO_BRAZIL_NAME_20m"]["data"]
+    assert parsed_data.sizes["time"] == january_data.sizes["time"]
+    assert np.all(parsed_data.time.dt.month == 1)
+    xr.testing.assert_identical(input_data, original_data)
 
 
 def test_parse_acrg_org_integrated_co2_drops_time_resolved_variables():

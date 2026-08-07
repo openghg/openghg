@@ -3,7 +3,7 @@ from typing import cast
 from collections.abc import MutableMapping
 import xarray as xr
 
-from openghg.util import open_time_nc_fn
+from openghg.util import open_time_nc_fn, preprocess_nc_data
 
 
 def parse_openghg(
@@ -34,7 +34,10 @@ def parse_openghg(
     will attempt to extract this from the data file.
 
     Args:
-        filepath: Path of observation file
+        filepath: Path of observation file. Specify either ``filepath`` or
+            ``data``.
+        data: In-memory observation dataset. Scalar ``time`` coordinates are
+            expanded before parsing. Specify either ``filepath`` or ``data``.
         satellite: Name of satellite (if relevant)
         domain: For satellite only. If data has been selected on an area include the
             identifier name for domain covered. This can map to previously defined domains
@@ -58,8 +61,13 @@ def parse_openghg(
         data_owner: Name of data owner.
         data_owner_email: Email address for data owner.
         kwargs: Any additional attributes to be associated with the data.
+
     Returns:
         Dict : Dictionary of source_name : data, metadata, attributes
+
+    Raises:
+        ValueError: If no input is supplied or required metadata or coordinates
+            are missing.
     """
     from openghg.standardise.meta import define_species_label
     from openghg.util import clean_string
@@ -69,6 +77,8 @@ def parse_openghg(
             raise ValueError("Please specify either `filepath` or `data`.")
         xr_open_fn, filepath = open_time_nc_fn(filepath)
         data = xr_open_fn(filepath)
+    else:
+        data = preprocess_nc_data(data, check_coords="time")
     data = data.chunk(chunks if chunks is not None else {})
 
     # TODO: Remove this once ragged arrays from xarray is handled

@@ -50,7 +50,7 @@ def parse_openghg(
     if isinstance(filepath, list) and len(filepath) == 1:
         filepath = filepath[0]
 
-    with get_data(dataset=data, filepath=filepath) as em_data:
+    with get_data(dataset=data, filepath=filepath, check_coords="time") as em_data:
         em_data = em_data.chunk(chunks if chunks is not None else {})
         # Check necessary 4D coordinates are present and rename if necessary (for consistency)
         check_coords = {

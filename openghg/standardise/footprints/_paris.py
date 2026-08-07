@@ -10,6 +10,7 @@ from openghg.util import (
     check_species_lifetime,
     timestamp_now,
     open_time_nc_fn,
+    preprocess_nc_data,
 )
 from openghg.store import infer_date_range, update_zero_dim
 from openghg.types import ParseError
@@ -42,7 +43,10 @@ def parse_paris(
     Read and parse input footprints data in "paris" format.
 
     Args:
-        filepath: Path of file to load
+        filepath: Path of file to load. Specify either ``filepath`` or
+            ``data``.
+        data: In-memory PARIS footprint dataset. Time and domain preprocessing
+            matches the file-input path without mutating the caller's dataset.
         domain: Domain of footprints
         model: Model used to create footprint (e.g. NAME or FLEXPART)
         inlet: Height above ground level in metres. Format 'NUMUNIT' e.g. "10m"
@@ -62,8 +66,13 @@ def parse_paris(
         short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
             Note this will be set to True if species has an associated lifetime.
         inner_domain: If the footprints are for an inner domain. This will affect the expected dimensions of the data and how these are stored in the output Dataset.
+
     Returns:
         dict: Dictionary of data
+
+    Raises:
+        ValueError: If no input is supplied, required metadata is missing, or
+            the dataset coordinates do not match the selected domain.
     """
 
     if high_time_resolution:
@@ -85,7 +94,7 @@ def parse_paris(
         xr_open_fn, filepath = open_time_nc_fn(filepath, domain)
         fp_data = xr_open_fn(filepath)
     else:
-        fp_data = data
+        fp_data = preprocess_nc_data(data, realign_on_domain=domain, check_coords="time")
 
     if time_resolved is None:
         time_resolved = check_species_time_resolved(species)

@@ -1,4 +1,5 @@
 import xarray as xr
+import pytest
 from helpers import get_flux_datapath
 from openghg.standardise.flux import parse_openghg
 from pandas import Timestamp
@@ -35,9 +36,15 @@ def test_parse_openghg_multi_file():
 
 
 def test_parse_openghg_data():
-    """Test parsing an OpenGHG flux dataset supplied directly."""
+    """Direct flux input receives the same preprocessing as filepath input."""
     filepath = get_flux_datapath(filename="co2-gpp-cardamom_EUROPE_2013.nc")
 
+    filepath_results = parse_openghg(
+        filepath=filepath,
+        domain="EUROPE",
+        species="co2",
+        source="anthro",
+    )
     with xr.open_dataset(filepath) as dataset:
         results = parse_openghg(
             data=dataset.load(),
@@ -47,4 +54,21 @@ def test_parse_openghg_data():
         )
 
     assert "co2_anthro_EUROPE" in results
-    assert results["co2_anthro_EUROPE"]["data"].time[0] == Timestamp("2013-01-01")
+    direct_data = results["co2_anthro_EUROPE"]["data"]
+    filepath_data = filepath_results["co2_anthro_EUROPE"]["data"]
+    xr.testing.assert_equal(direct_data, filepath_data)
+    assert direct_data.time[0] == Timestamp("2013-01-01")
+
+
+def test_parse_openghg_data_rejects_mismatched_known_domain():
+    """Direct flux input validates coordinates against a known domain."""
+    filepath = get_flux_datapath(filename="co2-gpp-cardamom_EUROPE_2013.nc")
+
+    with xr.open_dataset(filepath) as dataset:
+        with pytest.raises(ValueError, match="coordinates does not match"):
+            parse_openghg(
+                data=dataset.load(),
+                domain="USA",
+                species="co2",
+                source="anthro",
+            )
