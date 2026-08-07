@@ -51,6 +51,7 @@ def _json_value(value: Any) -> Any:
 
 
 def _write_report(path: Path, report: dict[str, Any]) -> None:
+    """Atomically write a JSON-compatible benchmark report."""
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(json.dumps(_json_value(report), indent=2, sort_keys=True) + "\n")
@@ -58,15 +59,18 @@ def _write_report(path: Path, report: dict[str, Any]) -> None:
 
 
 def _time_checksum(times: np.ndarray) -> str:
+    """Hash nanosecond timestamps in their current positional order."""
     values = np.ascontiguousarray(times.astype("datetime64[ns]").astype(np.int64))
     return hashlib.sha256(values.view(np.uint8)).hexdigest()
 
 
 def _physical_size(path: Path) -> int:
+    """Return the recursively allocated file size in bytes."""
     return sum(item.stat().st_size for item in path.rglob("*") if item.is_file())
 
 
 def _time_layout(times: np.ndarray) -> dict[str, Any]:
+    """Summarise ordering, duplication, and sorted gaps in a time array."""
     time_ns = times.astype("datetime64[ns]").astype(np.int64)
     sorted_ns = np.sort(time_ns, kind="stable")
     gaps_minutes = np.diff(sorted_ns) / (60 * 1_000_000_000)
@@ -83,7 +87,16 @@ def _time_layout(times: np.ndarray) -> dict[str, Any]:
 
 
 def _indexed_slab_layout(times: np.ndarray, h_back: np.ndarray, time_chunk: int) -> dict[str, Any]:
-    """Estimate hourly flux slabs loaded by the indexed kernel's time blocks."""
+    """Estimate hourly flux slabs loaded by indexed-kernel time blocks.
+
+    Args:
+        times: Irregular footprint release timestamps.
+        h_back: Footprint lag values in hours.
+        time_chunk: Number of releases in each compute block.
+
+    Returns:
+        Counts and ratios describing slab rows, lag targets, and blocks.
+    """
     sorted_times = np.sort(times.astype("datetime64[ns]"), kind="stable")
     lag_hours = np.rint(h_back).astype(np.int64)
     slab_rows: list[int] = []
@@ -108,10 +121,12 @@ def _indexed_slab_layout(times: np.ndarray, h_back: np.ndarray, time_chunk: int)
 
 
 def _chunks(array: xr.DataArray) -> dict[str, list[int]]:
+    """Return every Dask chunk length keyed by dimension."""
     return {dim: [int(value) for value in chunks] for dim, chunks in array.chunksizes.items()}
 
 
 def _chunk_summary(array: xr.DataArray) -> dict[str, dict[str, int]]:
+    """Summarise Dask chunk counts and boundary sizes by dimension."""
     return {
         dim: {
             "count": len(chunks),
@@ -130,7 +145,17 @@ def _prepare_core_inputs(
     *,
     time_chunk: int,
 ) -> tuple[xr.Dataset, xr.DataArray]:
-    """Establish the public core contract without using wrapper internals."""
+    """Establish the public core contract without wrapper internals.
+
+    Args:
+        footprint: Arbitrary footprint sample to sort and prepare.
+        flux: Single-source flux to prepare.
+        time_chunk: Requested footprint compute chunk length.
+
+    Returns:
+        A monotonic, float32, filled and chunked footprint plus source-resolved
+        flux suitable for ``fp_x_flux_keep_space_core``.
+    """
     order = np.argsort(footprint["time"].values, kind="stable")
     prepared_footprint = (
         footprint[["fp_time_resolved", "fp_residual"]]
@@ -144,12 +169,30 @@ def _prepare_core_inputs(
 
 
 def _prepare_flux(flux: xr.DataArray, *, apply_value_policy: bool) -> xr.DataArray:
+    """Prepare single-source flux for the core benchmark.
+
+    Args:
+        flux: Flux field to make source-resolved and spatially chunk.
+        apply_value_policy: Whether to cast to float32 and replace NaNs.
+
+    Returns:
+        Flux with a singleton source dimension and full spatial chunks.
+    """
     source = str(flux.attrs.get("source") or flux.name or "source")
     prepared = flux.astype(np.float32).fillna(0.0) if apply_value_policy else flux
     return prepared.expand_dims(source=[source]).chunk({"lat": -1, "lon": -1, "source": 1})
 
 
 def _core_readiness(footprint: xr.Dataset, flux: xr.DataArray) -> dict[str, Any]:
+    """Describe whether stored arrays already satisfy the core contract.
+
+    Args:
+        footprint: Candidate prepared footprint Dataset.
+        flux: Candidate source-resolved flux.
+
+    Returns:
+        Readiness flags plus footprint and flux chunk summaries.
+    """
     resolved = footprint["fp_time_resolved"]
     spatial_coordinates_match = all(resolved[dim].equals(flux[dim]) for dim in ("lat", "lon"))
     spatial_coordinate_metadata_match = all(resolved[dim].identical(flux[dim]) for dim in ("lat", "lon"))
@@ -176,7 +219,21 @@ def _repair_footprint(
     time_chunk: int,
     workers: int,
 ) -> tuple[xr.Dataset, dict[str, Any]]:
-    """Create or validate a sorted, filled, compute-chunked January cache."""
+    """Create or validate a compute-ready January footprint cache.
+
+    Args:
+        footprint: Original non-monotonic OCO2 footprint Dataset.
+        output_path: Destination for the repaired consolidated Zarr store.
+        time_chunk: Requested release-time chunk length.
+        workers: Number of Dask threads used for the write.
+
+    Returns:
+        The opened repaired Dataset and cache creation or reuse metrics.
+
+    Raises:
+        ValueError: If an existing cache does not satisfy the benchmark
+            contract or match the original January timestamps.
+    """
     times = footprint["time"].values
     positions = np.flatnonzero((times >= START) & (times < STOP))
     positions = positions[np.argsort(times[positions], kind="stable")]
@@ -256,6 +313,7 @@ def _repair_footprint(
 
 
 def _graph_tasks(array: xr.DataArray) -> int:
+    """Count tasks in a DataArray's Dask graph."""
     graph = array.data.__dask_graph__()
     return len(graph) if graph is not None else 0
 
@@ -267,7 +325,17 @@ def _run_eager_block(
     time_chunk: int,
     workers: int,
 ) -> dict[str, Any]:
-    """Measure one warm kernel block after all required inputs are in RAM."""
+    """Measure one warm kernel block after loading its inputs eagerly.
+
+    Args:
+        footprint: Original OCO2 footprint Dataset.
+        flux: Original OCO2 flux field.
+        time_chunk: Number of January releases to benchmark.
+        workers: Number of Dask worker threads.
+
+    Returns:
+        Loading, compute, graph, checksum, missing-value, and memory metrics.
+    """
     times = footprint["time"].values
     positions = np.flatnonzero((times >= START) & (times < STOP))
     positions = positions[np.argsort(times[positions], kind="stable")][:time_chunk]
@@ -330,6 +398,20 @@ def _run_stage(
     workers: int,
     compute_path: str,
 ) -> dict[str, Any]:
+    """Benchmark one duration using either the wrapper or prepared core.
+
+    Args:
+        footprint: Original or repaired footprint Dataset.
+        flux: Flux field used by the operator.
+        days: Number of January days to include.
+        time_chunk: Requested release-time chunk length.
+        workers: Number of Dask worker threads.
+        compute_path: ``"core"`` to compute the prepared core result or any
+            other value to compute the public wrapper result.
+
+    Returns:
+        Preparation, graph, compute, checksum, throughput, and memory metrics.
+    """
     end = START + np.timedelta64(days, "D")
     times = footprint["time"].values
     positions = np.flatnonzero((times >= START) & (times < end))
@@ -401,6 +483,7 @@ def _run_stage(
 
 
 def _parse_args() -> argparse.Namespace:
+    """Parse command-line options for the irregular OCO2 benchmark."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=DEFAULT_ROOT)
     parser.add_argument("--output-json", type=Path, required=True)
@@ -443,6 +526,25 @@ def _run_stage_series(
     max_stage_seconds: float,
     max_memory_mb: float,
 ) -> str:
+    """Run progressively larger benchmark stages and persist each result.
+
+    Args:
+        report: Mutable benchmark report receiving completed stage metrics.
+        output_path: JSON report path updated after every stage.
+        report_key: Report list to which stage metrics are appended.
+        footprint: Original or repaired footprint Dataset.
+        flux: Flux field used by the operator.
+        stages: Durations in days to benchmark sequentially.
+        time_chunk: Requested release-time chunk length.
+        workers: Number of Dask worker threads.
+        compute_path: Operator path passed to ``_run_stage``.
+        max_stage_seconds: Duration threshold that stops later stages.
+        max_memory_mb: Peak-memory threshold that stops later stages.
+
+    Returns:
+        ``"complete"`` or a status describing the threshold that stopped the
+        series.
+    """
     for days in stages:
         print(f"Starting {report_key} {days}-day stage", flush=True)
         stage = _run_stage(
@@ -477,6 +579,7 @@ def _run_stage_series(
 
 
 def main() -> None:
+    """Run the configured OCO2 benchmark and persist incremental evidence."""
     args = _parse_args()
     footprint_path = args.root / FOOTPRINT_RECORD
     flux_path = args.root / FLUX_RECORD

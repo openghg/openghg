@@ -40,7 +40,20 @@ def _interval_loop(
     *,
     time_chunk: int,
 ) -> xr.DataArray:
-    """Pure-xarray H_back loop with native flux-interval membership."""
+    """Build a pure-xarray lag loop with native interval membership.
+
+    Args:
+        footprint: Monotonic footprint sample to prepare and evaluate.
+        flux: Flux field whose timestamps label interval starts.
+        time_chunk: Requested footprint time chunk length.
+
+    Returns:
+        Lazy keep-space resolved and residual footprint-times-flux field.
+
+    Raises:
+        ValueError: If no resolved lag is available or a lag target falls
+            outside the represented flux intervals.
+    """
     prepared_footprint = (
         footprint[["fp_time_resolved", "fp_residual"]]
         .astype(np.float32)
@@ -73,6 +86,20 @@ def _run_stage(
     method: str,
     time_chunk: int,
 ) -> dict[str, Any]:
+    """Benchmark one duration with the legacy or corrected loop method.
+
+    Args:
+        footprint: Original OCO2 footprint Dataset.
+        flux: Original OCO2 flux field.
+        days: Number of January days to include.
+        workers: Number of Dask worker threads.
+        expected_checksum: Numba result used for scientific parity checks.
+        method: ``"legacy"`` or ``"interval-loop"``.
+        time_chunk: Requested footprint time chunk length for the loop method.
+
+    Returns:
+        Graph, compute, checksum, throughput, and memory metrics.
+    """
     end = START + np.timedelta64(days, "D")
     times = footprint["time"].values
     positions = np.flatnonzero((times >= START) & (times < end))
@@ -119,6 +146,7 @@ def _run_stage(
 
 
 def _parse_args() -> argparse.Namespace:
+    """Parse command-line options for the comparison benchmark."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=DEFAULT_ROOT)
     parser.add_argument("--baseline-json", type=Path, default=DEFAULT_BASELINE)
@@ -133,6 +161,7 @@ def _parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    """Run progressive comparison stages and persist incremental evidence."""
     args = _parse_args()
     footprint_path = args.root / FOOTPRINT_RECORD
     flux_path = args.root / FLUX_RECORD

@@ -23,6 +23,7 @@ def data_read() -> None:
 
 
 def _inputs() -> tuple[xr.Dataset, xr.DataArray]:
+    """Build compact resolved-footprint and source-resolved flux fixtures."""
     fp_time = pd.date_range("2021-01-01 03:00", periods=5, freq="h")
     flux_time = pd.date_range("2021-01-01", periods=40, freq="h")
     lat = np.array([51.0, 52.0], dtype=np.float32)
@@ -59,6 +60,7 @@ def _inputs() -> tuple[xr.Dataset, xr.DataArray]:
 
 
 def _reference(footprint: xr.Dataset, flux: xr.DataArray) -> xr.DataArray:
+    """Calculate expected hourly keep-space values directly with xarray."""
     resolved = None
     for lag in footprint["H_back"].values:
         fp_lag = footprint["fp_time_resolved"].sel(H_back=lag, drop=True)
@@ -71,6 +73,7 @@ def _reference(footprint: xr.Dataset, flux: xr.DataArray) -> xr.DataArray:
 
 
 def _existing_time_resolved_reference(footprint: xr.Dataset, flux: xr.DataArray) -> xr.DataArray:
+    """Evaluate the existing operator after adapting source dimensions."""
     if "source" not in flux.dims:
         return fp_x_flux_time_resolved(footprint, flux).expand_dims(source=["source"])
     results = [
@@ -86,6 +89,7 @@ def _assert_value_parity(actual: xr.DataArray, expected: xr.DataArray) -> None:
 
 
 def _interval_start_reference(footprint: xr.Dataset, flux: xr.DataArray) -> xr.DataArray:
+    """Calculate expected irregular-time values by interval membership."""
     resolved = None
     for lag in footprint["H_back"].values:
         fp_lag = footprint["fp_time_resolved"].sel(H_back=lag, drop=True)
@@ -98,6 +102,7 @@ def _interval_start_reference(footprint: xr.Dataset, flux: xr.DataArray) -> xr.D
 
 
 def test_fp_x_flux_keep_space_matches_reference_and_preserves_source_metadata() -> None:
+    """Match direct values and preserve source metadata coordinates."""
     footprint, flux = _inputs()
     result = fp_x_flux_keep_space(footprint, flux, time_chunk=2, lat_chunk=1, lon_chunk=1, source_chunk=1)
 
@@ -112,6 +117,7 @@ def test_fp_x_flux_keep_space_matches_reference_and_preserves_source_metadata() 
 
 
 def test_fp_x_flux_keep_space_matches_existing_time_resolved_method() -> None:
+    """Match the existing time-resolved operator on its supported domain."""
     footprint, flux = _inputs()
 
     result = fp_x_flux_keep_space(footprint, flux).compute()
@@ -121,6 +127,7 @@ def test_fp_x_flux_keep_space_matches_existing_time_resolved_method() -> None:
 
 
 def test_time_selector_is_applied_to_finished_lazy_result() -> None:
+    """Apply observation-time selection only after graph construction."""
     footprint, flux = _inputs()
     selected = footprint["time"].values[[1, 3]]
 
@@ -131,6 +138,7 @@ def test_time_selector_is_applied_to_finished_lazy_result() -> None:
 
 
 def test_sources_can_be_selected_and_relabelled() -> None:
+    """Select and relabel source coordinates without changing values."""
     footprint, flux = _inputs()
 
     result = fp_x_flux_keep_space(footprint, flux, sources=["ff"], source_labels=["fossil_fuel"])
@@ -142,6 +150,7 @@ def test_sources_can_be_selected_and_relabelled() -> None:
 
 
 def test_single_source_flux_without_source_dimension_is_supported() -> None:
+    """Promote flux without a source dimension to one labelled source."""
     footprint, flux = _inputs()
     single_flux = flux.sel(source="bio", drop=True)
 
@@ -154,6 +163,7 @@ def test_single_source_flux_without_source_dimension_is_supported() -> None:
 
 @pytest.mark.parametrize("step_hours", [2, 24])
 def test_regular_coarse_flux_matches_existing_time_resolved_method(step_hours: int) -> None:
+    """Match the legacy result for supported coarse flux cadences."""
     footprint, flux = _inputs()
     end = flux["time"].values[-1] + np.timedelta64(1, "h")
     coarse_time = pd.date_range(flux["time"].values[0], end, freq=f"{step_hours}h", inclusive="left")
@@ -166,6 +176,7 @@ def test_regular_coarse_flux_matches_existing_time_resolved_method(step_hours: i
 
 
 def test_align_flux_to_time_targets_uses_left_labelled_interval_membership() -> None:
+    """Map targets to containing left-labelled flux intervals."""
     times = pd.date_range("2021-01-01", periods=3, freq="h")
     flux = xr.DataArray(
         np.array([10.0, 20.0, 30.0]),
@@ -193,6 +204,7 @@ def test_align_flux_to_time_targets_uses_left_labelled_interval_membership() -> 
     [["2020-12-31 23:59:59"], ["2021-01-01 03:00:00"]],
 )
 def test_align_flux_to_time_targets_rejects_times_outside_intervals(targets: list[str]) -> None:
+    """Reject targets before coverage or beyond the final flux interval."""
     flux = xr.DataArray(
         np.ones(3),
         dims="time",
@@ -204,6 +216,7 @@ def test_align_flux_to_time_targets_rejects_times_outside_intervals(targets: lis
 
 
 def test_align_flux_to_time_targets_rejects_gapped_flux() -> None:
+    """Reject an irregular flux grid that leaves unrepresented intervals."""
     flux = xr.DataArray(
         np.ones(3),
         dims="time",
@@ -215,6 +228,7 @@ def test_align_flux_to_time_targets_rejects_gapped_flux() -> None:
 
 
 def test_irregular_release_times_use_indexed_kernel_and_preserve_exact_times() -> None:
+    """Use indexed lookup while preserving irregular order and duplicates."""
     footprint, flux = _inputs()
     irregular = pd.to_datetime(
         [
@@ -246,6 +260,7 @@ def test_irregular_release_times_use_indexed_kernel_and_preserve_exact_times() -
 
 
 def test_gapped_hour_aligned_release_times_use_indexed_kernel() -> None:
+    """Use indexed lookup when otherwise hourly releases contain gaps."""
     footprint, flux = _inputs()
     footprint = footprint.assign_coords(
         time=pd.to_datetime(
@@ -266,6 +281,7 @@ def test_gapped_hour_aligned_release_times_use_indexed_kernel() -> None:
 
 
 def test_irregular_release_times_support_regular_coarse_flux() -> None:
+    """Forward-fill coarse intervals before indexed irregular-time lookup."""
     footprint, flux = _inputs()
     footprint = footprint.assign_coords(
         time=pd.to_datetime(
@@ -287,6 +303,7 @@ def test_irregular_release_times_support_regular_coarse_flux() -> None:
 
 
 def test_irregular_times_match_legacy_where_flux_grid_has_the_same_offset() -> None:
+    """Match legacy values where its shifted time grid is scientifically valid."""
     footprint, flux = _inputs()
     release_times = pd.to_datetime(
         [
@@ -306,6 +323,7 @@ def test_irregular_times_match_legacy_where_flux_grid_has_the_same_offset() -> N
 
 
 def test_regular_hourly_release_times_keep_existing_numba_kernel() -> None:
+    """Retain the regular halo kernel for consecutive hourly releases."""
     footprint, flux = _inputs()
 
     result = fp_x_flux_keep_space(footprint, flux)
@@ -314,6 +332,7 @@ def test_regular_hourly_release_times_keep_existing_numba_kernel() -> None:
 
 
 def test_irregular_release_times_default_to_bounded_time_chunks() -> None:
+    """Default irregular computation to bounded release-time chunks."""
     footprint, flux = _inputs()
     footprint = footprint.isel(time=np.zeros(40, dtype=int)).assign_coords(
         time=pd.date_range("2021-01-01 03:01", periods=40, freq="53min")
@@ -326,6 +345,7 @@ def test_irregular_release_times_default_to_bounded_time_chunks() -> None:
 
 
 def test_prepared_core_matches_wrapper_without_sorting_or_rechunking() -> None:
+    """Match wrapper values when inputs already satisfy the core contract."""
     footprint, flux = _inputs()
     times = pd.to_datetime(
         [
@@ -355,6 +375,7 @@ def test_prepared_core_matches_wrapper_without_sorting_or_rechunking() -> None:
 
 
 def test_prepared_core_rejects_non_monotonic_release_time() -> None:
+    """Reject non-monotonic release times at the prepared core boundary."""
     footprint, flux = _inputs()
     footprint = footprint.assign_coords(time=footprint["time"].values[[0, 2, 1, 3, 4]]).chunk(
         {"time": 2, "lat": 1, "lon": 1, "H_back": -1}
@@ -366,6 +387,7 @@ def test_prepared_core_rejects_non_monotonic_release_time() -> None:
 
 
 def test_wrapper_sorts_hourly_releases_for_core_then_restores_input_order() -> None:
+    """Sort for core computation and restore the caller's release order."""
     footprint, flux = _inputs()
     order = [0, 2, 1, 4, 3]
     footprint = footprint.isel(time=order)
@@ -379,6 +401,7 @@ def test_wrapper_sorts_hourly_releases_for_core_then_restores_input_order() -> N
 
 
 def test_irregular_release_time_selector_is_applied_after_complete_result() -> None:
+    """Filter irregular releases only after computing the complete field."""
     footprint, flux = _inputs()
     footprint = footprint.assign_coords(
         time=pd.to_datetime(
@@ -401,6 +424,7 @@ def test_irregular_release_time_selector_is_applied_after_complete_result() -> N
 
 
 def test_irregular_release_times_support_single_source_flux() -> None:
+    """Support irregular releases with flux lacking a source dimension."""
     footprint, flux = _inputs()
     footprint = footprint.assign_coords(
         time=pd.to_datetime(
@@ -425,6 +449,7 @@ def test_irregular_release_times_support_single_source_flux() -> None:
 
 
 def test_month_boundary_residual_uses_the_containing_month() -> None:
+    """Use the calendar month containing each release for residual flux."""
     times = pd.to_datetime(["2021-01-31 23:37", "2021-02-01 00:23"])
     resolved = xr.DataArray(
         np.zeros((2, 1, 1, 1), dtype=np.float32),
@@ -452,6 +477,7 @@ def test_month_boundary_residual_uses_the_containing_month() -> None:
 
 
 def test_coarse_flux_interval_membership_crosses_month_boundary() -> None:
+    """Map coarse flux intervals correctly across a calendar boundary."""
     release_times = pd.to_datetime(["2021-01-31 23:37", "2021-02-01 00:23"])
     resolved = xr.DataArray(
         np.ones((2, 1, 1, 2), dtype=np.float32),
@@ -474,6 +500,7 @@ def test_coarse_flux_interval_membership_crosses_month_boundary() -> None:
 
 
 def test_flux_time_labels_must_describe_interval_starts() -> None:
+    """Reject flux explicitly labelled with non-start timestamps."""
     footprint, flux = _inputs()
     flux["time"].attrs["label"] = "right"
 
@@ -482,6 +509,7 @@ def test_flux_time_labels_must_describe_interval_starts() -> None:
 
 
 def test_time_selector_rejects_times_outside_footprint_grid() -> None:
+    """Reject selected timestamps absent from the footprint releases."""
     footprint, flux = _inputs()
 
     with pytest.raises(ValueError, match="outside the result time grid"):
@@ -489,6 +517,7 @@ def test_time_selector_rejects_times_outside_footprint_grid() -> None:
 
 
 def test_flux_must_include_complete_lag_halo() -> None:
+    """Reject flux that omits any release-minus-lag target interval."""
     footprint, flux = _inputs()
     flux = flux.sel(time=slice(footprint["time"].values[0], None))
 
@@ -497,6 +526,7 @@ def test_flux_must_include_complete_lag_halo() -> None:
 
 
 def test_write_fp_x_flux_keep_space_zarr_writes_ppm_and_manifest(tmp_path) -> None:
+    """Persist float32 ppm values and the required provenance manifest."""
     footprint, flux = _inputs()
     result = fp_x_flux_keep_space(footprint, flux, time_selector=footprint["time"].values[[0, 2]])
     path = tmp_path / "cache.zarr"
@@ -524,4 +554,5 @@ def test_write_fp_x_flux_keep_space_zarr_writes_ppm_and_manifest(tmp_path) -> No
 
 
 def test_warm_numba_fp_x_flux() -> None:
+    """Compile both Numba kernels and return the readiness message."""
     assert warm_numba_fp_x_flux() == "numba fp_x_flux kernel ready"

@@ -40,6 +40,7 @@ def _numba_kernel(function: Callable[_P, _R]) -> Callable[_P, _R]:
 
 
 def _require_numba() -> None:
+    """Raise an actionable error when the optional Numba extra is absent."""
     if njit is None:
         raise ImportError(
             "fp_x_flux_keep_space requires the optional Numba dependency. "
@@ -48,6 +49,7 @@ def _require_numba() -> None:
 
 
 def _as_flux_data_array(flux: xr.DataArray | xr.Dataset) -> xr.DataArray:
+    """Extract the flux DataArray from either supported input form."""
     if isinstance(flux, xr.Dataset):
         if "flux" not in flux:
             raise ValueError("Flux Dataset must contain a 'flux' variable.")
@@ -56,6 +58,19 @@ def _as_flux_data_array(flux: xr.DataArray | xr.Dataset) -> xr.DataArray:
 
 
 def _split_footprint(fp: xr.DataArray | xr.Dataset) -> xr.Dataset:
+    """Normalise current and legacy footprint representations.
+
+    Args:
+        fp: A Dataset with separate ``fp_time_resolved`` and ``fp_residual``
+            variables, or a legacy DataArray whose last ``H_back`` slice is
+            the residual footprint.
+
+    Returns:
+        A Dataset containing only ``fp_time_resolved`` and ``fp_residual``.
+
+    Raises:
+        ValueError: If the required variables or ``H_back`` slices are absent.
+    """
     if isinstance(fp, xr.Dataset):
         missing = {"fp_time_resolved", "fp_residual"} - set(fp.data_vars)
         if missing:
@@ -75,6 +90,16 @@ def _split_footprint(fp: xr.DataArray | xr.Dataset) -> xr.Dataset:
 
 
 def _reindex_space(data: xr.DataArray, footprint: xr.Dataset) -> xr.DataArray:
+    """Align a field to the footprint latitude and longitude coordinates.
+
+    Args:
+        data: Field to align spatially.
+        footprint: Footprint providing the target spatial coordinates.
+
+    Returns:
+        The original field when its indexes already match, otherwise an
+        interpolated or nearest-neighbour reindexed field.
+    """
     indexers = {dim: footprint.coords[dim] for dim in SPATIAL_DIMS}
     if all(data.coords[dim].equals(indexers[dim]) for dim in SPATIAL_DIMS):
         return data
@@ -91,6 +116,23 @@ def _prepare_inputs(
     cast_float32: bool,
     fillna_zero: bool,
 ) -> tuple[xr.Dataset, xr.DataArray, xr.DataArray, xr.DataArray]:
+    """Validate and normalise arbitrary footprint and flux inputs.
+
+    Args:
+        fp: Current Dataset or legacy DataArray footprint representation.
+        flux: Flux DataArray or Dataset containing a ``flux`` variable.
+        cast_float32: Whether to cast footprint and flux values to float32.
+        fillna_zero: Whether to replace missing footprint and flux values with
+            zero.
+
+    Returns:
+        The normalised footprint Dataset, resolved footprint, residual
+        footprint, and spatially aligned flux DataArray.
+
+    Raises:
+        ValueError: If an input is empty or lacks required variables or
+            dimensions.
+    """
     fp_ds = _split_footprint(fp)
     flux_da = _as_flux_data_array(flux)
 
@@ -127,6 +169,19 @@ def _prepare_inputs(
 
 
 def _hourly_lags(fp_time_resolved: xr.DataArray) -> np.ndarray:
+    """Convert valid ``H_back`` coordinates to non-negative integer hours.
+
+    Args:
+        fp_time_resolved: Time-resolved footprint with an ``H_back``
+            coordinate.
+
+    Returns:
+        Lag values as an int64 NumPy array measured in hours.
+
+    Raises:
+        ValueError: If the coordinate uses unsupported units or contains
+            negative or fractional hours.
+    """
     lag_coord = fp_time_resolved["H_back"]
     units = str(lag_coord.attrs.get("units", "hours")).lower()
     if units not in {"h", "hr", "hour", "hours"}:
@@ -139,6 +194,19 @@ def _hourly_lags(fp_time_resolved: xr.DataArray) -> np.ndarray:
 
 
 def _regular_time_step_hours(time: xr.DataArray, *, label: str) -> int:
+    """Return the whole-hour cadence of a regular time coordinate.
+
+    Args:
+        time: Time coordinate to validate.
+        label: Input name used in validation errors.
+
+    Returns:
+        The time step in whole hours, or one for a singleton coordinate.
+
+    Raises:
+        ValueError: If timestamps are not strictly increasing at a regular,
+            whole-hour cadence.
+    """
     if time.size < 2:
         return 1
     diffs_ns = np.diff(time.values.astype("datetime64[ns]")).astype("timedelta64[ns]").astype(np.int64)
@@ -149,6 +217,19 @@ def _regular_time_step_hours(time: xr.DataArray, *, label: str) -> int:
 
 
 def _validate_interval_start_time(time: xr.DataArray, *, label: str) -> int:
+    """Validate left-labelled interval timestamps and return their cadence.
+
+    Args:
+        time: Time coordinate whose labels describe averaging intervals.
+        label: Input name used in validation errors.
+
+    Returns:
+        The regular interval duration in hours.
+
+    Raises:
+        ValueError: If labels do not represent interval starts or the
+            coordinate is not regular.
+    """
     time_label = str(time.attrs.get("label", "left")).lower()
     if time_label not in {"left", "start", "beginning"}:
         raise ValueError(
@@ -164,7 +245,21 @@ def _interval_start_indices(
     *,
     step_hours: int,
 ) -> np.ndarray:
-    """Map targets into half-open, left-labelled flux intervals."""
+    """Map targets into half-open, left-labelled flux intervals.
+
+    Args:
+        flux_time: Regular flux interval-start timestamps.
+        target_times: Timestamps for which flux values are required. The array
+            may have any shape.
+        step_hours: Width of every represented flux interval in hours.
+
+    Returns:
+        Integer flux indexes with the same shape as ``target_times``.
+
+    Raises:
+        ValueError: If the flux coordinate is empty or any target falls outside
+            a represented interval.
+    """
     flux_ns = np.asarray(flux_time.values, dtype="datetime64[ns]").astype(np.int64)
     if flux_ns.size == 0:
         raise ValueError("Flux time coordinate must not be empty.")
@@ -202,6 +297,11 @@ def align_flux_to_time_targets(
     Returns:
         Flux values with their time dimension replaced by the exact target
         timestamps, preserving target order and duplicates.
+
+    Raises:
+        ValueError: If flux lacks time, target timestamps are not
+            one-dimensional, flux timestamps do not describe regular interval
+            starts, or a target lies outside the represented intervals.
     """
     flux_da = _as_flux_data_array(flux)
     if "time" not in flux_da.dims:
@@ -219,6 +319,17 @@ def align_flux_to_time_targets(
 
 
 def _h_back_window_hours(fp_time_resolved: xr.DataArray) -> int:
+    """Return the full time window represented by the resolved lag bins.
+
+    Args:
+        fp_time_resolved: Footprint containing whole-hour ``H_back`` values.
+
+    Returns:
+        Window length in hours, including the width of the final lag bin.
+
+    Raises:
+        ValueError: If the lag coordinate is invalid.
+    """
     lags = np.sort(_hourly_lags(fp_time_resolved))
     if lags.size < 2:
         return int(lags.max(initial=0)) + 1
@@ -227,6 +338,16 @@ def _h_back_window_hours(fp_time_resolved: xr.DataArray) -> int:
 
 
 def _forward_fill_flux_hourly(flux: xr.DataArray, *, step_hours: int) -> xr.DataArray:
+    """Expand regular coarse flux intervals onto an hourly interval grid.
+
+    Args:
+        flux: Flux whose timestamps label interval starts.
+        step_hours: Width of each original flux interval in hours.
+
+    Returns:
+        The original hourly flux or an hourly, forward-filled view with
+        attributes preserved.
+    """
     if step_hours == 1:
         return flux
     end = flux["time"].values[-1] + np.timedelta64(step_hours, "h")
@@ -237,6 +358,7 @@ def _forward_fill_flux_hourly(flux: xr.DataArray, *, step_hours: int) -> xr.Data
 
 
 def _padded_flux_bounds(fp_time_resolved: xr.DataArray) -> tuple[np.datetime64, np.datetime64]:
+    """Return inclusive flux bounds covering releases and their lag halo."""
     max_lag = int(_hourly_lags(fp_time_resolved).max(initial=0))
     start = fp_time_resolved["time"].values[0] - np.timedelta64(max_lag, "h")
     end = fp_time_resolved["time"].values[-1]
@@ -244,6 +366,16 @@ def _padded_flux_bounds(fp_time_resolved: xr.DataArray) -> tuple[np.datetime64, 
 
 
 def _low_frequency_flux(flux: xr.DataArray, fp_ds: xr.Dataset) -> xr.DataArray:
+    """Align calendar-month mean flux to footprint release timestamps.
+
+    Args:
+        flux: Spatially aligned source-resolved flux.
+        fp_ds: Footprint Dataset providing release times and compute chunks.
+
+    Returns:
+        Float32 monthly mean flux aligned to every footprint release, with time
+        chunks matching the resolved footprint when it is Dask-backed.
+    """
     # Include complete calendar months so boundary releases use a full-month
     # mean without reading unrelated years from a long flux record.
     release_index = pd.DatetimeIndex(fp_ds["time"].values)
@@ -264,6 +396,18 @@ def _resolved_keep_space_block(
     flux_block: np.ndarray,
     lag_indices: np.ndarray,
 ) -> np.ndarray:
+    """Accumulate regular-grid lag contributions while retaining space.
+
+    Args:
+        fp_block: Footprint block ordered as time, latitude, longitude, lag.
+        flux_block: Haloed flux block ordered as time, latitude, longitude,
+            source.
+        lag_indices: Integer hourly lag for every footprint lag bin.
+
+    Returns:
+        Resolved footprint-times-flux values ordered as time, latitude,
+        longitude, source.
+    """
     nt, ny, nx, nh = fp_block.shape
     ns = flux_block.shape[3]
     out = np.empty((nt, ny, nx, ns), dtype=fp_block.dtype)
@@ -287,7 +431,18 @@ def _resolved_keep_space_indexed_block(
     flux_block: np.ndarray,
     flux_indices: np.ndarray,
 ) -> np.ndarray:
-    """Apply an observation-block-specific flux index map."""
+    """Accumulate indexed lag contributions while retaining space.
+
+    Args:
+        fp_block: Footprint block ordered as time, latitude, longitude, lag.
+        flux_block: Minimal flux slab ordered as time, latitude, longitude,
+            source.
+        flux_indices: Flux-slab index for each release and lag pair.
+
+    Returns:
+        Resolved footprint-times-flux values ordered as time, latitude,
+        longitude, source.
+    """
     nt, ny, nx, nh = fp_block.shape
     ns = flux_block.shape[3]
     out = np.empty((nt, ny, nx, ns), dtype=fp_block.dtype)
@@ -303,6 +458,19 @@ def _resolved_keep_space_indexed_block(
 
 
 def _chunks_with_minimum_tail(length: int, target: int | None, minimum: int) -> tuple[int, ...]:
+    """Build uniform chunks without leaving an undersized final chunk.
+
+    Args:
+        length: Total axis length.
+        target: Requested chunk length, or ``None`` for one full chunk.
+        minimum: Minimum permitted size of the final chunk.
+
+    Returns:
+        Chunk lengths that cover the axis exactly.
+
+    Raises:
+        ValueError: If the requested chunk length is not positive.
+    """
     if target is None or target >= length:
         return (length,)
     if target <= 0:
@@ -328,6 +496,24 @@ def _chunk_inputs(
     source_chunk: int | None,
     minimum_time_chunk: int,
 ) -> tuple[xr.DataArray, xr.DataArray, xr.DataArray]:
+    """Apply compatible compute chunks to footprint and flux inputs.
+
+    Args:
+        fp_time_resolved: Resolved footprint to chunk.
+        fp_residual: Residual footprint to chunk consistently.
+        flux: Source-resolved flux to spatially chunk with the footprint.
+        time_chunk: Requested footprint time chunk length.
+        lat_chunk: Requested latitude chunk length.
+        lon_chunk: Requested longitude chunk length.
+        source_chunk: Requested flux source chunk length.
+        minimum_time_chunk: Smallest allowed final time chunk.
+
+    Returns:
+        Chunked resolved footprint, residual footprint, and flux arrays.
+
+    Raises:
+        ValueError: If a requested chunk size is not positive.
+    """
     time_chunks = _chunks_with_minimum_tail(
         fp_time_resolved.sizes["time"],
         time_chunk,
@@ -353,6 +539,15 @@ def _pad_footprint_left(
     *,
     pad_hours: int,
 ) -> xr.DataArray:
+    """Prepend zero releases required by the regular halo kernel.
+
+    Args:
+        fp_time_resolved: Chunked resolved footprint.
+        pad_hours: Number of hourly zero rows to prepend.
+
+    Returns:
+        Footprint with padding folded into its first time chunk.
+    """
     if pad_hours == 0:
         return fp_time_resolved
     original_chunks = tuple(int(value) for value in fp_time_resolved.chunksizes["time"])
@@ -365,6 +560,19 @@ def _pad_footprint_left(
 
 
 def _flux_with_halo(flux: xr.DataArray, fp_time_resolved: xr.DataArray) -> xr.DataArray:
+    """Construct overlapping flux blocks for the regular-time kernel.
+
+    Args:
+        flux: Hourly source-resolved flux.
+        fp_time_resolved: Chunked resolved footprint defining release chunks
+            and the required lag depth.
+
+    Returns:
+        A lazy flux array whose time blocks include the required left halo.
+
+    Raises:
+        ValueError: If flux does not cover all release and lag timestamps.
+    """
     lags = _hourly_lags(fp_time_resolved)
     max_lag = int(lags.max(initial=0))
     start, end = _padded_flux_bounds(fp_time_resolved)
@@ -398,6 +606,7 @@ def _flux_with_halo(flux: xr.DataArray, fp_time_resolved: xr.DataArray) -> xr.Da
 
 
 def _uses_regular_halo_kernel(fp_time: xr.DataArray, flux_time: xr.DataArray) -> bool:
+    """Report whether releases are hourly and exactly represented by flux."""
     try:
         if _regular_time_step_hours(fp_time, label="Footprint") != 1:
             return False
@@ -412,7 +621,21 @@ def _indexed_flux_blocks(
     *,
     step_hours: int,
 ) -> tuple[da.Array, da.Array]:
-    """Build one minimal contiguous flux slab and index map per footprint block."""
+    """Build a minimal flux slab and index map for each footprint block.
+
+    Args:
+        fp_time_resolved: Monotonic, chunked resolved footprint.
+        flux: Hourly flux covering every release-minus-lag target.
+        step_hours: Width of the flux intervals used for target lookup.
+
+    Returns:
+        A concatenation of per-block flux slabs and a matching array of
+        slab-relative indexes for each release and lag.
+
+    Raises:
+        ValueError: If lag values are invalid or a target lies outside flux
+            coverage.
+    """
     lags = _hourly_lags(fp_time_resolved)
     release_times = np.asarray(fp_time_resolved["time"].values, dtype="datetime64[ns]")
     targets = release_times[:, None] - lags[None, :].astype("timedelta64[h]")
@@ -445,7 +668,20 @@ def _resolved_keep_space_indexed(
     *,
     step_hours: int,
 ) -> xr.DataArray:
-    """Run the indexed Numba kernel for irregular footprint release times."""
+    """Run the indexed Numba kernel for irregular release times.
+
+    Args:
+        fp_time_resolved: Monotonic, chunked resolved footprint.
+        flux: Chunked hourly source-resolved flux.
+        step_hours: Width of the flux intervals used for target lookup.
+
+    Returns:
+        A lazy resolved contribution ordered as time, latitude, longitude,
+        source.
+
+    Raises:
+        ValueError: If lag values or flux coverage are invalid.
+    """
     fp_time_resolved = fp_time_resolved.transpose("time", "lat", "lon", "H_back")
     flux = flux.transpose("time", "lat", "lon", "source")
     flux_blocks, index_blocks = _indexed_flux_blocks(
@@ -486,6 +722,15 @@ def _resolved_keep_space_indexed(
 
 
 def _attach_source_coordinates(result: xr.DataArray, flux: xr.DataArray) -> xr.DataArray:
+    """Copy compatible source metadata coordinates from flux to output.
+
+    Args:
+        result: Computed footprint-times-flux field.
+        flux: Selected flux carrying source metadata coordinates.
+
+    Returns:
+        Result with non-conflicting source-dependent coordinates attached.
+    """
     coordinates: dict[str, xr.DataArray] = {}
     for name, coordinate in flux.coords.items():
         if not isinstance(name, str):
@@ -498,6 +743,7 @@ def _attach_source_coordinates(result: xr.DataArray, flux: xr.DataArray) -> xr.D
 
 
 def _normalise_time_selector(selector: xr.DataArray | Sequence[Any]) -> np.ndarray:
+    """Convert a selector to unique, non-missing nanosecond timestamps."""
     values = selector.values if isinstance(selector, xr.DataArray) else selector
     index = pd.DatetimeIndex(pd.to_datetime(np.asarray(values).reshape(-1))).dropna().drop_duplicates()
     return cast(np.ndarray, index.to_numpy(dtype="datetime64[ns]"))
@@ -507,6 +753,18 @@ def _select_result_times(
     result: xr.DataArray,
     time_selector: xr.DataArray | Sequence[Any] | None,
 ) -> xr.DataArray:
+    """Retain requested timestamps after constructing the full result.
+
+    Args:
+        result: Complete footprint-times-flux result.
+        time_selector: Timestamps to retain, or ``None`` for all releases.
+
+    Returns:
+        The unchanged result or a timestamp-selected view.
+
+    Raises:
+        ValueError: If the selector includes a timestamp absent from the result.
+    """
     if time_selector is None:
         return result
     selected_times = _normalise_time_selector(time_selector)
@@ -522,6 +780,18 @@ def _validate_core_inputs(
     fp_residual: xr.DataArray,
     flux: xr.DataArray,
 ) -> None:
+    """Validate the strict prepared-data contract used by the core operator.
+
+    Args:
+        fp_ds: Footprint Dataset providing the shared release coordinate.
+        fp_time_resolved: Dask-backed resolved footprint.
+        fp_residual: Dask-backed residual footprint.
+        flux: Dask-backed, source-resolved flux.
+
+    Raises:
+        ValueError: If dimensions, coordinates, monotonicity, or chunks violate
+            the core contract.
+    """
     required_resolved = {"time", "lat", "lon", "H_back"}
     missing_resolved = required_resolved - set(fp_time_resolved.dims)
     if missing_resolved:
@@ -581,6 +851,11 @@ def fp_x_flux_keep_space_core(
 
     Returns:
         A lazy, dimensionless DataArray ordered as ``source, lat, lon, time``.
+
+    Raises:
+        ImportError: If OpenGHG was installed without the ``fp-x-flux`` extra.
+        ValueError: If prepared dimensions, coordinates, chunks, time labels,
+            lag values, or flux coverage violate the core contract.
     """
     _require_numba()
     fp_ds = _split_footprint(footprint)
@@ -708,6 +983,11 @@ def fp_x_flux_keep_space(  # noqa: PLR0913
 
     Returns:
         A lazy, dimensionless DataArray ordered as ``source, lat, lon, time``.
+
+    Raises:
+        ImportError: If OpenGHG was installed without the ``fp-x-flux`` extra.
+        ValueError: If inputs, source labels, interval timestamps, lag values,
+            flux coverage, chunks, or the optional time selector are invalid.
     """
     _require_numba()
     fp_ds, fp_time_resolved, fp_residual, flux_da = _prepare_inputs(
@@ -806,6 +1086,12 @@ def warm_numba_fp_x_flux() -> str:
 
     This is optional. It is mainly useful with ``distributed.Client.run`` to
     remove first-call compilation cost from every Dask worker.
+
+    Returns:
+        A readiness message suitable for collecting from distributed workers.
+
+    Raises:
+        ImportError: If OpenGHG was installed without the ``fp-x-flux`` extra.
     """
     _require_numba()
     fp = np.zeros((1, 1, 1, 1), dtype=np.float32)
@@ -828,6 +1114,22 @@ def write_fp_x_flux_keep_space_zarr(  # noqa: PLR0913
     A JSON manifest is written beside the store. ``provenance`` is supplied by
     the caller because OpenGHG cannot infer record versions, checksums, or an
     observation-selector identity from arbitrary xarray inputs.
+
+    Args:
+        result: Dimensionless keep-space result to persist.
+        output_path: Destination Zarr store.
+        output_chunks: Optional output chunk lengths by dimension.
+        provenance: Caller-supplied footprint, flux, and observation-selector
+            provenance for the sidecar manifest.
+        overwrite: Whether to atomically replace an existing store.
+
+    Returns:
+        Path to the completed consolidated Zarr store.
+
+    Raises:
+        ValueError: If result dimensions or units are invalid, or required
+            provenance entries are missing.
+        FileExistsError: If the destination exists and ``overwrite`` is false.
     """
     if set(result.dims) != set(REQUIRED_OUTPUT_DIMS):
         raise ValueError(f"Result must contain exactly the dimensions {REQUIRED_OUTPUT_DIMS!r}.")
