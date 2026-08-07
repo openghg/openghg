@@ -27,6 +27,21 @@ def mock_configuration_paths() -> dict:
     }
 
 
+@pytest.fixture(scope="session")
+def default_test_store() -> str:
+    """Return the default writable object store for tests.
+
+    Test data fixtures should populate the ``user`` store and return this value
+    to consumers. Tests should pass the returned name to retrieval functions so
+    that they do not accidentally search the readable ``group`` or ``shared``
+    stores. Use another named store only when that distinction is under test.
+
+    Returns:
+        The writable store name, ``"user"``.
+    """
+    return "user"
+
+
 @pytest.fixture(scope="session", autouse=True)
 def default_session_fixture(mock_configuration_paths) -> Iterator[None]:
     with patch("openghg.objectstore._local_store.read_local_config", return_value=mock_configuration_paths):

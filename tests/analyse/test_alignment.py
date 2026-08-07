@@ -3,16 +3,17 @@ import pandas as pd
 import pytest
 
 from openghg.analyse._alignment import (
+    _buffer_start_and_end_dates,
     _extract_obs_freq,
     infer_freq_in_seconds,
     time_overlap,
-    _buffer_start_and_end_dates,
 )
-from openghg.retrieve import get_obs_surface, get_footprint
+from openghg.retrieve import get_obs_surface
 
 
 @pytest.fixture
-def obs_data():
+def obs_data(tac_surface_store):
+    """Return TAC observations from the explicitly populated user store."""
     start_date = "2012-01-01"
     end_date = "2013-01-01"
 
@@ -22,27 +23,19 @@ def obs_data():
     inlet = "100m"
 
     obs_surface = get_obs_surface(
-        site=site, species=species, start_date=start_date, end_date=end_date, inlet=inlet, network=network
+        site=site,
+        species=species,
+        start_date=start_date,
+        end_date=end_date,
+        inlet=inlet,
+        network=network,
+        store=tac_surface_store,
     )
     return obs_surface
 
 
-@pytest.fixture
-def footprint_data():
-    start_date = "2012-01-01"
-    end_date = "2013-01-01"
-
-    site = "tac"
-    domain = "EUROPE"
-    inlet = "100m"
-
-    footprint = get_footprint(
-        site=site, domain=domain, height=inlet, start_date=start_date, end_date=end_date
-    )
-    return footprint
-
-
 def test_extract_obs_freq(obs_data):
+    """Test extracting a declared sampling frequency from real observations."""
     # this obs data has "sampling period" attribute:
     assert _extract_obs_freq(obs_data.data) == 60.0
 

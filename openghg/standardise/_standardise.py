@@ -466,7 +466,7 @@ def standardise_footprint(
     overwrite: bool = False,
     force: bool = False,
     high_spatial_resolution: bool = False,
-    time_resolved: bool = False,
+    time_resolved: bool | None = None,
     high_time_resolution: bool = False,
     short_lifetime: bool = False,
     sort: bool = False,
@@ -505,8 +505,10 @@ def standardise_footprint(
         continuous: Whether time stamps have to be continuous.
         retrieve_met: Whether to also download meterological data for this footprints area
         high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.
-        time_resolved: Indicate footprints are high time resolution (include H_back dimension)
-            Note this will be set to True automatically for Carbon Dioxide data.
+        time_resolved: Indicate whether footprints are time resolved (include an
+            H_back dimension). For CO2, the default (None) selects time-resolved
+            footprints for backwards compatibility. Set this explicitly to False
+            to add an integrated footprint.
         short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
             Note this will be set to True if species has an associated lifetime.
         high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.

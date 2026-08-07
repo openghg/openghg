@@ -12,8 +12,12 @@ from openghg.standardise import standardise_bc, standardise_flux, standardise_fo
 from pandas import Timestamp
 from xarray import Dataset
 
+from openghg.analyse import ModelScenario, calc_dim_resolution, match_dataset_dims, stack_datasets
+from openghg.dataobjects import ObsData
+from openghg.retrieve import get_bc, get_flux, get_footprint, get_obs_column, get_obs_surface
 
-def test_scenario_direct_objects():
+
+def test_scenario_direct_objects(tac_ch4_store):
     """
     Test ModelScenario class can be created with direct objects
     (ObsData, FootprintData, FluxData)
@@ -37,15 +41,21 @@ def test_scenario_direct_objects():
         inlet=inlet,
         network=network,
         target_units={"mf_variability": "ppm"},
+        store=tac_ch4_store,
     )
 
     footprint = get_footprint(
-        site=site, domain=domain, height=inlet, start_date=start_date, end_date=end_date
+        site=site,
+        domain=domain,
+        height=inlet,
+        start_date=start_date,
+        end_date=end_date,
+        store=tac_ch4_store,
     )
 
-    flux = get_flux(species=species, domain=domain, source=source)
+    flux = get_flux(species=species, domain=domain, source=source, store=tac_ch4_store)
 
-    bc = get_bc(species=species, domain=domain, bc_input=bc_input)
+    bc = get_bc(species=species, domain=domain, bc_input=bc_input, store=tac_ch4_store)
 
     model_scenario = ModelScenario(obs=obs_surface, footprint=footprint, flux=flux, bc=bc)
 
@@ -62,7 +72,7 @@ def test_scenario_direct_objects():
     xr.testing.assert_equal(model_scenario.bc.data, bc.data)
 
 
-def test_scenario_infer_inputs_ch4():
+def test_scenario_infer_inputs_ch4(tac_ch4_store):
     """
     Test ModelScenario can find underlying data based on keyword inputs.
     """
@@ -89,6 +99,7 @@ def test_scenario_infer_inputs_ch4():
         bc_input=bc_input,
         start_date=start_date,
         end_date=end_date,
+        store=tac_ch4_store,
     )
 
     # Check data is being found and stored
@@ -144,8 +155,8 @@ def test_scenario_infer_inputs_ch4():
 
 
 @pytest.fixture
-def model_scenario_co2():
-    """Fixture to create model scenario object with co2 data for testing"""
+def model_scenario_co2(tac_co2_store):
+    """Create a CO2 model scenario from the explicitly populated user store."""
     start_date = "2014-07-01"
     end_date = "2014-08-01"
 
@@ -166,17 +177,20 @@ def model_scenario_co2():
         sources=source,
         start_date=start_date,
         end_date=end_date,
+        store=tac_co2_store,
     )
 
-    return { "scenario_co2": scenario,
-                "start_date" : "2014-07-01",
-                "end_date" : "2014-08-01",
-                "site" : "tac",
-                "domain" : "TEST",
-                "inlet" : "100m",
-                "network" : "DECC",
-                "species" : "co2",
-                "source" : "natural-rtot"}
+    return {
+        "scenario_co2": scenario,
+        "start_date": "2014-07-01",
+        "end_date": "2014-08-01",
+        "site": "tac",
+        "domain": "TEST",
+        "inlet": "100m",
+        "network": "DECC",
+        "species": "co2",
+        "source": "natural-rtot",
+    }
 
 
 def test_scenario_infer_inputs_co2(model_scenario_co2):
@@ -261,7 +275,7 @@ def test_plot_comparison_uses_mf_mod_high_res(model_scenario_co2, monkeypatch):
     np.testing.assert_allclose(np.asarray(modelled_trace.y), modelled_obs["mf_mod_high_res"].values)
 
 
-def test_scenario_flux_extend_co2():
+def test_scenario_flux_extend_co2(tac_co2_store):
     """
     Check ModelScenario can extract full date range of flux values for a given
     source.
@@ -290,6 +304,7 @@ def test_scenario_flux_extend_co2():
         sources=source,
         start_date=start_date,
         end_date=end_date,
+        store=tac_co2_store,
     )
 
     # Check data is being found and stored
@@ -304,7 +319,7 @@ def test_scenario_flux_extend_co2():
     assert flux_time[1] == Timestamp("2014-07-01T00:00:00")  # From test file 2 - reduced time axis
 
 
-def test_scenario_infer_inlet():
+def test_scenario_infer_inlet(tac_ch4_store):
     """
     Test ModelScenario can find underlying data for both observations and
     footprint when omitting the inlet label. This should be inferred from the
@@ -320,7 +335,13 @@ def test_scenario_infer_inlet():
 
     # Explicitly not including inlet to test this can be inferred from obs data.
     model_scenario = ModelScenario(
-        site=site, species=species, domain=domain, sources=source, start_date=start_date, end_date=end_date
+        site=site,
+        species=species,
+        domain=domain,
+        sources=source,
+        start_date=start_date,
+        end_date=end_date,
+        store=tac_ch4_store,
     )
 
     assert model_scenario.obs is not None
@@ -331,7 +352,7 @@ def test_scenario_infer_inlet():
     assert model_scenario.fp_inlet == "100m"
 
 
-def test_scenario_mult_fluxes():
+def test_scenario_mult_fluxes(tac_ch4_store):
     """
     Extract multiple flux sources at once from available data
     """
@@ -353,6 +374,7 @@ def test_scenario_mult_fluxes():
         sources=sources,
         start_date=start_date,
         end_date=end_date,
+        store=tac_ch4_store,
     )
 
     for source in sources:
@@ -372,7 +394,7 @@ def test_scenario_too_few_inputs():
     assert model_scenario.footprint is None
 
 
-def test_scenario_uses_fp_inlet():
+def test_scenario_uses_fp_inlet(tac_ch4_store):
     """
     Test ModelScenario is using fp_inlet in place of inlet if this is passed.
     In this case we expect the observation data to be found but the footprint
@@ -395,6 +417,7 @@ def test_scenario_uses_fp_inlet():
         fp_inlet=fp_inlet,
         start_date=start_date,
         end_date=end_date,
+        store=tac_ch4_store,
     )
 
     # Expect observation data to be found
@@ -405,7 +428,7 @@ def test_scenario_uses_fp_inlet():
     assert model_scenario.footprint is None
 
 
-def test_scenario_matches_fp_inlet():
+def test_scenario_matches_fp_inlet(wao_radon_store):
     """
     Test ModelScenario is able to use "height_name" data from site_info file to
     map between different inlet values for observation data and footprints.
@@ -429,7 +452,13 @@ def test_scenario_matches_fp_inlet():
     inlet = "10m"
 
     model_scenario = ModelScenario(
-        site=site, species=species, inlet=inlet, domain=domain, start_date=start_date, end_date=end_date
+        site=site,
+        species=species,
+        inlet=inlet,
+        domain=domain,
+        start_date=start_date,
+        end_date=end_date,
+        store=wao_radon_store,
     )
 
     expected_obs_inlet = inlet  # inlet for observation data
@@ -445,7 +474,7 @@ def test_scenario_matches_fp_inlet():
     assert model_scenario.fp_inlet == expected_fp_inlet
 
 
-def test_add_data():
+def test_add_data(tac_ch4_store):
     """
     Test add_* functions can be used to add new data after initalisation step.
     """
@@ -458,10 +487,21 @@ def test_add_data():
 
     model_scenario = ModelScenario()
 
-    model_scenario.add_obs(site=site, species=species, inlet=inlet)
-    model_scenario.add_footprint(site=site, inlet=inlet, domain=domain, species=species)
-    model_scenario.add_flux(species=species, domain=domain, sources=source)
-    model_scenario.add_bc(species=species, domain=domain)
+    model_scenario.add_obs(site=site, species=species, inlet=inlet, store=tac_ch4_store)
+    model_scenario.add_footprint(
+        site=site,
+        inlet=inlet,
+        domain=domain,
+        species=species,
+        store=tac_ch4_store,
+    )
+    model_scenario.add_flux(
+        species=species,
+        domain=domain,
+        sources=source,
+        store=tac_ch4_store,
+    )
+    model_scenario.add_bc(species=species, domain=domain, store=tac_ch4_store)
 
     assert model_scenario.obs is not None
     assert model_scenario.footprint is not None
@@ -470,8 +510,8 @@ def test_add_data():
 
 
 @pytest.fixture(scope="function")
-def model_scenario_1():
-    """Create model scenario as fixture for data in object store"""
+def model_scenario_1(tac_ch4_store):
+    """Create a CH4 model scenario from the explicitly populated user store."""
 
     start_date = "2012-01-01"
     end_date = "2013-01-01"
@@ -494,6 +534,7 @@ def model_scenario_1():
         bc_input=bc_input,
         start_date=start_date,
         end_date=end_date,
+        store=tac_ch4_store,
     )
 
     return model_scenario
@@ -557,13 +598,18 @@ def test_calc_modelled_obs_period(model_scenario_1):
         # Could add more checks here but may be better doing this with mocked data
 
 
-def test_add_multiple_flux(model_scenario_1):
+def test_add_multiple_flux(model_scenario_1, tac_ch4_store):
     """Test multiple flux sources can be added."""
     species = "ch4"
     source = "waste"
     domain = "EUROPE"
 
-    model_scenario_1.add_flux(species=species, sources=source, domain=domain)
+    model_scenario_1.add_flux(
+        species=species,
+        sources=source,
+        domain=domain,
+        store=tac_ch4_store,
+    )
 
     expected_sources = ["anthro", source]
 
@@ -574,13 +620,18 @@ def test_add_multiple_flux(model_scenario_1):
         assert metadata["source"] == source
 
 
-def test_combine_flux_sources(model_scenario_1):
+def test_combine_flux_sources(model_scenario_1, tac_ch4_store):
     """Test fluxes can be combined to produce a stacked output"""
     species = "ch4"
     source = "waste"
     domain = "EUROPE"
 
-    model_scenario_1.add_flux(species=species, sources=source, domain=domain)
+    model_scenario_1.add_flux(
+        species=species,
+        sources=source,
+        domain=domain,
+        store=tac_ch4_store,
+    )
 
     flux_stacked = model_scenario_1.combine_flux_sources()
 
@@ -629,7 +680,7 @@ def test_footprints_data_merge(model_scenario_1):
     assert error_in_mod_obs < error_threshold
 
 
-def test_combine_obs_sampling_period_infer():
+def test_combine_obs_sampling_period_infer(wao_radon_store):
     """
     If the sampling_period is "NOT_SET" then when combining obs and footprints
     this should infer the sampling period from the frequency of the data but this
@@ -647,7 +698,13 @@ def test_combine_obs_sampling_period_infer():
     inlet = "10m"
 
     model_scenario = ModelScenario(
-        site=site, species=species, inlet=inlet, domain=domain, start_date=start_date, end_date=end_date
+        site=site,
+        species=species,
+        inlet=inlet,
+        domain=domain,
+        start_date=start_date,
+        end_date=end_date,
+        store=wao_radon_store,
     )
 
     obs_data_1 = model_scenario.obs.data
@@ -1496,8 +1553,8 @@ def test_stack_datasets_with_alignment(flux_daily, flux_daily_small_dim_diff):
     np.testing.assert_allclose(output_flux, expected_flux)
 
 
-def test_satellite_scenario_raises_error():
-    """Test to ensure ModelScenario instance raises error if max_level is not passed when platform argument is satellite"""
+def test_satellite_scenario_raises_error(satellite_cams_store):
+    """Test that a satellite ModelScenario requires ``max_level``."""
 
     satellite = "gosat"
     domain = "SOUTHAMERICA"
@@ -1505,20 +1562,28 @@ def test_satellite_scenario_raises_error():
     species = "ch4"
 
     obs_column = get_obs_column(
-        species=species, max_level=3, satellite=satellite, selection="land", store="user"
+        species=species,
+        max_level=3,
+        satellite=satellite,
+        selection="land",
+        store=satellite_cams_store,
     )
 
     footprint = get_footprint(
-        satellite=satellite, domain=domain, obs_region=obs_region, model="cams", store="user"
+        satellite=satellite,
+        domain=domain,
+        obs_region=obs_region,
+        model="cams",
+        store=satellite_cams_store,
     )
 
     with pytest.raises(AttributeError):
         # checks that ModelScenario fails if passing platform=satellite but not max_level
-        model_scenario = ModelScenario(obs_column=obs_column, footprint=footprint, platform="satellite")
+        ModelScenario(obs_column=obs_column, footprint=footprint, platform="satellite")
 
 
-def test_model_scenario_col_fp_data_merge():
-    """This is to test satellite data aligns fp to obs and satifies the fp_data_merge functionality"""
+def test_model_scenario_col_fp_data_merge(satellite_name_store):
+    """Test that satellite observations and footprints align during ``footprints_data_merge``."""
 
     satellite = "gosat"
     domain = "southamerica"
@@ -1531,7 +1596,7 @@ def test_model_scenario_col_fp_data_merge():
         start_date="2016-01-01 14:59:12.500000+00:00",
         end_date="2016-01-01 18:10:16.500000+00:00",
         obs_region="brazil",
-        store="user",
+        store=satellite_name_store,
     )
     fp_column_data = get_footprint(
         satellite=satellite,
@@ -1540,9 +1605,14 @@ def test_model_scenario_col_fp_data_merge():
         start_date="2016-01-01 14:59:12.500000+00:00",
         end_date="2016-01-01 19:10:16.500000+00:00",
         model="name",
-        store="user",
+        store=satellite_name_store,
     )
-    flux_data = get_flux(species="ch4", source="all", domain="southamerica")
+    flux_data = get_flux(
+        species="ch4",
+        source="all",
+        domain="southamerica",
+        store=satellite_name_store,
+    )
 
     satellite_scenario = ModelScenario(
         obs_column=obs_column_data,
@@ -1573,16 +1643,18 @@ def test_model_scenario_col_fp_data_merge():
     len(attributes["heights"]) == 20
 
 
-def test_scenario_infer_flux_source_ch4():
+def test_scenario_infer_flux_source_ch4(tac_ch4_store):
     """
     Test ModelScenario can find the source of a flux
     if only a single flux matches the given metadata
     and source is in the flux metadata.
     """
-    from openghg.objectstore import get_readable_buckets
-    from openghg.retrieve import get_flux
-
-    result = get_flux(species="ch4", domain="europe", source="waste")
+    result = get_flux(
+        species="ch4",
+        domain="europe",
+        source="waste",
+        store=tac_ch4_store,
+    )
 
     model_scenario = ModelScenario()
     model_scenario.add_flux(flux=result)
@@ -1671,8 +1743,94 @@ def test_modelscenario_from_direct_datasets():
     assert "mf_mod_high_res" in modelled_obs
 
 
-def test_modelscenario_doesnt_error_empty_objectstore():
+def test_modelscenario_from_direct_datasets():
+    """Re-store retrieved datasets through direct input and run forward modelling."""
+    obs = get_obs_surface(
+        site="tac",
+        species="co2",
+        start_date="2014-07-01",
+        end_date="2014-08-01",
+        inlet="100m",
+        network="DECC",
+        store="user",
+    )
+    obs_data = obs.data.load().rename(
+        {
+            "mf": "co2",
+            "mf_variability": "co2_variability",
+            "mf_number_of_observations": "co2_number_of_observations",
+        }
+    )
+    footprint_data = xr.open_dataset(
+        get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
+    ).load()
+    flux_data = xr.open_dataset(get_flux_datapath("co2-rtot-cardamom-2hr_TEST_2014.nc")).load()
+    bc_data = xr.open_dataset(get_bc_datapath("co2_TEST_201407.nc")).load()
+
     clear_test_stores()
+
+    standardise_surface(
+        data=obs_data,
+        source_format="openghg",
+        site="tac",
+        network="DECC",
+        inlet="100m",
+        calibration_scale=obs.metadata["calibration_scale"],
+        store="user",
+        update_mismatch="metadata",
+    )
+    standardise_footprint(
+        data=footprint_data,
+        model="NAME",
+        site="tac",
+        network="DECC",
+        domain="TEST",
+        species="co2",
+        inlet="100m",
+        store="user",
+    )
+    standardise_flux(
+        data=flux_data,
+        species="co2",
+        source="natural-rtot",
+        domain="TEST",
+        time_resolved=True,
+        store="user",
+    )
+    standardise_bc(
+        data=bc_data,
+        species="co2",
+        bc_input="MOZART",
+        domain="TEST",
+        period="monthly",
+        store="user",
+    )
+
+    scenario = ModelScenario(
+        site="tac",
+        species="co2",
+        inlet="100m",
+        network="DECC",
+        domain="TEST",
+        sources="natural-rtot",
+        bc_input="MOZART",
+        start_date="2014-07-01",
+        end_date="2014-08-01",
+    )
+
+    modelled_obs = scenario.calc_modelled_obs(resample_to="coarsest")
+    assert modelled_obs is not None
+    assert "mf_mod_high_res" in modelled_obs
+
+
+def test_modelscenario_doesnt_error_empty_objectstore(monkeypatch):
+    """Test that an empty retrieval boundary produces an empty scenario."""
+
+    def no_data(_self, _keywords, **_kwargs):
+        """Represent an object-store retrieval that found no matching data."""
+        return None
+
+    monkeypatch.setattr(ModelScenario, "_get_data", no_data)
 
     site = "TAC"
     domain = "EUROPE"
@@ -1693,6 +1851,3 @@ def test_modelscenario_doesnt_error_empty_objectstore():
     )
 
     assert not scenario
-
-
-# NOTE: the test store is modified by the last two tests
