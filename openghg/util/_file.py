@@ -31,6 +31,7 @@ __all__ = [
     "decompress_json",
     "open_nc_fn",
     "open_time_nc_fn",
+    "preprocess_nc_data",
 ]
 
 
@@ -299,7 +300,7 @@ def _select_time(x: xr.Dataset) -> xr.Dataset:
     month = x.time.resample(time="M").count().idxmax().values.astype("datetime64[M]")
     start_date = month.astype("datetime64[D]")
     end_date = (month + np.timedelta64(1, "M")).astype("datetime64[D]")
-    return x.sel(time=slice(start_date, end_date))
+    return x.where((x.time >= start_date) & (x.time < end_date), drop=True)
 
 
 def check_coords_nc(data: XrDataLikeMatch, coords: str | list | None = None) -> XrDataLikeMatch:
@@ -331,11 +332,54 @@ def check_coords_nc(data: XrDataLikeMatch, coords: str | list | None = None) -> 
     return data
 
 
+def preprocess_nc_data(
+    data: xr.Dataset,
+    realign_on_domain: str | None = None,
+    sel_month: bool = False,
+    check_coords: str | list[str] | None = None,
+) -> xr.Dataset:
+    """Apply the standard NetCDF preprocessing steps to a dataset.
+
+    The returned dataset has an independent xarray structure and attributes,
+    while retaining the input array data without eagerly copying it. This
+    allows parsers to update the returned dataset without mutating a
+    caller-owned dataset.
+
+    Args:
+        data: Dataset to preprocess.
+        realign_on_domain: Domain whose canonical latitude and longitude
+            coordinates should be validated and assigned.
+        sel_month: Whether to retain only the month containing the most time
+            points.
+        check_coords: Coordinates that must exist as one-dimensional
+            dimensions. Scalar coordinates are expanded.
+
+    Returns:
+        A shallow structural copy with the requested preprocessing applied.
+
+    Raises:
+        ValueError: If an expected coordinate is absent, the domain is
+            unknown, or spatial coordinates do not match the domain.
+    """
+    data = data.copy(deep=False)
+
+    if check_coords:
+        data = check_coords_nc(data, coords=check_coords)
+
+    if sel_month:
+        data = _select_time(data)
+
+    if realign_on_domain:
+        data = align_lat_lon(data, realign_on_domain)
+
+    return data
+
+
 def open_nc_fn(
     filepath: str | Path | list[str] | list[Path],
     realign_on_domain: str | None = None,
     sel_month: bool = False,
-    check_coords: str | None = None,
+    check_coords: str | list[str] | None = None,
     **kwargs: Any,
 ) -> tuple[Callable, str | Path | list[str] | list[Path]]:
     """
@@ -355,25 +399,12 @@ def open_nc_fn(
             to use with the function.
     """
 
-    def process(x: xr.Dataset) -> xr.Dataset:
-        """
-        Apply appropriate process functions for the provided dataset.
-
-        Returns:
-            xarray.Dataset: updated Dataset with appropriate pre-processing applied.
-        """
-
-        if check_coords:
-            x = check_coords_nc(x, coords=check_coords)
-
-        if realign_on_domain and sel_month:
-            return align_lat_lon(_select_time(x), realign_on_domain)
-        elif realign_on_domain:
-            return align_lat_lon(x, realign_on_domain)
-        elif sel_month:
-            return _select_time(x)
-        else:
-            return x
+    process = partial(
+        preprocess_nc_data,
+        realign_on_domain=realign_on_domain,
+        sel_month=sel_month,
+        check_coords=check_coords,
+    )
 
     if isinstance(filepath, list):
         if len(filepath) > 1:
@@ -393,7 +424,7 @@ def open_time_nc_fn(
     filepath: str | Path | list[str] | list[Path],
     realign_on_domain: str | None = None,
     sel_month: bool = False,
-    check_coords: str | None = "time",
+    check_coords: str | list[str] | None = "time",
     **kwargs: Any,
 ) -> tuple[Callable, str | Path | list[str] | list[Path]]:
     """
@@ -418,7 +449,7 @@ def open_netcdfs(
     chunks: dict | None = None,
     realign_on_domain: str | None = None,
     sel_month: bool = False,
-    check_coords: str | None = "time",
+    check_coords: str | list[str] | None = "time",
 ) -> Iterator[xr.Dataset]:
     """
     Context manager for safely opening NetCDF files in openghg.
@@ -452,6 +483,10 @@ def open_netcdfs(
 def get_data(  # type: ignore
     dataset: xr.Dataset | None = None,
     filepath: str | Path | list[str] | list[Path] | None = None,
+    realign_on_domain: str | None = None,
+    sel_month: bool = False,
+    check_coords: str | list[str] | None = "time",
+    chunks: dict | None = None,
     **kwargs,
 ) -> Iterator[xr.Dataset]:
     """
@@ -460,18 +495,34 @@ def get_data(  # type: ignore
     Args:
         dataset: Xarray dataset
         filepath: Filepath of the data
+        realign_on_domain: Domain whose spatial coordinates should be aligned.
+        sel_month: Whether to retain only the month with the most time points.
+        check_coords: Coordinates to validate and expand when scalar.
+        chunks: Chunking schema applied when opening file input.
     Yields:
         xr.Dataset:
             The opened or provided dataset. If opened from file(s), the dataset
             is automatically closed when leaving the context manager.
     Raises:
-        ValueError:
-            If both ``dataset`` and ``filepath`` are ``None``.
+        ValueError: If both inputs are ``None``, a requested coordinate is
+            missing, or the data cannot be aligned to the requested domain.
     """
     if dataset is not None:
-        yield dataset
+        yield preprocess_nc_data(
+            dataset,
+            realign_on_domain=realign_on_domain,
+            sel_month=sel_month,
+            check_coords=check_coords,
+        )
     else:
         if filepath is None:
             raise ValueError("filepath must be provided if dataset is None")
-        with open_netcdfs(filepath, **kwargs) as ds:
+        with open_netcdfs(
+            filepath,
+            chunks=chunks,
+            realign_on_domain=realign_on_domain,
+            sel_month=sel_month,
+            check_coords=check_coords,
+            **kwargs,
+        ) as ds:
             yield ds

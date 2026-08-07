@@ -21,7 +21,6 @@ def fp_x_flux_integrated(footprint: xr.Dataset, flux: xr.Dataset) -> xr.DataArra
 
     """
     flux = reindex_on_dims(flux, footprint, ["lat", "lon"])
-
     # align separately on time
     # TODO: if method="nearest" was acceptable, then we could align all coordinates at once with reindex_like
     flux = flux.reindex_like(footprint, method="ffill")
@@ -34,6 +33,13 @@ def fp_x_flux_integrated(footprint: xr.Dataset, flux: xr.Dataset) -> xr.DataArra
 
     result = footprint.fp.pint.quantify() * flux.flux.pint.quantify()
     return cast(xr.DataArray, result.pint.dequantify())
+
+
+def make_integrated_low_freq_flux(flux: xr.DataArray | xr.Dataset) -> xr.Dataset:
+    """Create monthly-mean flux for integrated footprint calculations."""
+    flux_var = flux.flux if isinstance(flux, xr.Dataset) else flux
+    flux_low_freq = flux_var.resample({"time": "1MS"}).mean()
+    return flux_low_freq.to_dataset(name="flux")
 
 
 # helper functions for time-resolved calculation

@@ -30,6 +30,25 @@ def test_parse_openghg_data():
     assert results["geoschem_ch4_2015-01-01"]["metadata"]["data_type"] == "eulerian_model"
 
 
+def test_parse_openghg_scalar_time_data_matches_filepath(tmp_path):
+    """Direct and filepath inputs both expand a scalar time coordinate."""
+    filepath = get_eulerian_datapath("GEOSChem.SpeciesConc.20150101_0000z_reduced.nc4")
+
+    with xr.open_dataset(filepath) as dataset:
+        scalar_time_data = dataset.load().isel(time=0)
+
+    scalar_filepath = tmp_path / "scalar_time.nc"
+    scalar_time_data.to_netcdf(scalar_filepath)
+
+    direct_result = parse_openghg(data=scalar_time_data, model="GEOSChem", species="ch4")
+    filepath_result = parse_openghg(filepath=scalar_filepath, model="GEOSChem", species="ch4")
+
+    direct_data = direct_result["geoschem_ch4_2015-01-01"]["data"]
+    filepath_data = filepath_result["geoschem_ch4_2015-01-01"]["data"]
+    assert direct_data.sizes["time"] == 1
+    xr.testing.assert_equal(direct_data, filepath_data)
+
+
 def test_parse_openghg_multiple():
     """This tests the parser for Eulerian model
     Looks for processed key and metadata associated with the file"""

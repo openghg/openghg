@@ -35,8 +35,18 @@ Footprints
 
 .. autofunction:: openghg.standardise.standardise_footprint
 
+Eulerian model output
+^^^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: openghg.standardise.standardise_eulerian
+
+Site meteorology
+^^^^^^^^^^^^^^^^
+
+.. autofunction:: openghg.standardise.standardise_site_met
+
 Flux Timeseries
-^^^^^^^^^^
+^^^^^^^^^^^^^^^
 
 .. autofunction:: openghg.standardise.standardise_flux_timeseries
 

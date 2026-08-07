@@ -25,12 +25,20 @@ def standardise(
 
     Args:
         data_type: type of data to standardise
-        filepath: path to file(s) to standardise
+        filepath: Path to file(s) to standardise. Exactly one of ``filepath``
+            and ``data`` must be supplied.
+        data: In-memory dataset in the format expected by the selected parser.
+            Exactly one of ``filepath`` and ``data`` must be supplied. The
+            caller retains ownership of the dataset.
         store: Name of object store to write to, required if user has access to more than one
-        writable store
+            writable store.
         **kwargs: data type specific arguments, see specific implementations below.
+
     Returns:
-        dict: Dictionary of result data.
+        list[dict]: Details of the datasource UUIDs data was assigned to.
+
+    Raises:
+        ValueError: If neither or both of ``filepath`` and ``data`` are supplied.
     """
     from openghg.store._meta import get_data_class
 
@@ -258,7 +266,11 @@ def standardise_column(
     """Read column observation file
 
     Args:
-        filepath: Path to the input observation file.
+        filepath: Path to the input observation file. Exactly one of ``filepath``
+            and ``data`` must be supplied.
+        data: In-memory column-observation dataset in the format expected by
+            ``source_format``. Exactly one of ``filepath`` and ``data`` must
+            be supplied. The caller retains ownership of the dataset.
         species: Species name or synonym (e.g., "ch4").
         platform: Type of platform (default is "satellite"). Can be one of:
             - "satellite"
@@ -308,7 +320,7 @@ def standardise_column(
         DeprecationWarning: If ``force`` is ``True``.
 
     Returns:
-        dict: Dictionary containing confirmation of standardisation process.
+        Details of the datasource UUIDs for the processed data.
     """
 
     _warn_if_force_ignored(force)
@@ -367,7 +379,11 @@ def standardise_bc(
     """Standardise boundary condition data and store it in the object store.
 
     Args:
-        filepath: Path of boundary conditions file
+        filepath: Path of boundary conditions file. Exactly one of ``filepath``
+            and ``data`` must be supplied.
+        data: In-memory boundary-condition dataset in the format expected by
+            ``source_format``. Exactly one of ``filepath`` and ``data`` must
+            be supplied. The caller retains ownership of the dataset.
         species: Species name
         bc_input: Input used to create boundary conditions. For example:
             - a model name such as "MOZART" or "CAMS"
@@ -412,7 +428,7 @@ def standardise_bc(
         DeprecationWarning: If ``force`` is ``True``.
 
     Returns:
-        dict: Dictionary containing confirmation of standardisation process.
+        Details of the datasource UUIDs for the processed data.
     """
 
     _warn_if_force_ignored(force)
@@ -466,7 +482,7 @@ def standardise_footprint(
     overwrite: bool = False,
     force: bool = False,
     high_spatial_resolution: bool = False,
-    time_resolved: bool = False,
+    time_resolved: bool | None = None,
     high_time_resolution: bool = False,
     short_lifetime: bool = False,
     sort: bool = False,
@@ -484,7 +500,11 @@ def standardise_footprint(
     the processed data has been assigned to
 
     Args:
-        filepath: Path(s) of file to standardise
+        filepath: Path(s) of file to standardise. Exactly one of ``filepath``
+            and ``data`` must be supplied.
+        data: In-memory footprint dataset in the format expected by
+            ``source_format``. Exactly one of ``filepath`` and ``data`` must
+            be supplied. The caller retains ownership of the dataset.
         model: Model used to create footprint (e.g. NAME or FLEXPART)
         domain: Domain of footprints
         site: Site name
@@ -505,8 +525,10 @@ def standardise_footprint(
         continuous: Whether time stamps have to be continuous.
         retrieve_met: Whether to also download meterological data for this footprints area
         high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.
-        time_resolved: Indicate footprints are high time resolution (include H_back dimension)
-            Note this will be set to True automatically for Carbon Dioxide data.
+        time_resolved: Indicate whether footprints are time resolved (include an
+            H_back dimension). For CO2, the default (None) selects time-resolved
+            footprints for backwards compatibility. Set this explicitly to False
+            to add an integrated footprint.
         short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
             Note this will be set to True if species has an associated lifetime.
         high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.
@@ -546,8 +568,7 @@ def standardise_footprint(
         DeprecationWarning: If ``force`` or ``high_time_resolution`` is ``True``.
 
     Returns:
-        dict / None: Dictionary containing confirmation of standardisation process. None
-        if file already processed.
+        Details of the datasource UUIDs for the processed data.
     """
     _warn_if_force_ignored(force)
 
@@ -635,7 +656,11 @@ def standardise_flux(
     """Process flux / emissions data
 
     Args:
-        filepath: Path of flux / emissions file
+        filepath: Path of flux / emissions file. Exactly one of ``filepath``
+            and ``data`` must be supplied.
+        data: In-memory flux dataset in the format expected by ``source_format``.
+            Exactly one of ``filepath`` and ``data`` must be supplied. The
+            caller retains ownership of the dataset.
         species: Species name
         source: Flux / Emissions source
         domain: Flux / Emissions domain
@@ -682,7 +707,7 @@ def standardise_flux(
         DeprecationWarning: If ``force`` or ``high_time_resolution`` is ``True``.
 
     Returns:
-        dict: Dictionary of Datasource UUIDs data assigned to
+        Details of the datasource UUIDs for the processed data.
     """
 
     _warn_if_force_ignored(force)
@@ -747,7 +772,11 @@ def standardise_eulerian(
     """Read Eulerian model output
 
     Args:
-        filepath: Path of Eulerian model species output
+        filepath: Path of Eulerian model species output. Exactly one of
+            ``filepath`` and ``data`` must be supplied.
+        data: In-memory Eulerian-model dataset in the format expected by
+            ``source_format``. Exactly one of ``filepath`` and ``data`` must
+            be supplied. The caller retains ownership of the dataset.
         model: Eulerian model name
         species: Species name
         source_format: Data format, for example openghg (internal format)
@@ -756,16 +785,12 @@ def standardise_eulerian(
         setup: Additional setup details for run
         tag: Special tagged values to add to the Datasource. This will be added to any
             current values if the tag key already exists in a list.
-        if_exists: What to do if existing data is present.
-            - "auto" - checks new and current data for timeseries overlap
-                - adds data if no overlap
-                - raises DataOverlapError if there is an overlap
-            - "new" - just include new data and ignore previous
-            - "combine" - replace and insert new data into current timeseries
-        save_current: Whether to save data in current form and create a new version.
-            - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
-            - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
-            - "n" / "no" - Allow current data to updated / deleted
+        if_exists: What to do if existing data is present: ``"auto"`` checks
+            for overlap, ``"new"`` keeps only new data, and ``"combine"``
+            replaces overlapping values in the current timeseries.
+        save_current: Whether to save the current data as a previous version.
+            Accepted values are ``"auto"``, ``"y"``/``"yes"``, and
+            ``"n"``/``"no"``.
         overwrite: Deprecated. This will use options for if_exists="new".
         store: Name of object store to write to, required if user has access to more than one
         writable store
@@ -791,7 +816,11 @@ def standardise_eulerian(
         DeprecationWarning: If ``force`` is ``True``.
 
     Returns:
-        dict: Dictionary of result data
+        Details of the datasource UUIDs for the processed data.
+
+    Raises:
+        ValueError: If exactly one of ``filepath`` and ``data`` is not
+            supplied.
     """
     _warn_if_force_ignored(force)
 
@@ -982,7 +1011,11 @@ def standardise_site_met(
     """Standardise site meteorology data and store it in the object store.
 
     Args:
-        filepath: Path to the site meteorology data.
+        filepath: Path to the site meteorology data. Exactly one of ``filepath``
+            and ``data`` must be supplied.
+        data: In-memory site-meteorology dataset in the format expected by
+            ``source_format``. Exactly one of ``filepath`` and ``data`` must
+            be supplied. The caller retains ownership of the dataset.
         site: Site code or name.
         network: Measurement network name.
         met_source: Source of the meteorology data.

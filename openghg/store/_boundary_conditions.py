@@ -132,7 +132,7 @@ class BoundaryConditions(BaseStore):
     def transform_data(
         self,
         datapath: pathType | None,
-        database: str,
+        database: str | None,
         if_exists: str = "auto",
         save_current: str = "auto",
         overwrite: bool = False,
@@ -142,12 +142,43 @@ class BoundaryConditions(BaseStore):
         data: Any | None = None,
         **kwargs: dict,
     ) -> list[dict]:
-        """Read and transform a cams boundary conditions data. This will find the appropriate parser function to use for the database specified. The necessary inputs are determined by which database is being used.
-        The underlying parser functions will be of the form:
-            - openghg.transform.boundary_conditions.parse_{database.lower()}
-                - e.g. openghg.transform.boundary_conditions.parse_cams()"""
+        """Transform raw boundary conditions and assign them to the store.
+
+        The database selects a parser such as
+        :func:`openghg.transform.boundary_conditions.parse_cams`. Exactly one
+        of ``datapath`` and ``data`` must be provided.
+
+        Args:
+            datapath: Path to raw boundary-condition data.
+            database: Name of the boundary-condition transform parser.
+            if_exists: Action to take when matching stored data exists.
+            save_current: Whether to preserve the current stored version.
+            overwrite: Deprecated alias for ``if_exists="new"``.
+            compressor: Optional compressor used when storing transformed data.
+            filters: Optional storage filters.
+            info_metadata: Optional informational metadata to add to each
+                transformed datasource.
+            data: Raw in-memory data to transform instead of reading
+                ``datapath``.
+            **kwargs: Inputs for the selected parser.
+
+        Returns:
+            Metadata dictionaries identifying the assigned datasources.
+
+        Raises:
+            TransformError: If the selected parser cannot transform the input.
+            ValueError: If the database is unsupported or exactly one of
+                ``datapath`` and ``data`` is not provided.
+        """
 
         from openghg.store.spec import define_transform_parsers
+
+        transform_parsers = define_transform_parsers()[self._data_type]
+        if not isinstance(database, str) or database.upper() not in transform_parsers.__members__:
+            raise ValueError(f"Unable to transform '{database}' selected.")
+
+        if (datapath is None) == (data is None):
+            raise ValueError("Please specify exactly one of `datapath` or `data`.")
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -163,17 +194,9 @@ class BoundaryConditions(BaseStore):
 
         if data is not None:
             fn_input_parameters["data"] = data
-        elif datapath is not None:
-            fn_input_parameters["datapath"] = Path(datapath)
         else:
-            raise ValueError("Please specify exactly one of `datapath` or `data`.")
-
-        transform_parsers = define_transform_parsers()[self._data_type]
-
-        try:
-            transform_parsers[database.upper()].value
-        except KeyError:
-            raise ValueError(f"Unable to transform '{database}' selected.")
+            assert datapath is not None
+            fn_input_parameters["datapath"] = Path(datapath)
 
         # Load the data retrieve object
         parser_fn = load_transform_parser(data_type=self._data_type, source_format=database)
