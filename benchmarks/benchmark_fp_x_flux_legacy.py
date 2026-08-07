@@ -27,9 +27,40 @@ from benchmarks.benchmark_fp_x_flux_irregular import (
     _time_layout,
     _write_report,
 )
+from openghg.analyse import align_flux_to_time_targets
+from openghg.analyse._fp_x_flux import _low_frequency_flux
 from openghg.analyse._modelled_obs import fp_x_flux_time_resolved
 
 DEFAULT_BASELINE = Path("/group/chem/acrg/object_stores/temp/OCO2_test/benchmarks/issue-1704-18300036.json")
+
+
+def _interval_loop(
+    footprint: xr.Dataset,
+    flux: xr.DataArray,
+    *,
+    time_chunk: int,
+) -> xr.DataArray:
+    """Pure-xarray H_back loop with native flux-interval membership."""
+    prepared_footprint = (
+        footprint[["fp_time_resolved", "fp_residual"]]
+        .astype(np.float32)
+        .fillna(0.0)
+        .chunk({"time": time_chunk, "lat": -1, "lon": -1, "H_back": -1})
+    )
+    prepared_flux = flux.astype(np.float32).fillna(0.0).chunk({"lat": -1, "lon": -1})
+    low_frequency = _low_frequency_flux(prepared_flux, prepared_footprint)
+    resolved: xr.DataArray | None = None
+    for h_back in prepared_footprint["H_back"].values:
+        lag = int(round(float(h_back)))
+        fp_lag = prepared_footprint["fp_time_resolved"].sel(H_back=h_back, drop=True)
+        targets: Any = fp_lag["time"].values - np.timedelta64(lag, "h")
+        flux_lag = align_flux_to_time_targets(prepared_flux, targets).assign_coords(time=fp_lag["time"])
+        flux_lag = flux_lag.chunk({"time": fp_lag.chunksizes["time"]})
+        term = fp_lag * flux_lag
+        resolved = term if resolved is None else resolved + term
+    if resolved is None:
+        raise ValueError("No H_back values found in fp_time_resolved.")
+    return resolved + prepared_footprint["fp_residual"] * low_frequency
 
 
 def _run_stage(
@@ -39,6 +70,8 @@ def _run_stage(
     days: int,
     workers: int,
     expected_checksum: float,
+    method: str,
+    time_chunk: int,
 ) -> dict[str, Any]:
     end = START + np.timedelta64(days, "D")
     times = footprint["time"].values
@@ -46,10 +79,15 @@ def _run_stage(
     sample = footprint.isel(time=positions)
     order = np.argsort(sample["time"].values, kind="stable")
     sample = sample.isel(time=order)
-    sample = sample.assign_coords({dim: sample[dim].assign_attrs(flux[dim].attrs) for dim in ("lat", "lon")})
 
     graph_started = time.perf_counter()
-    result = fp_x_flux_time_resolved(sample, flux)
+    if method == "legacy":
+        sample = sample.assign_coords(
+            {dim: sample[dim].assign_attrs(flux[dim].attrs) for dim in ("lat", "lon")}
+        )
+        result = fp_x_flux_time_resolved(sample, flux)
+    else:
+        result = _interval_loop(sample, flux, time_chunk=time_chunk)
     graph_seconds = time.perf_counter() - graph_started
 
     compute_started = time.perf_counter()
@@ -87,6 +125,8 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--output-json", type=Path, required=True)
     parser.add_argument("--stages", type=int, nargs="+", default=[1, 3, 7, 14, 31])
     parser.add_argument("--workers", type=int, default=4)
+    parser.add_argument("--time-chunk", type=int, default=32)
+    parser.add_argument("--method", choices=("legacy", "interval-loop"), default="legacy")
     parser.add_argument("--max-stage-seconds", type=float, default=1200.0)
     parser.add_argument("--max-memory-mb", type=float, default=14000.0)
     return parser.parse_args()
@@ -105,18 +145,21 @@ def main() -> None:
         "status": "running",
         "host": socket.gethostname(),
         "slurm_job_id": os.environ.get("SLURM_JOB_ID"),
-        "method": "openghg.analyse._modelled_obs.fp_x_flux_time_resolved",
+        "method": args.method,
         "configuration": {
             "footprint": str(footprint_path),
             "flux": str(flux_path),
             "baseline_json": str(args.baseline_json),
             "stages_days": args.stages,
             "workers": args.workers,
+            "time_chunk": args.time_chunk,
             "max_stage_seconds": args.max_stage_seconds,
             "max_memory_mb": args.max_memory_mb,
             "time_preparation": "stable sort before legacy operator",
             "coordinate_preparation": (
                 "copy flux lat/lon attributes onto equal footprint indexes to avoid PintIndex conflict"
+                if args.method == "legacy"
+                else "equal coordinate indexes; no interpolation"
             ),
         },
         "stages": [],
@@ -125,13 +168,15 @@ def main() -> None:
 
     try:
         for days in args.stages:
-            print(f"Starting legacy {days}-day stage", flush=True)
+            print(f"Starting {args.method} {days}-day stage", flush=True)
             stage = _run_stage(
                 footprint,
                 flux,
                 days=days,
                 workers=args.workers,
                 expected_checksum=expected[days],
+                method=args.method,
+                time_chunk=args.time_chunk,
             )
             report["stages"].append(stage)
             _write_report(args.output_json, report)
