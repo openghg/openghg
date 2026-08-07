@@ -19,6 +19,7 @@ mkdir -p "$MPLCONFIGDIR"
 .venv/bin/python benchmarks/benchmark_fp_x_flux_irregular.py \
   --output-json "$results/issue-1704-${SLURM_JOB_ID}.json" \
   --repaired-footprint /group/chem/acrg/object_stores/temp/OCO2_test/benchmarks/issue-1704-january-time32.zarr \
+  --benchmark-mode "${BENCHMARK_MODE:-both}" \
   --stages 1 3 7 14 31 \
   --time-chunk 32 \
   --workers 4 \

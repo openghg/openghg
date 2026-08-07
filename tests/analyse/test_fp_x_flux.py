@@ -350,6 +350,7 @@ def test_prepared_core_matches_wrapper_without_sorting_or_rechunking() -> None:
     )
 
     assert core_result.attrs["kernel"] == "numba_indexed_keep_space"
+    assert core_result.chunksizes["time"] == footprint.chunksizes["time"]
     xr.testing.assert_allclose(core_result.compute(), wrapped_result.compute())
 
 

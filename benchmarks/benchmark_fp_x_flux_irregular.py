@@ -333,7 +333,10 @@ def _run_stage(
     end = START + np.timedelta64(days, "D")
     times = footprint["time"].values
     positions = np.flatnonzero((times >= START) & (times < end))
-    sample = footprint.isel(time=positions)
+    if positions.size and np.all(np.diff(positions) == 1):
+        sample = footprint.isel(time=slice(int(positions[0]), int(positions[-1]) + 1))
+    else:
+        sample = footprint.isel(time=positions)
 
     prepare_started = time.perf_counter()
     if compute_path == "core":
@@ -402,6 +405,12 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--root", type=Path, default=DEFAULT_ROOT)
     parser.add_argument("--output-json", type=Path, required=True)
     parser.add_argument("--repaired-footprint", type=Path, default=DEFAULT_REPAIRED)
+    parser.add_argument(
+        "--benchmark-mode",
+        choices=("both", "original", "repaired"),
+        default="both",
+        help="Run both storage layouts or isolate one layout in a fresh process.",
+    )
     parser.add_argument("--stages", type=int, nargs="+", default=[1, 3, 7, 14, 31])
     parser.add_argument("--time-chunk", type=int, default=32)
     parser.add_argument("--workers", type=int, default=4)
@@ -459,7 +468,7 @@ def _run_stage_series(
         _write_report(output_path, report)
         print(json.dumps(_json_value(stage), sort_keys=True), flush=True)
 
-        peak_memory = stage["resource_memory_mb"]["maximum"]
+        peak_memory = stage["process_max_rss_mb"]
         if stage["compute_seconds"] > max_stage_seconds:
             return "stopped_after_slow_stage"
         if peak_memory is not None and peak_memory > max_memory_mb:
@@ -482,6 +491,7 @@ def main() -> None:
             "footprint": str(footprint_path),
             "flux": str(flux_path),
             "repaired_footprint": str(args.repaired_footprint),
+            "benchmark_mode": args.benchmark_mode,
             "stages_days": args.stages,
             "time_chunk": args.time_chunk,
             "workers": args.workers,
@@ -505,60 +515,64 @@ def main() -> None:
         }
         _write_report(args.output_json, report)
 
-        print("Starting eager one-block measurement", flush=True)
-        report["eager_block"] = _run_eager_block(
-            footprint,
-            flux,
-            time_chunk=args.time_chunk,
-            workers=args.workers,
-        )
-        _write_report(args.output_json, report)
+        statuses: list[str] = []
+        if args.benchmark_mode in {"both", "original"}:
+            print("Starting eager one-block measurement", flush=True)
+            report["eager_block"] = _run_eager_block(
+                footprint,
+                flux,
+                time_chunk=args.time_chunk,
+                workers=args.workers,
+            )
+            _write_report(args.output_json, report)
 
-        report["original_status"] = _run_stage_series(
-            report,
-            args.output_json,
-            report_key="original_stages",
-            footprint=footprint,
-            flux=flux,
-            stages=args.stages,
-            time_chunk=args.time_chunk,
-            workers=args.workers,
-            compute_path="wrapper",
-            max_stage_seconds=args.max_stage_seconds,
-            max_memory_mb=args.max_memory_mb,
-        )
+            report["original_status"] = _run_stage_series(
+                report,
+                args.output_json,
+                report_key="original_stages",
+                footprint=footprint,
+                flux=flux,
+                stages=args.stages,
+                time_chunk=args.time_chunk,
+                workers=args.workers,
+                compute_path="wrapper",
+                max_stage_seconds=args.max_stage_seconds,
+                max_memory_mb=args.max_memory_mb,
+            )
+            statuses.append(report["original_status"])
 
-        print(f"Creating or validating repaired cache: {args.repaired_footprint}", flush=True)
-        repaired, repair_metrics = _repair_footprint(
-            footprint,
-            args.repaired_footprint,
-            time_chunk=args.time_chunk,
-            workers=args.workers,
-        )
-        prepared_flux = _prepare_flux(flux, apply_value_policy=True)
-        repair_metrics["core_readiness_with_prepared_flux"] = _core_readiness(
-            repaired,
-            prepared_flux,
-        )
-        report["repaired_cache"] = repair_metrics
-        _write_report(args.output_json, report)
+        if args.benchmark_mode in {"both", "repaired"}:
+            print(f"Creating or validating repaired cache: {args.repaired_footprint}", flush=True)
+            repaired, repair_metrics = _repair_footprint(
+                footprint,
+                args.repaired_footprint,
+                time_chunk=args.time_chunk,
+                workers=args.workers,
+            )
+            prepared_flux = _prepare_flux(flux, apply_value_policy=True)
+            repair_metrics["core_readiness_with_prepared_flux"] = _core_readiness(
+                repaired,
+                prepared_flux,
+            )
+            report["repaired_cache"] = repair_metrics
+            _write_report(args.output_json, report)
 
-        report["repaired_status"] = _run_stage_series(
-            report,
-            args.output_json,
-            report_key="repaired_stages",
-            footprint=repaired,
-            flux=flux,
-            stages=args.stages,
-            time_chunk=args.time_chunk,
-            workers=args.workers,
-            compute_path="core",
-            max_stage_seconds=args.max_stage_seconds,
-            max_memory_mb=args.max_memory_mb,
-        )
-        report["status"] = (
-            "complete" if report["original_status"] == report["repaired_status"] == "complete" else "partial"
-        )
+            report["repaired_status"] = _run_stage_series(
+                report,
+                args.output_json,
+                report_key="repaired_stages",
+                footprint=repaired,
+                flux=flux,
+                stages=args.stages,
+                time_chunk=args.time_chunk,
+                workers=args.workers,
+                compute_path="core",
+                max_stage_seconds=args.max_stage_seconds,
+                max_memory_mb=args.max_memory_mb,
+            )
+            statuses.append(report["repaired_status"])
+
+        report["status"] = "complete" if all(status == "complete" for status in statuses) else "partial"
     except Exception as error:
         report["status"] = "failed"
         report["error"] = {"type": type(error).__name__, "message": str(error)}

@@ -251,7 +251,11 @@ def _low_frequency_flux(flux: xr.DataArray, fp_ds: xr.Dataset) -> xr.DataArray:
     month_after_last = (release_index.max().to_period("M") + 1).start_time
     final_instant = month_after_last.to_datetime64() - np.timedelta64(1, "ns")
     monthly = flux.sel(time=slice(first_month, final_instant)).resample(time="1MS").mean()
-    return monthly.reindex(time=fp_ds["time"], method="ffill").astype(np.float32)
+    result = monthly.reindex(time=fp_ds["time"], method="ffill").astype(np.float32)
+    resolved = fp_ds["fp_time_resolved"]
+    if hasattr(resolved.data, "chunks"):
+        result = result.chunk({"time": resolved.chunksizes["time"]})
+    return result
 
 
 @_numba_kernel
