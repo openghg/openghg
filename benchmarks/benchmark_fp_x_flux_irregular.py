@@ -24,7 +24,7 @@ import numpy as np
 import xarray as xr
 from dask.diagnostics import ResourceProfiler
 
-from openghg.analyse import fp_x_flux, fp_x_flux_core, warm_numba_fp_x_flux
+from openghg.analyse import fp_x_flux_time_resolved_numba, fp_x_flux_time_resolved_numba_core, warm_numba_fp_x_flux
 
 DEFAULT_ROOT = Path("/group/chem/acrg/object_stores/temp/OCO2_test/data")
 DEFAULT_REPAIRED = Path(
@@ -154,7 +154,7 @@ def _prepare_core_inputs(
 
     Returns:
         A monotonic, float32, filled and chunked footprint plus source-resolved
-        flux suitable for ``fp_x_flux_core``.
+        flux suitable for ``fp_x_flux_time_resolved_numba_core``.
     """
     order = np.argsort(footprint["time"].values, kind="stable")
     prepared_footprint = (
@@ -361,7 +361,7 @@ def _run_eager_block(
 
     eager_footprint = eager_footprint.chunk({"time": time_chunk, "lat": -1, "lon": -1, "H_back": -1})
     prepared_flux = _prepare_flux(eager_flux, apply_value_policy=False)
-    result = fp_x_flux_core(eager_footprint, prepared_flux)
+    result = fp_x_flux_time_resolved_numba_core(eager_footprint, prepared_flux)
     compute_started = time.perf_counter()
     with dask.config.set(scheduler="threads", num_workers=workers):
         with ResourceProfiler(dt=0.05) as profile:
@@ -429,11 +429,11 @@ def _run_stage(
     prepare_seconds = time.perf_counter() - prepare_started
 
     core_graph_started = time.perf_counter()
-    core_result = fp_x_flux_core(prepared_footprint, prepared_flux)
+    core_result = fp_x_flux_time_resolved_numba_core(prepared_footprint, prepared_flux)
     core_graph_seconds = time.perf_counter() - core_graph_started
 
     wrapper_graph_started = time.perf_counter()
-    wrapper_result = fp_x_flux(sample, flux, time_chunk=time_chunk)
+    wrapper_result = fp_x_flux_time_resolved_numba(sample, flux, time_chunk=time_chunk)
     wrapper_graph_seconds = time.perf_counter() - wrapper_graph_started
     result = core_result if compute_path == "core" else wrapper_result
 

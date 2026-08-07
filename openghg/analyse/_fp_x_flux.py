@@ -23,7 +23,7 @@ except ImportError:  # pragma: no cover - exercised in base installs without the
 
 SPATIAL_DIMS = ("lat", "lon")
 REQUIRED_OUTPUT_DIMS = ("source", "lat", "lon", "time")
-FP_X_FLUX_OPERATOR = "openghg.analyse.fp_x_flux"
+FP_X_FLUX_OPERATOR = "openghg.analyse.fp_x_flux_time_resolved_numba"
 FP_X_FLUX_OPERATOR_VERSION = 2
 FLUX_TIME_ALIGNMENT = "interval_start"
 DEFAULT_IRREGULAR_TIME_CHUNK = 32
@@ -43,7 +43,7 @@ def _require_numba() -> None:
     """Raise an actionable error when the optional Numba extra is absent."""
     if njit is None:
         raise ImportError(
-            "fp_x_flux requires the optional Numba dependency. "
+            "fp_x_flux_time_resolved_numba requires the optional Numba dependency. "
             "Install OpenGHG with `pip install 'openghg[fp-x-flux]'`."
         )
 
@@ -824,7 +824,7 @@ def _validate_core_inputs(
             raise ValueError(f"Core footprint and flux {dim!r} chunks must match.")
 
 
-def fp_x_flux_core(
+def fp_x_flux_time_resolved_numba_core(
     footprint: xr.Dataset,
     flux: xr.DataArray,
     *,
@@ -838,7 +838,7 @@ def fp_x_flux_core(
     flux spatial coordinates and chunks must match; ``H_back`` must be one
     chunk; and flux must already contain a ``source`` dimension.
 
-    Use :func:`fp_x_flux` for arbitrary user inputs. That wrapper
+    Use :func:`fp_x_flux_time_resolved_numba` for arbitrary user inputs. That wrapper
     establishes this contract, restores non-monotonic input order, and applies
     requested output chunks.
 
@@ -934,7 +934,7 @@ def fp_x_flux_core(
     return _select_result_times(result, time_selector)
 
 
-def fp_x_flux(  # noqa: PLR0913
+def fp_x_flux_time_resolved_numba(  # noqa: PLR0913
     footprint: xr.DataArray | xr.Dataset,
     flux: xr.DataArray | xr.Dataset,
     *,
@@ -1048,7 +1048,7 @@ def fp_x_flux(  # noqa: PLR0913
         minimum_time_chunk=(int(_hourly_lags(fp_time_resolved).max(initial=0)) if use_regular_kernel else 1),
     )
     prepared_footprint = xr.Dataset({"fp_time_resolved": fp_time_resolved, "fp_residual": fp_residual})
-    result = fp_x_flux_core(prepared_footprint, flux_da)
+    result = fp_x_flux_time_resolved_numba_core(prepared_footprint, flux_da)
     if restore_time_order is not None:
         result = result.isel(time=restore_time_order).assign_coords(time=fp_ds["time"])
     result = _attach_source_coordinates(result, flux_metadata)

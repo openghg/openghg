@@ -15,7 +15,7 @@ modelled output based on this data. The types of data currently included are:
 Footprint times flux
 --------------------
 
-``fp_x_flux`` computes source-resolved model sensitivity without
+``fp_x_flux_time_resolved_numba`` computes source-resolved model sensitivity without
 summing the spatial grid. It returns a lazy ``(source, lat, lon, time)`` array,
 so basis functions can be applied later. When observation times are supplied,
 selection happens after the full lagged calculation is constructed. Install
@@ -37,13 +37,13 @@ spatial grid size.
 
 .. autofunction:: openghg.analyse.align_flux_to_time_targets
 
-.. autofunction:: openghg.analyse.fp_x_flux
+.. autofunction:: openghg.analyse.fp_x_flux_time_resolved_numba
 
 For data pipelines that already guarantee monotonic release time, spatial
 alignment, float/NaN policy, source selection, and compatible Dask chunks, the
 computation-only entry point avoids the wrapper's sorting and rechunking.
 
-.. autofunction:: openghg.analyse.fp_x_flux_core
+.. autofunction:: openghg.analyse.fp_x_flux_time_resolved_numba_core
 
 .. autofunction:: openghg.analyse.write_fp_x_flux_zarr
 
