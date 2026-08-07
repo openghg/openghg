@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 import json
 import os
 import shutil
-from typing import Any, cast
+from typing import Any, ParamSpec, TypeVar, cast
 from uuid import uuid4
 
 import dask.array as da
@@ -16,7 +16,7 @@ import pandas as pd
 import xarray as xr
 
 try:
-    from numba import njit
+    from numba import njit  # type: ignore[import-not-found]
 except ImportError:  # pragma: no cover - exercised in base installs without the optional extra
     njit = None  # type: ignore[assignment]
 
@@ -26,10 +26,15 @@ REQUIRED_OUTPUT_DIMS = ("source", "lat", "lon", "time")
 FP_X_FLUX_OPERATOR = "openghg.analyse.fp_x_flux_keep_space"
 FP_X_FLUX_OPERATOR_VERSION = 1
 
+_P = ParamSpec("_P")
+_R = TypeVar("_R")
 
-def _numba_kernel(function):
+
+def _numba_kernel(function: Callable[_P, _R]) -> Callable[_P, _R]:
     """Decorate a kernel when the optional Numba dependency is installed."""
-    return function if njit is None else njit(cache=True)(function)
+    if njit is None:
+        return function
+    return cast(Callable[_P, _R], njit(cache=True)(function))
 
 
 def _require_numba() -> None:
@@ -124,7 +129,7 @@ def _hourly_lags(fp_time_resolved: xr.DataArray) -> np.ndarray:
     rounded = np.rint(values)
     if not np.allclose(values, rounded) or np.any(rounded < 0):
         raise ValueError("H_back values must be non-negative whole hours.")
-    return rounded.astype(np.int64)
+    return cast(np.ndarray, rounded.astype(np.int64))
 
 
 def _regular_time_step_hours(time: xr.DataArray, *, label: str) -> int:
@@ -285,6 +290,8 @@ def _flux_with_halo(flux: xr.DataArray, fp_time_resolved: xr.DataArray) -> xr.Da
 def _attach_source_coordinates(result: xr.DataArray, flux: xr.DataArray) -> xr.DataArray:
     coordinates: dict[str, xr.DataArray] = {}
     for name, coordinate in flux.coords.items():
+        if not isinstance(name, str):
+            continue
         if name in result.coords or "source" not in coordinate.dims:
             continue
         if set(coordinate.dims).issubset(result.dims):
@@ -295,7 +302,7 @@ def _attach_source_coordinates(result: xr.DataArray, flux: xr.DataArray) -> xr.D
 def _normalise_time_selector(selector: xr.DataArray | Sequence[Any]) -> np.ndarray:
     values = selector.values if isinstance(selector, xr.DataArray) else selector
     index = pd.DatetimeIndex(pd.to_datetime(np.asarray(values).reshape(-1))).dropna().drop_duplicates()
-    return index.to_numpy(dtype="datetime64[ns]")
+    return cast(np.ndarray, index.to_numpy(dtype="datetime64[ns]"))
 
 
 def fp_x_flux_keep_space(  # noqa: PLR0913
