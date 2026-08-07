@@ -43,7 +43,7 @@ def _validate_transform_request(
         supported = ", ".join(parser.value for parser in transform_parsers)
         raise ValueError(f"Unable to transform '{database}' selected. Choose one of: {supported}.")
 
-    if (datapath is None) == (data is None):
+    if (datapath is None and data is None) or (datapath is not None and data is not None):
         raise ValueError("Please specify exactly one of `datapath` or `data`.")
 
     return database

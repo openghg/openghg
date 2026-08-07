@@ -152,7 +152,10 @@ class BoundaryConditions(BaseStore):
             datapath: Path to raw boundary-condition data.
             database: Name of the boundary-condition transform parser.
             if_exists: Action to take when matching stored data exists.
+                Accepted values are ``"auto"``, ``"new"``, and ``"combine"``.
             save_current: Whether to preserve the current stored version.
+                Accepted values are ``"auto"``, ``"y"``/``"yes"``, and
+                ``"n"``/``"no"``.
             overwrite: Deprecated alias for ``if_exists="new"``.
             compressor: Optional compressor used when storing transformed data.
             filters: Optional storage filters.
@@ -177,7 +180,7 @@ class BoundaryConditions(BaseStore):
         if not isinstance(database, str) or database.upper() not in transform_parsers.__members__:
             raise ValueError(f"Unable to transform '{database}' selected.")
 
-        if (datapath is None) == (data is None):
+        if (datapath is None and data is None) or (datapath is not None and data is not None):
             raise ValueError("Please specify exactly one of `datapath` or `data`.")
 
         if overwrite and if_exists == "auto":

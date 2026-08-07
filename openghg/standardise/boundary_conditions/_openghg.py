@@ -46,7 +46,12 @@ def parse_openghg(
     if isinstance(filepath, list) and len(filepath) == 1:
         filepath = filepath[0]
 
-    with get_data(dataset=data, filepath=filepath, realign_on_domain=domain) as bc_data:
+    with get_data(
+        dataset=data,
+        filepath=filepath,
+        realign_on_domain=domain,
+        check_coords="time",
+    ) as bc_data:
         bc_data = bc_data.chunk(chunks if chunks is not None else {})
         # Some attributes are numpy types we can't serialise to JSON so convert them
         # to their native types here

@@ -45,6 +45,7 @@ from ._metadata_util import check_not_set_value as check_not_set_value
 from ._metadata_util import check_number_match as check_number_match
 from ._metadata_util import check_str_match as check_str_match
 from ._metadata_util import check_value_match as check_value_match
+from ._metadata_util import convert_numpy_scalars as convert_numpy_scalars
 from ._metadata_util import get_overlap_keys as get_overlap_keys
 from ._metadata_util import merge_and_extend_dict as merge_and_extend_dict
 from ._metadata_util import merge_dict as merge_dict

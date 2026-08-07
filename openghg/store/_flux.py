@@ -166,7 +166,7 @@ class Flux(BaseStore):
         if not isinstance(database, str) or database.upper() not in transform_parsers.__members__:
             raise ValueError(f"Unable to transform '{database}' selected.")
 
-        if (datapath is None) == (data is None):
+        if (datapath is None and data is None) or (datapath is not None and data is not None):
             raise ValueError("Please specify exactly one of `datapath` or `data`.")
 
         if overwrite and if_exists == "auto":

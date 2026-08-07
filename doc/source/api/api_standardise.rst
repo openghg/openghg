@@ -5,6 +5,9 @@ Standardise
 Functions that accept data in specific formats, standardise it to a CF-compliant format and ensure it has the correct metadata attached. The
 data returned from these functions is then stored in the object store.
 
+.. automodule:: openghg.standardise._standardise
+   :no-members:
+
 Measurement Standardisation
 ===========================
 

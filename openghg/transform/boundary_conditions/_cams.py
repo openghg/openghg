@@ -381,7 +381,7 @@ def parse_cams(
             units cannot be determined from direct data.
     """
 
-    if (datapath is None) == (data is None):
+    if (datapath is None and data is None) or (datapath is not None and data is not None):
         raise ValueError("Please specify exactly one of `datapath` or `data`.")
 
     if data is None:
@@ -400,7 +400,7 @@ def parse_cams(
             raise ValueError("Species must be specified when transforming direct data.")
 
     units = None
-    with get_data(dataset=data, filepath=datapath) as ds:
+    with get_data(dataset=data, filepath=datapath, check_coords="time") as ds:
         ds = ds.chunk(chunks)
 
         units = get_cams_data_units(ds, species)

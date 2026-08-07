@@ -66,6 +66,7 @@ from openghg.util import (
     synonyms,
     find_coord_name,
     convert_internal_longitude,
+    convert_numpy_scalars,
     timestamp_now,
 )
 
@@ -161,25 +162,6 @@ def assemble_edgar_metadata(
         metadata["source"] = source
 
     return metadata
-
-
-def _serialisable_attrs(attrs: dict[Any, Any]) -> dict[Any, Any]:
-    """Convert NumPy scalar attributes to JSON-serialisable Python values.
-
-    Args:
-        attrs: Dataset attributes copied from a raw EDGAR dataset.
-
-    Returns:
-        A new attribute dictionary with scalar values converted via
-        :meth:`numpy.generic.item` when available.
-    """
-    serialisable = {}
-    for key, value in attrs.items():
-        try:
-            serialisable[key] = value.item()
-        except (AttributeError, ValueError):
-            serialisable[key] = value
-    return serialisable
 
 
 def _normalise_edgar_date(date: str | int | None, time: xr.DataArray | None = None) -> str:
@@ -306,7 +288,7 @@ def _parse_edgar_dataset(
         ValueError: If required metadata, time, coordinates, or a supported raw
             EDGAR variable cannot be determined.
     """
-    attrs = _serialisable_attrs(data.attrs.copy())
+    attrs = convert_numpy_scalars(data.attrs.copy())
     period = None
     species = species or attrs.get("species")
     if species is None:
@@ -320,6 +302,7 @@ def _parse_edgar_dataset(
     source = str(source or attrs.get("source", "anthro"))
     input_edgar_version = edgar_version or attrs.get("database_version")
     flux_da = _select_raw_edgar_variable(data, species_label, input_edgar_version)
+    # Convert EDGAR mass flux from kg/m2/s to molar flux in mol/m2/s.
     flux_da = flux_da * 1e3 / molar_mass(species_label)
     units = "mol/m2/s"
     edgar_version = str(input_edgar_version or "direct")
@@ -446,7 +429,7 @@ def parse_edgar(
     TODO: Allow date range to be extracted rather than year?
     TODO: Add sector stacking option
     """
-    if (datapath is None) == (data is None):
+    if (datapath is None and data is None) or (datapath is not None and data is not None):
         raise ValueError("Please specify exactly one of `datapath` or `data`.")
 
     if data is not None:
@@ -544,7 +527,6 @@ def parse_edgar(
         else:
             raise ValueError(f"Data variable {name} not present.")
 
-    # Convert from kg/m2/s to mol/m2/s
     species_molar_mass = molar_mass(species_label)
     kg_to_g = 1e3
 
@@ -556,6 +538,7 @@ def parse_edgar(
             f" but '{name}' has {len(flux_da.dims)} dimensions: {flux_da.dims}."
         )
 
+    # Convert EDGAR mass flux from kg/m2/s to molar flux in mol/m2/s.
     flux_da = flux_da * kg_to_g / species_molar_mass
     units = "mol/m2/s"
 
@@ -572,7 +555,7 @@ def parse_edgar(
 
     # Some attributes are numpy types we can't serialise to JSON so convert them
     # to their native types here
-    attrs = _serialisable_attrs(em_data.attrs)
+    attrs = convert_numpy_scalars(em_data.attrs)
 
     author_name = "OpenGHG Cloud"
     em_data.attrs["author"] = author_name

@@ -1,3 +1,31 @@
+"""Standardise supported data products and store them in OpenGHG.
+
+The public functions in this module accept either file input through
+``filepath`` or an in-memory :class:`xarray.Dataset` through ``data``. Exactly
+one input form must be supplied. Data is parsed using the selected
+``source_format``, validated for its OpenGHG data type, and assigned to a
+matching datasource in the selected object store.
+
+The ``if_exists`` and ``save_current`` arguments control different parts of
+an update. ``if_exists`` determines the contents of the resulting latest
+version when a matching datasource already exists:
+
+* ``"auto"`` appends non-overlapping data but raises ``DataOverlapError`` if
+  any timestamps overlap;
+* ``"new"`` makes the supplied data the complete contents of the latest
+  version, without retaining existing data in that version; and
+* ``"combine"`` combines existing and supplied data, replacing existing
+  values at overlapping timestamps with the supplied values.
+
+``save_current`` determines whether the update creates a version while
+preserving the previously current data. ``"y"`` and ``"yes"`` always create
+a version; ``"n"`` and ``"no"`` update the current version without preserving
+it. With ``"auto"``, ``if_exists="auto"`` updates the current version in place,
+whereas ``if_exists="new"`` or ``if_exists="combine"`` creates a version. The
+deprecated ``overwrite=True`` option selects ``if_exists="new"`` when
+``if_exists`` has not been set explicitly.
+"""
+
 from pathlib import Path
 from typing import Any
 import xarray as xr
@@ -32,7 +60,8 @@ def standardise(
             caller retains ownership of the dataset.
         store: Name of object store to write to, required if user has access to more than one
             writable store.
-        **kwargs: data type specific arguments, see specific implementations below.
+        **kwargs: Data-type-specific arguments. See the module documentation
+            for ``if_exists`` and ``save_current`` behavior.
 
     Returns:
         list[dict]: Details of the datasource UUIDs data was assigned to.
@@ -288,15 +317,10 @@ def standardise_column(
         tag: Special tagged values to add to the Datasource. This will be added to any
             current values if the tag key already exists in a list.
         store: The name of the store to write the processed data to.
-        if_exists: Determines behavior if data already exists in the store.
-            Can be one of:
-            - "auto" (default): Checks for overlap and decides whether to add or raise an error.
-            - "new": Only includes new data, ignoring existing data.
-            - "combine": Replaces and inserts new data into the existing timeseries.
-        save_current: Decides whether to save the current version of the data:
-            - "auto" (default): Automatically saves based on `if_exists` behavior.
-            - "yes" or "y": Save current data as a separate version.
-            - "no" or "n": Allow updates or deletion of current data.
+        if_exists: Existing-data handling (``"auto"``, ``"new"``, or ``"combine"``);
+            see the module documentation.
+        save_current: Version preservation (``"auto"``, ``"y"``/``"yes"``, or
+            ``"n"``/``"no"``); see the module documentation.
         overwrite: Deprecated. Replaced by `if_exists="new"`.
         force: Deprecated and ignored. Use ``if_exists`` to control overlap
             handling. Passing ``True`` emits a deprecation warning.
@@ -395,16 +419,10 @@ def standardise_bc(
         tag: Special tagged values to add to the Datasource. This will be added to any
             current values if the tag key already exists in a list.
         store: Name of store to write to
-        if_exists: What to do if existing data is present.
-            - "auto" - checks new and current data for timeseries overlap
-                - adds data if no overlap
-                - raises DataOverlapError if there is an overlap
-            - "new" - just include new data and ignore previous
-            - "combine" - replace and insert new data into current timeseries
-        save_current: Whether to save data in current form and create a new version.
-             - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
-             - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
-             - "n" / "no" - Allow current data to updated / deleted
+        if_exists: Existing-data handling (``"auto"``, ``"new"``, or ``"combine"``);
+            see the module documentation.
+        save_current: Version preservation (``"auto"``, ``"y"``/``"yes"``, or
+            ``"n"``/``"no"``); see the module documentation.
         overwrite: Deprecated. This will use options for if_exists="new".
         force: Deprecated and ignored. Use ``if_exists`` to control overlap
             handling. Passing ``True`` emits a deprecation warning.
@@ -535,16 +553,11 @@ def standardise_footprint(
         tag: Special tagged values to add to the Datasource. This will be added to any
             current values if the tag key already exists in a list.
         store: Name of store to write to
-        if_exists: What to do if existing data is present.
-            - "auto" - checks new and current data for timeseries overlap
-                - adds data if no overlap
-                - raises DataOverlapError if there is an overlap
-            - "new" - just include new data and ignore previous
-            - "combine" - replace and insert new data into current timeseries
-        save_current: Whether to save data in current form and create a new version.
-             - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
-             - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
-             - "n" / "no" - Allow current data to updated / deleted        overwrite: Deprecated. This will use options for if_exists="new".
+        if_exists: Existing-data handling (``"auto"``, ``"new"``, or ``"combine"``);
+            see the module documentation.
+        save_current: Version preservation (``"auto"``, ``"y"``/``"yes"``, or
+            ``"n"``/``"no"``); see the module documentation.
+        overwrite: Deprecated. This will use options for if_exists="new".
         force: Deprecated and ignored. Use ``if_exists`` to control overlap
             handling. Passing ``True`` emits a deprecation warning.
         sort: Sort data in by time
@@ -678,16 +691,10 @@ def standardise_flux(
         tag: Special tagged values to add to the Datasource. This will be added to any
             current values if the tag key already exists in a list.
         store: Name of store to write to
-        if_exists: What to do if existing data is present.
-            - "auto" - checks new and current data for timeseries overlap
-                - adds data if no overlap
-                - raises DataOverlapError if there is an overlap
-            - "new" - just include new data and ignore previous
-            - "combine" - replace and insert new data into current timeseries
-        save_current: Whether to save data in current form and create a new version.
-             - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
-             - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
-             - "n" / "no" - Allow current data to updated / deleted
+        if_exists: Existing-data handling (``"auto"``, ``"new"``, or ``"combine"``);
+            see the module documentation.
+        save_current: Version preservation (``"auto"``, ``"y"``/``"yes"``, or
+            ``"n"``/``"no"``); see the module documentation.
         overwrite: Deprecated. This will use options for if_exists="new".
         force: Deprecated and ignored. Use ``if_exists`` to control overlap
             handling. Passing ``True`` emits a deprecation warning.
@@ -785,12 +792,10 @@ def standardise_eulerian(
         setup: Additional setup details for run
         tag: Special tagged values to add to the Datasource. This will be added to any
             current values if the tag key already exists in a list.
-        if_exists: What to do if existing data is present: ``"auto"`` checks
-            for overlap, ``"new"`` keeps only new data, and ``"combine"``
-            replaces overlapping values in the current timeseries.
-        save_current: Whether to save the current data as a previous version.
-            Accepted values are ``"auto"``, ``"y"``/``"yes"``, and
-            ``"n"``/``"no"``.
+        if_exists: Existing-data handling (``"auto"``, ``"new"``, or ``"combine"``);
+            see the module documentation.
+        save_current: Version preservation (``"auto"``, ``"y"``/``"yes"``, or
+            ``"n"``/``"no"``); see the module documentation.
         overwrite: Deprecated. This will use options for if_exists="new".
         store: Name of object store to write to, required if user has access to more than one
         writable store
@@ -1020,8 +1025,10 @@ def standardise_site_met(
         network: Measurement network name.
         met_source: Source of the meteorology data.
         source_format: Input data format.
-        if_exists: What to do if existing data is present.
-        save_current: Whether to retain the current data as a previous version.
+        if_exists: Existing-data handling (``"auto"``, ``"new"``, or ``"combine"``);
+            see the module documentation.
+        save_current: Version preservation (``"auto"``, ``"y"``/``"yes"``, or
+            ``"n"``/``"no"``); see the module documentation.
         store: Name of the object store to write to.
         force: Deprecated and ignored. Use ``if_exists`` to control overlap
             handling. Passing ``True`` emits a deprecation warning.

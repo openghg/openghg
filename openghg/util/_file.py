@@ -3,7 +3,7 @@ import bz2
 from functools import partial, wraps
 import json
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any, Iterator, cast
 from collections.abc import Callable
 import numpy as np
 import xarray as xr
@@ -14,6 +14,8 @@ from openghg.types import pathType, multiPathType, convert_to_list_of_metadata_a
 from openghg.util import align_lat_lon
 
 logger = logging.getLogger("openghg.util.file")
+
+_DEFAULT_CHECK_COORDS = object()
 
 __all__ = [
     "load_parser",
@@ -485,7 +487,7 @@ def get_data(  # type: ignore
     filepath: str | Path | list[str] | list[Path] | None = None,
     realign_on_domain: str | None = None,
     sel_month: bool = False,
-    check_coords: str | list[str] | None = "time",
+    check_coords: str | list[str] | None | object = _DEFAULT_CHECK_COORDS,
     chunks: dict | None = None,
     **kwargs,
 ) -> Iterator[xr.Dataset]:
@@ -497,7 +499,10 @@ def get_data(  # type: ignore
         filepath: Filepath of the data
         realign_on_domain: Domain whose spatial coordinates should be aligned.
         sel_month: Whether to retain only the month with the most time points.
-        check_coords: Coordinates to validate and expand when scalar.
+        check_coords: Coordinates to validate and expand when scalar. When
+            omitted, filepath input retains the historical ``"time"`` check
+            while direct Dataset input is not coordinate-checked. Pass a
+            coordinate explicitly to apply the same check to both paths.
         chunks: Chunking schema applied when opening file input.
     Yields:
         xr.Dataset:
@@ -507,12 +512,20 @@ def get_data(  # type: ignore
         ValueError: If both inputs are ``None``, a requested coordinate is
             missing, or the data cannot be aligned to the requested domain.
     """
+    dataset_check_coords: str | list[str] | None
+    filepath_check_coords: str | list[str] | None
+    if check_coords is _DEFAULT_CHECK_COORDS:
+        dataset_check_coords = None
+        filepath_check_coords = "time"
+    else:
+        dataset_check_coords = filepath_check_coords = cast(str | list[str] | None, check_coords)
+
     if dataset is not None:
         yield preprocess_nc_data(
             dataset,
             realign_on_domain=realign_on_domain,
             sel_month=sel_month,
-            check_coords=check_coords,
+            check_coords=dataset_check_coords,
         )
     else:
         if filepath is None:
@@ -522,7 +535,7 @@ def get_data(  # type: ignore
             chunks=chunks,
             realign_on_domain=realign_on_domain,
             sel_month=sel_month,
-            check_coords=check_coords,
+            check_coords=filepath_check_coords,
             **kwargs,
         ) as ds:
             yield ds
