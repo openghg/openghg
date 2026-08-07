@@ -23,7 +23,7 @@ except ImportError:  # pragma: no cover - exercised in base installs without the
 
 SPATIAL_DIMS = ("lat", "lon")
 REQUIRED_OUTPUT_DIMS = ("source", "lat", "lon", "time")
-FP_X_FLUX_OPERATOR = "openghg.analyse.fp_x_flux_keep_space"
+FP_X_FLUX_OPERATOR = "openghg.analyse.fp_x_flux"
 FP_X_FLUX_OPERATOR_VERSION = 2
 FLUX_TIME_ALIGNMENT = "interval_start"
 DEFAULT_IRREGULAR_TIME_CHUNK = 32
@@ -43,7 +43,7 @@ def _require_numba() -> None:
     """Raise an actionable error when the optional Numba extra is absent."""
     if njit is None:
         raise ImportError(
-            "fp_x_flux_keep_space requires the optional Numba dependency. "
+            "fp_x_flux requires the optional Numba dependency. "
             "Install OpenGHG with `pip install 'openghg[fp-x-flux]'`."
         )
 
@@ -391,7 +391,7 @@ def _low_frequency_flux(flux: xr.DataArray, fp_ds: xr.Dataset) -> xr.DataArray:
 
 
 @_numba_kernel
-def _resolved_keep_space_block(
+def _resolved_block(
     fp_block: np.ndarray,
     flux_block: np.ndarray,
     lag_indices: np.ndarray,
@@ -426,7 +426,7 @@ def _resolved_keep_space_block(
 
 
 @_numba_kernel
-def _resolved_keep_space_indexed_block(
+def _resolved_indexed_block(
     fp_block: np.ndarray,
     flux_block: np.ndarray,
     flux_indices: np.ndarray,
@@ -662,7 +662,7 @@ def _indexed_flux_blocks(
     return flux_blocks, index_blocks
 
 
-def _resolved_keep_space_indexed(
+def _resolved_indexed(
     fp_time_resolved: xr.DataArray,
     flux: xr.DataArray,
     *,
@@ -690,7 +690,7 @@ def _resolved_keep_space_indexed(
         step_hours=step_hours,
     )
     resolved_data = da.blockwise(
-        _resolved_keep_space_indexed_block,
+        _resolved_indexed_block,
         "tyxs",
         fp_time_resolved.data,
         "tyxh",
@@ -824,13 +824,13 @@ def _validate_core_inputs(
             raise ValueError(f"Core footprint and flux {dim!r} chunks must match.")
 
 
-def fp_x_flux_keep_space_core(
+def fp_x_flux_core(
     footprint: xr.Dataset,
     flux: xr.DataArray,
     *,
     time_selector: xr.DataArray | Sequence[Any] | None = None,
 ) -> xr.DataArray:
-    """Run the keep-space operator on monotonic, aligned, pre-chunked inputs.
+    """Run the operator on monotonic, aligned, pre-chunked spatial inputs.
 
     This is the computation-only entry point for prepared on-disk data. It
     does not sort, spatially align, cast, fill missing values, select sources,
@@ -838,7 +838,7 @@ def fp_x_flux_keep_space_core(
     flux spatial coordinates and chunks must match; ``H_back`` must be one
     chunk; and flux must already contain a ``source`` dimension.
 
-    Use :func:`fp_x_flux_keep_space` for arbitrary user inputs. That wrapper
+    Use :func:`fp_x_flux` for arbitrary user inputs. That wrapper
     establishes this contract, restores non-monotonic input order, and applies
     requested output chunks.
 
@@ -866,18 +866,18 @@ def fp_x_flux_keep_space_core(
     flux_step_hours = _validate_interval_start_time(flux["time"], label="Flux")
     low_frequency_flux = _low_frequency_flux(flux, fp_ds)
     if flux_step_hours > _h_back_window_hours(fp_time_resolved):
-        kernel_name = "low_frequency_keep_space"
+        kernel_name = "low_frequency"
         resolved = fp_time_resolved.sum("H_back") * low_frequency_flux
     else:
         flux_hourly = _forward_fill_flux_hourly(flux, step_hours=flux_step_hours)
         if _uses_regular_halo_kernel(fp_time_resolved["time"], flux_hourly["time"]):
-            kernel_name = "numba_block_keep_space"
+            kernel_name = "numba_block"
             lags = _hourly_lags(fp_time_resolved)
             max_lag = int(lags.max(initial=0))
             flux_halo = _flux_with_halo(flux_hourly, fp_time_resolved)
             fp_padded = _pad_footprint_left(fp_time_resolved, pad_hours=max_lag)
             resolved_data = da.blockwise(
-                _resolved_keep_space_block,
+                _resolved_block,
                 "tyxs",
                 fp_padded.data,
                 "tyxh",
@@ -906,8 +906,8 @@ def fp_x_flux_keep_space_core(
             ).isel(time=slice(max_lag, None))
             resolved = resolved.assign_coords(time=fp_ds["time"])
         else:
-            kernel_name = "numba_indexed_keep_space"
-            resolved = _resolved_keep_space_indexed(
+            kernel_name = "numba_indexed"
+            resolved = _resolved_indexed(
                 fp_time_resolved,
                 flux_hourly,
                 step_hours=1,
@@ -934,7 +934,7 @@ def fp_x_flux_keep_space_core(
     return _select_result_times(result, time_selector)
 
 
-def fp_x_flux_keep_space(  # noqa: PLR0913
+def fp_x_flux(  # noqa: PLR0913
     footprint: xr.DataArray | xr.Dataset,
     flux: xr.DataArray | xr.Dataset,
     *,
@@ -1048,7 +1048,7 @@ def fp_x_flux_keep_space(  # noqa: PLR0913
         minimum_time_chunk=(int(_hourly_lags(fp_time_resolved).max(initial=0)) if use_regular_kernel else 1),
     )
     prepared_footprint = xr.Dataset({"fp_time_resolved": fp_time_resolved, "fp_residual": fp_residual})
-    result = fp_x_flux_keep_space_core(prepared_footprint, flux_da)
+    result = fp_x_flux_core(prepared_footprint, flux_da)
     if restore_time_order is not None:
         result = result.isel(time=restore_time_order).assign_coords(time=fp_ds["time"])
     result = _attach_source_coordinates(result, flux_metadata)
@@ -1066,7 +1066,7 @@ def fp_x_flux_keep_space(  # noqa: PLR0913
                 "time",
                 (
                     compute_time_chunk
-                    if time_chunk is None and result.attrs["kernel"] == "numba_indexed_keep_space"
+                    if time_chunk is None and result.attrs["kernel"] == "numba_indexed"
                     else time_chunk
                 ),
             ),
@@ -1096,12 +1096,12 @@ def warm_numba_fp_x_flux() -> str:
     _require_numba()
     fp = np.zeros((1, 1, 1, 1), dtype=np.float32)
     flux = np.zeros((1, 1, 1, 1), dtype=np.float32)
-    _resolved_keep_space_block(fp, flux, np.zeros(1, dtype=np.int64))
-    _resolved_keep_space_indexed_block(fp, flux, np.zeros((1, 1), dtype=np.int64))
+    _resolved_block(fp, flux, np.zeros(1, dtype=np.int64))
+    _resolved_indexed_block(fp, flux, np.zeros((1, 1), dtype=np.int64))
     return "numba fp_x_flux kernel ready"
 
 
-def write_fp_x_flux_keep_space_zarr(  # noqa: PLR0913
+def write_fp_x_flux_zarr(  # noqa: PLR0913
     result: xr.DataArray,
     output_path: str | Path,
     *,
@@ -1109,14 +1109,14 @@ def write_fp_x_flux_keep_space_zarr(  # noqa: PLR0913
     provenance: Mapping[str, Any],
     overwrite: bool = False,
 ) -> Path:
-    """Atomically persist a keep-space result as consolidated float32 ppm Zarr.
+    """Atomically persist an fp-times-flux result as consolidated float32 ppm Zarr.
 
     A JSON manifest is written beside the store. ``provenance`` is supplied by
     the caller because OpenGHG cannot infer record versions, checksums, or an
     observation-selector identity from arbitrary xarray inputs.
 
     Args:
-        result: Dimensionless keep-space result to persist.
+        result: Dimensionless spatially resolved result to persist.
         output_path: Destination Zarr store.
         output_chunks: Optional output chunk lengths by dimension.
         provenance: Caller-supplied footprint, flux, and observation-selector

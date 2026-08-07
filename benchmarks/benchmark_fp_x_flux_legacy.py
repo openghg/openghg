@@ -48,7 +48,7 @@ def _interval_loop(
         time_chunk: Requested footprint time chunk length.
 
     Returns:
-        Lazy keep-space resolved and residual footprint-times-flux field.
+        Lazy spatially resolved footprint-times-flux field.
 
     Raises:
         ValueError: If no resolved lag is available or a lag target falls

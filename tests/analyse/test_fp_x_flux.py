@@ -9,10 +9,10 @@ import xarray as xr
 
 from openghg.analyse import (
     align_flux_to_time_targets,
-    fp_x_flux_keep_space,
-    fp_x_flux_keep_space_core,
+    fp_x_flux,
+    fp_x_flux_core,
     warm_numba_fp_x_flux,
-    write_fp_x_flux_keep_space_zarr,
+    write_fp_x_flux_zarr,
 )
 from openghg.analyse._modelled_obs import fp_x_flux_time_resolved
 
@@ -60,7 +60,7 @@ def _inputs() -> tuple[xr.Dataset, xr.DataArray]:
 
 
 def _reference(footprint: xr.Dataset, flux: xr.DataArray) -> xr.DataArray:
-    """Calculate expected hourly keep-space values directly with xarray."""
+    """Calculate expected hourly spatially resolved values directly with xarray."""
     resolved = None
     for lag in footprint["H_back"].values:
         fp_lag = footprint["fp_time_resolved"].sel(H_back=lag, drop=True)
@@ -101,10 +101,10 @@ def _interval_start_reference(footprint: xr.Dataset, flux: xr.DataArray) -> xr.D
     return (resolved + footprint["fp_residual"] * low_frequency).transpose("source", "lat", "lon", "time")
 
 
-def test_fp_x_flux_keep_space_matches_reference_and_preserves_source_metadata() -> None:
+def test_fp_x_flux_matches_reference_and_preserves_source_metadata() -> None:
     """Match direct values and preserve source metadata coordinates."""
     footprint, flux = _inputs()
-    result = fp_x_flux_keep_space(footprint, flux, time_chunk=2, lat_chunk=1, lon_chunk=1, source_chunk=1)
+    result = fp_x_flux(footprint, flux, time_chunk=2, lat_chunk=1, lon_chunk=1, source_chunk=1)
 
     assert hasattr(result.data, "__dask_graph__")
     assert result.dims == ("source", "lat", "lon", "time")
@@ -116,11 +116,11 @@ def test_fp_x_flux_keep_space_matches_reference_and_preserves_source_metadata() 
     xr.testing.assert_allclose(result.compute(), _reference(footprint, flux))
 
 
-def test_fp_x_flux_keep_space_matches_existing_time_resolved_method() -> None:
+def test_fp_x_flux_matches_existing_time_resolved_method() -> None:
     """Match the existing time-resolved operator on its supported domain."""
     footprint, flux = _inputs()
 
-    result = fp_x_flux_keep_space(footprint, flux).compute()
+    result = fp_x_flux(footprint, flux).compute()
     expected = _existing_time_resolved_reference(footprint, flux)
 
     _assert_value_parity(result, expected.astype(np.float32))
@@ -131,7 +131,7 @@ def test_time_selector_is_applied_to_finished_lazy_result() -> None:
     footprint, flux = _inputs()
     selected = footprint["time"].values[[1, 3]]
 
-    result = fp_x_flux_keep_space(footprint, flux, time_selector=selected, time_chunk=2)
+    result = fp_x_flux(footprint, flux, time_selector=selected, time_chunk=2)
 
     assert result["time"].values.tolist() == selected.tolist()
     xr.testing.assert_allclose(result.compute(), _reference(footprint, flux).sel(time=selected))
@@ -141,7 +141,7 @@ def test_sources_can_be_selected_and_relabelled() -> None:
     """Select and relabel source coordinates without changing values."""
     footprint, flux = _inputs()
 
-    result = fp_x_flux_keep_space(footprint, flux, sources=["ff"], source_labels=["fossil_fuel"])
+    result = fp_x_flux(footprint, flux, sources=["ff"], source_labels=["fossil_fuel"])
 
     assert result["source"].values.tolist() == ["fossil_fuel"]
     assert result["sector"].values.tolist() == ["FF"]
@@ -154,7 +154,7 @@ def test_single_source_flux_without_source_dimension_is_supported() -> None:
     footprint, flux = _inputs()
     single_flux = flux.sel(source="bio", drop=True)
 
-    result = fp_x_flux_keep_space(footprint, single_flux, source_labels=["biosphere"])
+    result = fp_x_flux(footprint, single_flux, source_labels=["biosphere"])
     expected = fp_x_flux_time_resolved(footprint, single_flux).expand_dims(source=["biosphere"])
 
     assert result.dims == ("source", "lat", "lon", "time")
@@ -169,7 +169,7 @@ def test_regular_coarse_flux_matches_existing_time_resolved_method(step_hours: i
     coarse_time = pd.date_range(flux["time"].values[0], end, freq=f"{step_hours}h", inclusive="left")
     coarse_flux = flux.reindex(time=coarse_time, method="nearest")
 
-    result = fp_x_flux_keep_space(footprint, coarse_flux).compute()
+    result = fp_x_flux(footprint, coarse_flux).compute()
     expected = _existing_time_resolved_reference(footprint, coarse_flux)
 
     _assert_value_parity(result, expected.astype(np.float32))
@@ -241,7 +241,7 @@ def test_irregular_release_times_use_indexed_kernel_and_preserve_exact_times() -
     )
     footprint = footprint.assign_coords(time=irregular)
 
-    result = fp_x_flux_keep_space(
+    result = fp_x_flux(
         footprint,
         flux,
         time_chunk=2,
@@ -250,7 +250,7 @@ def test_irregular_release_times_use_indexed_kernel_and_preserve_exact_times() -
         source_chunk=1,
     )
 
-    assert result.attrs["kernel"] == "numba_indexed_keep_space"
+    assert result.attrs["kernel"] == "numba_indexed"
     assert result.attrs["flux_time_alignment"] == "interval_start"
     assert result["time"].values.tolist() == irregular.values.tolist()
     assert result.chunksizes["time"] == (2, 2, 1)
@@ -274,9 +274,9 @@ def test_gapped_hour_aligned_release_times_use_indexed_kernel() -> None:
         )
     )
 
-    result = fp_x_flux_keep_space(footprint, flux)
+    result = fp_x_flux(footprint, flux)
 
-    assert result.attrs["kernel"] == "numba_indexed_keep_space"
+    assert result.attrs["kernel"] == "numba_indexed"
     xr.testing.assert_allclose(result.compute(), _interval_start_reference(footprint, flux))
 
 
@@ -296,9 +296,9 @@ def test_irregular_release_times_support_regular_coarse_flux() -> None:
     )
     coarse_flux = flux.isel(time=slice(None, None, 2))
 
-    result = fp_x_flux_keep_space(footprint, coarse_flux)
+    result = fp_x_flux(footprint, coarse_flux)
 
-    assert result.attrs["kernel"] == "numba_indexed_keep_space"
+    assert result.attrs["kernel"] == "numba_indexed"
     xr.testing.assert_allclose(result.compute(), _interval_start_reference(footprint, coarse_flux))
 
 
@@ -316,7 +316,7 @@ def test_irregular_times_match_legacy_where_flux_grid_has_the_same_offset() -> N
     )
     footprint = footprint.assign_coords(time=release_times)
 
-    result = fp_x_flux_keep_space(footprint, flux).compute()
+    result = fp_x_flux(footprint, flux).compute()
     expected = _existing_time_resolved_reference(footprint, flux)
 
     _assert_value_parity(result, expected.astype(np.float32))
@@ -326,9 +326,9 @@ def test_regular_hourly_release_times_keep_existing_numba_kernel() -> None:
     """Retain the regular halo kernel for consecutive hourly releases."""
     footprint, flux = _inputs()
 
-    result = fp_x_flux_keep_space(footprint, flux)
+    result = fp_x_flux(footprint, flux)
 
-    assert result.attrs["kernel"] == "numba_block_keep_space"
+    assert result.attrs["kernel"] == "numba_block"
 
 
 def test_irregular_release_times_default_to_bounded_time_chunks() -> None:
@@ -338,7 +338,7 @@ def test_irregular_release_times_default_to_bounded_time_chunks() -> None:
         time=pd.date_range("2021-01-01 03:01", periods=40, freq="53min")
     )
 
-    result = fp_x_flux_keep_space(footprint, flux)
+    result = fp_x_flux(footprint, flux)
 
     assert result.attrs["compute_time_chunk"] == 32
     assert result.chunksizes["time"] == (32, 8)
@@ -359,8 +359,8 @@ def test_prepared_core_matches_wrapper_without_sorting_or_rechunking() -> None:
     footprint = footprint.assign_coords(time=times).chunk({"time": 2, "lat": 1, "lon": 1, "H_back": -1})
     flux = flux.chunk({"lat": 1, "lon": 1, "source": 1})
 
-    core_result = fp_x_flux_keep_space_core(footprint, flux)
-    wrapped_result = fp_x_flux_keep_space(
+    core_result = fp_x_flux_core(footprint, flux)
+    wrapped_result = fp_x_flux(
         footprint,
         flux,
         time_chunk=2,
@@ -369,7 +369,7 @@ def test_prepared_core_matches_wrapper_without_sorting_or_rechunking() -> None:
         source_chunk=1,
     )
 
-    assert core_result.attrs["kernel"] == "numba_indexed_keep_space"
+    assert core_result.attrs["kernel"] == "numba_indexed"
     assert core_result.chunksizes["time"] == footprint.chunksizes["time"]
     xr.testing.assert_allclose(core_result.compute(), wrapped_result.compute())
 
@@ -383,7 +383,7 @@ def test_prepared_core_rejects_non_monotonic_release_time() -> None:
     flux = flux.chunk({"lat": 1, "lon": 1, "source": 1})
 
     with pytest.raises(ValueError, match="monotonic non-decreasing"):
-        fp_x_flux_keep_space_core(footprint, flux)
+        fp_x_flux_core(footprint, flux)
 
 
 def test_wrapper_sorts_hourly_releases_for_core_then_restores_input_order() -> None:
@@ -392,10 +392,10 @@ def test_wrapper_sorts_hourly_releases_for_core_then_restores_input_order() -> N
     order = [0, 2, 1, 4, 3]
     footprint = footprint.isel(time=order)
 
-    result = fp_x_flux_keep_space(footprint, flux, time_chunk=2)
+    result = fp_x_flux(footprint, flux, time_chunk=2)
     expected = _reference(footprint, flux)
 
-    assert result.attrs["kernel"] == "numba_block_keep_space"
+    assert result.attrs["kernel"] == "numba_block"
     np.testing.assert_array_equal(result["time"], footprint["time"])
     xr.testing.assert_allclose(result.compute(), expected)
 
@@ -416,7 +416,7 @@ def test_irregular_release_time_selector_is_applied_after_complete_result() -> N
     )
     selected = footprint["time"].values[[1, 4]]
 
-    result = fp_x_flux_keep_space(footprint, flux, time_selector=selected)
+    result = fp_x_flux(footprint, flux, time_selector=selected)
     expected = _interval_start_reference(footprint, flux).sel(time=selected)
 
     assert result["time"].values.tolist() == selected.tolist()
@@ -439,7 +439,7 @@ def test_irregular_release_times_support_single_source_flux() -> None:
     )
     flux = flux.sel(source="bio", drop=True)
 
-    result = fp_x_flux_keep_space(footprint, flux, source_labels=["biosphere"])
+    result = fp_x_flux(footprint, flux, source_labels=["biosphere"])
     expected = _interval_start_reference(
         footprint,
         flux.expand_dims(source=["biosphere"]),
@@ -471,7 +471,7 @@ def test_month_boundary_residual_uses_the_containing_month() -> None:
         coords={"time": flux_times, "lat": [51.0], "lon": [-1.0]},
     )
 
-    result = fp_x_flux_keep_space(footprint, flux).compute()
+    result = fp_x_flux(footprint, flux).compute()
 
     np.testing.assert_allclose(result.values.reshape(-1), [1.0, 3.0])
 
@@ -494,7 +494,7 @@ def test_coarse_flux_interval_membership_crosses_month_boundary() -> None:
         coords={"time": flux_times, "lat": [51.0], "lon": [-1.0]},
     )
 
-    result = fp_x_flux_keep_space(footprint, flux).compute()
+    result = fp_x_flux(footprint, flux).compute()
 
     np.testing.assert_allclose(result.values.reshape(-1), [2.0, 3.0])
 
@@ -505,7 +505,7 @@ def test_flux_time_labels_must_describe_interval_starts() -> None:
     flux["time"].attrs["label"] = "right"
 
     with pytest.raises(ValueError, match="must label the start"):
-        fp_x_flux_keep_space(footprint, flux)
+        fp_x_flux(footprint, flux)
 
 
 def test_time_selector_rejects_times_outside_footprint_grid() -> None:
@@ -513,7 +513,7 @@ def test_time_selector_rejects_times_outside_footprint_grid() -> None:
     footprint, flux = _inputs()
 
     with pytest.raises(ValueError, match="outside the result time grid"):
-        fp_x_flux_keep_space(footprint, flux, time_selector=["2022-01-01"])
+        fp_x_flux(footprint, flux, time_selector=["2022-01-01"])
 
 
 def test_flux_must_include_complete_lag_halo() -> None:
@@ -522,16 +522,16 @@ def test_flux_must_include_complete_lag_halo() -> None:
     flux = flux.sel(time=slice(footprint["time"].values[0], None))
 
     with pytest.raises(ValueError, match="complete footprint lag halo"):
-        fp_x_flux_keep_space(footprint, flux)
+        fp_x_flux(footprint, flux)
 
 
-def test_write_fp_x_flux_keep_space_zarr_writes_ppm_and_manifest(tmp_path) -> None:
+def test_write_fp_x_flux_zarr_writes_ppm_and_manifest(tmp_path) -> None:
     """Persist float32 ppm values and the required provenance manifest."""
     footprint, flux = _inputs()
-    result = fp_x_flux_keep_space(footprint, flux, time_selector=footprint["time"].values[[0, 2]])
+    result = fp_x_flux(footprint, flux, time_selector=footprint["time"].values[[0, 2]])
     path = tmp_path / "cache.zarr"
 
-    returned = write_fp_x_flux_keep_space_zarr(
+    returned = write_fp_x_flux_zarr(
         result,
         path,
         output_chunks={"source": 1, "time": 1},
