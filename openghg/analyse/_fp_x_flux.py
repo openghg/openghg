@@ -23,7 +23,7 @@ except ImportError:  # pragma: no cover - exercised in base installs without the
 
 SPATIAL_DIMS = ("lat", "lon")
 REQUIRED_OUTPUT_DIMS = ("source", "lat", "lon", "time")
-FP_X_FLUX_OPERATOR = "openghg.analyse.fp_x_flux"
+FP_X_FLUX_OPERATOR = "openghg.analyse.fp_x_flux_time_resolved_numba"
 FP_X_FLUX_OPERATOR_VERSION = 1
 
 _P = ParamSpec("_P")
@@ -41,7 +41,7 @@ def _require_numba() -> None:
     """Raise an informative error when the optional Numba dependency is absent."""
     if njit is None:
         raise ImportError(
-            "fp_x_flux requires the optional Numba dependency. "
+            "fp_x_flux_time_resolved_numba requires the optional Numba dependency. "
             "Install OpenGHG with `pip install 'openghg[fp-x-flux]'`."
         )
 
@@ -454,7 +454,7 @@ def _normalise_time_selector(selector: xr.DataArray | Sequence[Any]) -> np.ndarr
     return cast(np.ndarray, index.to_numpy(dtype="datetime64[ns]"))
 
 
-def fp_x_flux(  # noqa: PLR0913
+def fp_x_flux_time_resolved_numba(  # noqa: PLR0913
     footprint: xr.DataArray | xr.Dataset,
     flux: xr.DataArray | xr.Dataset,
     *,

@@ -15,7 +15,7 @@ modelled output based on this data. The types of data currently included are:
 Footprint times flux
 --------------------
 
-``fp_x_flux`` computes source-resolved model sensitivity without
+``fp_x_flux_time_resolved_numba`` computes source-resolved model sensitivity without
 summing the spatial grid. It returns a lazy ``(source, lat, lon, time)`` array,
 so basis functions can be applied later. When observation times are supplied,
 selection happens after the full lagged calculation is constructed. Install
@@ -23,7 +23,7 @@ the optional kernel dependency with ``pip install 'openghg[fp-x-flux]'``.
 Single-source flux and regularly spaced coarse flux are supported; footprint
 release times must currently be a regular hourly grid.
 
-.. autofunction:: openghg.analyse.fp_x_flux
+.. autofunction:: openghg.analyse.fp_x_flux_time_resolved_numba
 
 .. autofunction:: openghg.analyse.write_fp_x_flux_zarr
 
