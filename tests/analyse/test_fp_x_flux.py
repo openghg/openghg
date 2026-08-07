@@ -8,6 +8,7 @@ import pytest
 import xarray as xr
 
 from openghg.analyse import (
+    align_flux_to_time_targets,
     fp_x_flux_keep_space,
     warm_numba_fp_x_flux,
     write_fp_x_flux_keep_space_zarr,
@@ -83,6 +84,18 @@ def _assert_value_parity(actual: xr.DataArray, expected: xr.DataArray) -> None:
     xr.testing.assert_allclose(actual.reset_coords(drop=True), expected.reset_coords(drop=True))
 
 
+def _interval_start_reference(footprint: xr.Dataset, flux: xr.DataArray) -> xr.DataArray:
+    resolved = None
+    for lag in footprint["H_back"].values:
+        fp_lag = footprint["fp_time_resolved"].sel(H_back=lag, drop=True)
+        targets = fp_lag["time"].values - np.timedelta64(int(lag), "h")
+        flux_lag = align_flux_to_time_targets(flux, targets).assign_coords(time=fp_lag["time"])
+        term = fp_lag * flux_lag
+        resolved = term if resolved is None else resolved + term
+    low_frequency = flux.resample(time="1MS").mean().reindex(time=footprint["time"], method="ffill")
+    return (resolved + footprint["fp_residual"] * low_frequency).transpose("source", "lat", "lon", "time")
+
+
 def test_fp_x_flux_keep_space_matches_reference_and_preserves_source_metadata() -> None:
     footprint, flux = _inputs()
     result = fp_x_flux_keep_space(footprint, flux, time_chunk=2, lat_chunk=1, lon_chunk=1, source_chunk=1)
@@ -151,6 +164,269 @@ def test_regular_coarse_flux_matches_existing_time_resolved_method(step_hours: i
     _assert_value_parity(result, expected.astype(np.float32))
 
 
+def test_align_flux_to_time_targets_uses_left_labelled_interval_membership() -> None:
+    times = pd.date_range("2021-01-01", periods=3, freq="h")
+    flux = xr.DataArray(
+        np.array([10.0, 20.0, 30.0]),
+        dims="time",
+        coords={"time": times},
+    )
+    targets = pd.to_datetime(
+        [
+            "2021-01-01 01:59:59",
+            "2021-01-01 00:00:00",
+            "2021-01-01 01:00:00",
+            "2021-01-01 01:59:59",
+            "2021-01-01 02:59:59",
+        ]
+    )
+
+    result = align_flux_to_time_targets(flux, targets)
+
+    assert result.values.tolist() == [20.0, 10.0, 20.0, 20.0, 30.0]
+    assert result["time"].values.tolist() == targets.values.tolist()
+
+
+@pytest.mark.parametrize(
+    "targets",
+    [["2020-12-31 23:59:59"], ["2021-01-01 03:00:00"]],
+)
+def test_align_flux_to_time_targets_rejects_times_outside_intervals(targets: list[str]) -> None:
+    flux = xr.DataArray(
+        np.ones(3),
+        dims="time",
+        coords={"time": pd.date_range("2021-01-01", periods=3, freq="h")},
+    )
+
+    with pytest.raises(ValueError, match="does not contain 1 target"):
+        align_flux_to_time_targets(flux, targets)
+
+
+def test_align_flux_to_time_targets_rejects_gapped_flux() -> None:
+    flux = xr.DataArray(
+        np.ones(3),
+        dims="time",
+        coords={"time": pd.to_datetime(["2021-01-01 00:00", "2021-01-01 01:00", "2021-01-01 03:00"])},
+    )
+
+    with pytest.raises(ValueError, match="must be regular"):
+        align_flux_to_time_targets(flux, ["2021-01-01 02:00"])
+
+
+def test_irregular_release_times_use_indexed_kernel_and_preserve_exact_times() -> None:
+    footprint, flux = _inputs()
+    irregular = pd.to_datetime(
+        [
+            "2021-01-01 06:37",
+            "2021-01-01 03:23",
+            "2021-01-01 09:58",
+            "2021-01-01 06:37",
+            "2021-01-01 12:01",
+        ]
+    )
+    footprint = footprint.assign_coords(time=irregular)
+
+    result = fp_x_flux_keep_space(
+        footprint,
+        flux,
+        time_chunk=2,
+        lat_chunk=1,
+        lon_chunk=1,
+        source_chunk=1,
+    )
+
+    assert result.attrs["kernel"] == "numba_indexed_keep_space"
+    assert result.attrs["flux_time_alignment"] == "interval_start"
+    assert result["time"].values.tolist() == irregular.values.tolist()
+    assert result.chunksizes["time"] == (2, 2, 1)
+    assert hasattr(result.data, "__dask_graph__")
+    assert result["sector"].values.tolist() == ["GPP", "FF"]
+    xr.testing.assert_allclose(result.compute(), _interval_start_reference(footprint, flux))
+
+
+def test_gapped_hour_aligned_release_times_use_indexed_kernel() -> None:
+    footprint, flux = _inputs()
+    footprint = footprint.assign_coords(
+        time=pd.to_datetime(
+            [
+                "2021-01-01 03:00",
+                "2021-01-01 04:00",
+                "2021-01-01 08:00",
+                "2021-01-01 11:00",
+                "2021-01-01 12:00",
+            ]
+        )
+    )
+
+    result = fp_x_flux_keep_space(footprint, flux)
+
+    assert result.attrs["kernel"] == "numba_indexed_keep_space"
+    xr.testing.assert_allclose(result.compute(), _interval_start_reference(footprint, flux))
+
+
+def test_irregular_release_times_support_regular_coarse_flux() -> None:
+    footprint, flux = _inputs()
+    footprint = footprint.assign_coords(
+        time=pd.to_datetime(
+            [
+                "2021-01-01 03:37",
+                "2021-01-01 05:23",
+                "2021-01-01 07:58",
+                "2021-01-01 09:01",
+                "2021-01-01 11:42",
+            ]
+        )
+    )
+    coarse_flux = flux.isel(time=slice(None, None, 2))
+
+    result = fp_x_flux_keep_space(footprint, coarse_flux)
+
+    assert result.attrs["kernel"] == "numba_indexed_keep_space"
+    xr.testing.assert_allclose(result.compute(), _interval_start_reference(footprint, coarse_flux))
+
+
+def test_irregular_times_match_legacy_where_flux_grid_has_the_same_offset() -> None:
+    footprint, flux = _inputs()
+    release_times = pd.to_datetime(
+        [
+            "2021-01-01 03:00",
+            "2021-01-01 05:00",
+            "2021-01-01 06:00",
+            "2021-01-01 09:00",
+            "2021-01-01 11:00",
+        ]
+    )
+    footprint = footprint.assign_coords(time=release_times)
+
+    result = fp_x_flux_keep_space(footprint, flux).compute()
+    expected = _existing_time_resolved_reference(footprint, flux)
+
+    _assert_value_parity(result, expected.astype(np.float32))
+
+
+def test_regular_hourly_release_times_keep_existing_numba_kernel() -> None:
+    footprint, flux = _inputs()
+
+    result = fp_x_flux_keep_space(footprint, flux)
+
+    assert result.attrs["kernel"] == "numba_block_keep_space"
+
+
+def test_irregular_release_times_default_to_bounded_time_chunks() -> None:
+    footprint, flux = _inputs()
+    footprint = footprint.isel(time=np.zeros(40, dtype=int)).assign_coords(
+        time=pd.date_range("2021-01-01 03:01", periods=40, freq="53min")
+    )
+
+    result = fp_x_flux_keep_space(footprint, flux)
+
+    assert result.attrs["compute_time_chunk"] == 32
+    assert result.chunksizes["time"] == (32, 8)
+
+
+def test_irregular_release_time_selector_is_applied_after_complete_result() -> None:
+    footprint, flux = _inputs()
+    footprint = footprint.assign_coords(
+        time=pd.to_datetime(
+            [
+                "2021-01-01 03:37",
+                "2021-01-01 05:23",
+                "2021-01-01 07:58",
+                "2021-01-01 09:01",
+                "2021-01-01 11:42",
+            ]
+        )
+    )
+    selected = footprint["time"].values[[1, 4]]
+
+    result = fp_x_flux_keep_space(footprint, flux, time_selector=selected)
+    expected = _interval_start_reference(footprint, flux).sel(time=selected)
+
+    assert result["time"].values.tolist() == selected.tolist()
+    xr.testing.assert_allclose(result.compute(), expected)
+
+
+def test_irregular_release_times_support_single_source_flux() -> None:
+    footprint, flux = _inputs()
+    footprint = footprint.assign_coords(
+        time=pd.to_datetime(
+            [
+                "2021-01-01 03:37",
+                "2021-01-01 05:23",
+                "2021-01-01 07:58",
+                "2021-01-01 09:01",
+                "2021-01-01 11:42",
+            ]
+        )
+    )
+    flux = flux.sel(source="bio", drop=True)
+
+    result = fp_x_flux_keep_space(footprint, flux, source_labels=["biosphere"])
+    expected = _interval_start_reference(
+        footprint,
+        flux.expand_dims(source=["biosphere"]),
+    )
+
+    xr.testing.assert_allclose(result.compute(), expected)
+
+
+def test_month_boundary_residual_uses_the_containing_month() -> None:
+    times = pd.to_datetime(["2021-01-31 23:37", "2021-02-01 00:23"])
+    resolved = xr.DataArray(
+        np.zeros((2, 1, 1, 1), dtype=np.float32),
+        dims=("time", "lat", "lon", "H_back"),
+        coords={"time": times, "lat": [51.0], "lon": [-1.0], "H_back": [0]},
+    )
+    resolved["H_back"].attrs["units"] = "hours"
+    residual = xr.DataArray(
+        np.ones((2, 1, 1), dtype=np.float32),
+        dims=("time", "lat", "lon"),
+        coords={"time": times, "lat": [51.0], "lon": [-1.0]},
+    )
+    footprint = xr.Dataset({"fp_time_resolved": resolved, "fp_residual": residual})
+    flux_times = pd.date_range("2021-01-31", "2021-02-02", freq="h", inclusive="left")
+    flux_values = np.where(flux_times.month == 1, 1.0, 3.0).astype(np.float32)
+    flux = xr.DataArray(
+        flux_values.reshape(-1, 1, 1),
+        dims=("time", "lat", "lon"),
+        coords={"time": flux_times, "lat": [51.0], "lon": [-1.0]},
+    )
+
+    result = fp_x_flux_keep_space(footprint, flux).compute()
+
+    np.testing.assert_allclose(result.values.reshape(-1), [1.0, 3.0])
+
+
+def test_coarse_flux_interval_membership_crosses_month_boundary() -> None:
+    release_times = pd.to_datetime(["2021-01-31 23:37", "2021-02-01 00:23"])
+    resolved = xr.DataArray(
+        np.ones((2, 1, 1, 2), dtype=np.float32),
+        dims=("time", "lat", "lon", "H_back"),
+        coords={"time": release_times, "lat": [51.0], "lon": [-1.0], "H_back": [0, 1]},
+    )
+    resolved["H_back"].attrs["units"] = "hours"
+    residual = xr.zeros_like(resolved.isel(H_back=0, drop=True))
+    footprint = xr.Dataset({"fp_time_resolved": resolved, "fp_residual": residual})
+    flux_times = pd.date_range("2021-01-31 20:00", periods=6, freq="2h")
+    flux = xr.DataArray(
+        np.arange(6, dtype=np.float32).reshape(-1, 1, 1),
+        dims=("time", "lat", "lon"),
+        coords={"time": flux_times, "lat": [51.0], "lon": [-1.0]},
+    )
+
+    result = fp_x_flux_keep_space(footprint, flux).compute()
+
+    np.testing.assert_allclose(result.values.reshape(-1), [2.0, 3.0])
+
+
+def test_flux_time_labels_must_describe_interval_starts() -> None:
+    footprint, flux = _inputs()
+    flux["time"].attrs["label"] = "right"
+
+    with pytest.raises(ValueError, match="must label the start"):
+        fp_x_flux_keep_space(footprint, flux)
+
+
 def test_time_selector_rejects_times_outside_footprint_grid() -> None:
     footprint, flux = _inputs()
 
@@ -187,7 +463,8 @@ def test_write_fp_x_flux_keep_space_zarr_writes_ppm_and_manifest(tmp_path) -> No
     assert stored.attrs["units"] == "ppm"
     xr.testing.assert_allclose(stored, result * np.float32(1_000_000))
     manifest = json.loads((tmp_path / "cache.zarr.manifest.json").read_text())
-    assert manifest["operator_version"] == 1
+    assert manifest["operator_version"] == 2
+    assert manifest["kernel_options"]["flux_time_alignment"] == "interval_start"
     assert manifest["source"] == ["bio", "ff"]
     assert manifest["provenance"]["flux"]["checksum"] == "test-flux"
 

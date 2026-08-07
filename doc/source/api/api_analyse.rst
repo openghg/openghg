@@ -20,8 +20,22 @@ summing the spatial grid. It returns a lazy ``(source, lat, lon, time)`` array,
 so basis functions can be applied later. When observation times are supplied,
 selection happens after the full lagged calculation is constructed. Install
 the optional kernel dependency with ``pip install 'openghg[fp-x-flux]'``.
-Single-source flux and regularly spaced coarse flux are supported; footprint
-release times must currently be a regular hourly grid.
+Single-source flux, regularly spaced coarse flux, and irregular footprint
+release times are supported.
+
+Flux timestamps are interpreted as the starts of regular averaging intervals.
+For a release time and ``H_back`` lag, the target belongs to the half-open
+interval ``[flux_time, flux_time + cadence)``. Values are not interpolated,
+matched to the nearest timestamp, or extrapolated across missing intervals.
+Use ``align_flux_to_time_targets`` when the same explicit alignment is needed
+outside the full operator. Non-monotonic release times are sorted internally
+for efficient block reads and restored to their exact original positional
+order in the result.
+The indexed kernel defaults to 32 releases per compute chunk when
+``time_chunk`` is omitted; tune this value for the available worker memory and
+spatial grid size.
+
+.. autofunction:: openghg.analyse.align_flux_to_time_targets
 
 .. autofunction:: openghg.analyse.fp_x_flux_keep_space
 
