@@ -388,7 +388,7 @@ Up to this point, we have seen how to specify a file path and add data to the ob
 In many workflows, however, you may already have your data available in memory as an ``xarray.Dataset``.
 For the appropriate `source_format` inputs, the ``standardise_surface`` function also supports this workflow, allowing you to pass a dataset directly without needing to first write it to disk.
 
-This approach is especially useful when your data has already been processed in Python or retrieved from another source (such as a remote server or API) and you want to store it straight away.
+This approach is especially useful when your data has already been processed in Python or retrieved from another source (such as a remote server or API) and you want to store it straight away. The ``filepath`` and ``data`` arguments are alternatives, so provide exactly one of them.
 
 Let’s start by importing ``xarray`` and converting an example file into an ``xarray.Dataset``:
 
@@ -399,9 +399,10 @@ Let’s start by importing ``xarray`` and converting an example file into an ``x
     data_url = "https://github.com/openghg/example_data/raw/main/timeseries/decc-picarro_co2.tar.gz"
 
     tac_openghg_data = retrieve_example_data(url=data_url)
-    data = xr.open_dataset(tac_openghg_data[0])
+    with xr.open_dataset(tac_openghg_data[0]) as dataset:
+        data = dataset.load()
 
-Now that we have our dataset in memory, we can provide it directly to the ``dataset`` argument of ``standardise_surface``.
+Now that we have our dataset in memory, we can provide it directly to the ``data`` argument of ``standardise_surface``.
 This will standardise the data and add it to the object store just as if we had supplied a file path:
 
 .. jupyter-execute::

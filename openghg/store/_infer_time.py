@@ -86,6 +86,7 @@ def infer_date_range(
         else:
             start_date = timestamp_tzaware(timestamp)
 
+        date_match = ""
         if filepath is not None:
             filename = Path(filepath).stem
             filename_identifiers = filename.split("_")

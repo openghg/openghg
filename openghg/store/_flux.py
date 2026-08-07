@@ -102,20 +102,22 @@ class Flux(BaseStore):
 
     def transform_data(
         self,
-        datapath: pathType,
-        database: str,
+        datapath: pathType | None,
+        database: str | None,
         if_exists: str = "auto",
         save_current: str = "auto",
         overwrite: bool = False,
         compressor: Any | None = None,
         filters: Any | None = None,
         info_metadata: dict | None = None,
+        data: Any | None = None,
         **kwargs: dict,
     ) -> list[dict]:
-        """
-        Read and transform a flux / emissions database. This will find the appropriate
-        parser function to use for the database specified. The necessary inputs
-        are determined by which database is being used.
+        """Transform raw flux data and assign it to the object store.
+
+        The database selects a parser such as
+        :func:`openghg.transform.flux.parse_edgar`. Exactly one of
+        ``datapath`` and ``data`` must be provided.
 
         The underlying parser functions will be of the form:
             - openghg.transform.flux.parse_{database.lower()}
@@ -140,14 +142,32 @@ class Flux(BaseStore):
                 See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+            info_metadata: Optional informational metadata to add to each
+                transformed datasource.
+            data: Raw in-memory data to transform instead of reading
+                ``datapath``.
             **kwargs: Inputs for underlying parser function for the database.
 
                 Necessary inputs will depend on the database being parsed.
 
-        TODO: Could allow Callable[..., Dataset] type for a pre-defined function be passed
+        Returns:
+            Metadata dictionaries identifying the assigned datasources.
+
+        Raises:
+            ValueError: If the database is unsupported or exactly one of
+                ``datapath`` and ``data`` is not provided.
+
+        TODO: Could allow Callable[..., Dataset] type for a pre-defined function be passed.
         """
         from openghg.store.spec import define_transform_parsers
         from openghg.util import load_transform_parser, check_if_need_new_version, split_function_inputs
+
+        transform_parsers = define_transform_parsers()[self._data_type]
+        if not isinstance(database, str) or database.upper() not in transform_parsers.__members__:
+            raise ValueError(f"Unable to transform '{database}' selected.")
+
+        if (datapath is None and data is None) or (datapath is not None and data is not None):
+            raise ValueError("Please specify exactly one of `datapath` or `data`.")
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -160,14 +180,11 @@ class Flux(BaseStore):
 
         # Format input parameters (specific to data_type)
         fn_input_parameters = self.format_inputs(**kwargs)
-        fn_input_parameters["datapath"] = Path(datapath)
-
-        transform_parsers = define_transform_parsers()[self._data_type]
-
-        try:
-            transform_parsers[database.upper()].value
-        except KeyError:
-            raise ValueError(f"Unable to transform '{database}' selected.")
+        if data is not None:
+            fn_input_parameters["data"] = data
+        else:
+            assert datapath is not None
+            fn_input_parameters["datapath"] = Path(datapath)
 
         # Load the data retrieve object
         parser_fn = load_transform_parser(data_type=self._data_type, source_format=database)

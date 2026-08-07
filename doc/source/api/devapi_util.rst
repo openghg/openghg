@@ -52,6 +52,8 @@ File handling, compression
 
 .. autofunction:: openghg.util.read_header
 
+.. autofunction:: openghg.util.convert_numpy_scalars
+
 Measurement helpers
 ===================
 

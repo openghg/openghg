@@ -4,6 +4,11 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
+from helpers import clear_test_stores, get_bc_datapath, get_flux_datapath, get_footprint_datapath
+from openghg.analyse import ModelScenario, calc_dim_resolution, match_dataset_dims, stack_datasets
+from openghg.dataobjects import ObsData
+from openghg.retrieve import get_bc, get_flux, get_footprint, get_obs_surface, get_obs_column
+from openghg.standardise import standardise_bc, standardise_flux, standardise_footprint, standardise_surface
 from pandas import Timestamp
 from xarray import Dataset
 
@@ -1656,6 +1661,166 @@ def test_scenario_infer_flux_source_ch4(tac_ch4_store):
 
     # expect 'waste' to be found in flux metadata:
     assert "waste" in model_scenario.fluxes
+
+
+def test_modelscenario_from_direct_datasets():
+    """Re-store retrieved datasets through direct input and run forward modelling."""
+    obs = get_obs_surface(
+        site="tac",
+        species="co2",
+        start_date="2014-07-01",
+        end_date="2014-08-01",
+        inlet="100m",
+        network="DECC",
+        store="user",
+    )
+    obs_data = obs.data.load().rename(
+        {
+            "mf": "co2",
+            "mf_variability": "co2_variability",
+            "mf_number_of_observations": "co2_number_of_observations",
+        }
+    )
+    footprint_data = xr.open_dataset(
+        get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
+    ).load()
+    flux_data = xr.open_dataset(get_flux_datapath("co2-rtot-cardamom-2hr_TEST_2014.nc")).load()
+    bc_data = xr.open_dataset(get_bc_datapath("co2_TEST_201407.nc")).load()
+
+    clear_test_stores()
+
+    standardise_surface(
+        data=obs_data,
+        source_format="openghg",
+        site="tac",
+        network="DECC",
+        inlet="100m",
+        calibration_scale=obs.metadata["calibration_scale"],
+        store="user",
+        update_mismatch="metadata",
+    )
+    standardise_footprint(
+        data=footprint_data,
+        model="NAME",
+        site="tac",
+        network="DECC",
+        domain="TEST",
+        species="co2",
+        inlet="100m",
+        store="user",
+    )
+    standardise_flux(
+        data=flux_data,
+        species="co2",
+        source="natural-rtot",
+        domain="TEST",
+        time_resolved=True,
+        store="user",
+    )
+    standardise_bc(
+        data=bc_data,
+        species="co2",
+        bc_input="MOZART",
+        domain="TEST",
+        period="monthly",
+        store="user",
+    )
+
+    scenario = ModelScenario(
+        site="tac",
+        species="co2",
+        inlet="100m",
+        network="DECC",
+        domain="TEST",
+        sources="natural-rtot",
+        bc_input="MOZART",
+        start_date="2014-07-01",
+        end_date="2014-08-01",
+    )
+
+    modelled_obs = scenario.calc_modelled_obs(resample_to="coarsest")
+    assert modelled_obs is not None
+    assert "mf_mod_high_res" in modelled_obs
+
+
+def test_modelscenario_from_direct_datasets():
+    """Re-store retrieved datasets through direct input and run forward modelling."""
+    obs = get_obs_surface(
+        site="tac",
+        species="co2",
+        start_date="2014-07-01",
+        end_date="2014-08-01",
+        inlet="100m",
+        network="DECC",
+        store="user",
+    )
+    obs_data = obs.data.load().rename(
+        {
+            "mf": "co2",
+            "mf_variability": "co2_variability",
+            "mf_number_of_observations": "co2_number_of_observations",
+        }
+    )
+    footprint_data = xr.open_dataset(
+        get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
+    ).load()
+    flux_data = xr.open_dataset(get_flux_datapath("co2-rtot-cardamom-2hr_TEST_2014.nc")).load()
+    bc_data = xr.open_dataset(get_bc_datapath("co2_TEST_201407.nc")).load()
+
+    clear_test_stores()
+
+    standardise_surface(
+        data=obs_data,
+        source_format="openghg",
+        site="tac",
+        network="DECC",
+        inlet="100m",
+        calibration_scale=obs.metadata["calibration_scale"],
+        store="user",
+        update_mismatch="metadata",
+    )
+    standardise_footprint(
+        data=footprint_data,
+        model="NAME",
+        site="tac",
+        network="DECC",
+        domain="TEST",
+        species="co2",
+        inlet="100m",
+        store="user",
+    )
+    standardise_flux(
+        data=flux_data,
+        species="co2",
+        source="natural-rtot",
+        domain="TEST",
+        time_resolved=True,
+        store="user",
+    )
+    standardise_bc(
+        data=bc_data,
+        species="co2",
+        bc_input="MOZART",
+        domain="TEST",
+        period="monthly",
+        store="user",
+    )
+
+    scenario = ModelScenario(
+        site="tac",
+        species="co2",
+        inlet="100m",
+        network="DECC",
+        domain="TEST",
+        sources="natural-rtot",
+        bc_input="MOZART",
+        start_date="2014-07-01",
+        end_date="2014-08-01",
+    )
+
+    modelled_obs = scenario.calc_modelled_obs(resample_to="coarsest")
+    assert modelled_obs is not None
+    assert "mf_mod_high_res" in modelled_obs
 
 
 def test_modelscenario_doesnt_error_empty_objectstore(monkeypatch):

@@ -1,4 +1,5 @@
 import pytest
+import xarray as xr
 from helpers import get_footprint_datapath
 from openghg.standardise.footprints import parse_paris
 from openghg.types import ParseError
@@ -149,3 +150,22 @@ def test_paris_footprint_fail_message():
         )
 
         assert "need to use source_format='acrg_org'" in exc
+
+
+def test_paris_footprint_data():
+    """Test parsing PARIS footprint data supplied directly."""
+    filepath = get_footprint_datapath("MHD-10magl_NAME_UKV_TEST_inert_PARIS-format_201301.nc")
+
+    with xr.open_dataset(filepath) as dataset:
+        result = parse_paris(
+            data=dataset.load(),
+            site="mhd",
+            domain="test",
+            inlet="10m",
+            model="NAME",
+            met_model="ukv",
+            species="inert",
+        )
+
+    assert "mhd_test_NAME_10m" in result
+    assert result["mhd_test_NAME_10m"]["metadata"]["data_type"] == "footprints"

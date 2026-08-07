@@ -1,21 +1,23 @@
 import logging
 from pathlib import Path
 from pandas import Timestamp as pd_Timestamp
+import xarray as xr
 
-from openghg.util import clean_string, timestamp_now, timestamp_tzaware, open_time_nc_fn
+from openghg.util import clean_string, timestamp_now, timestamp_tzaware, get_data
 
 logger = logging.getLogger("openghg.standardise.eulerian_model")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def parse_openghg(
-    filepath: str | Path | list[str] | list[Path],
-    model: str,
-    species: str,
+    filepath: str | Path | list[str] | list[Path] | None = None,
+    model: str | None = None,
+    species: str | None = None,
     start_date: str | None = None,
     end_date: str | None = None,
     setup: str | None = None,
     chunks: dict | None = None,
+    data: xr.Dataset | None = None,
     **kwargs: str,
 ) -> dict:
     """Parse Eulerian model files
@@ -36,7 +38,8 @@ def parse_openghg(
          Dict : Dictionary of source_name : data, metadata, attr
     """
 
-    xr_open_fn, filepath = open_time_nc_fn(filepath)
+    if model is None or species is None:
+        raise ValueError("`model` and `species` must be specified.")
 
     model = clean_string(model)
     species = clean_string(species)
@@ -44,7 +47,11 @@ def parse_openghg(
     end_date = clean_string(end_date)
     setup = clean_string(setup)
 
-    with xr_open_fn(filepath).chunk(chunks if chunks is not None else {}) as em_data:
+    if isinstance(filepath, list) and len(filepath) == 1:
+        filepath = filepath[0]
+
+    with get_data(dataset=data, filepath=filepath, check_coords="time") as em_data:
+        em_data = em_data.chunk(chunks if chunks is not None else {})
         # Check necessary 4D coordinates are present and rename if necessary (for consistency)
         check_coords = {
             "time": ["time"],
