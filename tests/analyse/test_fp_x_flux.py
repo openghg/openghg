@@ -423,6 +423,30 @@ def test_irregular_release_time_selector_is_applied_after_complete_result() -> N
     xr.testing.assert_allclose(result.compute(), expected)
 
 
+def test_time_selector_rejects_duplicate_selector_values() -> None:
+    """Reject ambiguous duplicate values in an observation-time selector."""
+    footprint, flux = _inputs()
+    selected = footprint["time"].values[[1, 1]]
+
+    with pytest.raises(ValueError, match="time_selector must contain unique timestamps"):
+        fp_x_flux_time_resolved_numba(footprint, flux, time_selector=selected)
+
+
+def test_time_selector_rejects_non_unique_result_times() -> None:
+    """Require positional alignment when footprint release times repeat."""
+    footprint, flux = _inputs()
+    duplicate_times = footprint["time"].values.copy()
+    duplicate_times[3] = duplicate_times[1]
+    footprint = footprint.assign_coords(time=duplicate_times)
+
+    with pytest.raises(ValueError, match="result time coordinate contains duplicate timestamps"):
+        fp_x_flux_time_resolved_numba(
+            footprint,
+            flux,
+            time_selector=duplicate_times[[1]],
+        )
+
+
 def test_irregular_release_times_support_single_source_flux() -> None:
     """Support irregular releases with flux lacking a source dimension."""
     footprint, flux = _inputs()
@@ -525,10 +549,30 @@ def test_flux_must_include_complete_lag_halo() -> None:
         fp_x_flux_time_resolved_numba(footprint, flux)
 
 
+@pytest.mark.parametrize("time_indices", [[3, 27], [0, 24]])
+def test_low_frequency_flux_must_cover_complete_footprint_period(time_indices: list[int]) -> None:
+    """Validate lag and release coverage before using low-frequency flux.
+
+    Args:
+        time_indices: Flux indexes producing missing lag or release coverage.
+    """
+    footprint, flux = _inputs()
+    coarse_flux = flux.isel(time=time_indices)
+    if time_indices[0] == 0:
+        footprint = footprint.assign_coords(time=footprint["time"] + np.timedelta64(60, "D"))
+
+    with pytest.raises(ValueError, match="complete footprint lag halo"):
+        fp_x_flux_time_resolved_numba(footprint, coarse_flux)
+
+
 def test_write_fp_x_flux_zarr_writes_ppm_and_manifest(tmp_path) -> None:
     """Persist float32 ppm values and the required provenance manifest."""
     footprint, flux = _inputs()
-    result = fp_x_flux_time_resolved_numba(footprint, flux, time_selector=footprint["time"].values[[0, 2]])
+    result = fp_x_flux_time_resolved_numba(
+        footprint,
+        flux,
+        time_selector=footprint["time"].values[[0, 2]],
+    ).isel(time=[1, 0])
     path = tmp_path / "cache.zarr"
 
     returned = write_fp_x_flux_zarr(
@@ -551,6 +595,11 @@ def test_write_fp_x_flux_zarr_writes_ppm_and_manifest(tmp_path) -> None:
     assert manifest["kernel_options"]["flux_time_alignment"] == "interval_start"
     assert manifest["source"] == ["bio", "ff"]
     assert manifest["provenance"]["flux"]["checksum"] == "test-flux"
+    assert manifest["time_coverage"] == {
+        "start": str(result["time"].values.min()),
+        "end": str(result["time"].values.max()),
+        "count": 2,
+    }
 
 
 def test_warm_numba_fp_x_flux() -> None:

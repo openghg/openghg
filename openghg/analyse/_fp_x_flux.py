@@ -365,6 +365,33 @@ def _padded_flux_bounds(fp_time_resolved: xr.DataArray) -> tuple[np.datetime64, 
     return start, end
 
 
+def _validate_flux_coverage(
+    flux: xr.DataArray,
+    fp_time_resolved: xr.DataArray,
+    *,
+    step_hours: int,
+) -> None:
+    """Validate that flux intervals cover every release and lag target.
+
+    Args:
+        flux: Regular flux whose timestamps label interval starts.
+        fp_time_resolved: Time-resolved footprint defining releases and lags.
+        step_hours: Width of each flux interval in hours.
+
+    Raises:
+        ValueError: If the flux intervals do not cover the complete footprint
+            period and its left lag halo.
+    """
+    start, end = _padded_flux_bounds(fp_time_resolved)
+    flux_start = flux["time"].values[0]
+    flux_end = flux["time"].values[-1] + np.timedelta64(step_hours, "h")
+    if flux_start > start or flux_end <= end:
+        raise ValueError(
+            "Flux time coverage must include the complete footprint lag halo "
+            f"from {start} through {end}."
+        )
+
+
 def _low_frequency_flux(flux: xr.DataArray, fp_ds: xr.Dataset) -> xr.DataArray:
     """Align calendar-month mean flux to footprint release timestamps.
 
@@ -743,9 +770,11 @@ def _attach_source_coordinates(result: xr.DataArray, flux: xr.DataArray) -> xr.D
 
 
 def _normalise_time_selector(selector: xr.DataArray | Sequence[Any]) -> np.ndarray:
-    """Convert a selector to unique, non-missing nanosecond timestamps."""
+    """Convert a selector to non-missing, unique nanosecond timestamps."""
     values = selector.values if isinstance(selector, xr.DataArray) else selector
-    index = pd.DatetimeIndex(pd.to_datetime(np.asarray(values).reshape(-1))).dropna().drop_duplicates()
+    index = pd.DatetimeIndex(pd.to_datetime(np.asarray(values).reshape(-1))).dropna()
+    if index.has_duplicates:
+        raise ValueError("time_selector must contain unique timestamps.")
     return cast(np.ndarray, index.to_numpy(dtype="datetime64[ns]"))
 
 
@@ -763,12 +792,19 @@ def _select_result_times(
         The unchanged result or a timestamp-selected view.
 
     Raises:
-        ValueError: If the selector includes a timestamp absent from the result.
+        ValueError: If selector values are duplicated or absent from the result,
+            or the result time coordinate is non-unique.
     """
     if time_selector is None:
         return result
     selected_times = _normalise_time_selector(time_selector)
-    missing = pd.DatetimeIndex(selected_times).difference(pd.DatetimeIndex(result["time"].values))
+    result_index = pd.DatetimeIndex(result["time"].values)
+    if result_index.has_duplicates:
+        raise ValueError(
+            "time_selector cannot be applied when the result time coordinate contains duplicate timestamps; "
+            "omit time_selector for already-aligned footprint and observation inputs."
+        )
+    missing = pd.DatetimeIndex(selected_times).difference(result_index)
     if len(missing):
         raise ValueError(f"time_selector contains {len(missing)} timestamp(s) outside the result time grid.")
     return result.sel(time=selected_times)
@@ -864,6 +900,7 @@ def fp_x_flux_time_resolved_numba_core(
     _validate_core_inputs(fp_ds, fp_time_resolved, fp_residual, flux)
 
     flux_step_hours = _validate_interval_start_time(flux["time"], label="Flux")
+    _validate_flux_coverage(flux, fp_time_resolved, step_hours=flux_step_hours)
     low_frequency_flux = _low_frequency_flux(flux, fp_ds)
     if flux_step_hours > _h_back_window_hours(fp_time_resolved):
         kernel_name = "low_frequency"
@@ -1156,6 +1193,7 @@ def write_fp_x_flux_zarr(  # noqa: PLR0913
     ppm.attrs["units"] = "ppm"
     ppm.attrs["native_units"] = "1"
     dataset = ppm.to_dataset()
+    time_values = result["time"].values
     manifest = {
         "operator": FP_X_FLUX_OPERATOR,
         "operator_version": FP_X_FLUX_OPERATOR_VERSION,
@@ -1176,8 +1214,8 @@ def write_fp_x_flux_zarr(  # noqa: PLR0913
             "lon_max": float(result["lon"].max()),
         },
         "time_coverage": {
-            "start": str(result["time"].values[0]),
-            "end": str(result["time"].values[-1]),
+            "start": str(time_values.min()),
+            "end": str(time_values.max()),
             "count": result.sizes["time"],
         },
         "provenance": dict(provenance),
