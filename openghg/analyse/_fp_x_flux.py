@@ -266,8 +266,7 @@ def _validate_flux_coverage(
     flux_end = flux["time"].values[-1] + np.timedelta64(step_hours, "h")
     if flux_start > start or flux_end <= end:
         raise ValueError(
-            "Flux time coverage must include the complete footprint lag halo "
-            f"from {start} through {end}."
+            "Flux time coverage must include the complete footprint lag halo " f"from {start} through {end}."
         )
 
 
