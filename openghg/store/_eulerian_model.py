@@ -75,6 +75,11 @@ class EulerianModel(BaseStore):
         data_vars: dict[str, tuple[str, ...]] = {}
         dtypes = {"lat": np.floating, "lon": np.floating, "time": np.datetime64}
 
-        data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
+        units = {
+            "lat": "degrees_north",
+            "lon": "degrees_east",
+        }
+
+        data_format = DataSchema(data_vars=data_vars, dtypes=dtypes, units=units)
 
         return data_format
