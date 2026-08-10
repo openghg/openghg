@@ -82,5 +82,23 @@ def test_species_attributes_isotopologue():
     assert species_attrs["long_name"] == long_name
     assert species_attrs["units"] == units
     assert species_attrs["units_description"] == units_non_standard
-
     assert ds_updated.attrs["species"] == name
+
+
+def test_observation_counts_are_dimensionless():
+    """Counts must not inherit the mole-fraction unit of their species."""
+    import numpy as np
+    import xarray as xr
+
+    data = xr.Dataset(
+        {
+            "ch4": ("time", np.arange(2.0)),
+            "ch4_number_of_observations": ("time", np.arange(2)),
+        },
+        coords={"time": np.array(["2020-01-01", "2020-02-01"], dtype="datetime64[ns]")},
+    )
+
+    result = get_attributes(data, species="ch4", site="mhd")
+
+    assert result.ch4.attrs["units"] == "1e-9"
+    assert result.ch4_number_of_observations.attrs["units"] == "1"
