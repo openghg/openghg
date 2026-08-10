@@ -244,6 +244,33 @@ def _padded_flux_bounds(fp_time_resolved: xr.DataArray) -> tuple[np.datetime64, 
     return start, end
 
 
+def _validate_flux_coverage(
+    flux: xr.DataArray,
+    fp_time_resolved: xr.DataArray,
+    *,
+    step_hours: int,
+) -> None:
+    """Validate that flux intervals cover every release and lag target.
+
+    Args:
+        flux: Regular flux whose timestamps label interval starts.
+        fp_time_resolved: Time-resolved footprint defining releases and lags.
+        step_hours: Width of each flux interval in hours.
+
+    Raises:
+        ValueError: If the flux intervals do not cover the complete footprint
+            period and its left lag halo.
+    """
+    start, end = _padded_flux_bounds(fp_time_resolved)
+    flux_start = flux["time"].values[0]
+    flux_end = flux["time"].values[-1] + np.timedelta64(step_hours, "h")
+    if flux_start > start or flux_end <= end:
+        raise ValueError(
+            "Flux time coverage must include the complete footprint lag halo "
+            f"from {start} through {end}."
+        )
+
+
 def _low_frequency_flux(flux: xr.DataArray, fp_ds: xr.Dataset) -> xr.DataArray:
     """Calculate monthly mean flux aligned to the footprint time coordinate."""
     # Resample before selecting the footprint period so edge months use all
@@ -525,6 +552,7 @@ def fp_x_flux_time_resolved_numba(  # noqa: PLR0913
     if _regular_time_step_hours(fp_time_resolved["time"], label="Footprint") != 1:
         raise ValueError("Footprint time coordinate must be a regular hourly grid.")
     flux_step_hours = _regular_time_step_hours(flux_da["time"], label="Flux")
+    _validate_flux_coverage(flux_da, fp_time_resolved, step_hours=flux_step_hours)
     low_frequency_flux = _low_frequency_flux(flux_da, fp_ds)
     flux_metadata = flux_da
 

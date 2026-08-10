@@ -205,6 +205,22 @@ def test_flux_must_include_complete_lag_halo() -> None:
         fp_x_flux_time_resolved_numba(footprint, flux)
 
 
+@pytest.mark.parametrize("time_indices", [[3, 27], [0, 24]])
+def test_low_frequency_flux_must_cover_complete_footprint_period(time_indices: list[int]) -> None:
+    """Validate lag and release coverage before using low-frequency flux.
+
+    Args:
+        time_indices: Flux indexes producing missing lag or release coverage.
+    """
+    footprint, flux = _inputs()
+    coarse_flux = flux.isel(time=time_indices)
+    if time_indices[0] == 0:
+        footprint = footprint.assign_coords(time=footprint["time"] + np.timedelta64(60, "D"))
+
+    with pytest.raises(ValueError, match="complete footprint lag halo"):
+        fp_x_flux_time_resolved_numba(footprint, coarse_flux)
+
+
 def test_write_fp_x_flux_zarr_writes_ppm_and_manifest(tmp_path) -> None:
     """Write ppm values and required provenance to Zarr and JSON.
 
