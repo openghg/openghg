@@ -207,8 +207,10 @@ def get_attributes(
 
     variable_names = cast(dict[str, Any], ds.variables)
 
-    # Write units as attributes to variables containing any of these
-    match_words = ["variability", "repeatability", "stdev", "count"]
+    # Write units as attributes to variables containing any of these.
+    # Observation counts are dimensionless and must not inherit the mole
+    # fraction unit of the measured species.
+    measurement_match_words = ["variability", "repeatability", "stdev"]
 
     for key in variable_names:
         key = key.lower()
@@ -219,7 +221,9 @@ def get_attributes(
             ds[key].attrs["long_name"] = key.replace(species_label, sp_long)
 
             # If units are required for variable, add attribute
-            if key == species_label or any(word in key for word in match_words):
+            if "count" in key or key.endswith("_number_of_observations"):
+                ds[key].attrs["units"] = "1"
+            elif key == species_label or any(word in key for word in measurement_match_words):
                 if units in unit_interpret:
                     ds[key].attrs["units"] = unit_interpret[units]
                     # If units are non-standard, add details
