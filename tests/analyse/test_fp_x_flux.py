@@ -104,7 +104,9 @@ def _interval_start_reference(footprint: xr.Dataset, flux: xr.DataArray) -> xr.D
 def test_fp_x_flux_time_resolved_numba_matches_reference_and_preserves_source_metadata() -> None:
     """Match direct values and preserve source metadata coordinates."""
     footprint, flux = _inputs()
-    result = fp_x_flux_time_resolved_numba(footprint, flux, time_chunk=2, lat_chunk=1, lon_chunk=1, source_chunk=1)
+    result = fp_x_flux_time_resolved_numba(
+        footprint, flux, time_chunk=2, lat_chunk=1, lon_chunk=1, source_chunk=1
+    )
 
     assert hasattr(result.data, "__dask_graph__")
     assert result.dims == ("source", "lat", "lon", "time")
