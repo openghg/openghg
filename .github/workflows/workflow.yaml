@@ -90,7 +90,7 @@ jobs:
           cd doc
           uv run make html
       - name: Deploy to GitHub pages
-        uses: JamesIves/github-pages-deploy-action@v4.8.0
+        uses: JamesIves/github-pages-deploy-action@v4.9.0
         with:
           branch: gh-pages
           folder: "doc/build/html"
