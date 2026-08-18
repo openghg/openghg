@@ -349,7 +349,7 @@ def retrieve_and_parse_icos_data(
     else:
         raise NotImplementedError(f"Unsupported ICOS data_format: {data_format}")
 
-     # Ensure all required keys exist in data_attributes with sensible defaults
+    # Ensure all required keys exist in data_attributes with sensible defaults
     defaults = {
         "dataset_calibration_scale": "unknown",
         "dataset_data_frequency": "unknown",
@@ -366,11 +366,10 @@ def retrieve_and_parse_icos_data(
         "site_longitude": "unknown",
         "site_elevation": "unknown",
     }
-    
+
     for key, default_value in defaults.items():
         if key not in data_attributes:
             data_attributes[key] = default_value
-
 
     return dataset, data_attributes
 
@@ -576,7 +575,6 @@ def create_icos_attributes(
             # Use the value from attributes (already set by attributes_requiring_retrieval)
             instrument_value = attributes["instrument"]
 
-
     attributes["instrument"] = instrument_value
 
     attributes.update(additional_data)
@@ -699,6 +697,8 @@ def _retrieve_remote(
         search_str = "FastTrack"
     elif dataset_source == "EYE-AVE-PAR":
         search_str = "GHG"
+    elif dataset_source == "ICOS Flask":
+        search_str = "ICOS ATC/CAL Flask Release"
     else:
         # For this see https://stackoverflow.com/a/55335207
         # Need to make sure this is a raw string and that all \ characters have been escaped.
@@ -731,7 +731,6 @@ def _retrieve_remote(
     # TODO: ALSO: Do we need to / could filter by "ATMO_" station first?
     # Previous: For some reason they have separate station record pages that contain "ATMO_"
 
-
     data_object_info = _queries.dobj_info(
         site=site,
         data_level=data_level,
@@ -744,11 +743,10 @@ def _retrieve_remote(
         format_info=True,  # May or may not need this?
     )
 
-
     print(f"Total rows from dobj_info: {len(data_object_info)}")
     print(f"Columns: {data_object_info.columns.tolist()}")
     print(data_object_info.to_string())
-    
+
     # Load our site metadata for a few things like the station's long_name that
     # isn't in the ICOS metadata in the way we want it at the momenet - 2023-03-20
     site_info_fpath = openghg_defs.site_info_file
