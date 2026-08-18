@@ -190,27 +190,33 @@ def parse_icos_text_file(data_info: dict | pd.Series) -> tuple[xr.Dataset, dict]
 
     skiprows = int(header["header_lines"]) - 1
 
-    # # skip first column becaues it is just the site name, and skip DecimalDate
-    # usecols = [col for col in header["columns"][1:] if col != "DecimalDate"]
+    data_format = _data_parsing._retrieve_dobj_format(data_info)
+    if data_format == "asciiAtcFlaskTimeSer":
+        usecols = [
+            species,
+            "SamplingHeight",
+            "SamplingStart",
+            "SamplingEnd",
+            "Stdev",
+            "EstRep",
+            "ScalLink",
+            "CombUnc",
+            "NbPoints",
+            "Flag",
+            "InstrumentId",
+        ]
+        dataframe = pd.read_csv(io.StringIO(icos_text), skiprows=skiprows, sep=";", usecols=usecols)
 
-    usecols = [species, "Stdev", "NbPoints", "Flag", "Year", "Month", "Day", "Hour", "Minute"]
+        dataframe["TIMESTAMP"] = pd.to_datetime(dataframe["SamplingStart"]).dt.tz_localize(None)
 
-    # na_values = ["-999.99", "-9.99"]  # these are used in some ICOS files
+    else:
+        usecols = [species, "Stdev", "NbPoints", "Flag", "Year", "Month", "Day", "Hour", "Minute"]
+        dataframe = pd.read_csv(io.StringIO(icos_text), skiprows=skiprows, sep=";", usecols=usecols)
 
-    dataframe = pd.read_csv(
-        io.StringIO(icos_text), skiprows=skiprows, sep=";", usecols=usecols
-    )  # , na_values=na_values)
-
-    # make time index
-    date_cols, times = _data_parsing.parse_date_columns(dataframe)
-    # df["time"] = times
-    dataframe["TIMESTAMP"] = times
-    dataframe = dataframe.drop(columns=date_cols)
-    # dataframe = dataframe.set_index("time")
-
-    # # drop na
-    # drop_na_cols = [col for col in df.columns if col in [species, "Stdev", "NbPoints"]]
-    # df = df.dropna(subset=drop_na_cols)
+        # make time index
+        date_cols, times = _data_parsing.parse_date_columns(dataframe)
+        dataframe["TIMESTAMP"] = times
+        dataframe = dataframe.drop(columns=date_cols)
 
     # # try to get dtypes
     # dtypes = dtypes_dict(df.columns.to_list(), attrs) if attrs is not None else None
