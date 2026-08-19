@@ -74,6 +74,11 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS"]
 [project.optional-dependencies]
+    fp-x-flux = [
+        # Prevent resolvers backtracking to old Numba/llvmlite releases.
+        # This mirrors the lower bound used by openghg_inversions.
+        "numba>=0.59",
+    ]
     dev = [
         "black==26.5.1",
         "cfchecker",
@@ -161,6 +166,7 @@ dev = { features = ["pixi-dev"], solve-group = "default" }
 black = "==26.5.1"
 flake8 = "<=7.3.0"
 mypy = "==2.1.0"
+numba = ">=0.59"
 pre-commit = "<=4.6.0"
 pytest = "<=7.0.0"
 pytest-cov = "<=7.0.0"
