@@ -73,6 +73,7 @@ from openghg.retrieve import (
 from openghg.util import synonyms, clean_string, format_inlet, verify_site_with_satellite, define_platform
 from openghg.types import SearchError, ReindexMethod
 from ._alignment import combine_datasets, resample_obs_and_other
+from ._fp_x_flux import fp_x_flux_time_resolved_numba
 from ._modelled_baseline import baseline_sensitivities
 from ._utils import match_dataset_dims, stack_datasets
 
@@ -1348,7 +1349,12 @@ class ModelScenario:
 
         flux_ds = self.combine_flux_sources(sources)
 
-        fp_x_flux = fp_x_flux_time_resolved(fp, flux_ds, averaging=averaging)
+        if output_fpXflux:
+            fp_x_flux = fp_x_flux_time_resolved_numba(
+                fp.transpose("time", "lat", "lon", "H_back", missing_dims="ignore"), flux_ds
+            ).sum("source")
+        else:
+            fp_x_flux = fp_x_flux_time_resolved(fp, flux_ds, averaging=averaging)
 
         data = {}
 
