@@ -187,9 +187,7 @@ def _make_high_freq_flux(
         flux_high_freq = flux_resampler.ffill()
 
     # Fill gaps on the regular, flux-aligned grid before constructing lag windows.
-    full_dates = pd.date_range(
-        flux_high_freq.time.values[0], flux_high_freq.time.values[-1], freq=freq
-    ).to_numpy()
+    full_dates = pd.date_range(flux_high_freq.time.values[0], end, freq=freq, inclusive="left").to_numpy()
     flux_high_freq = flux_high_freq.reindex({"time": full_dates}, method="ffill")
 
     # create rolling windows
