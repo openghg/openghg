@@ -1350,6 +1350,8 @@ class ModelScenario:
         flux_ds = self.combine_flux_sources(sources)
 
         if output_fpXflux:
+            # ModelScenario sums selected fluxes first and handles split_by_sectors
+            # by calling this method once per sector, so collapse the operator's source axis.
             fp_x_flux = fp_x_flux_time_resolved_numba(
                 fp.transpose("time", "lat", "lon", "H_back", missing_dims="ignore"), flux_ds
             ).sum("source")
