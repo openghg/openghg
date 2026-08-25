@@ -1701,7 +1701,7 @@ def test_model_scenario_column_footprint_requires_max_level(satellite_name_store
     fp_column_data.data.attrs.pop("max_level")
     fp_column_data.metadata.pop("max_level")
 
-    with pytest.raises(ValueError, match=r"must have a 'max_level' attribute"):
+    with pytest.raises(ValueError, match=r"data_manager\(\.\.\.\)\.update_attributes"):
         ModelScenario(
             obs_column=obs_column_data,
             footprint=fp_column_data,

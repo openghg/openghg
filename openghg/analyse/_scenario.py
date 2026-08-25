@@ -314,8 +314,10 @@ class ModelScenario:
             raise ValueError(
                 "Column footprint data must have a 'max_level' attribute before it can be used "
                 "in ModelScenario. Re-standardise the footprint from a source file containing "
-                "max_level, or correct the source metadata, so it can be checked against the "
-                "column observations."
+                "max_level or, for data in a writable object store, add the known footprint "
+                "value using data_manager(...).update_attributes(...). Also use "
+                "update_metadata(...) to keep the stored metadata consistent. Do not infer the "
+                "footprint value from the requested observation level."
             )
 
         try:
