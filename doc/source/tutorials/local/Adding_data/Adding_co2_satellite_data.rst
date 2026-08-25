@@ -94,7 +94,8 @@ integrated calculation.
 
 .. important::
 
-   ``max_level`` must match the fixed value used when the column footprint was processed.
+   For comparison to the modelled observations, ``max_level`` must match the fixed value used
+   when the column footprint was processed.
    Using a different value for the column observations places the observations and footprint
    in different vertical spaces. For an existing footprint, inspect ``footprint.metadata["max_level"]``
    (or ``footprint.data.attrs["max_level"]``) and use that value when retrieving the column

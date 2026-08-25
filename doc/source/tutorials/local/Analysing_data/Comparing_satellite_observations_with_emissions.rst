@@ -65,11 +65,12 @@ We can now create a ``ModelScenario`` linking satellite observations with ancill
 
 .. important::
 
-   For a column or satellite ``ModelScenario``, the observation ``max_level`` must be the
-   same as the fixed ``max_level`` used to process the footprint. Otherwise, the observations
-   and footprints describe different vertical spaces and the modelled prior contribution can
-   be incorrect. The footprint in this tutorial was processed with ``max_level=17``, so the
-   column observations must also use 17. For previously retrieved objects, these values are
+   For a column or satellite ``ModelScenario``, the ``max_level`` used to retrieve the column
+   observations must be the same as the fixed ``max_level`` used to process the footprint.
+   Otherwise, the observations and footprints describe different vertical spaces and the
+   modelled prior contribution can be incorrect. The footprint in this tutorial was processed
+   with ``max_level=17``, so the value used to retrieve the column observations must also be 17.
+   For previously retrieved objects, these values are
    available from ``obs_column_data.data.attrs["max_level"]`` and
    ``fp_column_data.metadata["max_level"]`` (or ``fp_column_data.data.attrs["max_level"]``).
 
@@ -172,7 +173,7 @@ same data needs to be used for multiple different scenarios.
 
 .. jupyter-execute::
 
-    scenario_direct = ModelScenario(obs_column=obs_column_data, footprint=fp_column_data, flux=flux_data, bc=bc_results, platform="satellite", max_level=17)
+    scenario_direct = ModelScenario(obs_column=obs_column_data, footprint=fp_column_data, flux=flux_data, bc=bc_results, platform="satellite")
 
 .. note::
 
