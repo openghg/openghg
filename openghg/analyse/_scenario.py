@@ -156,8 +156,10 @@ class ModelScenario:
         network: Network name e.g. "AGAGE".
         domain: Domain name e.g. "EUROPE".
         platform: Platform name e.g "satellite", "column-insitu".
-        max_level: Maximum level for processing column observations. This must
-            match the ``max_level`` attribute of the column footprint data.
+        max_level: Maximum level for processing column observations. This is required when
+            retrieving column observations. If comparing modelled observations using a
+            footprint, it must match the footprint's ``max_level`` attribute. When supplying
+            an ``ObsColumnData`` object directly, its stored ``max_level`` is used instead.
         obs_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
         selection: For satellite only, identifier for any data selection which has been
             performed on satellite data. This can be based on any form of filtering, binning etc.
@@ -208,9 +210,10 @@ class ModelScenario:
         # For ObsColumn data processing
         if platform in accepted_column_data_types:
             # Add observation column data (directly or through keywords, column or satellite)
-            if max_level is None:
+            if max_level is None and obs_column is None:
                 raise AttributeError(
-                    f"If you are using column-based data (i.e. platform is {accepted_column_data_types}), you need to pass max_level"
+                    "Retrieving column observations for ModelScenario requires max_level. "
+                    f"Column platforms are {accepted_column_data_types}."
                 )
             self.add_obs_column(
                 site=site,
