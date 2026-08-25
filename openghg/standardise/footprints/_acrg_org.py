@@ -221,6 +221,9 @@ def parse_acrg_org(
     if network is not None:
         metadata["network"] = network
 
+    if inlet == "column":
+        metadata["max_level"] = str(fp_data.attrs.get("max_level", "unknown"))
+
     # Check if time has 0-dimensions and, if so, expand this so time is 1D
     if "time" in fp_data.coords:
         fp_data = update_zero_dim(fp_data, dim="time")

@@ -122,6 +122,9 @@ def test_paris_footprint(site, inlet, model, met_model, domain, species, filenam
 
     assert metadata.items() >= expected_metadata.items()
 
+    if inlet == "column":
+        assert metadata["max_level"] == "24"
+
     # TODO: Add data checks as required (may not be able to easily parameterize)
 
 

@@ -63,6 +63,17 @@ We'll use helper functions from ``openghg.tutorial`` to populate example data:
 
 We can now create a ``ModelScenario`` linking satellite observations with ancillary inputs.
 
+.. important::
+
+   For a column or satellite ``ModelScenario``, the ``max_level`` used to retrieve the column
+   observations must be the same as the fixed ``max_level`` used to process the footprint.
+   Otherwise, the observations and footprints describe different vertical spaces and the
+   modelled prior contribution can be incorrect. The footprint in this tutorial was processed
+   with ``max_level=17``, so the value used to retrieve the column observations must also be 17.
+   For previously retrieved objects, these values are
+   available from ``obs_column_data.data.attrs["max_level"]`` and
+   ``fp_column_data.metadata["max_level"]`` (or ``fp_column_data.data.attrs["max_level"]``).
+
 .. jupyter-execute::
 
     from openghg.analyse import ModelScenario
@@ -70,7 +81,7 @@ We can now create a ``ModelScenario`` linking satellite observations with ancill
     scenario = ModelScenario(satellite="gosat",
                    species="ch4",
                    platform="satellite",
-                   max_level=3,
+                   max_level=17,
                    domain="southamerica",
                    obs_region="brazil",
                    source="all")
@@ -137,7 +148,7 @@ same data needs to be used for multiple different scenarios.
 
     obs_column_data = get_obs_column(
         species="ch4",
-        max_level=3,
+        max_level=17,
         satellite=satellite,
         start_date="2016-01-01 14:59:12.500000+00:00",
         end_date="2016-01-01 18:10:16.500000+00:00",
@@ -162,7 +173,7 @@ same data needs to be used for multiple different scenarios.
 
 .. jupyter-execute::
 
-    scenario_direct = ModelScenario(obs_column=obs_column_data, footprint=fp_column_data, flux=flux_data, bc=bc_results, platform="satellite", max_level=3)
+    scenario_direct = ModelScenario(obs_column=obs_column_data, footprint=fp_column_data, flux=flux_data, bc=bc_results, platform="satellite")
 
 .. note::
 

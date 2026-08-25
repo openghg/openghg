@@ -1553,33 +1553,10 @@ def test_stack_datasets_with_alignment(flux_daily, flux_daily_small_dim_diff):
     np.testing.assert_allclose(output_flux, expected_flux)
 
 
-def test_satellite_scenario_raises_error(satellite_cams_store):
-    """Test that a satellite ModelScenario requires ``max_level``."""
-
-    satellite = "gosat"
-    domain = "SOUTHAMERICA"
-    obs_region = "BRAZIL"
-    species = "ch4"
-
-    obs_column = get_obs_column(
-        species=species,
-        max_level=3,
-        satellite=satellite,
-        selection="land",
-        store=satellite_cams_store,
-    )
-
-    footprint = get_footprint(
-        satellite=satellite,
-        domain=domain,
-        obs_region=obs_region,
-        model="cams",
-        store=satellite_cams_store,
-    )
-
-    with pytest.raises(AttributeError):
-        # checks that ModelScenario fails if passing platform=satellite but not max_level
-        ModelScenario(obs_column=obs_column, footprint=footprint, platform="satellite")
+def test_satellite_scenario_retrieval_requires_max_level():
+    """Retrieving satellite observations through ModelScenario requires ``max_level``."""
+    with pytest.raises(AttributeError, match="requires max_level"):
+        ModelScenario(satellite="gosat", species="ch4", platform="satellite")
 
 
 def test_model_scenario_col_fp_data_merge(satellite_name_store):
@@ -1591,7 +1568,7 @@ def test_model_scenario_col_fp_data_merge(satellite_name_store):
 
     obs_column_data = get_obs_column(
         species="ch4",
-        max_level=3,
+        max_level=17,
         satellite=satellite,
         start_date="2016-01-01 14:59:12.500000+00:00",
         end_date="2016-01-01 18:10:16.500000+00:00",
@@ -1607,6 +1584,10 @@ def test_model_scenario_col_fp_data_merge(satellite_name_store):
         model="name",
         store=satellite_name_store,
     )
+
+    assert obs_column_data.data.attrs["max_level"] == 17
+    assert int(fp_column_data.metadata["max_level"]) == 17
+
     flux_data = get_flux(
         species="ch4",
         source="all",
@@ -1619,7 +1600,6 @@ def test_model_scenario_col_fp_data_merge(satellite_name_store):
         footprint=fp_column_data,
         flux=flux_data,
         platform="satellite",
-        max_level=3,
     )
 
     # Check values have been stored in ModelScenario object correctly
@@ -1641,6 +1621,63 @@ def test_model_scenario_col_fp_data_merge(satellite_name_store):
     attributes["model"] == "name"
     attributes["data_type"] == "column"
     len(attributes["heights"]) == 20
+
+
+def test_model_scenario_column_max_level_must_match_footprint(satellite_name_store):
+    """Column observations and footprints must cover the same vertical extent."""
+    obs_column_data = get_obs_column(
+        species="ch4",
+        satellite="gosat",
+        max_level=3,
+        obs_region="brazil",
+        start_date="2016-01-01 14:59:12.500000+00:00",
+        end_date="2016-01-01 18:10:16.500000+00:00",
+        store=satellite_name_store,
+    )
+    fp_column_data = get_footprint(
+        satellite="gosat",
+        domain="southamerica",
+        model="name",
+        store=satellite_name_store,
+    )
+
+    assert obs_column_data.data.attrs["max_level"] == 3
+    assert int(fp_column_data.metadata["max_level"]) == 17
+
+    with pytest.raises(ValueError, match=r"observations use 3, while footprints use 17"):
+        ModelScenario(
+            obs_column=obs_column_data,
+            footprint=fp_column_data,
+            platform="satellite",
+        )
+
+
+def test_model_scenario_column_footprint_requires_max_level(satellite_name_store):
+    """A missing footprint max_level must not silently permit incompatible data."""
+    obs_column_data = get_obs_column(
+        species="ch4",
+        satellite="gosat",
+        max_level=17,
+        obs_region="brazil",
+        start_date="2016-01-01 14:59:12.500000+00:00",
+        end_date="2016-01-01 18:10:16.500000+00:00",
+        store=satellite_name_store,
+    )
+    fp_column_data = get_footprint(
+        satellite="gosat",
+        domain="southamerica",
+        model="name",
+        store=satellite_name_store,
+    )
+    fp_column_data.data.attrs.pop("max_level")
+    fp_column_data.metadata.pop("max_level")
+
+    with pytest.raises(ValueError, match=r"data_manager\(\.\.\.\)\.update_attributes"):
+        ModelScenario(
+            obs_column=obs_column_data,
+            footprint=fp_column_data,
+            platform="satellite",
+        )
 
 
 def test_scenario_infer_flux_source_ch4(tac_ch4_store):

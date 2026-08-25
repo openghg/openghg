@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Added column `max_level` consistency validation to `ModelScenario` and preserved `max_level` metadata when standardising ACRG and PARIS column footprints, preventing observations and footprints with different vertical extents from being combined. [PR #1718](https://github.com/openghg/openghg/pull/1718)
 - Ensured explicitly integrated CO2 site and satellite footprints are standardised and modelled through the integrated-footprint pathway, while preserving the time-resolved default for CO2 footprints. [PR #1698](https://github.com/openghg/openghg/pull/1698)
 - Added a dimension dtype checker for H_back dimension to "timedelta64[ns]". Bug occured for dimension "resolution" and dtype "resolution".[PR #1671](https://github.com/openghg/openghg/pull/1671)
 - Added config-driven metadata key handling for transformed flux and boundary condition data: removed hard-coded required-key lookups.[PR #1686](https://github.com/openghg/openghg/pull/1686)
