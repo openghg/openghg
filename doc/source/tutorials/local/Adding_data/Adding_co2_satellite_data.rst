@@ -92,6 +92,15 @@ calculation from the stored footprint variables: time-resolved data goes through
 the time-resolved CO2 calculation, while ``fp``-only data goes through the
 integrated calculation.
 
+.. important::
+
+   ``max_level`` must match the fixed value used when the column footprint was processed.
+   Using a different value for the column observations places the observations and footprint
+   in different vertical spaces. For an existing footprint, inspect ``footprint.metadata["max_level"]``
+   (or ``footprint.data.attrs["max_level"]``) and use that value when retrieving the column
+   observations and creating ``ModelScenario``. The example footprint below uses
+   ``max_level=17``.
+
 .. code:: ipython3
 
     from openghg.analyse import ModelScenario
