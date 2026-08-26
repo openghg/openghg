@@ -68,6 +68,11 @@ class SiteMet(BaseStore):
             "pressure_level": np.floating,
         }
 
-        data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
+        units = {
+            "lat": "degrees_north",
+            "lon": "degrees_east",
+        }
+
+        data_format = DataSchema(data_vars=data_vars, dtypes=dtypes, units=units)
 
         return data_format

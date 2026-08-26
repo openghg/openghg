@@ -205,11 +205,12 @@ class ObsColumn(BaseStore):
             check vertical_name inputs against valid list of options.
         """
         from openghg.standardise.meta import define_species_label
+        from openghg.util import get_species_info, load_internal_json
 
         data_vars: dict[str, tuple[str, ...]] = {}
         dtypes: dict[str, Any] = {"time": np.datetime64}
 
-        species_name = define_species_label(species)[0]
+        species_name, species_key = define_species_label(species)
 
         column_name = f"x{species_name}"
         averaging_kernal_name = f"x{species_name}_averaging_kernel"
@@ -225,6 +226,24 @@ class ObsColumn(BaseStore):
             profile_apriori_name: np.floating,
         }
 
-        data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
+        try:
+            source_unit = get_species_info()[species_key]["units"]
+        except KeyError:
+            unit = None
+        else:
+            unit = load_internal_json(filename="attributes.json")["unit_interpret"].get(source_unit, source_unit)
+
+        units = {
+            column_name: unit,
+            f"{column_name}_uncertainty": unit,
+            f"{column_name}_error": unit,
+            averaging_kernal_name: "1",
+            profile_apriori_name: unit,
+            "pressure_weights": "1",
+            "lat": "degrees_north",
+            "lon": "degrees_east",
+        }
+
+        data_format = DataSchema(data_vars=data_vars, dtypes=dtypes, units=units)
 
         return data_format

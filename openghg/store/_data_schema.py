@@ -30,6 +30,31 @@ class DataSchema:
     data_vars: dict[str, tuple[str, ...]] | None = None
     dtypes: dict[str, type] | None = None
     dims: list[str] | None = None
+    units: dict[str, str | None] | None = None
+
+    def assign_units(self, data: Dataset) -> None:
+        """Assign missing units defined by this schema.
+
+        A schema unit is a default for an internal OpenGHG variable, rather
+        than a conversion request. Existing units are therefore retained so
+        that source-specific scales, such as ``1e-9`` for mole fractions,
+        remain correct. A value of ``None`` marks a variable as outside Pint
+        handling and removes any unit attribute it may have acquired.
+
+        Args:
+            data: Dataset whose variables and coordinates should be updated.
+        """
+        if self.units is None:
+            return
+
+        for variable, unit in self.units.items():
+            if variable not in data:
+                continue
+
+            if unit is None:
+                data[variable].attrs.pop("units", None)
+            elif data[variable].attrs.get("units") in (None, ""):
+                data[variable].attrs["units"] = unit
 
     def _check_data_vars(self, data: Dataset) -> None:
         """
@@ -124,6 +149,7 @@ class DataSchema:
          - data variables are present with expected dimensions.
          - general dimensions are present
          - data types of data variables and coordinates match to expected values
+         - missing units are assigned from the schema
 
         Args:
             data : xarray Dataset to be validated
@@ -133,6 +159,8 @@ class DataSchema:
             Raises a ValidationError with details if the input data does not adhere
             to the defined DataSchema.
         """
+
+        self.assign_units(data)
 
         if self.data_vars is not None:
             self._check_data_vars(data)
