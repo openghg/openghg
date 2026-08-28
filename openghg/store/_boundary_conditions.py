@@ -125,7 +125,12 @@ class BoundaryConditions(BaseStore):
             "vmr_w": np.floating,
         }
 
-        data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
+        data_format = DataSchema(
+            data_vars=data_vars,
+            dtypes=dtypes,
+            units={"lat": "degrees_north", "lon": "degrees_east", "height": "m"},
+            units_compatible={name: "mol/mol" for name in data_vars},
+        )
 
         return data_format
 
