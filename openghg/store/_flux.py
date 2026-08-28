@@ -4,7 +4,6 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, Optional
 import warnings
-import numpy as np
 from numpy import ndarray
 from xarray import DataArray
 
@@ -247,18 +246,7 @@ class Flux(BaseStore):
         Returns:
             DataSchema : Contains schema for Flux.
         """
-        data_vars: dict[str, tuple[str, ...]] = {"flux": ("time", "lat", "lon")}
-        dtypes = {"lat": np.floating, "lon": np.floating, "time": np.datetime64, "flux": np.floating}
-
-        data_format = DataSchema(
-            data_vars=data_vars,
-            dtypes=dtypes,
-            units={"lat": "degrees_north", "lon": "degrees_east"},
-            units_compatible={"flux": "mol m-2 s-1"},
-            required_attrs={"flux": {"source", "species"}},
-        )
-
-        return data_format
+        return DataSchema.from_name("flux")
 
     def chunking_schema(self) -> ChunkingSchema:
         """

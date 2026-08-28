@@ -2,7 +2,6 @@ from __future__ import annotations
 import logging
 from typing import cast, Any
 import warnings
-import numpy as np
 
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
@@ -319,19 +318,6 @@ class Footprints(BaseStore):
         # # but given that all other openghg internal formats are ("lat", "lon"), we are currently keeping the
         # # footprint internal format consistent with this.
 
-        # Names of data variables and associated dimensions (as a tuple)
-        data_vars: dict[str, tuple[str, ...]] = {}
-        units: dict[str, str | None] = {
-            "lat": "degrees_north",
-            "lon": "degrees_east",
-        }
-        # Internal data types of data variables and coordinates
-        dtypes = {
-            "lat": np.floating,  # Covers np.float16, np.float32, np.float64 types
-            "lon": np.floating,
-            "time": np.datetime64,
-        }
-
         # Disable particle_locations validation when inner_domain is present
         if inner_domain:
             particle_locations = False
@@ -343,86 +329,21 @@ class Footprints(BaseStore):
             )
             time_resolved = high_time_resolution
 
+        fragments = []
         if not time_resolved and not high_spatial_resolution:
-            # Includes standard footprint variable
-            data_vars["fp"] = ("time", "lat", "lon")
-            dtypes["fp"] = np.floating
-            units["fp"] = "m2 s mol-1"
-
+            fragments.append("integrated")
         if high_spatial_resolution:
-            # Include options for high spatial resolution footprint
-            # This includes footprint data on multiple resolutions
-
-            data_vars["fp_low"] = ("time", "lat", "lon")
-            data_vars["fp_high"] = ("time", "lat_high", "lon_high")
-
-            dtypes["fp_low"] = np.floating
-            dtypes["fp_high"] = np.floating
-            units["fp_low"] = "m2 s mol-1"
-            units["fp_high"] = "m2 s mol-1"
-            units["lat_high"] = "degrees_north"
-            units["lon_high"] = "degrees_east"
-
+            fragments.append("high_spatial_resolution")
         if time_resolved:
-            # Include options for high time resolution footprint (usually co2)
-            # This includes a footprint data with an additional hourly back dimension
-            if source_format in ("PARIS", "FLEXPART"):
-                data_vars["fp_time_resolved"] = ("time", "lat", "lon", "H_back")
-                data_vars["fp_residual"] = ("time", "lat", "lon")
-                dtypes["fp_time_resolved"] = np.floating
-                dtypes["fp_residual"] = np.floating
-                units["fp_time_resolved"] = "m2 s mol-1"
-                units["fp_residual"] = "m2 s mol-1"
-            else:
-                data_vars["fp_HiTRes"] = ("time", "lat", "lon", "H_back")
-                dtypes["fp_HiTRes"] = np.floating
-                units["fp_HiTRes"] = "m2 s mol-1"
-
-            dtypes["H_back"] = np.number  # float or integer
-            units["H_back"] = "hour"
-
-        # Includes particle location directions - one for each regional boundary
+            fragments.append(
+                "time_resolved_paris" if source_format in ("PARIS", "FLEXPART") else "time_resolved_acrg"
+            )
         if particle_locations:
-            data_vars["particle_locations_n"] = ("time", "lon", "height")
-            data_vars["particle_locations_e"] = ("time", "lat", "height")
-            data_vars["particle_locations_s"] = ("time", "lon", "height")
-            data_vars["particle_locations_w"] = ("time", "lat", "height")
-
-            dtypes["height"] = np.floating
-            dtypes["particle_locations_n"] = np.floating
-            dtypes["particle_locations_e"] = np.floating
-            dtypes["particle_locations_s"] = np.floating
-            dtypes["particle_locations_w"] = np.floating
-            units["height"] = "m"
-            units.update({name: "1" for name in data_vars if name.startswith("particle_locations_")})
-
-        # TODO: Could also add check for meteorological + other data
-        # "air_temperature", "air_pressure", "wind_speed", "wind_from_direction",
-        # "atmosphere_boundary_layer_thickness", "release_lon", "release_lat"
-
-        # Include options for short lifetime footprints (short-lived species)
-        # This includes additional particle ages (allow calculation of decay based on particle lifetimes)
+            fragments.append("particle_locations")
         if short_lifetime:
-            data_vars["mean_age_particles_n"] = ("time", "lon", "height")
-            data_vars["mean_age_particles_e"] = ("time", "lat", "height")
-            data_vars["mean_age_particles_s"] = ("time", "lon", "height")
-            data_vars["mean_age_particles_w"] = ("time", "lat", "height")
+            fragments.append("short_lifetime")
 
-            dtypes["mean_age_particles_n"] = np.floating
-            dtypes["mean_age_particles_e"] = np.floating
-            dtypes["mean_age_particles_s"] = np.floating
-            dtypes["mean_age_particles_w"] = np.floating
-            units["height"] = "m"
-            units.update({name: "hour" for name in data_vars if name.startswith("mean_age_particles_")})
-
-        data_format = DataSchema(
-            data_vars=data_vars,
-            dtypes=dtypes,
-            units=units,
-            required_attrs={name: {"long_name"} for name in data_vars},
-        )
-
-        return data_format
+        return DataSchema.from_name("footprints", fragments=fragments)
 
     def chunking_schema(
         self,

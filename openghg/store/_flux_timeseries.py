@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
-import numpy as np
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -236,12 +235,4 @@ class FluxTimeseries(BaseStore):
         """
         from openghg.store import DataSchema
 
-        data_vars: dict[str, tuple[str, ...]] = {"flux_timeseries": ("time",)}
-        dtypes = {
-            "time": np.datetime64,
-            "flux_timeseries": np.floating,
-        }
-
-        data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
-
-        return data_format
+        return DataSchema.from_name("flux_timeseries")

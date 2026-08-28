@@ -1,6 +1,9 @@
 from dataclasses import dataclass, field
-from functools import partial
+from functools import lru_cache, partial
+from importlib import resources
+import json
 import logging
+from typing import Any, cast, Iterable, Mapping
 
 import numpy as np
 from xarray import DataArray, Dataset
@@ -17,6 +20,41 @@ __all__ = ["DataSchema"]
 
 
 xv_units.set_registry(cf_ureg)
+
+
+_DTYPES: dict[str, type] = {
+    "datetime64": np.datetime64,
+    "floating": np.floating,
+    "integer": np.integer,
+    "number": np.number,
+}
+
+
+@lru_cache(maxsize=1)
+def _schema_configs() -> dict[str, Any]:
+    schema_path = resources.files(__package__).joinpath("data_schemas.json")
+    with schema_path.open(encoding="utf-8") as file:
+        return cast(dict[str, Any], json.load(file))
+
+
+def _format(value: str, substitutions: Mapping[str, str]) -> str:
+    try:
+        return value.format_map(substitutions)
+    except KeyError as err:
+        raise ValueError(f"Missing schema substitution: {err.args[0]}") from err
+
+
+def _merge_configs(configs: Iterable[dict[str, Any]]) -> dict[str, Any]:
+    merged: dict[str, Any] = {}
+    for config in configs:
+        for field_name, value in config.items():
+            if isinstance(value, dict):
+                merged.setdefault(field_name, {}).update(value)
+            elif isinstance(value, list):
+                merged.setdefault(field_name, []).extend(value)
+            else:
+                raise ValueError(f"Unsupported schema field: {field_name}")
+    return merged
 
 
 def _attrs_schema(
@@ -57,6 +95,69 @@ class DataSchema:
     required_attrs: dict[str, set[str]] | None = None
     dataset_attrs: set[str] | None = None
     _schema: xv.DatasetSchema = field(init=False, repr=False, compare=False)
+
+    @classmethod
+    def from_name(
+        cls,
+        name: str,
+        *,
+        fragments: Iterable[str] = (),
+        substitutions: Mapping[str, str] | None = None,
+    ) -> "DataSchema":
+        """Load an OpenGHG schema declaration from the packaged JSON resource."""
+        try:
+            config = _schema_configs()[name]
+        except KeyError as err:
+            raise ValueError(f"Unknown data schema: {name}") from err
+
+        if "base" in config:
+            selected = [config["base"]]
+            try:
+                selected.extend(config["fragments"][fragment] for fragment in fragments)
+            except KeyError as err:
+                raise ValueError(f"Unknown {name} schema fragment: {err.args[0]}") from err
+            config = _merge_configs(selected)
+        elif tuple(fragments):
+            raise ValueError(f"Schema {name} does not define fragments")
+
+        return cls.from_dict(config, substitutions=substitutions)
+
+    @classmethod
+    def from_dict(
+        cls, config: dict[str, Any], substitutions: Mapping[str, str] | None = None
+    ) -> "DataSchema":
+        """Create a schema from the JSON-compatible OpenGHG declaration format."""
+        substitutions = substitutions or {}
+
+        def name(value: str) -> str:
+            return _format(value, substitutions)
+
+        try:
+            dtypes = {name(variable): _DTYPES[dtype] for variable, dtype in config.get("dtypes", {}).items()}
+        except KeyError as err:
+            raise ValueError(f"Unknown schema dtype: {err.args[0]}") from err
+
+        data_vars = {
+            name(variable): tuple(name(dim) for dim in dims)
+            for variable, dims in config.get("data_vars", {}).items()
+        }
+
+        return cls(
+            data_vars=data_vars if "data_vars" in config else None,
+            dtypes=dtypes if "dtypes" in config else None,
+            dims=[name(dim) for dim in config.get("dims", [])] or None,
+            units={name(variable): unit for variable, unit in config.get("units", {}).items()} or None,
+            units_compatible={
+                name(variable): unit for variable, unit in config.get("units_compatible", {}).items()
+            }
+            or None,
+            required_attrs={
+                name(variable): set(attributes)
+                for variable, attributes in config.get("required_attrs", {}).items()
+            }
+            or None,
+            dataset_attrs=set(config.get("dataset_attrs", [])) or None,
+        )
 
     def __post_init__(self) -> None:
         variables: dict[str, xv.DataArraySchema] = {}
