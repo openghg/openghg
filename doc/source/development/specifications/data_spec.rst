@@ -50,6 +50,39 @@ must be present but may appear in a different order. Dtype constraints for
 coordinates remain optional when the coordinate is absent, matching the
 historical OpenGHG schema behaviour.
 
+Unit requirements
+~~~~~~~~~~~~~~~~~
+
+Schemas declare units only for variables whose physical meaning is known. The
+``units`` mapping requires a unit equivalent to the declared unit; a ``None``
+value requires a non-empty units string without constraining its dimension.
+``units_compatible`` accepts scaled units with the same dimensionality:
+
+.. code-block:: python
+
+    DataSchema(
+        data_vars={"flux": ("time", "lat", "lon")},
+        units={"lat": "degrees_north", "lon": "degrees_east"},
+        units_compatible={"flux": "mol m-2 s-1"},
+    )
+
+The main surface-observation variable uses the non-empty form because surface
+data includes mole fractions, isotopes, particulates, and other dimensions.
+Observation cardinalities such as ``number_of_observations`` are deliberately
+not assigned units and must not be converted with the observation signal.
+
+Flux, footprint, and boundary-condition schemas use dimensional constraints.
+Latitude, longitude, height, and numeric back-time coordinates are also
+validated where present in those formats. Datetime coordinates are excluded:
+xarray moves their CF units into the encoding when it decodes them, and Pint
+handles datetime coordinates without a units attribute.
+
+Unit parsing uses OpenGHG's CF-aware Pint registry, so scaled mole fractions
+such as ``ppm``, ``ppb``, and ``1e-9`` and CF spellings such as
+``degrees_north`` are handled consistently. Add requirements to the named
+physical variables in a storage-class schema; do not use a wildcard merely to
+require units on every data variable.
+
 ObsSurface
 ----------
 
