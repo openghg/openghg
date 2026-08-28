@@ -1,11 +1,15 @@
 from dataclasses import dataclass, field
 from functools import partial
+import logging
 
 import numpy as np
 from xarray import DataArray, Dataset
 import xarray_validate as xv  # type: ignore[import-untyped]
 
 from openghg.types import ValidationError
+
+logger = logging.getLogger("openghg.store")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 __all__ = ["DataSchema"]
 
