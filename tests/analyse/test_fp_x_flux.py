@@ -283,12 +283,12 @@ def test_gapped_hour_aligned_release_times_use_indexed_kernel() -> None:
 
 
 def test_irregular_release_times_support_regular_coarse_flux() -> None:
-    """Forward-fill coarse intervals before indexed irregular-time lookup."""
+    """Match the corrected legacy operator for irregular times and coarse flux."""
     footprint, flux = _inputs()
     footprint = footprint.assign_coords(
         time=pd.to_datetime(
             [
-                "2021-01-01 03:37",
+                "2021-01-01 02:37",
                 "2021-01-01 05:23",
                 "2021-01-01 07:58",
                 "2021-01-01 09:01",
@@ -298,22 +298,23 @@ def test_irregular_release_times_support_regular_coarse_flux() -> None:
     )
     coarse_flux = flux.isel(time=slice(None, None, 2))
 
-    result = fp_x_flux_time_resolved_numba(footprint, coarse_flux)
+    result = fp_x_flux_time_resolved_numba(footprint, coarse_flux).compute()
+    expected = _existing_time_resolved_reference(footprint, coarse_flux)
 
     assert result.attrs["kernel"] == "numba_indexed"
-    xr.testing.assert_allclose(result.compute(), _interval_start_reference(footprint, coarse_flux))
+    _assert_value_parity(result, expected.astype(np.float32))
 
 
-def test_irregular_times_match_legacy_where_flux_grid_has_the_same_offset() -> None:
-    """Match legacy values where its shifted time grid is scientifically valid."""
+def test_irregular_times_match_corrected_legacy_operator() -> None:
+    """Match corrected legacy values for irregular footprint releases."""
     footprint, flux = _inputs()
     release_times = pd.to_datetime(
         [
-            "2021-01-01 03:00",
-            "2021-01-01 05:00",
-            "2021-01-01 06:00",
-            "2021-01-01 09:00",
-            "2021-01-01 11:00",
+            "2021-01-01 02:37",
+            "2021-01-01 05:23",
+            "2021-01-01 07:58",
+            "2021-01-01 09:01",
+            "2021-01-01 11:42",
         ]
     )
     footprint = footprint.assign_coords(time=release_times)
