@@ -6,6 +6,7 @@ channels:
 dependencies:
   - python>=3.10
   - addict
+  - attrs>=22
   - cf_xarray
   - dask<2025.10
   - h5netcdf>=1.0.0,<=1.6.4
@@ -46,5 +47,6 @@ dependencies:
   - pip:
     - icoscp
     - numpy>=2.0,<=2.3.3
+    - xarray-validate==0.0.5
 # numpy >= 2.0 is included in pip requirements because icoscp will try and downgrade numpy to <2.0
 # - can remove and use definition above again when https://github.com/ICOS-Carbon-Portal/data/issues/391 is resolved.

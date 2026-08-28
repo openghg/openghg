@@ -1,146 +1,62 @@
-from dataclasses import dataclass
-import logging
+from dataclasses import dataclass, field
+from functools import partial
+
 import numpy as np
-from xarray import Dataset
+from xarray import DataArray, Dataset
+import xarray_validate as xv  # type: ignore[import-untyped]
 
 from openghg.types import ValidationError
-
-logger = logging.getLogger("openghg.store")
-logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 __all__ = ["DataSchema"]
 
 
+def _check_dims(expected: tuple[str, ...], data: DataArray) -> None:
+    for dim in expected:
+        if dim not in data.dims:
+            raise ValueError(
+                f"Missing dimension for data variable: {data.name}, {dim}. Current dims: {data.dims}"
+            )
+
+
 @dataclass
 class DataSchema:
-    """
-    Create schema for a data type based on inputs for components of the data.
-    Expected format is based against an xarray Dataset.
-
-    Example inputs:
-        DataSchema(
-            data_vars = {"fp": ("time", "lat", "lon"), ...},
-            dtypes = {"fp" : np.floating, ...},
-            dims = ["time", "lat", "lon", ...]
-        )
-    """
-
-    # TODO : Change or add additional checks as needed
+    """OpenGHG compatibility wrapper around :mod:`xarray_validate` schemas."""
 
     data_vars: dict[str, tuple[str, ...]] | None = None
     dtypes: dict[str, type] | None = None
     dims: list[str] | None = None
+    _schema: xv.DatasetSchema = field(init=False, repr=False, compare=False)
 
-    def _check_data_vars(self, data: Dataset) -> None:
-        """
-        Check data variables and their dimensions of data against the schema.
+    def __post_init__(self) -> None:
+        variables: dict[str, xv.DataArraySchema] = {}
+        for name, dims in (self.data_vars or {}).items():
+            variables[name] = xv.DataArraySchema(
+                dtype=(self.dtypes or {}).get(name),
+                checks=[partial(_check_dims, dims)],
+            )
 
-        Args:
-            data : xarray Dataset to be checked
-        Returns:
-            None
+        self._schema = xv.DatasetSchema(
+            data_vars=variables or None,
+            allow_extra_keys=True,
+            checks=[self._check_remaining_constraints],
+        )
 
-            Raises a ValueError with details if expected data variable is
-            not present or expected dimensions are not present for a data variable
-            based on the DataSchema object.
-        """
-        expected_data_vars = self.data_vars
-        if expected_data_vars is None:
-            logger.debug("No data variables to check against schema")
-            return None
-        else:
-            expected_dv = expected_data_vars.keys()
+    def _check_remaining_constraints(self, data: Dataset) -> None:
+        """Retain the old optional-coordinate dtype and dataset-dimension checks."""
+        for dim in self.dims or []:
+            if dim not in data.dims:
+                raise xv.SchemaError(f"Expected dimension: {dim} not present in standardised data")
 
-        data_vars = data.data_vars
+        required_vars = self.data_vars or {}
+        for name, dtype in (self.dtypes or {}).items():
+            if name in data and name not in required_vars and not np.issubdtype(data[name].dtype, dtype):
+                raise xv.SchemaError(
+                    f"Expected data type of variable {name} to be: {dtype}. Current {data[name].dtype}"
+                )
 
-        for edv in expected_dv:
-            if edv in data_vars:
-                dims = data[edv].dims
-                expected_dv_dims = expected_data_vars[edv]
-                for edim in expected_dv_dims:
-                    if edim not in dims:
-                        raise ValueError(
-                            f"Missing dimension for data variable: {edv}, {edim}. Current dims: {dims}"
-                        )
-            else:
-                raise ValidationError(f"Expected data variable: {edv} not present in standardised data")
-
-    def _check_dims(self, data: Dataset) -> None:
-        """
-        Check dimensions of data against the the schema.
-
-        Args:
-            data : xarray Dataset to be checked
-        Returns:
-            None
-
-            Raises a ValueError with details if expected dimensions
-            are not present in data based on the DataSchema object.
-        """
-        expected_dims = self.dims
-        if expected_dims is None:
-            logger.debug("No dims to check against schema")
-            return None
-
-        dims = data.dims
-
-        for edim in expected_dims:
-            if edim not in dims:
-                raise ValidationError(f"Expected dimension: {edim} not present in standardised data")
-
-    def _check_dtypes(self, data: Dataset) -> None:
-        """
-        Check dtypes of variables and coordinates of data against the schema.
-
-        Args:
-            data : xarray Dataset to be checked
-        Returns:
-            None
-
-            Raises a ValueError with details if data variables and coordinates
-            are not of expected data types based on the DataSchema object.
-        """
-        expected_data_types = self.dtypes
-        if expected_data_types is None:
-            logger.debug("No data types to check against schema")
-            return None
-
-        for variable, edata_type in expected_data_types.items():
-            if variable in data:
-                dtype = data[variable].dtype
-                if not np.issubdtype(dtype, edata_type):
-                    raise ValidationError(
-                        f"Expected data type of variable {variable} to be: {edata_type}. Current {dtype}"
-                    )
-
-    def validate_data(
-        self,
-        data: Dataset,
-    ) -> None:
-        """
-        Validate input data based on schema.
-
-        Currently check can include:
-         - data variables are present with expected dimensions.
-         - general dimensions are present
-         - data types of data variables and coordinates match to expected values
-
-        Args:
-            data : xarray Dataset to be validated
-        Returns:
-            None
-
-            Raises a ValidationError with details if the input data does not adhere
-            to the defined DataSchema.
-        """
-
-        if self.data_vars is not None:
-            self._check_data_vars(data)
-
-        if self.dims is not None:
-            self._check_dims(data)
-
-        if self.dtypes is not None:
-            self._check_dtypes(data)
-
-    # TODO: Add string method for pretty printing
+    def validate_data(self, data: Dataset) -> None:
+        """Validate an xarray Dataset, exposing OpenGHG's public error type."""
+        try:
+            self._schema.validate(data)
+        except xv.SchemaError as err:
+            raise ValidationError(str(err)) from err

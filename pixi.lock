@@ -291,6 +291,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/c1/ea/53f2148663b321f21b5a606bd5f191517cf40b7072c0497d3c92c4a13b1e/executing-2.2.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/c5/3c/3179b85b0e1c3659f0369940200cd6d0fa900e6cefcc7ea0bc6dd0e29ffb/nest_asyncio2-1.7.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/cb/a8/20d0723294217e47de6d9e2e40fd4a9d2f7c4b6ef974babd482a59743694/fastjsonschema-2.21.2-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/cc/11/88c4bb44dff0e8003c4781190a8e598caf7fa95a27d1f1e0e2f16dcbb333/xarray_validate-0.0.5-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d2/39/e7eaf1799466a4aef85b6a4fe7bd175ad2b1c6345066aa33f1f58d4b18d0/asttokens-3.0.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d4/5b/911af9f1f68f4e30474dc5923966656a57d6bc5b1f3b836362739a57d961/msgpack_types-0.7.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d5/0c/043d5e551459da400957a1395e0febbf771446ff34291afcbe3d8be2a279/fsspec-2026.4.0-py3-none-any.whl
@@ -507,6 +508,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/c1/ea/53f2148663b321f21b5a606bd5f191517cf40b7072c0497d3c92c4a13b1e/executing-2.2.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/c5/3c/3179b85b0e1c3659f0369940200cd6d0fa900e6cefcc7ea0bc6dd0e29ffb/nest_asyncio2-1.7.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/cb/a8/20d0723294217e47de6d9e2e40fd4a9d2f7c4b6ef974babd482a59743694/fastjsonschema-2.21.2-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/cc/11/88c4bb44dff0e8003c4781190a8e598caf7fa95a27d1f1e0e2f16dcbb333/xarray_validate-0.0.5-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/cf/35/819eeb4fa8ee676d38fdbb8213a76fd496f7dbbfdfafa89d34e02b22dfac/orjson-3.12.0-cp310-cp310-macosx_10_15_x86_64.macosx_11_0_arm64.macosx_10_15_universal2.whl
       - pypi: https://files.pythonhosted.org/packages/d2/39/e7eaf1799466a4aef85b6a4fe7bd175ad2b1c6345066aa33f1f58d4b18d0/asttokens-3.0.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d4/5b/911af9f1f68f4e30474dc5923966656a57d6bc5b1f3b836362739a57d961/msgpack_types-0.7.0-py3-none-any.whl
@@ -729,6 +731,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/c1/ea/53f2148663b321f21b5a606bd5f191517cf40b7072c0497d3c92c4a13b1e/executing-2.2.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/c5/3c/3179b85b0e1c3659f0369940200cd6d0fa900e6cefcc7ea0bc6dd0e29ffb/nest_asyncio2-1.7.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/cb/a8/20d0723294217e47de6d9e2e40fd4a9d2f7c4b6ef974babd482a59743694/fastjsonschema-2.21.2-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/cc/11/88c4bb44dff0e8003c4781190a8e598caf7fa95a27d1f1e0e2f16dcbb333/xarray_validate-0.0.5-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/cf/35/819eeb4fa8ee676d38fdbb8213a76fd496f7dbbfdfafa89d34e02b22dfac/orjson-3.12.0-cp310-cp310-macosx_10_15_x86_64.macosx_11_0_arm64.macosx_10_15_universal2.whl
       - pypi: https://files.pythonhosted.org/packages/d2/39/e7eaf1799466a4aef85b6a4fe7bd175ad2b1c6345066aa33f1f58d4b18d0/asttokens-3.0.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d4/5b/911af9f1f68f4e30474dc5923966656a57d6bc5b1f3b836362739a57d961/msgpack_types-0.7.0-py3-none-any.whl
@@ -1049,6 +1052,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/c5/3c/3179b85b0e1c3659f0369940200cd6d0fa900e6cefcc7ea0bc6dd0e29ffb/nest_asyncio2-1.7.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/c5/d3/8ef50149e8412a77f7ab409efdef0e2b23803707a3863da4fc64cb23d459/ruff-0.16.2-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/cb/a8/20d0723294217e47de6d9e2e40fd4a9d2f7c4b6ef974babd482a59743694/fastjsonschema-2.21.2-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/cc/11/88c4bb44dff0e8003c4781190a8e598caf7fa95a27d1f1e0e2f16dcbb333/xarray_validate-0.0.5-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d2/39/e7eaf1799466a4aef85b6a4fe7bd175ad2b1c6345066aa33f1f58d4b18d0/asttokens-3.0.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d4/5b/911af9f1f68f4e30474dc5923966656a57d6bc5b1f3b836362739a57d961/msgpack_types-0.7.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d5/0c/043d5e551459da400957a1395e0febbf771446ff34291afcbe3d8be2a279/fsspec-2026.4.0-py3-none-any.whl
@@ -1290,6 +1294,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/c1/ea/53f2148663b321f21b5a606bd5f191517cf40b7072c0497d3c92c4a13b1e/executing-2.2.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/c5/3c/3179b85b0e1c3659f0369940200cd6d0fa900e6cefcc7ea0bc6dd0e29ffb/nest_asyncio2-1.7.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/cb/a8/20d0723294217e47de6d9e2e40fd4a9d2f7c4b6ef974babd482a59743694/fastjsonschema-2.21.2-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/cc/11/88c4bb44dff0e8003c4781190a8e598caf7fa95a27d1f1e0e2f16dcbb333/xarray_validate-0.0.5-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/cf/35/819eeb4fa8ee676d38fdbb8213a76fd496f7dbbfdfafa89d34e02b22dfac/orjson-3.12.0-cp310-cp310-macosx_10_15_x86_64.macosx_11_0_arm64.macosx_10_15_universal2.whl
       - pypi: https://files.pythonhosted.org/packages/d2/39/e7eaf1799466a4aef85b6a4fe7bd175ad2b1c6345066aa33f1f58d4b18d0/asttokens-3.0.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d4/5b/911af9f1f68f4e30474dc5923966656a57d6bc5b1f3b836362739a57d961/msgpack_types-0.7.0-py3-none-any.whl
@@ -1537,6 +1542,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/c1/ea/53f2148663b321f21b5a606bd5f191517cf40b7072c0497d3c92c4a13b1e/executing-2.2.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/c5/3c/3179b85b0e1c3659f0369940200cd6d0fa900e6cefcc7ea0bc6dd0e29ffb/nest_asyncio2-1.7.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/cb/a8/20d0723294217e47de6d9e2e40fd4a9d2f7c4b6ef974babd482a59743694/fastjsonschema-2.21.2-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/cc/11/88c4bb44dff0e8003c4781190a8e598caf7fa95a27d1f1e0e2f16dcbb333/xarray_validate-0.0.5-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/cf/35/819eeb4fa8ee676d38fdbb8213a76fd496f7dbbfdfafa89d34e02b22dfac/orjson-3.12.0-cp310-cp310-macosx_10_15_x86_64.macosx_11_0_arm64.macosx_10_15_universal2.whl
       - pypi: https://files.pythonhosted.org/packages/d2/39/e7eaf1799466a4aef85b6a4fe7bd175ad2b1c6345066aa33f1f58d4b18d0/asttokens-3.0.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d4/5b/911af9f1f68f4e30474dc5923966656a57d6bc5b1f3b836362739a57d961/msgpack_types-0.7.0-py3-none-any.whl
@@ -7380,10 +7386,11 @@ packages:
   name: openghg
   requires_dist:
   - addict<=2.4.0
+  - attrs>=22
   - cdsapi>=0.7.7
   - cf-xarray<=0.10.6
-  - dask<2026.8
-  - filelock<=3.32.3
+  - dask<2026.9
+  - filelock<=3.32.5
   - flox<=0.10.4
   - h5netcdf>=1.0.0,<=1.8.1
   - h5py<3.17
@@ -7393,7 +7400,7 @@ packages:
   - kaleido>=1.3.0
   - matplotlib<=3.10.9
   - msgpack-types<=0.8.0
-  - msgpack<=1.2.1
+  - msgpack<=1.2.2
   - nbformat<=5.11.1
   - nc-time-axis<=1.4.1
   - netcdf4>=1.6.0,<=1.7.2
@@ -7407,7 +7414,7 @@ packages:
   - pandas>=2.0,<=2.3.3
   - pint-xarray<=0.5.1
   - pint<=0.24.4
-  - plotly<=6.9.0
+  - plotly<=7.0.0
   - pre-commit>=4.6.0
   - pytest-mock>=3.15.1
   - pytest>=7.0.0
@@ -7420,6 +7427,7 @@ packages:
   - tinydb<=4.9.0
   - toml<=0.10.2
   - urllib3>=1.26.3
+  - xarray-validate==0.0.5
   - xarray>=2025.4.0,<=2025.9.1
   - zarr==2.18.3
   - cfchecker @ git+https://github.com/openghg/cf-checker@master ; extra == 'dev'
@@ -7431,8 +7439,8 @@ packages:
   - pytest-tornasync<=0.6.0.post2 ; extra == 'dev'
   - pytest<=7.0.0 ; extra == 'dev'
   - requests-mock<=1.12.1 ; extra == 'dev'
-  - ruff==0.16.2 ; extra == 'dev'
-  - tox<=4.60.0 ; extra == 'dev'
+  - ruff==0.16.6 ; extra == 'dev'
+  - tox<=4.61.2 ; extra == 'dev'
   - types-paramiko<=5.0.0.20260724 ; extra == 'dev'
   - types-pyyaml<=6.0.12.20260815 ; extra == 'dev'
   - types-requests<=2.33.0.20260712 ; extra == 'dev'
@@ -7441,7 +7449,7 @@ packages:
   - docutils<=0.23 ; extra == 'doc'
   - ipython<=8.39.0 ; extra == 'doc'
   - jinja2 ; extra == 'doc'
-  - jupyter-client<=8.9.1 ; extra == 'doc'
+  - jupyter-client<=8.10.0 ; extra == 'doc'
   - jupyter-core<=5.9.1 ; extra == 'doc'
   - jupyter-sphinx ; extra == 'doc'
   - myst-parser<=4.0.1 ; extra == 'doc'
@@ -7457,7 +7465,7 @@ packages:
   - sphinx-rtd-theme<3.2.0 ; extra == 'doc'
   - sphinx-togglebutton ; extra == 'doc'
   - sphinxcontrib-bibtex<=2.7.0 ; extra == 'doc'
-  - sphinxcontrib-mermaid<=2.1.0 ; extra == 'doc'
+  - sphinxcontrib-mermaid<=2.1.1 ; extra == 'doc'
   - sphinxcontrib-programoutput ; extra == 'doc'
   - numba>=0.59 ; extra == 'fp-x-flux'
   requires_python: '>=3.10'
@@ -8479,6 +8487,18 @@ packages:
   - pytest-benchmark ; extra == 'devel'
   - pytest-cache ; extra == 'devel'
   - validictory ; extra == 'devel'
+- pypi: https://files.pythonhosted.org/packages/cc/11/88c4bb44dff0e8003c4781190a8e598caf7fa95a27d1f1e0e2f16dcbb333/xarray_validate-0.0.5-py3-none-any.whl
+  name: xarray-validate
+  version: 0.0.5
+  sha256: 4d472b40d1063c5b4f2f56097b57551380dc06393da4a480d9ca85fd3cf0f2a9
+  requires_dist:
+  - attrs
+  - numpy
+  - xarray
+  - dask ; extra == 'dask'
+  - pint ; extra == 'units'
+  - ruamel-yaml ; extra == 'yaml'
+  requires_python: '>=3.8'
 - pypi: https://files.pythonhosted.org/packages/cf/35/819eeb4fa8ee676d38fdbb8213a76fd496f7dbbfdfafa89d34e02b22dfac/orjson-3.12.0-cp310-cp310-macosx_10_15_x86_64.macosx_11_0_arm64.macosx_10_15_universal2.whl
   name: orjson
   version: 3.12.0
