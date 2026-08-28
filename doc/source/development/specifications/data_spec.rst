@@ -83,6 +83,27 @@ such as ``ppm``, ``ppb``, and ``1e-9`` and CF spellings such as
 physical variables in a storage-class schema; do not use a wildcard merely to
 require units on every data variable.
 
+Other attribute requirements
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Use ``required_attrs`` to require non-empty string attributes on named data
+variables or coordinates, and ``dataset_attrs`` for Dataset-level attributes:
+
+.. code-block:: python
+
+    DataSchema(
+        data_vars={"example": ("time",)},
+        required_attrs={"example": {"long_name", "source"}},
+        dataset_attrs={"species"},
+    )
+
+Attribute requirements should describe stable parts of an internal data format,
+not metadata that is only available from some source formats. Surface signals
+require ``long_name``; fluxes require ``source`` and ``species``; footprint and
+boundary-condition signals require ``long_name``. Add or normalize these
+attributes in the standardizer before schema validation rather than silently
+adding them in the validator.
+
 ObsSurface
 ----------
 

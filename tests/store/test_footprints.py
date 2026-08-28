@@ -103,6 +103,7 @@ def test_read_footprint_standard(keyword, value):
 
     assert "fp" in footprint_data.data_vars
     assert footprint_data.fp.attrs["units"] == "(mol/mol)/(mol/m2/s)"
+    assert footprint_data.fp.attrs["long_name"] == "source_receptor_relationship"
     assert footprint_data.particle_locations_n.attrs["units"] == "1"
     assert footprint_data.height.attrs["units"] == "m"
     assert footprint_data.lat.attrs["units"] == "degrees_north"
@@ -576,6 +577,7 @@ def test_footprint_schema():
     assert "particle_locations_w" in data_vars
     assert data_schema.units["fp"] == "m2 s mol-1"
     assert data_schema.units["particle_locations_n"] == "1"
+    assert data_schema.required_attrs == {name: {"long_name"} for name in data_vars}
 
     # TODO: Could also add checks for dims and dtypes?
 

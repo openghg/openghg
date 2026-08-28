@@ -115,3 +115,28 @@ def test_data_schema_requires_units_on_named_variables_and_coordinates():
 
     with pytest.raises(ValidationError, match="not compatible"):
         schema.validate_data(data.assign(flux=data.flux.assign_attrs(units="ppm")))
+
+
+def test_data_schema_requires_named_variable_and_dataset_attributes():
+    data = xr.Dataset(
+        {"ch4": ("time", [1900.0], {"long_name": "methane_mole_fraction"})},
+        coords={"time": np.array(["2020-01-01"], dtype="datetime64[ns]")},
+        attrs={"species": "ch4"},
+    )
+    schema = DataSchema(
+        data_vars={"ch4": ("time",)},
+        required_attrs={"ch4": {"long_name"}},
+        dataset_attrs={"species"},
+    )
+
+    schema.validate_data(data)
+
+    missing_variable_attr = data.copy()
+    del missing_variable_attr.ch4.attrs["long_name"]
+    with pytest.raises(ValidationError, match="long_name"):
+        schema.validate_data(missing_variable_attr)
+
+    missing_dataset_attr = data.copy()
+    del missing_dataset_attr.attrs["species"]
+    with pytest.raises(ValidationError, match="species"):
+        schema.validate_data(missing_dataset_attr)

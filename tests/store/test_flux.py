@@ -515,6 +515,7 @@ def test_flux_schema():
     assert "lon" in data_vars["flux"]
     assert data_schema.units_compatible == {"flux": "mol m-2 s-1"}
     assert data_schema.units == {"lat": "degrees_north", "lon": "degrees_east"}
+    assert data_schema.required_attrs == {"flux": {"source", "species"}}
 
     # TODO: Could also add checks for dims and dtypes?
 

@@ -36,8 +36,14 @@ def normalise_footprint_units(data: Dataset) -> None:
             if name in data and not data[name].attrs.get("units"):
                 data[name].attrs["units"] = signal_unit
 
+    for name in _FOOTPRINT_SIGNALS:
+        if name in data:
+            data[name].attrs.setdefault("long_name", "source_receptor_relationship")
+
     for data_var in data.data_vars:
         if isinstance(data_var, str) and data_var.startswith("particle_locations_"):
             data[data_var].attrs["units"] = "1"
+            data[data_var].attrs.setdefault("long_name", "fraction_of_particles_leaving_domain")
         elif isinstance(data_var, str) and data_var.startswith("mean_age_particles_"):
             data[data_var].attrs["units"] = "hour"
+            data[data_var].attrs.setdefault("long_name", "mean_age_of_particles_leaving_domain")

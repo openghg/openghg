@@ -130,6 +130,7 @@ class BoundaryConditions(BaseStore):
             dtypes=dtypes,
             units={"lat": "degrees_north", "lon": "degrees_east", "height": "m"},
             units_compatible={name: "mol/mol" for name in data_vars},
+            required_attrs={name: {"long_name"} for name in data_vars},
         )
 
         return data_format

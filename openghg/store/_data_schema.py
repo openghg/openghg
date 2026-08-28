@@ -19,15 +19,22 @@ __all__ = ["DataSchema"]
 xv_units.set_registry(cf_ureg)
 
 
-def _unit_attrs(unit: str | None = None, compatible: str | None = None) -> xv.AttrsSchema:
+def _attrs_schema(
+    required: set[str] | None = None,
+    unit: str | None = None,
+    compatible: str | None = None,
+    require_units: bool = False,
+) -> xv.AttrsSchema | None:
+    attrs = {name: xv.AttrSchema(type=str, value=r"{.*\S.*}") for name in required or set()}
     if unit is None and compatible is None:
-        requirement = xv.AttrSchema(type=str, value=r"{.*\S.*}")
+        if require_units:
+            attrs["units"] = xv.AttrSchema(type=str, value=r"{.*\S.*}")
     elif compatible is not None:
-        requirement = xv.AttrSchema(type=str, units_compatible=compatible)
+        attrs["units"] = xv.AttrSchema(type=str, units_compatible=compatible)
     else:
-        requirement = xv.AttrSchema(type=str, units=unit)
+        attrs["units"] = xv.AttrSchema(type=str, units=unit)
 
-    return xv.AttrsSchema({"units": requirement})
+    return xv.AttrsSchema(attrs) if attrs else None
 
 
 def _check_dims(expected: tuple[str, ...], data: DataArray) -> None:
@@ -47,6 +54,8 @@ class DataSchema:
     dims: list[str] | None = None
     units: dict[str, str | None] | None = None
     units_compatible: dict[str, str] | None = None
+    required_attrs: dict[str, set[str]] | None = None
+    dataset_attrs: set[str] | None = None
     _schema: xv.DatasetSchema = field(init=False, repr=False, compare=False)
 
     def __post_init__(self) -> None:
@@ -58,7 +67,9 @@ class DataSchema:
                 checks=[partial(_check_dims, dims)],
             )
 
-        coord_names = (set(self.units or {}) | set(self.units_compatible or {})) - set(variables)
+        coord_names = (
+            set(self.units or {}) | set(self.units_compatible or {}) | set(self.required_attrs or {})
+        ) - set(variables)
         coords = {
             name: xv.DataArraySchema(
                 attrs=self._attrs_for(name),
@@ -70,17 +81,19 @@ class DataSchema:
             data_vars=variables or None,
             allow_extra_keys=True,
             coords=xv.CoordsSchema(coords) if coords else None,
+            attrs=_attrs_schema(required=self.dataset_attrs),
             checks=[self._check_remaining_constraints],
         )
 
     def _attrs_for(self, name: str) -> xv.AttrsSchema | None:
         compatible_units = self.units_compatible or {}
         units = self.units or {}
+        required_attrs = (self.required_attrs or {}).get(name)
         if name in compatible_units:
-            return _unit_attrs(compatible=compatible_units[name])
+            return _attrs_schema(required=required_attrs, compatible=compatible_units[name])
         if name in units:
-            return _unit_attrs(unit=units[name])
-        return None
+            return _attrs_schema(required=required_attrs, unit=units[name], require_units=True)
+        return _attrs_schema(required=required_attrs)
 
     def _check_remaining_constraints(self, data: Dataset) -> None:
         """Retain the old optional-coordinate dtype and dataset-dimension checks."""

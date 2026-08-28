@@ -115,6 +115,7 @@ def test_read_file_monthly():
     for dv in data_vars:
         assert orig_data[dv].equals(bc_data.data[dv])
         assert bc_data.data[dv].attrs["units"] == "mol/mol"
+        assert bc_data.data[dv].attrs["long_name"]
 
     assert bc_data.data.lat.attrs["units"] == "degrees_north"
     assert bc_data.data.lon.attrs["units"] == "degrees_east"
@@ -374,6 +375,7 @@ def test_bc_schema():
     assert "vmr_w" in data_vars
     assert set(data_schema.units_compatible) == {"vmr_n", "vmr_e", "vmr_s", "vmr_w"}
     assert data_schema.units == {"lat": "degrees_north", "lon": "degrees_east", "height": "m"}
+    assert data_schema.required_attrs == {name: {"long_name"} for name in data_vars}
 
     # TODO: Could also add checks for dims and dtypes?
 
