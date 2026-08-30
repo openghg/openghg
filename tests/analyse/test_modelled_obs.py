@@ -9,6 +9,7 @@ import pandas as pd
 import pytest
 import xarray as xr
 
+from openghg.analyse import _scenario as scenario_module
 from openghg.analyse import ModelScenario
 from openghg.analyse._modelled_obs import (
     fp_x_flux_time_resolved,
@@ -357,8 +358,9 @@ def test_fp_x_flux_time_resolved_irregular_times_are_ffilled(footprint_paris_co2
 
 
 # TODO: this test could go elsewhere?
-def test_model_modelled_obs_co2_multisector(model_scenario_co2_dummy, flux_co2_dummy):
+def test_model_modelled_obs_co2_multisector(model_scenario_co2_dummy, flux_co2_dummy, mocker):
     """Test footprints_data_merge with multisector return options"""
+    numba_fp_x_flux = mocker.spy(scenario_module, "fp_x_flux_time_resolved_numba")
     model_scenario_co2_dummy.add_flux(species="co2", flux={"TESTSOURCE2": flux_co2_dummy})
     combined_dataset = model_scenario_co2_dummy.footprints_data_merge(
         calc_fp_x_flux=True, split_by_sectors=True
@@ -369,4 +371,7 @@ def test_model_modelled_obs_co2_multisector(model_scenario_co2_dummy, flux_co2_d
         for dv in ["mf_mod_high_res", "fp_x_flux", "mf_mod_high_res_sectoral", "fp_x_flux_sectoral"]
     )
 
+    assert numba_fp_x_flux.call_count == 3
+    assert combined_dataset.fp_x_flux.dims == ("lat", "lon", "time")
+    assert combined_dataset.fp_x_flux_sectoral.dims == ("source", "lat", "lon", "time")
     assert all(combined_dataset.source.values == ["TESTSOURCE", "TESTSOURCE2"])
