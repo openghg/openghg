@@ -42,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Clarified datasource update/versioning behavior for `if_exists`, `save_current`, and overlap handling, including fixes for copied-version metadata and non-overlapping combine updates. [PR #1614](https://github.com/openghg/openghg/pull/1614)
 - Fixed handling of irregular fp time reindexing and missing "calibration_scale", also added the ability to detect "mf_mod_high_res"  for plot_comparison.[PR #1611](https://github.com/openghg/openghg/pull/1611)
 - Fixed object store search and retrieve results to include datasource-managed metadata without mutating datasource records, while keeping raw metastore descriptor metadata authoritative. [PR #1652](https://github.com/openghg/openghg/pull/1652)
+- Fixed intermittent uv CI hangs by forcing Dask's synchronous scheduler during pytest sessions. [PR #1657](https://github.com/openghg/openghg/pull/1657)
 
 ### Updated
 

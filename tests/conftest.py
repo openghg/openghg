@@ -14,6 +14,14 @@ tmp_store_paths = temporary_store_paths()
 from openghg.store import get_metakey_defaults
 
 
+def _configure_test_dask_scheduler() -> None:
+    """Avoid intermittent threaded Dask deadlocks in xarray/netCDF4 tests."""
+    import dask
+
+    if dask.config.get("scheduler", None) is None:
+        dask.config.set(scheduler="sync")
+
+
 @pytest.fixture(scope="session", autouse=True)
 def mock_configuration_paths() -> dict:
     return {
@@ -125,6 +133,8 @@ def pytest_addoption(parser):
 
 
 def pytest_configure(config):
+    _configure_test_dask_scheduler()
+
     config.addinivalue_line("markers", "cfchecks: mark test as needing CF related libs to run")
     config.addinivalue_line(
         "markers",
