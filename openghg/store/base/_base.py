@@ -439,7 +439,6 @@ class BaseStore:
             results = []
 
             for i, fp in enumerate(filepaths):
-
                 # fn_input_parameters["filepath"] = fp
                 if loop_params:
                     for key1, key2 in loop_params.items():

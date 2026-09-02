@@ -63,8 +63,8 @@ def get_sys_info() -> list:
                 ("machine", f"{machine}"),
                 ("processor", f"{processor}"),
                 ("byteorder", f"{sys.byteorder}"),
-                ("LC_ALL", f'{os.environ.get("LC_ALL", "None")}'),
-                ("LANG", f'{os.environ.get("LANG", "None")}'),
+                ("LC_ALL", f"{os.environ.get('LC_ALL', 'None')}"),
+                ("LANG", f"{os.environ.get('LANG', 'None')}"),
                 ("LOCALE", f"{locale.getlocale()}"),
             ]
         )

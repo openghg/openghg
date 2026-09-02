@@ -147,9 +147,9 @@ def parse_acrg_org(
     dv_attribute_updates["fp"]["long_name"] = "source_receptor_relationship"
     dv_attribute_updates["air_temperature"]["long_name"] = "air temperature at release"
     dv_attribute_updates["air_pressure"]["long_name"] = "air pressure at release"
-    dv_attribute_updates["atmosphere_boundary_layer_thickness"][
-        "long_name"
-    ] = "atmospheric boundary layer thickness at release"
+    dv_attribute_updates["atmosphere_boundary_layer_thickness"]["long_name"] = (
+        "atmospheric boundary layer thickness at release"
+    )
 
     dv_attribute_updates["wind_speed"]["units"] = "m s-1"
     dv_attribute_updates["wind_speed"]["long_name"] = "wind speed at release"
@@ -164,7 +164,6 @@ def parse_acrg_org(
 
     # create 'release_heigt' variable for compatibility between different footprints
     if inlet != "column":
-
         inlet_int = int(inlet.replace("magl", "").replace("m", ""))
         fp_data["release_height"] = inlet_int * ones_like(fp_data["time"].astype(int))
 
