@@ -208,7 +208,7 @@ The ``python`` command will default to the first version in the list; in this ca
 Running tests with ``tox``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To run tests against Python 3.10, 3.11, and 3.12, as well as run the linters (``black`` and ``flake8``) and ``mypy``, call ``tox``
+To run tests against Python 3.10, 3.11, and 3.12, as well as run ``ruff`` and ``mypy``, call ``tox``
 in your OpenGHG repo.
 
 To see all jobs that ``tox`` can run, use ``tox -l``. You can run a specific job with ``tox run -e <env>``.
@@ -232,7 +232,7 @@ Coding Style
 
 OpenGHG is written in Python 3 (>= 3.9). We aim as much as possible to follow a
 `PEP8 <https://www.python.org/dev/peps/pep-0008/>`__ python coding style and
-recommend that use a linter such as `flake8 <https://flake8.pycqa.org/en/latest/>`__.
+use `Ruff <https://docs.astral.sh/ruff/>`__ for linting and formatting.
 
 This code has to run on a wide variety of architectures, operating
 systems and machines - some of which don't have any graphic libraries,
@@ -399,8 +399,8 @@ Now create and switch to a feature branch. This should be prefixed with
 Pre-commit
 ----------
 
-This project uses `pre-commit <https://pre-commit.com/>`__ to ensure code is linted and formatted using tools such as flake8,
-black and others. This ensures errors are caught before the code is checked in the CI pipeline.
+This project uses `pre-commit <https://pre-commit.com/>`__ to ensure code is linted and formatted using Ruff and
+other repository checks. This ensures errors are caught before the code is checked in the CI pipeline.
 
 To install the hook
 

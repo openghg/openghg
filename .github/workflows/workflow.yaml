@@ -41,13 +41,13 @@ jobs:
       - name: Install project (including dev dependencies)
         run: uv sync --extra dev --extra fp-x-flux
 
-      - name: Format code with black
+      - name: Check formatting with Ruff
         run: |
-          uv run black --check openghg/
+          uv run ruff format --check openghg/
 
-      - name: Lint with flake8
+      - name: Lint with Ruff
         run: |
-          uv run flake8 openghg/ --count --statistics
+          uv run ruff check openghg/
 
       - name: Run mypy
         run: uv run mypy --python-version ${{ matrix.python-version }} openghg/

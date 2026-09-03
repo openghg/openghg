@@ -2,7 +2,6 @@ import logging
 
 import pytest
 from helpers import (
-    attributes_checker_obssurface,
     check_cf_compliance,
     get_surface_datapath,
     parsed_surface_metachecker,
@@ -12,9 +11,6 @@ from pandas import Timestamp
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
-
-# Disable this for long strings below - Line break occurred before a binary operator (W503)
-# flake8: noqa: W503
 
 
 @pytest.fixture(scope="session")
@@ -195,4 +191,4 @@ def test_read_incorrect_site_raises():
     )
 
     with pytest.raises(ValueError):
-        data = parse_noaa(filepath=filepath, site="NotASite", inlet="flask", measurement_type="flask")
+        parse_noaa(filepath=filepath, site="NotASite", inlet="flask", measurement_type="flask")

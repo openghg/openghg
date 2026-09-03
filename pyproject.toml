@@ -80,9 +80,7 @@ classifiers = [
         "numba>=0.59",
     ]
     dev = [
-        "black==26.5.1",
         "cfchecker",
-        "flake8<=7.3.0",
         "mypy==2.3.1",
         "pre-commit<=4.6.2",
         "pytest<=7.0.0",
@@ -91,6 +89,7 @@ classifiers = [
         "pytest-timeout>=2.4.0,<3.0.0",
         "pytest-tornasync<=0.6.0.post2",
         "requests-mock<=1.12.1",
+        "ruff==0.16.2",
         "tox<=4.60.0",
         "types-paramiko<=5.0.0.20260724",
         "types-pyyaml<=6.0.12.20260815",
@@ -163,8 +162,6 @@ default = { features = [], solve-group = "default" }
 dev = { features = ["pixi-dev"], solve-group = "default" }
 
 [tool.pixi.feature.pixi-dev.dependencies]
-black = "==26.5.1"
-flake8 = "<=7.3.0"
 mypy = "==2.1.0"
 numba = ">=0.59"
 pre-commit = "<=4.6.0"
@@ -183,11 +180,12 @@ types-urllib3 = "*"
 cfchecker = { git = "https://github.com/openghg/cf-checker", rev = "master" }
 msgpack-types = "<=0.7.0"
 requests-mock = "<=1.12.1"
+ruff = "==0.16.2"
 
 [tool.pixi.feature.pixi-dev.tasks]
 test = "pytest"
 test-storage = "pytest tests/storage/test_store.py tests/store/test_obssurface.py::test_read_CRDS tests/store/test_footprints.py::test_read_footprint_high_spatial_resolution"
-lint = "black --check openghg && flake8 openghg"
+lint = "ruff format --check openghg && ruff check openghg"
 typecheck = "mypy openghg"
 
 [tool.uv.sources]
@@ -224,8 +222,17 @@ versionfile_build = "openghg/_version.py"
 tag_prefix = ""
 parentdir_prefix_version = "openghg-"
 
-[tool.black]
+[tool.ruff]
 line-length = 110
+target-version = "py310"
+
+[tool.ruff.lint]
+preview = true
+select = ["E", "F", "W"]
+ignore = ["E203", "E501", "W291", "E701"]
+
+[tool.ruff.lint.per-file-ignores]
+"**/__init__.py" = ["F401", "E402", "F822"]
 
 [tool.pytest.ini_options]
 pythonpath = [
