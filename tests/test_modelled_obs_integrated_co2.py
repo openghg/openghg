@@ -60,6 +60,50 @@ def test_add_footprint_forwards_time_resolved_selector(monkeypatch):
     assert all(keywords["time_resolved"] is False for keywords in captured_keywords)
 
 
+def test_add_footprint_retrieves_each_sector_resolution(monkeypatch):
+    """A sector mapping retrieves integrated and time-resolved footprints."""
+    captured_resolutions = []
+
+    def capture_keywords(self, keywords, data_type):
+        resolution = keywords[0]["time_resolved"]
+        captured_resolutions.append(resolution)
+        data = xr.Dataset()
+        if resolution:
+            data["fp_time_resolved"] = xr.DataArray(0.0)
+            data["fp_residual"] = xr.DataArray(0.0)
+        return FootprintData(
+            data=data,
+            metadata={"species": "co2", "site": "TAC", "inlet": "100m"},
+        )
+
+    monkeypatch.setattr(ModelScenario, "_get_data", capture_keywords)
+    scenario = ModelScenario()
+    scenario.add_footprint(
+        site="tac",
+        fp_inlet="100m",
+        domain="TEST",
+        species="co2",
+        time_resolved_by_sector={"biosphere": True, "anthropogenic": False},
+    )
+
+    assert set(captured_resolutions) == {True, False}
+    assert set(scenario.footprints_by_sector or {}) == {"biosphere", "anthropogenic"}
+
+
+def test_add_footprint_rejects_resolution_mismatch():
+    """Direct sector footprints must match their declared resolution."""
+    integrated = FootprintData(
+        data=xr.Dataset({"fp": xr.DataArray(0.0)}),
+        metadata={"species": "co2", "site": "TAC", "inlet": "100m"},
+    )
+
+    with pytest.raises(ValueError, match="does not match time_resolved_by_sector"):
+        ModelScenario().add_footprint(
+            footprint={"biosphere": integrated},
+            time_resolved_by_sector={"biosphere": True},
+        )
+
+
 @pytest.fixture
 def integrated_co2_scenario():
     """Create a minimal integrated-CO2 scenario for modelled-observation tests."""

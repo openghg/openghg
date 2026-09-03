@@ -45,7 +45,7 @@ on which data types are missing.
 
 import logging
 from typing import Any, Iterable, Union, cast
-from collections.abc import Hashable, Sequence
+from collections.abc import Hashable, Mapping, Sequence
 
 import pandas as pd
 import xarray as xr
@@ -107,6 +107,12 @@ class ModelScenario:
             or bool(self.bc)
         )
 
+    @staticmethod
+    def _footprint_is_time_resolved(footprint: FootprintData | Dataset) -> bool:
+        """Return whether a footprint contains time-resolved sensitivity data."""
+        data = footprint.data if isinstance(footprint, FootprintData) else footprint
+        return any(name in data.data_vars for name in ("fp_HiTRes", "fp_time_resolved"))
+
     def __init__(
         self,
         site: str | None = None,
@@ -130,11 +136,12 @@ class ModelScenario:
         end_date: str | Timestamp | None = None,
         obs: ObsData | None = None,
         obs_column: ObsColumnData | None = None,
-        footprint: FootprintData | None = None,
+        footprint: FootprintData | Mapping[str, FootprintData] | None = None,
         flux: FluxData | dict[str, FluxData] | None = None,
         bc: BoundaryConditionsData | None = None,
         store: str | None = None,
         time_resolved: bool | None = None,
+        time_resolved_by_sector: Mapping[str, bool] | None = None,
     ) -> None:
         """Create a ModelScenario instance based on a set of keywords to be
         or directly supplied objects. This can be created as an empty class to be
@@ -175,13 +182,16 @@ class ModelScenario:
         end_date: End of date range to use. Note for flux this may not be applied.
         obs: Supply ObsData object directly (e.g. from get_obs...() functions).
         obs_column: Supply ObsColumnData object directly.
-        footprint: Supply FootprintData object directly (e.g. from get_footprint() function).
+        footprint: Supply one FootprintData object, or a source-to-FootprintData
+            mapping when using ``time_resolved_by_sector``.
         flux: Supply FluxData object directly (e.g. from get_flux() function).
         bc: Supply BoundaryConditionsData object directly.
         store: Name of object store to retrieve data from.
         time_resolved: Whether to filter retrieved footprints by time resolution.
             ``True`` selects time-resolved footprints, ``False`` selects integrated
             footprints, and ``None`` does not filter on footprint resolution.
+        time_resolved_by_sector: Map each flux source to its footprint resolution.
+            ``True`` selects time-resolved and ``False`` integrated footprints.
 
         Returns:
             None
@@ -194,6 +204,8 @@ class ModelScenario:
         self.obs: ObsData | ObsColumnData | None = None
         self.obs_column: ObsColumnData | None = None
         self.footprint: FootprintData | None = None
+        self.footprints_by_sector: dict[str, FootprintData] | None = None
+        self.time_resolved_by_sector: dict[str, bool] | None = None
         self.fluxes: dict[str, FluxData] | None = None
         self.bc: BoundaryConditionsData | None = None
 
@@ -267,6 +279,7 @@ class ModelScenario:
             footprint=footprint,
             store=store,
             time_resolved=time_resolved,
+            time_resolved_by_sector=time_resolved_by_sector,
         )
 
         if self.platform in accepted_column_data_types and self.footprint is not None:
@@ -497,9 +510,10 @@ class ModelScenario:
         species: str | None = None,
         fp_inlet: str | list | None = None,
         network: str | None = None,
-        footprint: FootprintData | None = None,
+        footprint: FootprintData | Mapping[str, FootprintData] | None = None,
         store: str | None = None,
         time_resolved: bool | None = None,
+        time_resolved_by_sector: Mapping[str, bool] | None = None,
     ) -> None:
         """Add footprint data based on keywords or a supplied data object.
 
@@ -520,10 +534,14 @@ class ModelScenario:
                 observation inlet.
             network: Observation network used when inferring the release height.
             footprint: Footprint data to attach directly instead of retrieving it.
+                With ``time_resolved_by_sector``, this may map source names to
+                footprint data.
             store: Name of the object store from which to retrieve data.
             time_resolved: Whether to filter retrieved footprints by time resolution.
                 ``True`` selects time-resolved footprints, ``False`` selects integrated
                 footprints, and ``None`` does not filter on footprint resolution.
+            time_resolved_by_sector: Map each flux source to its footprint resolution.
+                ``True`` selects time-resolved and ``False`` integrated footprints.
 
         Returns:
             None. The selected footprint is stored on this scenario.
@@ -532,6 +550,84 @@ class ModelScenario:
             species_lifetime,
             extract_height_name,
         )
+
+        if time_resolved_by_sector is not None:
+            if time_resolved is not None:
+                raise ValueError("Specify either time_resolved or time_resolved_by_sector, not both.")
+
+            sector_resolutions = dict(time_resolved_by_sector)
+            if not sector_resolutions:
+                raise ValueError("time_resolved_by_sector must not be empty.")
+            if not all(isinstance(source, str) and source for source in sector_resolutions):
+                raise TypeError("time_resolved_by_sector keys must be non-empty strings.")
+            if not all(isinstance(value, bool) for value in sector_resolutions.values()):
+                raise TypeError("time_resolved_by_sector values must be booleans.")
+
+            if footprint is not None:
+                if not isinstance(footprint, Mapping):
+                    raise TypeError(
+                        "footprint must map source names to FootprintData objects when "
+                        "time_resolved_by_sector is supplied."
+                    )
+                sector_footprints = dict(footprint)
+                if set(sector_footprints) != set(sector_resolutions):
+                    raise ValueError("footprint and time_resolved_by_sector keys must match.")
+                if not all(isinstance(value, FootprintData) for value in sector_footprints.values()):
+                    raise TypeError("All sector footprint values must be FootprintData objects.")
+
+                mismatches = [
+                    source
+                    for source, expected in sector_resolutions.items()
+                    if self._footprint_is_time_resolved(sector_footprints[source]) != expected
+                ]
+                if mismatches:
+                    raise ValueError(
+                        "Supplied footprint data does not match time_resolved_by_sector for: "
+                        + ", ".join(sorted(mismatches))
+                    )
+            else:
+                footprints_by_resolution: dict[bool, FootprintData] = {}
+                for resolution in set(sector_resolutions.values()):
+                    self.add_footprint(
+                        site=site,
+                        inlet=inlet,
+                        height=height,
+                        domain=domain,
+                        model=model,
+                        satellite=satellite,
+                        obs_region=obs_region,
+                        met_model=met_model,
+                        start_date=start_date,
+                        end_date=end_date,
+                        species=species,
+                        fp_inlet=fp_inlet,
+                        network=network,
+                        store=store,
+                        time_resolved=resolution,
+                    )
+                    if self.footprint is None:
+                        kind = "time-resolved" if resolution else "integrated"
+                        raise SearchError(f"No {kind} footprint was found.")
+                    if self._footprint_is_time_resolved(self.footprint) != resolution:
+                        raise ValueError(f"Retrieved footprint does not match time_resolved={resolution}.")
+                    footprints_by_resolution[resolution] = self.footprint
+
+                sector_footprints = {
+                    source: footprints_by_resolution[resolution]
+                    for source, resolution in sector_resolutions.items()
+                }
+
+            self.time_resolved_by_sector = sector_resolutions
+            self.footprints_by_sector = sector_footprints
+            primary_source = next(
+                (source for source, resolution in sector_resolutions.items() if not resolution),
+                next(iter(sector_resolutions)),
+            )
+            self.footprint = sector_footprints[primary_source]
+            return
+
+        if isinstance(footprint, Mapping):
+            raise ValueError("time_resolved_by_sector is required when footprint is supplied as a mapping.")
 
         # Search for footprint data based on keywords
         # - site, domain, inlet (can extract from obs / height_name), model, met_model
@@ -609,7 +705,7 @@ class ModelScenario:
 
             footprint = self._get_data(footprint_keyword_options, data_type="footprint")
 
-        self.footprint = footprint
+        self.footprint = cast(FootprintData | None, footprint)
 
         if self.footprint is not None:
             if "satellite" in self.footprint.metadata and self.footprint.metadata["satellite"] is not None:
@@ -1009,6 +1105,27 @@ class ModelScenario:
 
         return sources
 
+    def _scenario_for_footprint(
+        self,
+        footprint: FootprintData,
+        resample_to: str | None,
+        platform: str | None,
+    ) -> Dataset:
+        """Align one sector footprint without replacing the scenario cache."""
+        original_footprint = self.footprint
+        try:
+            self.footprint = footprint
+            if self.obs is None and self.obs_column is None:
+                return self._check_footprint_resample(resample_to)
+            return self.combine_obs_footprint(
+                resample_to=resample_to,
+                platform=platform,
+                cache=False,
+                recalculate=True,
+            )
+        finally:
+            self.footprint = original_footprint
+
     def combine_flux_sources(
         self, sources: str | list | None = None, cache: bool = True, recalculate: bool = False
     ) -> Dataset:
@@ -1193,6 +1310,35 @@ class ModelScenario:
         """
         self._check_data_is_present(need=["footprint", "fluxes"])
 
+        selected_sources = self._clean_sources_input(sources)
+        if self.time_resolved_by_sector is not None:
+            missing = set(selected_sources) - set(self.time_resolved_by_sector)
+            unused = set(self.time_resolved_by_sector) - set(selected_sources) if sources is None else set()
+            if missing or unused:
+                details = []
+                if missing:
+                    details.append("missing settings: " + ", ".join(sorted(missing)))
+                if unused:
+                    details.append("no matching flux: " + ", ".join(sorted(unused)))
+                raise ValueError(
+                    "time_resolved_by_sector does not match the selected flux sources ("
+                    + "; ".join(details)
+                    + ")."
+                )
+
+        calculation_options = {
+            "sources": ", ".join(selected_sources),
+            "output_fp_x_flux": str(output_fp_x_flux),
+            "split_by_sectors": str(split_by_sectors),
+            "output_units": str(output_units),
+            "use_low_freq_flux": str(use_low_freq_flux),
+            "time_resolved_by_sector": str(tuple(sorted((self.time_resolved_by_sector or {}).items()))),
+        }
+        if self.modelled_obs is not None and any(
+            self.modelled_obs.attrs.get(key) != value for key, value in calculation_options.items()
+        ):
+            recalculate = True
+
         param_calculate = self._param_setup(
             param="modelled_obs", resample_to=resample_to, platform=platform, recalculate=recalculate
         )
@@ -1204,31 +1350,38 @@ class ModelScenario:
         if self.scenario is None:
             raise ValueError("Combined data must have been defined before calculating modelled observations.")
 
-        time_resolved_footprint = any(
-            name in self.scenario.data_vars for name in ("fp_HiTRes", "fp_time_resolved")
-        )
-
-        if time_resolved_footprint:
-            modelled_obs = self._calc_modelled_obs_HiTRes(
-                sources=sources,
-                output_TS=True,
-                output_fpXflux=output_fp_x_flux,
+        if self.footprints_by_sector is not None:
+            modelled_obs = self._calc_modelled_obs_mixed_footprints(
+                sources=selected_sources,
+                resample_to=resample_to,
+                platform=platform,
+                output_fp_x_flux=output_fp_x_flux,
+                split_by_sectors=split_by_sectors,
                 use_low_freq_flux=use_low_freq_flux,
             )
         else:
-            modelled_obs = self._calc_modelled_obs_integrated(
-                sources=sources,
-                output_TS=True,
-                output_fpXflux=output_fp_x_flux,
-                use_low_freq_flux=use_low_freq_flux,
-            )
+            time_resolved_footprint = self._footprint_is_time_resolved(self.scenario)
+
+            if time_resolved_footprint:
+                modelled_obs = self._calc_modelled_obs_HiTRes(
+                    sources=selected_sources,
+                    output_TS=True,
+                    output_fpXflux=output_fp_x_flux,
+                    use_low_freq_flux=use_low_freq_flux,
+                )
+            else:
+                modelled_obs = self._calc_modelled_obs_integrated(
+                    sources=selected_sources,
+                    output_TS=True,
+                    output_fpXflux=output_fp_x_flux,
+                    use_low_freq_flux=use_low_freq_flux,
+                )
 
         # calculate sectoral modelled mf and fp_x_flux
-        if split_by_sectors:
-            sources = self._clean_sources_input(sources)
+        if split_by_sectors and self.footprints_by_sector is None:
             sectoral_datasets = []
 
-            for source in sources:
+            for source in selected_sources:
                 if time_resolved_footprint:
                     mod_obs = self._calc_modelled_obs_HiTRes(
                         sources=source,
@@ -1253,9 +1406,9 @@ class ModelScenario:
             sectoral_modelled_obs = xr.concat(sectoral_datasets, dim="source")
             modelled_obs.update(sectoral_modelled_obs)
 
-        modelled_obs.attrs["resample_to"] = str(resample_to)
-
         modelled_obs = self.convert_units(modelled_obs, output_units=output_units)
+        modelled_obs.attrs["resample_to"] = str(resample_to)
+        modelled_obs.attrs.update(calculation_options)
 
         # Cache output from calculations
         if cache:
@@ -1268,6 +1421,55 @@ class ModelScenario:
 
         return modelled_obs
 
+    def _calc_modelled_obs_mixed_footprints(
+        self,
+        sources: list[str],
+        resample_to: str | None,
+        platform: str | None,
+        output_fp_x_flux: bool,
+        split_by_sectors: bool,
+        use_low_freq_flux: bool | None,
+    ) -> Dataset:
+        """Calculate each source with its configured footprint resolution."""
+        sector_footprints = cast(dict[str, FootprintData], self.footprints_by_sector)
+        sector_results = []
+
+        for source in sources:
+            sector_scenario = self._scenario_for_footprint(
+                sector_footprints[source], resample_to=resample_to, platform=platform
+            )
+            if self._footprint_is_time_resolved(sector_scenario):
+                result = self._calc_modelled_obs_HiTRes(
+                    sources=source,
+                    output_TS=True,
+                    ts_name="mf_mod",
+                    output_fpXflux=output_fp_x_flux,
+                    fp_x_flux_name="fp_x_flux",
+                    use_low_freq_flux=use_low_freq_flux,
+                    scenario=sector_scenario,
+                )
+            else:
+                result = self._calc_modelled_obs_integrated(
+                    sources=source,
+                    output_TS=True,
+                    ts_name="mf_mod",
+                    output_fpXflux=output_fp_x_flux,
+                    fp_x_flux_name="fp_x_flux",
+                    use_low_freq_flux=use_low_freq_flux,
+                    scenario=sector_scenario,
+                )
+            sector_results.append(result.expand_dims(source=[source]))
+
+        sectoral = xr.concat(sector_results, dim="source", join="inner")
+        result = Dataset({"mf_mod": sectoral.mf_mod.sum("source", skipna=False)})
+        if output_fp_x_flux:
+            result["fp_x_flux"] = sectoral.fp_x_flux.sum("source", skipna=False)
+        if split_by_sectors:
+            result["mf_mod_sectoral"] = sectoral.mf_mod
+            if output_fp_x_flux:
+                result["fp_x_flux_sectoral"] = sectoral.fp_x_flux
+        return result
+
     def _calc_modelled_obs_integrated(
         self,
         sources: str | list | None = None,
@@ -1276,6 +1478,7 @@ class ModelScenario:
         output_fpXflux: bool = False,
         fp_x_flux_name: str = "fp_x_flux",
         use_low_freq_flux: bool | None = None,
+        scenario: Dataset | None = None,
     ) -> Dataset:
         """Calculate modelled mole fraction timeseries using integrated footprints data.
 
@@ -1297,10 +1500,10 @@ class ModelScenario:
             If both output_TS and output_fpXflux are both True:
                 Both DataArrays are returned.
         """
-        if self.scenario is None:
+        if scenario is None:
+            scenario = self.scenario
+        if scenario is None:
             raise ValueError("Combined data must have been defined before calling this function.")
-
-        scenario = self.scenario
 
         flux = self.combine_flux_sources(sources)
         if use_low_freq_flux is None:
@@ -1328,6 +1531,7 @@ class ModelScenario:
         output_fpXflux: bool = False,
         fp_x_flux_name: str = "fp_x_flux",
         use_low_freq_flux: bool | None = None,
+        scenario: Dataset | None = None,
     ) -> Dataset:
         """Calculate modelled mole fraction timeseries using high time resolution
         footprints data and emissions data. This is appropriate for time variable
@@ -1372,13 +1576,15 @@ class ModelScenario:
         # TODO: Need to work out how this fits in with high time resolution method
         # Do we need to flag low resolution to use a different method? natural / anthro for example
 
-        if self.scenario is None:
+        if scenario is None:
+            scenario = self.scenario
+        if scenario is None:
             raise ValueError("Combined data must have been defined before calling this function.")
 
-        if "fp_HiTRes" in self.scenario:
-            fp = self.scenario.fp_HiTRes
-        elif "fp_time_resolved" in self.scenario.data_vars:
-            fp = self.scenario[["fp_time_resolved", "fp_residual"]]
+        if "fp_HiTRes" in scenario:
+            fp = scenario.fp_HiTRes
+        elif "fp_time_resolved" in scenario.data_vars:
+            fp = scenario[["fp_time_resolved", "fp_residual"]]
         else:
             return self._calc_modelled_obs_integrated(
                 sources=sources,
@@ -1387,6 +1593,7 @@ class ModelScenario:
                 output_fpXflux=output_fpXflux,
                 fp_x_flux_name=fp_x_flux_name,
                 use_low_freq_flux=use_low_freq_flux,
+                scenario=scenario,
             )
 
         flux_ds = self.combine_flux_sources(sources)

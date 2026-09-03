@@ -118,3 +118,26 @@ integrated calculation.
     )
 
     modelled_observations = scenario.calc_modelled_obs()
+
+Using different footprint resolutions by sector
+------------------------------------------------
+
+Use ``time_resolved_by_sector`` when CO2 sources require different footprint
+resolutions. Keys must match the flux source names. ``True`` selects a
+time-resolved footprint and ``False`` selects an integrated footprint.
+
+.. code:: ipython3
+
+    scenario = ModelScenario(
+        site="tac",
+        species="co2",
+        inlet="100m",
+        domain="europe",
+        sources=["biosphere", "anthropogenic"],
+        time_resolved_by_sector={
+            "biosphere": True,
+            "anthropogenic": False,
+        },
+    )
+
+    modelled_observations = scenario.calc_modelled_obs(split_by_sectors=True)

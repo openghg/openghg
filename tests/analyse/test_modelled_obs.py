@@ -15,7 +15,7 @@ from openghg.analyse._modelled_obs import (
     time_resolved_and_residual_footprints,
     _max_h_back,
 )
-from openghg.dataobjects import ObsData
+from openghg.dataobjects import FluxData, ObsData
 from openghg.dataobjects._footprint_data import FootprintData
 
 
@@ -370,3 +370,31 @@ def test_model_modelled_obs_co2_multisector(model_scenario_co2_dummy, flux_co2_d
     )
 
     assert all(combined_dataset.source.values == ["TESTSOURCE", "TESTSOURCE2"])
+
+
+def test_modelled_obs_uses_configured_footprint_per_sector(
+    obs_co2_dummy, footprint_co2_dummy, flux_co2_dummy
+):
+    """Each CO2 sector uses its configured footprint resolution."""
+    integrated_footprint = FootprintData(
+        data=footprint_co2_dummy.data[["fp"]].copy(deep=True),
+        metadata=footprint_co2_dummy.metadata.copy(),
+    )
+    second_flux = FluxData(
+        data=flux_co2_dummy.data.copy(deep=True),
+        metadata={**flux_co2_dummy.metadata, "source": "ANTHRO"},
+    )
+    scenario = ModelScenario(
+        obs=obs_co2_dummy,
+        footprint={"TESTSOURCE": footprint_co2_dummy, "ANTHRO": integrated_footprint},
+        flux={"TESTSOURCE": flux_co2_dummy, "ANTHRO": second_flux},
+        time_resolved_by_sector={"TESTSOURCE": True, "ANTHRO": False},
+    )
+
+    combined = scenario.footprints_data_merge(
+        calc_fp_x_flux=True, split_by_sectors=True, calc_bc=False
+    )
+
+    assert combined.mf_mod_sectoral.source.values.tolist() == ["TESTSOURCE", "ANTHRO"]
+    xr.testing.assert_allclose(combined.mf_mod_sectoral.sum("source"), combined.mf_mod)
+    xr.testing.assert_allclose(combined.fp_x_flux_sectoral.sum("source"), combined.fp_x_flux)
