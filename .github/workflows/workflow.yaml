@@ -12,8 +12,34 @@ on:
     paths-ignore:
       - 'CHANGELOG.md'
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag value to validate without releasing"
+        required: true
+        default: "1.2.3"
+        type: string
 
 jobs:
+  release_tag:
+    name: Check for a release tag
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/'))
+    runs-on: ubuntu-latest
+    outputs:
+      is_release: ${{ steps.check.outputs.is_release }}
+    steps:
+      - name: Validate release tag
+        id: check
+        env:
+          TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+        run: |
+          if [[ "$TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            is_release=true
+          else
+            is_release=false
+          fi
+          echo "Tag '$TAG': is_release=$is_release"
+          echo "is_release=$is_release" >> "$GITHUB_OUTPUT"
+
   test:
     name: Run the tests
     runs-on: ${{ matrix.operating-system }}
@@ -63,9 +89,9 @@ jobs:
           uv run pytest --run-cfchecks
   docs:
     name: Build and deploy the documentation
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags') && !contains(github.ref_name, '-') && contains(github.ref_name, '.')
+    if: github.event_name == 'push' && needs.release_tag.outputs.is_release == 'true'
     runs-on: ubuntu-latest
-    needs: ["test"]
+    needs: ["test", "release_tag"]
     steps:
       - uses: actions/checkout@v7
       - name: Set up Python
@@ -98,9 +124,9 @@ jobs:
 
   release_testpypi:
     name: TestPyPI Build and publish Python distributions (PEP 621, Trusted Publishing)
-    needs: ["test", "docs"]
+    needs: ["test", "docs", "release_tag"]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && !contains(github.ref_name, '-') && contains(github.ref_name, '.')
+    if: github.event_name == 'push' && needs.release_tag.outputs.is_release == 'true'
     environment:
       name: testpypi
       url: https://test.pypi.org/p/openghg
@@ -129,8 +155,8 @@ jobs:
   release_pypi:
     name: PyPI Build and publish Python distributions (PEP 621, Trusted Publishing)
     runs-on: ubuntu-latest
-    needs: ["test", "docs", "release_testpypi"]
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && !contains(github.ref_name, '-') && contains(github.ref_name, '.')
+    needs: ["test", "docs", "release_testpypi", "release_tag"]
+    if: github.event_name == 'push' && needs.release_tag.outputs.is_release == 'true'
     environment:
       name: pypi
       url: https://pypi.org/p/openghg
@@ -159,8 +185,8 @@ jobs:
   release_conda:
     name: Build and publish conda package
     runs-on: ubuntu-latest
-    needs: ["test", "docs"]
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags') && !contains(github.ref_name, '-') && contains(github.ref_name, '.')
+    needs: ["test", "docs", "release_tag"]
+    if: github.event_name == 'push' && needs.release_tag.outputs.is_release == 'true'
     defaults:
       run:
         shell: bash -el {0}
