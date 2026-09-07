@@ -1062,6 +1062,7 @@ class ModelScenario:
         Ignores resample_to keywords of ("coarsest", "obs", "footprint") as this is
         for comparison with observation data but uses pandas frequencies to resample.
         """
+        self._check_data_is_present(need="footprint")
         footprint = cast(FootprintData, self.footprint)
 
         if resample_to in ("coarsest", "obs", "footprint") or resample_to is None:
@@ -1121,24 +1122,14 @@ class ModelScenario:
                 )
             else:
                 self.scenario = self._check_footprint_resample(resample_to)
-        elif self.obs is not None:
-            # Check previous resample_to input for cached data
-            # prev_resample_to = self.modelled_obs.attrs.get("resample_to")
-            prev_resample_to = parameter.attrs.get("resample_to")
-
+        elif parameter.attrs.get("resample_to") != str(resample_to):
             # Check if this previous resample period matches input value
             # - if not (or explicit recalculation requested), recreate scenario
             # - if so return cached modelled observations
-            if prev_resample_to != str(resample_to) or recalculate:
+            if self.obs is not None:
                 self.combine_obs_footprint(resample_to, platform=platform, cache=True)
             else:
-                # return self.modelled_obs
-                return False
-        elif recalculate:
-            # Recalculate based on footprint data if obs not present
-            self.scenario = self._check_footprint_resample(resample_to)
-
-        # TODO: Add check for matching sources and recalculate otherwise
+                self.scenario = self._check_footprint_resample(resample_to)
         else:
             # Return cached modelled observations if explicit recalculation not requested
             # return self.modelled_obs
@@ -1529,9 +1520,14 @@ class ModelScenario:
         Returns:
             xarray.Dataset: Combined dataset containing footprint and observation data
         """
-        combined_dataset = self.combine_obs_footprint(
-            resample_to=resample_to, platform=platform, cache=cache, recalculate=recalculate
-        )
+        if self.obs is not None:
+            combined_dataset = self.combine_obs_footprint(
+                resample_to=resample_to, platform=platform, cache=cache, recalculate=recalculate
+            )
+        else:
+            combined_dataset = self._check_footprint_resample(resample_to).assign_attrs(
+                resample_to=str(resample_to)
+            )
 
         if calc_timeseries or calc_fp_x_flux:
             modelled_obs = self.calc_modelled_obs(
