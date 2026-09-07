@@ -27,3 +27,8 @@ repos:
             types-requests,
             types-toml
           ]
+  - repo: https://github.com/gitleaks/gitleaks
+    # v8.30.x fails the upstream detection canary (gitleaks/gitleaks#2170).
+    rev: v8.18.4
+    hooks:
+      - id: gitleaks

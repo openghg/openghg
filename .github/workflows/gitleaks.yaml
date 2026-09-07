@@ -1,0 +1,23 @@
+name: Gitleaks
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    name: Scan the repository for secrets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Run Gitleaks
+        # Keep this version aligned with .pre-commit-config.yaml.
+        uses: docker://ghcr.io/gitleaks/gitleaks:v8.18.4
+        with:
+          args: >-
+            detect --redact --verbose --source /github/workspace
+            --log-opts=${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}
