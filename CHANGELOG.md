@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added shared agent instructions and human guidance for AI-assisted development. [Issue
+  #1695](https://github.com/openghg/openghg/issues/1695)
 - Added Gitleaks secret scanning to pre-commit and CI. [Issue
   #1695](https://github.com/openghg/openghg/issues/1695)
 - Added reproducible Graphify regeneration, CI freshness checking, and a focused navigation
