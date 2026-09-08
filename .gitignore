@@ -143,6 +143,5 @@ doc/build/*
 
 # Ignore internal Graphify artifacts and caches
 graphify-out/*
-# Allow the main graph outputs
+# Allow the reproducible code graph only
 !graphify-out/graph.json
-!graphify-out/manifest.json
