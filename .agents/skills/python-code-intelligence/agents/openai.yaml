@@ -1,0 +1,4 @@
+interface:
+  display_name: "Python Code Intelligence"
+  short_description: "Trace Python symbols with Pyright and ty"
+  default_prompt: "Use $python-code-intelligence to trace this Python symbol and its likely impact."
