@@ -22,7 +22,7 @@ First we'll clone the repository and make sure we're on the ``devel`` branch. Th
    cd openghg
    git checkout devel
 
-Next we'll get a virtual environment setup using ``pixi``, ``pip``, or ``conda``.
+Next we'll set up a development environment using ``pixi``, ``uv``, or ``conda``.
 
 Environments
 ------------
@@ -65,17 +65,17 @@ checkout:
 
 .. code-block:: bash
 
-   pixi install -e dev
-   pixi run -e dev python -c "import openghg, h5py, h5netcdf, netCDF4, xarray, zarr"
+   pixi install --locked -e dev
+   pixi run --locked -e dev python -c "import openghg, h5py, h5netcdf, netCDF4, xarray, zarr"
 
 Useful development commands:
 
 .. code-block:: bash
 
-   pixi run -e dev test
-   pixi run -e dev test-storage
-   pixi run -e dev lint
-   pixi run -e dev typecheck
+   pixi run --locked -e dev test
+   pixi run --locked -e dev test-storage
+   pixi run --locked -e dev lint
+   pixi run --locked -e dev typecheck
 
 Avoid running commands such as ``pip install -U h5py h5netcdf netcdf4``
 inside the Pixi environment. That can replace Pixi's conda-forge
@@ -88,44 +88,38 @@ OpenGHG should now be installed, you can check this by opening ``ipython`` and r
 
    In [1]: import openghg
 
-``pip``
-^^^^^^^
+``uv``
+^^^^^^
 
-It is recommended that you develop OpenGHG in a Python
-`virtual environment <https://docs.python.org/3/tutorial/venv.html>`__.
-Here we'll create a new folder called ``envs`` in our home directory and create
-a new ``openghg_devel`` environment in it.
-
-.. code-block:: bash
-
-    mkdir -p ~/envs/openghg_devel
-    python -m venv ~/envs/openghg_devel
-
-Virtual environments provide sandboxes which make it easier to develop
-and test code. They also allow you to install Python modules without
-interfering with other Python installations.
-
-We activate our new environment using
+For routine development that does not require Pixi's compiled scientific
+stack, `uv <https://docs.astral.sh/uv/>`__ provides a fast project environment.
+From the repository root, create ``.venv`` and install OpenGHG in editable mode
+with the locked development dependencies:
 
 .. code-block:: bash
 
-    source ~/envs/openghg_devel/bin/activate
+   uv sync --extra dev --locked
 
-We'll first install and update some of the installation tools
-
-.. code-block:: bash
-
-   pip install --upgrade pip wheel setuptools
-
-Now, making sure we're in the root of the OpenGHG repository we just cloned, install OpenGHG's development dependencies.
+You can activate this environment and run tools directly:
 
 .. code-block:: bash
 
-   pip install -e ".[dev]"
+   source .venv/bin/activate
+   pytest tests/path/to/test_file.py
 
-This installs OpenGHG in editable mode (``-e`` / ``--editable`` flag) with all development dependencies defined in ``pyproject.toml``.
+Alternatively, leave the shell unchanged and use ``uv run`` to select the same
+environment for each command:
 
-Now OpenGHG is installed please move on to :ref:`Configuring the object store<Configuring the object store>`.
+.. code-block:: bash
+
+   uv run --no-sync pytest tests/path/to/test_file.py
+
+After the explicit locked sync, ``--no-sync`` prevents validation commands from
+changing the environment or lock file. Activation is usually more convenient
+for an interactive terminal and editor; ``uv run`` is useful for automation and
+tools whose command invocations use separate shells. Both routes use the same
+``.venv``. A virtual environment isolates Python packages; it is not a security
+sandbox.
 
 ``conda``
 ^^^^^^^^^
@@ -134,22 +128,17 @@ Making sure you're in the ``openghg`` repository folder run
 
 .. code-block:: bash
 
-   conda env create -f environment-dev.yaml
+   conda env create -f environment.yaml -f environment-dev.yaml
 
-Once ``conda`` finishes its installation process you can activate the enironment
+Once ``conda`` finishes its installation process you can activate the environment:
 
 
 .. code-block:: bash
 
    conda activate openghg_dev_env
 
-Next install ``conda-build`` which allows us to install packages in develop mode
-
-.. code-block:: bash
-
-   conda install conda-build
-
-And finally install OpenGHG
+The combined environment files include ``conda-build``. Install OpenGHG in
+development mode:
 
 .. code-block:: bash
 
