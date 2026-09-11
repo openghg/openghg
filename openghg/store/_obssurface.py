@@ -351,7 +351,7 @@ class ObsSurface(BaseStore):
         data_vars: dict[str, tuple[str, ...]] = {name: ("time",)}
         dtypes = {name: np.floating, "time": np.datetime64}
 
-        source_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
+        source_format = DataSchema(data_vars=data_vars, dtypes=dtypes, units={name: None})
 
         return source_format
 

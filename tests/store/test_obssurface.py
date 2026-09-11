@@ -24,7 +24,7 @@ from openghg.objectstore import get_datasource, open_object_store
 from openghg.retrieve import get_obs_surface, search_surface
 from openghg.standardise import standardise_from_binary_data, standardise_surface
 from openghg.store import ObsSurface
-from openghg.types import DataOverlapError, MetadataAndData, StandardiseError
+from openghg.types import DataOverlapError, MetadataAndData, StandardiseError, ValidationError
 from openghg.util import create_daterange_str, clean_string
 from pandas import Timestamp
 
@@ -793,8 +793,27 @@ def test_obs_schema(species, obs_variable):
 
     data_vars = data_schema.data_vars
     assert obs_variable in data_vars
+    assert data_schema.units == {obs_variable: None}
 
     # TODO: Could also add checks for dims and dtypes?
+
+
+def test_obs_schema_requires_main_units_but_not_observation_count_units():
+    data = xr.Dataset(
+        {
+            "ch4": ("time", [1900.0], {"units": "ppb"}),
+            "number_of_observations": ("time", [3]),
+        },
+        coords={"time": np.array(["2020-01-01"], dtype="datetime64[ns]")},
+    )
+    schema = ObsSurface.schema(species="ch4")
+
+    schema.validate_data(data)
+
+    missing_units = data.copy()
+    del missing_units["ch4"].attrs["units"]
+    with pytest.raises(ValidationError, match="units"):
+        schema.validate_data(missing_units)
 
 
 def test_obssurface_same_data_raises_on_overlap():
