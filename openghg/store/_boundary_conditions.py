@@ -6,7 +6,6 @@ from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING, Any
 from openghg.types import pathType, TransformError
 from openghg.util import load_transform_parser, check_if_need_new_version, split_function_inputs
-import numpy as np
 
 if TYPE_CHECKING:
     from openghg.store import DataSchema
@@ -108,32 +107,7 @@ class BoundaryConditions(BaseStore):
         """
         from openghg.store import DataSchema
 
-        data_vars: dict[str, tuple[str, ...]] = {
-            "vmr_n": ("time", "height", "lon"),
-            "vmr_e": ("time", "height", "lat"),
-            "vmr_s": ("time", "height", "lon"),
-            "vmr_w": ("time", "height", "lat"),
-        }
-        dtypes = {
-            "lat": np.floating,
-            "lon": np.floating,
-            "height": np.floating,
-            "time": np.datetime64,
-            "vmr_n": np.floating,
-            "vmr_e": np.floating,
-            "vmr_s": np.floating,
-            "vmr_w": np.floating,
-        }
-
-        data_format = DataSchema(
-            data_vars=data_vars,
-            dtypes=dtypes,
-            units={"lat": "degrees_north", "lon": "degrees_east", "height": "m"},
-            units_compatible={name: "mol/mol" for name in data_vars},
-            required_attrs={name: {"long_name"} for name in data_vars},
-        )
-
-        return data_format
+        return DataSchema.from_name("boundary_conditions")
 
     def transform_data(
         self,

@@ -31,19 +31,9 @@ Validation is implemented by ``xarray-validate`` behind the existing
 validation library directly. For compatibility, a missing dimension on a
 required variable continues to raise ``ValueError``.
 
-When adding or changing an internal format, define required variables and
-data types in the storage class's ``schema()`` method:
-
-.. code-block:: python
-
-    import numpy as np
-
-    from openghg.store import DataSchema
-
-    DataSchema(
-        data_vars={"example": ("time",)},
-        dtypes={"example": np.floating, "time": np.datetime64},
-    )
+Storage-class ``schema()`` methods select declarations from the packaged JSON
+schema resource described below. ``DataSchema`` can still be constructed
+directly for custom validation and tests.
 
 Extra variables remain allowed, and dimensions listed for a required variable
 must be present but may appear in a different order. Dtype constraints for
@@ -103,6 +93,47 @@ require ``long_name``; fluxes require ``source`` and ``species``; footprint and
 boundary-condition signals require ``long_name``. Add or normalize these
 attributes in the standardizer before schema validation rather than silently
 adding them in the validator.
+
+JSON schema declarations
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Internal format declarations live in
+``openghg/store/data_schemas.json``. Storage-class ``schema()`` methods select a
+named declaration with ``DataSchema.from_name()``; their public return type and
+validation API remain unchanged.
+
+Each declaration can contain ``data_vars``, ``dtypes``, ``dims``, ``units``,
+``units_compatible``, ``required_attrs``, and ``dataset_attrs``. Data-variable
+dimensions and attribute sets are JSON arrays. Supported dtype tokens are
+``floating``, ``integer``, ``number``, and ``datetime64``. For example:
+
+.. code-block:: json
+
+    {
+      "example": {
+        "data_vars": {"example": ["time"]},
+        "dtypes": {"example": "floating", "time": "datetime64"},
+        "units": {"example": null},
+        "required_attrs": {"example": ["long_name"]}
+      }
+    }
+
+``null`` in ``units`` means that a non-empty units string is required without
+constraining dimensionality. ``units_compatible`` accepts scaled units with the
+same dimensionality.
+
+Surface and column declarations use placeholders that their Python schema
+methods replace with canonical species and vertical names. Footprints compose
+the ``integrated``, ``high_spatial_resolution``, ``time_resolved_acrg``,
+``time_resolved_paris``, ``particle_locations``, and ``short_lifetime`` JSON
+fragments according to the existing schema flags.
+
+When changing an internal format, edit the JSON declaration and update the
+corresponding storage schema tests. Use Python only for dynamic selection and
+name substitution. The JSON is an OpenGHG declaration format rather than an
+``xarray-validate`` serialization: upstream serialization does not preserve the
+callable checks used for OpenGHG's compatibility semantics or its generic NumPy
+dtype classes.
 
 ObsSurface
 ----------

@@ -3,7 +3,6 @@ import logging
 from pathlib import Path
 from typing import Any, MutableSequence
 from collections.abc import Sequence
-import numpy as np
 
 from openghg.standardise.meta import align_metadata_attributes
 from openghg.store import DataSchema
@@ -348,17 +347,7 @@ class ObsSurface(BaseStore):
 
         name = define_species_label(species)[0]
 
-        data_vars: dict[str, tuple[str, ...]] = {name: ("time",)}
-        dtypes = {name: np.floating, "time": np.datetime64}
-
-        source_format = DataSchema(
-            data_vars=data_vars,
-            dtypes=dtypes,
-            units={name: None},
-            required_attrs={name: {"long_name"}},
-        )
-
-        return source_format
+        return DataSchema.from_name("obs_surface", substitutions={"species": name})
 
     def store_data(
         self,

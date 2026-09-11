@@ -1,6 +1,5 @@
 import logging
 from typing import Any
-import numpy as np
 
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
@@ -59,15 +58,4 @@ class SiteMet(BaseStore):
 
         TODO: Expand to include data variables as well e.g. "pressure_level"
         """
-        # TODO: Add details of expected format for internal data
-        data_vars: dict = {}
-        dtypes = {
-            "lat": np.floating,  # Covers np.float16, np.float32, np.float64 types
-            "lon": np.floating,
-            "time": np.datetime64,
-            "pressure_level": np.floating,
-        }
-
-        data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
-
-        return data_format
+        return DataSchema.from_name("site_met")

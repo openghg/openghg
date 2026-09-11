@@ -1,7 +1,6 @@
 from __future__ import annotations
 import logging
 from typing import Optional, Any
-import numpy as np
 from numpy import ndarray
 
 from openghg.store import DataSchema
@@ -206,25 +205,18 @@ class ObsColumn(BaseStore):
         """
         from openghg.standardise.meta import define_species_label
 
-        data_vars: dict[str, tuple[str, ...]] = {}
-        dtypes: dict[str, Any] = {"time": np.datetime64}
-
         species_name = define_species_label(species)[0]
 
         column_name = f"x{species_name}"
         averaging_kernal_name = f"x{species_name}_averaging_kernel"
         profile_apriori_name = f"{species_name}_profile_apriori"
 
-        data_vars[column_name] = ("time",)
-        data_vars[averaging_kernal_name] = ("time", vertical_name)
-        data_vars[profile_apriori_name] = ("time", vertical_name)
-
-        dtypes = {
-            column_name: np.floating,
-            averaging_kernal_name: np.floating,
-            profile_apriori_name: np.floating,
-        }
-
-        data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
-
-        return data_format
+        return DataSchema.from_name(
+            "obs_column",
+            substitutions={
+                "column": column_name,
+                "averaging_kernel": averaging_kernal_name,
+                "profile_apriori": profile_apriori_name,
+                "vertical": vertical_name,
+            },
+        )
