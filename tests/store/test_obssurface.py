@@ -794,6 +794,7 @@ def test_obs_schema(species, obs_variable):
     data_vars = data_schema.data_vars
     assert obs_variable in data_vars
     assert data_schema.units == {obs_variable: None}
+    assert data_schema.required_attrs == {obs_variable: {"long_name"}}
 
     # TODO: Could also add checks for dims and dtypes?
 
@@ -801,7 +802,11 @@ def test_obs_schema(species, obs_variable):
 def test_obs_schema_requires_main_units_but_not_observation_count_units():
     data = xr.Dataset(
         {
-            "ch4": ("time", [1900.0], {"units": "ppb"}),
+            "ch4": (
+                "time",
+                [1900.0],
+                {"units": "ppb", "long_name": "mole_fraction_of_methane_in_air"},
+            ),
             "number_of_observations": ("time", [3]),
         },
         coords={"time": np.array(["2020-01-01"], dtype="datetime64[ns]")},

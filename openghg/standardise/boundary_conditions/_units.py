@@ -15,3 +15,5 @@ def normalise_boundary_condition_units(data: Dataset, vmr_units: str = "mol/mol"
     for name in ("vmr_n", "vmr_e", "vmr_s", "vmr_w"):
         if name in data and not data[name].attrs.get("units"):
             data[name].attrs["units"] = vmr_units
+        if name in data:
+            data[name].attrs.setdefault("long_name", f"volume_mixing_ratio_at_{name[-1]}_boundary")

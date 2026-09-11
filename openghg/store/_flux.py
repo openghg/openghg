@@ -255,6 +255,7 @@ class Flux(BaseStore):
             dtypes=dtypes,
             units={"lat": "degrees_north", "lon": "degrees_east"},
             units_compatible={"flux": "mol m-2 s-1"},
+            required_attrs={"flux": {"source", "species"}},
         )
 
         return data_format

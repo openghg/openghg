@@ -415,7 +415,12 @@ class Footprints(BaseStore):
             units["height"] = "m"
             units.update({name: "hour" for name in data_vars if name.startswith("mean_age_particles_")})
 
-        data_format = DataSchema(data_vars=data_vars, dtypes=dtypes, units=units)
+        data_format = DataSchema(
+            data_vars=data_vars,
+            dtypes=dtypes,
+            units=units,
+            required_attrs={name: {"long_name"} for name in data_vars},
+        )
 
         return data_format
 
