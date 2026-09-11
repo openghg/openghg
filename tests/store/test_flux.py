@@ -517,6 +517,14 @@ def test_flux_schema():
     # TODO: Could also add checks for dims and dtypes?
 
 
+def test_flux_schema_with_file_data():
+    """Validate an existing flux test file against the schema."""
+    test_datapath = get_flux_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
+
+    with open_dataset(test_datapath) as data:
+        Flux.schema().validate_data(data)
+
+
 def test_info_metadata_raise_error(clear_stores):
     """
     Test to verify required keys present in optional metadata supplied as dictionary raise ValueError
