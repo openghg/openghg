@@ -90,7 +90,7 @@ def parse_openghg(
 
     # Some flux files may already contain a valid 'source' attribute which is a URL to the source of the original flux data
     # To avoid conflict with our 'source' definition in the metadata this is renamed to 'source_url' in the attributes.
-    source_attr = attrs.get("source")
+    source_attr = attrs.get("source", "")
     if find_url(source_attr):
         em_data.attrs["source_url"] = source_attr
         em_data.attrs.pop("source")
