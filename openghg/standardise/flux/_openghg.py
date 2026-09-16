@@ -2,7 +2,7 @@ from pathlib import Path
 import warnings
 import xarray as xr
 
-from openghg.util import timestamp_now, open_time_nc_fn, preprocess_nc_data
+from openghg.util import open_time_nc_fn, preprocess_nc_data
 from openghg.store import infer_date_range, update_zero_dim
 from openghg.standardise.meta import assign_flux_attributes
 
@@ -80,6 +80,13 @@ def parse_openghg(
             attrs[key] = value.item()
         except AttributeError:
             attrs[key] = value
+
+    # 16/09/2026: Added to account for a bug in previously generated edgar flux data where the 'species' attribute created
+    # includes a 2-item list of [species_label, species_key] (from define_species_label) when this should just be species_label
+    # This should allow backwards compatability but shouldn't affect new data
+    species_attr = attrs.get("species")
+    if isinstance(species_attr, list) and len(species_attr) == 2:
+        em_data.attrs["species"] = species_attr[0]
 
     author_name = "OpenGHG Cloud"
     em_data.attrs["author"] = author_name
