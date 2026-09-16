@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-from openghg.analyse._alignment import time_of_day_offset
+from openghg.analyse._alignment import reindex_time_with_climatology, time_of_day_offset
 from openghg.analyse._utils import reindex_on_dims
 
 
@@ -23,7 +23,7 @@ def fp_x_flux_integrated(footprint: xr.Dataset, flux: xr.Dataset) -> xr.DataArra
     flux = reindex_on_dims(flux, footprint, ["lat", "lon"])
     # align separately on time
     # TODO: if method="nearest" was acceptable, then we could align all coordinates at once with reindex_like
-    flux = flux.reindex_like(footprint, method="ffill")
+    flux = reindex_time_with_climatology(flux, footprint)
 
     # align chunks for time after filling
     fp_time_chunks = footprint.fp.chunksizes.get("time")

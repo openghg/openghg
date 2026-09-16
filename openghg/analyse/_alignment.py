@@ -1,4 +1,5 @@
 import logging
+from calendar import monthrange
 from typing import Literal, TypeVar
 
 import numpy as np
@@ -154,6 +155,36 @@ def timedelta_to_hourly_freq(td: pd.Timedelta) -> str:
 
 T1 = TypeVar("T1", xr.DataArray, xr.Dataset)
 T2 = TypeVar("T2", xr.DataArray, xr.Dataset)
+
+
+def reindex_time_with_climatology(source: T1, target: T2) -> T1:
+    """Forward-fill time data, using a single reference year as a climatology.
+
+    A source whose timestamps do not overlap the target may represent monthly
+    climatological data. In that case, map each target timestamp to the latest
+    source year before forward-filling. Multi-year sources remain timestamped
+    data and are left unmodified when they do not overlap.
+    """
+    source_times = pd.DatetimeIndex(source.time.values)
+    target_times = pd.DatetimeIndex(target.time.values)
+
+    if source_times.min() <= target_times.max() and target_times.min() <= source_times.max():
+        return source.reindex(time=target.time, method="ffill")
+
+    if source_times.year.nunique() != 1:
+        return source.reindex(time=target.time, method="ffill")
+
+    reference_year = source_times.year.max()
+    reference_times = pd.DatetimeIndex(
+        [
+            timestamp.replace(
+                year=reference_year,
+                day=min(timestamp.day, monthrange(reference_year, timestamp.month)[1]),
+            )
+            for timestamp in target_times
+        ]
+    )
+    return source.reindex(time=reference_times, method="ffill").assign_coords(time=target.time)
 
 
 def resample_obs_and_other(

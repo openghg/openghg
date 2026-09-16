@@ -3,6 +3,7 @@ from typing import cast
 import numpy as np
 import xarray as xr
 
+from openghg.analyse._alignment import reindex_time_with_climatology
 from openghg.util import check_lifetime_monthly, species_lifetime, time_offset
 
 
@@ -29,9 +30,9 @@ def baseline_sensitivities(bc: xr.Dataset, fp: xr.Dataset, species: str | None =
         if dim in fp.dims and "units" not in bc[dim].attrs:
             bc[dim].attrs["units"] = fp[dim].attrs.get("units")
 
+    bc = reindex_time_with_climatology(bc, fp)
     fp = fp.pint.quantify()
-    bc = bc.pint.quantify()
-    bc = bc.pint.reindex_like(fp, "ffill")
+    bc = bc.pint.quantify().pint.reindex_like(fp, "ffill")
 
     # align chunks for time after filling
     fp_time_chunks = fp.particle_locations_n.chunksizes.get("time")
