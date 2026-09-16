@@ -199,6 +199,14 @@ If you'd like to contribute to OpenGHG, here are the steps to set up a developme
    ```
    This ensures that the local repository is installed in **editable mode**, meaning changes to the source code are immediately reflected. It will also ensure that all the dev and documentation dependencies are installed in the environment.
 
+   Run development commands through `uv` so that their executables and
+   dependencies always come from the project's `.venv`, even if another
+   environment (for example, Conda or Homebrew Python) is also on `PATH`:
+   ```bash
+   uv run python --version
+   uv run pytest -v tests/
+   ```
+
    For more details, please refer to the [UV Documentation (sync)](https://docs.astral.sh/uv/concepts/projects/sync/#syncing-the-environment).
 
 ### Using `conda` for Development
@@ -228,21 +236,40 @@ If you'd like to contribute to OpenGHG, here are the steps to set up a developme
 ### Running Tests
 
 OpenGHG uses `pytest` for testing. After setting up the development environment, you can run tests as follows:
+
 ```bash
-pytest -v tests/
+# uv
+uv run pytest -v tests/
+
+# Pixi
+pixi run -e dev test
+
+# An activated conda or Python virtual environment
+python -m pytest -v tests/
+```
+
+Using `uv run` or `python -m pytest` prevents a `pytest` executable from a
+different Python installation from being selected. You can confirm the Python
+used by uv with:
+
+```bash
+uv run python --version
 ```
 
 #### Additional Testing:
 
+The examples below use the uv environment. When using Pixi or an activated
+Conda/virtual environment, use the corresponding invocation shown above.
+
 - **CF Checker Tests:** Install the `udunits2` library for certain tests:
    ```bash
    sudo apt-get install libudunits2-0
-   pytest -v --run-cfchecks tests/
+   uv run pytest -v --run-cfchecks tests/
    ```
 
 - **ICOS Tests:** These tests access the ICOS Carbon Portal and should be run sparingly:
    ```bash
-   pytest -v --run-icos tests/
+   uv run pytest -v --run-icos tests/
    ```
 
 If you encounter issues, please [open a GitHub issue](https://github.com/openghg/openghg/issues/new).

@@ -173,7 +173,12 @@ To ensure everything is working on your system running the tests is a good idea.
 
 .. code-block:: bash
 
-    pytest -v tests
+    python -m pytest -v tests
+
+Invoking pytest as a Python module ensures that it uses the interpreter from
+the active environment. If the project was installed with ``uv``, run
+``uv run pytest -v tests`` instead; this explicitly uses the project's
+``.venv`` even when another Python installation is also on ``PATH``.
 
 Testing against multiple versions of Python
 -------------------------------------------
@@ -448,7 +453,7 @@ To run the full test suite, simply type:
 
 .. code-block:: bash
 
-   pytest tests/
+   python -m pytest tests/
 
 
 To get more detailed information about each test, run pytests using the
@@ -456,7 +461,7 @@ To get more detailed information about each test, run pytests using the
 
 .. code-block:: bash
 
-   pytest -v tests/
+   python -m pytest -v tests/
 
 For more information on the capabilties of ``pytest`` please see the
 `pytest documentation <https://docs.pytest.org/en/stable/contents.html>`__.
