@@ -535,7 +535,7 @@ def get_flux_attributes(
 
     global_attributes["processed_by"] = "OpenGHG_Cloud"
 
-    species_label = define_species_label(species)
+    species_label, species_key = define_species_label(species)
 
     global_attributes["species"] = species_label
     global_attributes["source"] = source
