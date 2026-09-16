@@ -97,7 +97,6 @@ def parse_openghg(
             metadata[key] = value
 
     metadata["author"] = author_name
-    metadata["processed"] = str(timestamp_now())
     metadata["source_format"] = "openghg"
 
     # As flux / emissions files handle things slightly differently we need to check the time values
