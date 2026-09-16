@@ -94,10 +94,14 @@ Do not run commands such as `pip install -U h5py h5netcdf netcdf4` inside the Pi
 
 3. **Install OpenGHG:**
    ```bash
-   uv pip install openghg
+   printf 'pytest>=7.0.0,<=9.1.1\n' > openghg-overrides.txt
+   uv pip install --overrides openghg-overrides.txt openghg
    ```
 
-This installs OpenGHG and its core dependencies.
+This installs OpenGHG and its core dependencies. The temporary override is
+needed because the latest `openghg-defs` release incorrectly declares
+`pytest<=7.0.0` as a runtime dependency. It can be removed once a corrected
+`openghg-defs` release is available.
 
 ### Installing with `conda`
 
