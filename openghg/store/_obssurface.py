@@ -5,7 +5,6 @@ from typing import Any, MutableSequence
 from collections.abc import Sequence
 import numpy as np
 
-from openghg.standardise.meta import align_metadata_attributes
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.types import pathType, MetadataAndData, DataOverlapError
@@ -290,27 +289,6 @@ class ObsSurface(BaseStore):
         params["data_source"] = data_source
 
         return params
-
-    def align_metadata_attributes(self, data: list[MetadataAndData], update_mismatch: str) -> None:
-        """
-        Check values within metadata and attributes are consistent and update (in place).
-        This is a wrapper for separate openghg.util.align_metadata_attributes() function.
-
-        Args:
-            data: sequence of MetadataAndData objects
-            update_mismatch: This determines how mismatches between the internal data
-                "attributes" and the supplied / derived "metadata" are handled.
-                This includes the options:
-                    - "never" - don't update mismatches and raise an AttrMismatchError
-                    - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
-                    - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
-        Returns:
-            None
-
-        TODO: At the moment the align_metadata_attributes() function is only applicable
-            to surface data but this should be generalised to all data types.
-        """
-        return align_metadata_attributes(data, update_mismatch, data_type=self._data_type)
 
     def define_loop_params(self) -> dict:
         """
