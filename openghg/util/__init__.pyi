@@ -13,6 +13,7 @@ from ._domain import find_coord_name as find_coord_name
 from ._domain import find_domain as find_domain
 from ._domain import get_domain_info as get_domain_info
 from ._download import download_data as download_data
+from ._download import find_url as find_url
 from ._download import parse_url_filename as parse_url_filename
 from ._export import to_dashboard as to_dashboard
 from ._export import to_dashboard_mobile as to_dashboard_mobile
