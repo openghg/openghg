@@ -12,7 +12,7 @@ For more information, please visit [our documentation](https://docs.openghg.org/
 
 ## Install OpenGHG
 
-OpenGHG supports Python 3.10 and later on Linux or MacOS. To install the released package, you can use `uv` or `conda`. For development installs from a local checkout, you can also use `pixi`.
+OpenGHG supports Python 3.11 through 3.14 on Linux or MacOS (Python 3.13 is the recommended version). To install the released package, you can use `uv` or `conda`. For development installs from a local checkout, you can also use `pixi`.
 
 ### Installing with Pixi for development
 
@@ -79,12 +79,13 @@ Do not run commands such as `pip install -U h5py h5netcdf netcdf4` inside the Pi
 
 2. **Create and activate an environment for OpenGHG:**
    ```bash
-   uv venv openghg-env
+   uv venv openghg-env --python 3.13
    ```
-   Additionally, a specific python version can be specified while creating the
-   environment as follows.
+   Python 3.13 is the recommended version. Additionally, any supported python
+   version (3.11-3.14) can be specified while creating the environment as
+   follows.
    ```bash
-   uv venv openghg-env --python 3.11
+   uv venv openghg-env --python 3.12
    ```
    To activate:
    ```bash
@@ -173,13 +174,14 @@ If you'd like to contribute to OpenGHG, here are the steps to set up a developme
 
 2. **Create and activate an environment for OpenGHG:**
    ```bash
-   uv venv
+   uv venv --python 3.13
    ```
-   A python environment with name can also be created, as showed in non-developer instance previously.
-   Additionally, a specific python version can be specified while creating the
-   environment as follows.
+   Python 3.13 is the recommended version. A python environment with name can
+   also be created, as showed in non-developer instance previously.
+   Additionally, any supported python version (3.11-3.14) can be specified
+   while creating the environment as follows.
    ```bash
-   uv venv --python 3.11
+   uv venv --python 3.12
    ```
    > **Note:**
    > If the virtual environment is not named, the .venv folder is  created at the directory level, and using commands like "uv add" or "uv pip install" will automatically detect the environment and install the packages.
@@ -207,7 +209,7 @@ If you'd like to contribute to OpenGHG, here are the steps to set up a developme
 
 2. **Create and activate a `conda` environment:**
    ```bash
-   conda create --name openghg-dev python=3.12
+   conda create --name openghg-dev python=3.13
    conda activate openghg-dev
    ```
 
