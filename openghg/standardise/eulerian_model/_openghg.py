@@ -74,6 +74,11 @@ def parse_openghg(
         # author_name = "OpenGHG Cloud"
         # em_data.attrs["author"] = author_name
 
+        history = attrs.get("history")
+        if history is None:
+            history = ""
+        attrs["history"] = history + f" {str(timestamp_now())} Processed onto OpenGHG cloud"
+
         metadata = {}
         metadata.update(attrs)
 
@@ -116,11 +121,6 @@ def parse_openghg(
         metadata["min_longitude"] = round(float(em_data["lon"].min()), 5)
         metadata["max_latitude"] = round(float(em_data["lat"].max()), 5)
         metadata["min_latitude"] = round(float(em_data["lat"].min()), 5)
-
-        history = metadata.get("history")
-        if history is None:
-            history = ""
-        metadata["history"] = history + f" {str(timestamp_now())} Processed onto OpenGHG cloud"
 
         key = "_".join((model, species, date))
 
