@@ -105,9 +105,11 @@ To get OpenGHG installed using `conda`, follow these steps:
 
 1. **Create and activate a `conda` environment:**
    ```bash
-   conda create --name openghg_env
+   conda create --name openghg_env python=3.13
    conda activate openghg_env
    ```
+   Python 3.13 is the recommended version. Any supported python version
+   (3.11-3.14) can be used instead.
 
 2. **Install OpenGHG and its dependencies using the `conda-forge` and `openghg` channels:**
    ```bash
@@ -212,6 +214,8 @@ If you'd like to contribute to OpenGHG, here are the steps to set up a developme
    conda create --name openghg-dev python=3.13
    conda activate openghg-dev
    ```
+   Python 3.13 is the recommended version. Any supported python version
+   (3.11-3.14) can be used instead.
 
 3. **Install development dependencies:**
    ```bash
