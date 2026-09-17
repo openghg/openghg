@@ -1,1 +1,2 @@
 openghg/_version.py export-subst
+graphify-out/graph.json linguist-generated=true
