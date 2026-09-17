@@ -45,7 +45,7 @@ data types in the storage class's ``schema()`` method:
         dtypes={"example": np.floating, "time": np.datetime64},
     )
 
-Extra variables remain allowed, and dimensions listed for a required variable
+Extra variables are allowed, and dimensions listed for a required variable
 must be present but may appear in a different order. Dtype constraints for
 coordinates remain optional when the coordinate is absent, matching the
 historical OpenGHG schema behaviour.
