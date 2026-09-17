@@ -11,8 +11,9 @@ Checking your Python installation
 OpenGHG is developed and `tested on Linux and MacOS <https://github.com/openghg/openghg/actions>`__,
 support for Windows is planned.
 
-To install OpenGHG, you first need to install Python >= 3.11. To check
-if you have Python 3.11 installed type;
+To install OpenGHG, you first need to install Python >= 3.11. Python 3.13 is
+the recommended version for local installations. To check if you have a
+supported Python installed type;
 
 .. code-block:: bash
 
@@ -92,6 +93,11 @@ incompatibilities.
 
 pip
 ---
+
+For pip installations, we recommend using Python 3.13. Python 3.11-3.14 are
+supported, but Python 3.14 may need a working C/C++ build toolchain because
+OpenGHG currently depends on ``numcodecs<0.16``, which can be built from
+source on 3.14.
 
 First create a virtual environment and activate it
 
