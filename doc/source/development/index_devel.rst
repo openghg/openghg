@@ -15,15 +15,17 @@ Quickstart
    quickstart_devel
 
 
-Python development
-------------------
+Python and AI-assisted development
+-----------------------------------
 
-Covers how we develop OpenGHG and the standards we adhere to
+Covers how we develop OpenGHG, the standards we follow, and how to use common
+AI coding assistants responsibly.
 
 .. toctree::
    :maxdepth: 1
 
    python_devel
+   ai_assisted_development
 
 Packaging & Release
 -------------------
@@ -32,7 +34,7 @@ Covers OpenGHG packaging and release
 
 .. toctree::
    :maxdepth: 1
-   
+
    packaging
 
 Data Specifications
