@@ -100614,7 +100614,7 @@
       "relation": "calls",
       "source": "openghg_standardise_eulerian_model_openghg_parse_openghg",
       "source_file": "openghg/standardise/eulerian_model/_openghg.py",
-      "source_location": "L82",
+      "source_location": "L80",
       "target": "openghg_util_time_timestamp_now",
       "weight": 1.0
     },
@@ -100626,7 +100626,7 @@
       "relation": "calls",
       "source": "openghg_standardise_eulerian_model_openghg_parse_openghg",
       "source_file": "openghg/standardise/eulerian_model/_openghg.py",
-      "source_location": "L87",
+      "source_location": "L92",
       "target": "openghg_util_time_timestamp_tzaware",
       "weight": 1.0
     },
