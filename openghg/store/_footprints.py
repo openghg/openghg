@@ -327,6 +327,38 @@ class Footprints(BaseStore):
             "lon": np.floating,
             "time": np.datetime64,
         }
+        # Defaults are deliberately defined for every known footprint variable,
+        # rather than only those enabled by the selected schema branch. This
+        # lets retrieval repair legacy datasets while still only touching
+        # variables that are actually present.
+        units: dict[str, str | None] = {
+            "fp": "m2 s mol-1",
+            "fp_low": "m2 s mol-1",
+            "fp_high": "m2 s mol-1",
+            "fp_HiTRes": "m2 s mol-1",
+            "fp_time_resolved": "m2 s mol-1",
+            "fp_residual": "m2 s mol-1",
+            "particle_locations_n": "1",
+            "particle_locations_e": "1",
+            "particle_locations_s": "1",
+            "particle_locations_w": "1",
+            # Particle ages are currently combined with a plain numeric
+            # lifetime. Leave them outside Pint until that calculation is
+            # unit-aware end to end.
+            "mean_age_particles_n": None,
+            "mean_age_particles_e": None,
+            "mean_age_particles_s": None,
+            "mean_age_particles_w": None,
+            "lat": "degrees_north",
+            "lon": "degrees_east",
+            "lat_high": "degrees_north",
+            "lon_high": "degrees_east",
+            "height": "m",
+            "H_back": "h",
+            "release_lon": "degree_east",
+            "release_lat": "degree_north",
+            "release_height": "m",
+        }
 
         # Disable particle_locations validation when inner_domain is present
         if inner_domain:
@@ -398,7 +430,7 @@ class Footprints(BaseStore):
             dtypes["mean_age_particles_s"] = np.floating
             dtypes["mean_age_particles_w"] = np.floating
 
-        data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
+        data_format = DataSchema(data_vars=data_vars, dtypes=dtypes, units=units)
 
         return data_format
 

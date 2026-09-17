@@ -345,13 +345,32 @@ class ObsSurface(BaseStore):
         # e.g. "ch4_variability", "ch4_number_of_observations"
         """
         from openghg.standardise.meta import define_species_label
+        from openghg.util import get_species_info, load_internal_json
 
-        name = define_species_label(species)[0]
+        name, species_key = define_species_label(species)
 
         data_vars: dict[str, tuple[str, ...]] = {name: ("time",)}
         dtypes = {name: np.floating, "time": np.datetime64}
 
-        source_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
+        try:
+            source_unit = get_species_info()[species_key]["units"]
+        except KeyError:
+            unit = None
+        else:
+            unit = load_internal_json(filename="attributes.json")["unit_interpret"].get(source_unit, source_unit)
+
+        units = {
+            name: unit,
+            f"{name}_variability": unit,
+            f"{name}_repeatability": unit,
+            f"{name}_stdev": unit,
+            f"{name}_number_of_observations": "1",
+            f"{name}_sampling_period": "s",
+            f"{name}_status_flag": None,
+            f"{name}_integration_flag": None,
+        }
+
+        source_format = DataSchema(data_vars=data_vars, dtypes=dtypes, units=units)
 
         return source_format
 

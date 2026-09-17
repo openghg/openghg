@@ -475,6 +475,20 @@ def test_get_footprint(inlet_keyword, inlet_value):
     assert metadata["time_resolved"] == "false"
 
 
+def test_get_footprint_assigns_schema_units():
+    """Footprint schema defaults should support Pint quantification on retrieval."""
+    footprint = get_footprint(
+        site="tmb",
+        domain="europe",
+        inlet="10m",
+        model="test_model",
+        is_dequantified=False,
+    ).data
+
+    assert f"{footprint.fp.pint.units:cf}" == "m2 s mol-1"
+    assert f"{footprint.particle_locations_n.pint.units:cf}" == "1"
+
+
 def test_get_footprint_no_result():
     """Test sensible error message is being returned when no results are found
     with input keywords for get_footprint function"""
