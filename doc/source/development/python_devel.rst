@@ -1,237 +1,16 @@
-=============
-Getting setup
-=============
-
-Here we'll cover getting your development environment setup for contributing to OpenGHG.
-The source code for OpenGHG is available on `GitHub <https://github.com/openghg/openghg>`__.
-
-Setting up your computer
-=========================
-
-You'll need `git <https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`_ and Python >= 3.10, so please make sure you have both installed before continuing further.
-
-
-Clone OpenGHG
--------------
-
-First we'll clone the repository and make sure we're on the ``devel`` branch. This makes sure we're on the most up to date version of OpenGHG.
-
-.. code-block:: bash
-
-   git clone https://github.com/openghg/openghg.git
-   cd openghg
-   git checkout devel
-
-Next we'll get a virtual environment setup using ``pixi``, ``pip``, or ``conda``.
-
-Environments
-------------
-
-Here we cover the creation of an environment and the installation of OpenGHG into it. Installation here means adding OpenGHG to the environment.
-We'll install it in developer mode so that any changes you make to the code will automatically be available when you run commands. Similarly, if you
-run a ``git pull`` on the ``devel`` branch all changes made will be available to you straight away, without having to reinstall or update OpenGHG within
-the environment.
-
-``pixi``
-^^^^^^^^
-
-Pixi is the recommended development environment when working with
-NetCDF, HDF5, or Zarr data. It installs the compiled scientific,
-HDF5, and NetCDF stack from ``conda-forge`` and keeps this OpenGHG
-checkout editable.
-
-Install Pixi directly with one of the following commands.
-
-On macOS or Linux, use the official installer:
-
-.. code-block:: bash
-
-   curl -fsSL https://pixi.sh/install.sh | sh
-
-If ``curl`` is unavailable, use ``wget``:
-
-.. code-block:: bash
-
-   wget -qO- https://pixi.sh/install.sh | sh
-
-On macOS with Homebrew:
-
-.. code-block:: bash
-
-   brew install pixi
-
-Then create the editable OpenGHG development environment from this
-checkout:
-
-.. code-block:: bash
-
-   pixi install -e dev
-   pixi run -e dev python -c "import openghg, h5py, h5netcdf, netCDF4, xarray, zarr"
-
-Useful development commands:
-
-.. code-block:: bash
-
-   pixi run -e dev test
-   pixi run -e dev test-storage
-   pixi run -e dev lint
-   pixi run -e dev typecheck
-
-Avoid running commands such as ``pip install -U h5py h5netcdf netcdf4``
-inside the Pixi environment. That can replace Pixi's conda-forge
-HDF5/NetCDF packages with PyPI wheels and reintroduce binary
-incompatibilities.
-
-OpenGHG should now be installed, you can check this by opening ``ipython`` and running
-
-.. code-block:: ipython
-
-   In [1]: import openghg
-
-``pip``
-^^^^^^^
-
-It is recommended that you develop OpenGHG in a Python
-`virtual environment <https://docs.python.org/3/tutorial/venv.html>`__.
-Here we'll create a new folder called ``envs`` in our home directory and create
-a new ``openghg_devel`` environment in it.
-
-.. code-block:: bash
-
-    mkdir -p ~/envs/openghg_devel
-    python -m venv ~/envs/openghg_devel
-
-Virtual environments provide sandboxes which make it easier to develop
-and test code. They also allow you to install Python modules without
-interfering with other Python installations.
-
-We activate our new environment using
-
-.. code-block:: bash
-
-    source ~/envs/openghg_devel/bin/activate
-
-
-We'll first install and update some installation tools
-
-.. code-block:: bash
-
-   pip install --upgrade pip wheel setuptools
-
-Now, making sure we're in the root of the OpenGHG repository we just cloned, install OpenGHG's development dependencies.
-
-.. code-block:: bash
-
-   pip install -e ".[dev]"
-
-This installs OpenGHG in editable mode (``-e`` / ``--editable`` flag) with all development dependencies defined in ``pyproject.toml``.
-
-OpenGHG should now be installed, you can check this by opening ``ipython`` and running
-
-.. code-block:: ipython
-
-   In [1]: import openghg
-
-``conda``
-^^^^^^^^^
-
-Making sure you're in the ``openghg`` repository folder run
-
-.. code-block:: bash
-
-   conda env create -f environment.yaml
-
-Once ``conda`` finishes its installation process you can activate the enironment
-
-
-.. code-block:: bash
-
-   conda activate openghg_env
-
-Next install ``conda-build`` which allows us to install packages in develop mode
-
-.. code-block:: bash
-
-   conda install conda-build
-
-And finally install OpenGHG
-
-.. code-block:: bash
-
-   conda develop .
-
-OpenGHG should now be installed, you can check this by opening ``ipython`` and running
-
-.. code-block:: ipython
-
-   In [1]: import openghg
-
-Run tests
----------
-
-To ensure everything is working on your system running the tests is a good idea. To do this run
-
-.. code-block:: bash
-
-    pytest -v tests
-
-Testing against multiple versions of Python
--------------------------------------------
-
-Our GitHub workflows test against multiple versions of Python, using the latest versions of dependencies.
-This can sometimes result in failing tests when you push to GitHub, despite your tests passing locally.
-
-You can use ``tox`` to run tests in isolated environments built with the latest dependencies  different versions of Python.
-
-Managing different versions of Python
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-To manage multiple versions of Python, you can use `pyenv <https://github.com/pyenv/pyenv>`_.
-After following the installation instructions, you can install multiple versions of Python:
-
-.. code-block:: bash
-
-    pyenv install 3.10
-    pyenv install 3.11
-    pyenv install 3.12
-
-To view all available versions, call ``pyenv versions``. To view and set your preferred version globally, use ``pyenv global``.
-To activate multiple versions of Python, you can use ``pyenv local``:
-
-.. code-block:: bash
-
-    pyenv local 3.10 3.11 3.12
-
-This makes Python 3.10, 3.11, and 3.12 available in the current directory.
-The ``python`` command will default to the first version in the list; in this case, Python 3.10.
-
-Running tests with ``tox``
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-To run tests against Python 3.10, 3.11, and 3.12, as well as run ``ruff`` and ``mypy``, call ``tox``
-in your OpenGHG repo.
-
-To see all jobs that ``tox`` can run, use ``tox -l``. You can run a specific job with ``tox run -e <env>``.
-For instance
-
-.. code-block:: bash
-
-   tox run -e py312
-
-will run the tests against Python 3.12.
-
-To pass arguments to ``pytest``, you can append them after the ``tox`` command as follows:
-
-.. code-block:: bash
-
-   tox run -e py312 -- tests/analyse/test_scenario.py
-
+==================
+Python development
+==================
+
+Follow :doc:`quickstart_devel` for the canonical development-environment setup.
+This page defines the coding, validation, and contribution conventions used by
+OpenGHG.
 
 Coding Style
 ============
 
-OpenGHG is written in Python 3 (>= 3.9). We aim as much as possible to follow a
-`PEP8 <https://www.python.org/dev/peps/pep-0008/>`__ python coding style and
+OpenGHG is written in Python 3 (>= 3.10). We aim as much as possible to follow a
+`PEP8 <https://peps.python.org/pep-0008/>`__ Python coding style and
 use `Ruff <https://docs.astral.sh/ruff/>`__ for linting and formatting.
 
 This code has to run on a wide variety of architectures, operating
@@ -250,10 +29,11 @@ We follow a Python style naming convention.
 * Methods: snake_case
 * Functions: snake_case
 * Variables: snake_case
-* Source Files: snake_case with a leading underscore
+* Source files: snake_case; private implementation modules normally begin with
+  an underscore
 
 Functions or variables that are private should be named with a leading
-underscore. This prevents them from being prominantly visible in Python's
+underscore. This prevents them from being prominently visible in Python's
 help and tab completion.
 
 Modules
@@ -343,38 +123,62 @@ show the hidden names when searching.
 Type hinting
 ------------
 
-Throughout the OpenGHG project we use type hinting which allows us to declare the type of the objects
-that are going to be passed to and returned from functions. This helps improve user understanding of the code
-and when used in conjunction with tools like `mypy <https://mypy.readthedocs.io/en/stable/>`__ can help
-catch bugs.
-
-If we are writing a function that accepts takes a string and returns a string we can add the types like so
+Use type annotations for new and modified production functions and methods.
+Annotations make interfaces clearer and allow tools such as
+`mypy <https://mypy.readthedocs.io/en/stable/>`__ to catch mistakes. Prefer
+modern built-in types and union syntax:
 
 .. code-block:: python
 
-    def greeter(name: str) -> str:
-        """ Greets the user
+   from collections.abc import Sequence
 
-            Args:
-                name: Name of user
-            Returns:
-                str: Greeting string
-        """
-        return 'Hello ' + name
+   def normalise_names(names: str | Sequence[str]) -> list[str]:
+       """Return names stripped of surrounding whitespace."""
+       if isinstance(names, str):
+           names = [names]
+       return [name.strip() for name in names]
 
-For a function that takes either a string or a list as its argument and returns a list we can write it as
+Docstrings and programming style
+--------------------------------
+
+Use `Google-style docstrings
+<https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings>`__
+for every public function, method, and class and every complicated private
+function, method, or class. Give simple private helpers and tests at least one meaningful
+sentence. Describe the behaviour or test scenario, rather than repeating the
+name; for example:
 
 .. code-block:: python
 
-    def search(search_terms: Union[str, List]) -> List:
-        """ A function that searches
+   def test_align_footprints_keeps_periods():
+       """Keep inferred sampling periods when footprints are aligned."""
+       ...
 
-            Args:
-                search_terms: Search terms
-            Returns:
-                list: List of data found
-        """
-        return ["found_item"]
+A docstring's summary is a sentence ending in punctuation. Describe the
+caller-visible contract rather than implementation details. Include scientific
+semantics that annotations cannot express, such as units, dimensions,
+coordinates, accepted values, mutation, lazy or eager behaviour, and relevant
+exceptions. Do not repeat annotated types in ``Args`` or ``Returns`` sections.
+
+The following selected conventions are particularly important in OpenGHG:
+
+* Use ``ValueError``, ``TypeError``, or a project exception for invalid runtime
+  inputs. Do not use ``assert`` for runtime validation.
+* Catch the narrowest expected exception and keep ``try`` blocks small. Catch
+  ``Exception`` only at a documented isolation boundary or when immediately
+  re-raising.
+* Avoid mutable or call-expression defaults. Use ``None`` and create the value
+  inside the function when necessary.
+* Comments explain a non-obvious reason or scientific intent, not Python syntax.
+  New TODOs should identify an issue or a concrete removal condition.
+* Use a specific error code for ``# type: ignore`` and ``# noqa``. Explain a
+  non-obvious suppression.
+* Resolve package and test-data paths relative to the package or test helpers;
+  do not hard-code paths from a developer's machine.
+
+Ruff's formatting and lint settings in ``pyproject.toml`` are authoritative.
+In particular, OpenGHG uses a 110-character line length rather than the Google
+Python Style Guide's 80-character recommendation.
 
 
 Workflow
@@ -399,8 +203,10 @@ Now create and switch to a feature branch. This should be prefixed with
 Pre-commit
 ----------
 
-This project uses `pre-commit <https://pre-commit.com/>`__ to ensure code is linted and formatted using Ruff and
-other repository checks. This ensures errors are caught before the code is checked in the CI pipeline.
+This project uses `pre-commit <https://pre-commit.com/>`__ to run the configured
+repository checks, including Ruff, mypy, and secret scanning. CI separately
+checks Graphify freshness. Pre-commit is an aggregate check rather than an alias
+for linting or tests; some hooks may modify files.
 
 To install the hook
 
@@ -410,13 +216,40 @@ To install the hook
 
 The hook should now run each time you make a commit.
 
+You can run file-oriented hooks on selected working-tree files without
+committing or installing the Git hook:
+
+.. code-block:: bash
+
+   pre-commit run --files openghg/example.py tests/example_test.py
+
+``pre-commit run --all-files`` is useful for an intentional repository-wide
+audit, but it can expose unrelated baseline issues and rewrite fixture files.
+It is not the default check for a focused change. Review the diff after any
+pre-commit run. For a faster or more specific cycle, run individual tools
+directly:
+
+.. code-block:: bash
+
+   ruff format --check openghg/example.py
+   ruff check openghg/example.py
+   mypy openghg
+   pytest tests/example_test.py::test_case
+
+Prefix these commands with ``uv run --no-sync`` or
+``pixi run --locked -e dev`` when using those environment managers.
+
+To simulate the commit hook without creating a commit, stage the intended files
+and run ``pre-commit run``. This checks the index, including Gitleaks. Review and
+re-stage any files modified by hooks before committing. The Gitleaks hook
+examines the staged snapshot, not unstaged files supplied via ``--files``.
+
 Testing
 =======
 
-When working on your feature it is important to write tests to ensure that it
-does what is expected and doesn't break any existing functionality. All code added to the
-project must be covered by tests and tests should be placed inside the ``tests`` directory, creating an appropriately
-named sub-directory for any new submodules.
+Add or update tests for changed behaviour. A regression test should fail without
+the fix when practicable. Place tests inside the ``tests`` directory, mirroring
+the source area when practical.
 
 The test suite is intended to be run using
 `pytest <https://docs.pytest.org/en/latest/contents.html>`__.
@@ -458,8 +291,27 @@ To get more detailed information about each test, run pytests using the
 
    pytest -v tests/
 
-For more information on the capabilties of ``pytest`` please see the
+For more information on the capabilities of ``pytest`` please see the
 `pytest documentation <https://docs.pytest.org/en/stable/contents.html>`__.
+
+Some test groups require explicit options or additional dependencies:
+
+* Tests marked ``cfchecks`` require ``--run-cfchecks``.
+* Tests marked ``icos`` require ``--run-icos`` and may access the network.
+* Tests marked ``xesmf`` require the optional regridding dependencies.
+
+Testing multiple Python versions
+--------------------------------
+
+Use tox when intentionally testing an isolated installation against Python
+3.10, 3.11, or 3.12. It is not the default fast development loop. List the
+available environments with ``tox list``. For example, run the Python 3.12
+suite, or pass a focused path to pytest, with:
+
+.. code-block:: bash
+
+   tox run -e py312
+   tox run -e py312 -- tests/analyse/test_scenario.py
 
 Continuous integration and delivery
 -----------------------------------
@@ -472,18 +324,16 @@ request until all tests pass. We only accept pull requests to devel.
 Documentation
 =============
 
-OpenGHG is fully documented using a combination of hand-written files
-(in the ``doc`` folder) and auto-generated api documentation created from
-Google `style docstrings <https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html>`__.
-for details. The documentation is automatically built using `Sphinx <http://sphinx-doc.org>`__. Whenever a commit is pushed to devel the
-documentation is automatically rebuilt and updated.
+OpenGHG combines hand-written files in ``doc/source`` with API documentation
+generated from Google-style docstrings. `Sphinx <https://www.sphinx-doc.org/>`__
+builds the documentation in continuous integration.
 
 To build the documentation locally you will first need to install the
 documentation dependencies. If you haven't yet installed the documentation dependencies please do so by running
 
 .. code-block:: bash
 
-   pip install -e ".[doc]"
+   uv sync --extra dev --extra doc --locked
 
 Next ensure you have `pandoc <https://pandoc.org/>`__ installed. Installation instructions
 can be `found here <https://pandoc.org/installing.html>`__
@@ -492,7 +342,7 @@ Then move to the ``doc`` directory and run:
 
 .. code-block:: bash
 
-   make
+   uv run --no-sync make html
 
 When finished, point your browser to ``build/html/index.html``.
 
@@ -500,7 +350,7 @@ Committing
 ==========
 
 If you create new tests, please make sure that they pass locally before
-commiting. When happy, commit your changes, e.g.
+committing. When happy, commit your changes, e.g.
 
 .. code-block:: bash
 
@@ -517,7 +367,7 @@ then please add ``[skip ci]`` to your commit message.
 This will avoid unnecessarily running the
 `GitHub Actions <https://github.com/openghg/openghg/actions>`__, e.g. running all the tests
 and rebuilding the documentation of the OpenGHG package etc. GitHub actions are configured in the file
-``.github/workflows/main.yaml``).
+``.github/workflows/workflow.yaml``).
 
 Next, push your changes to the remote server:
 
