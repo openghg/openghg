@@ -336,7 +336,7 @@ def test_modelled_obs_co2_consistency(model_scenario_co2_dummy, model_scenario_p
 
 
 def test_fp_x_flux_time_resolved_irregular_times_are_ffilled(footprint_paris_co2_dummy, flux_co2_dummy):
-    """High-frequency flux should be forward-filled to irregular fp_time_resolved timestamps."""
+    """Each resolved lag should use its containing flux interval at irregular times."""
     fp = footprint_paris_co2_dummy.data.copy(deep=True)
     fp = fp.isel(time=slice(0, 2), lat=slice(0, 1), lon=slice(0, 1), H_back=slice(0, 2))
     fp["fp_time_resolved"][:] = 1.0
@@ -349,7 +349,7 @@ def test_fp_x_flux_time_resolved_irregular_times_are_ffilled(footprint_paris_co2
     result = fp_x_flux_time_resolved(fp, flux)
 
     expected = xr.DataArray(
-        np.array([2.0, 4.0]).reshape(2, 1, 1),
+        np.array([4.0, 4.0]).reshape(2, 1, 1),
         coords={"time": fp.time, "lat": fp.lat, "lon": fp.lon},
         dims=("time", "lat", "lon"),
     )
