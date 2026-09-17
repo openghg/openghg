@@ -8,7 +8,6 @@ safe, and consistent with the surrounding module patterns.
 
 - Use `graphify-out/` for a quick map of the repository before broad searches:
   - `graphify-out/graph.json` Maps how modules, components, and files import one another. Data flow and impact analysis.
-  - `graphify-out/manifest.json` Defines the project name, description, version, and global entry points. API surfaces and asset paths(configs).
 - Treat `graphify-out/` as generated context. Do not edit it unless explicitly
   asked.
 - After graphify gives orientation, read the source and tests that are directly
@@ -97,4 +96,5 @@ Special test handling:
 - If a relevant check could not run because dependencies, network access, or
   compiled system libraries were unavailable, say so explicitly.
 - Do not include generated caches, local object stores, virtual environments, or
-  graphify output in code changes unless the task explicitly asks for them.
+  graphify output in code changes unless the task explicitly asks for them or the
+  Graphify freshness check requires regeneration.

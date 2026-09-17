@@ -1,0 +1,4 @@
+interface:
+  display_name: "Graphify Navigation"
+  short_description: "Trace OpenGHG dependencies and impact paths"
+  default_prompt: "Use $graphify-navigation to map the likely impact of this cross-module OpenGHG change."
