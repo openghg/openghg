@@ -1230,22 +1230,10 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
-      "source": "tests_analyse_test_modelled_obs_alignment_test_fp_x_flux_time_resolved_aligns_all_irregular_footprint_times",
+      "source": "tests_analyse_test_modelled_obs_alignment_test_fp_x_flux_time_resolved_uses_flux_intervals_for_irregular_footprint_times",
       "source_file": "tests/analyse/test_modelled_obs_alignment.py",
       "source_location": "L57",
       "target": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "tests_analyse_test_modelled_obs_alignment_test_high_freq_flux_without_second_reindex_reproduces_dropped_times",
-      "source_file": "tests/analyse/test_modelled_obs_alignment.py",
-      "source_location": "L66",
-      "target": "openghg_analyse_modelled_obs_make_high_freq_flux",
       "weight": 1.0
     },
     {
@@ -5144,7 +5132,7 @@
       "relation": "calls",
       "source": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L226",
+      "source_location": "L220",
       "target": "openghg_analyse_modelled_obs_time_resolved_and_residual_footprints",
       "weight": 1.0
     },
@@ -5155,7 +5143,7 @@
       "relation": "calls",
       "source": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L228",
+      "source_location": "L222",
       "target": "openghg_analyse_utils_reindex_on_dims",
       "weight": 1.0
     },
@@ -5166,7 +5154,7 @@
       "relation": "calls",
       "source": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L245",
+      "source_location": "L239",
       "target": "openghg_analyse_modelled_obs_make_low_freq_flux",
       "weight": 1.0
     },
@@ -5177,7 +5165,7 @@
       "relation": "calls",
       "source": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L249",
+      "source_location": "L243",
       "target": "openghg_analyse_modelled_obs_calc_hourly_freq",
       "weight": 1.0
     },
@@ -5188,7 +5176,7 @@
       "relation": "calls",
       "source": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L252",
+      "source_location": "L246",
       "target": "openghg_analyse_modelled_obs_max_h_back",
       "weight": 1.0
     },
@@ -5199,7 +5187,7 @@
       "relation": "calls",
       "source": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L260",
+      "source_location": "L254",
       "target": "openghg_analyse_modelled_obs_make_high_freq_flux",
       "weight": 1.0
     },
@@ -5232,7 +5220,7 @@
       "relation": "calls",
       "source": "openghg_analyse_modelled_obs_make_high_freq_flux",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L171",
+      "source_location": "L169",
       "target": "openghg_analyse_modelled_obs_fp_time_and_h_back_freq_gcd",
       "weight": 1.0
     },
@@ -5243,7 +5231,7 @@
       "relation": "calls",
       "source": "openghg_analyse_modelled_obs_make_high_freq_flux",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L172",
+      "source_location": "L170",
       "target": "openghg_analyse_modelled_obs_padded_flux_slice_start_and_end",
       "weight": 1.0
     },
@@ -5254,18 +5242,7 @@
       "relation": "calls",
       "source": "openghg_analyse_modelled_obs_make_high_freq_flux",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L173",
-      "target": "openghg_analyse_alignment_time_of_day_offset",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "context": "call",
-      "relation": "calls",
-      "source": "openghg_analyse_modelled_obs_make_high_freq_flux",
-      "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L180",
+      "source_location": "L171",
       "target": "openghg_analyse_modelled_obs_calc_hourly_freq",
       "weight": 1.0
     },
@@ -5276,7 +5253,18 @@
       "relation": "calls",
       "source": "openghg_analyse_modelled_obs_make_high_freq_flux",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L195",
+      "source_location": "L172",
+      "target": "openghg_analyse_alignment_time_of_day_offset",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_analyse_modelled_obs_make_high_freq_flux",
+      "source_file": "openghg/analyse/_modelled_obs.py",
+      "source_location": "L194",
       "target": "openghg_analyse_modelled_obs_make_hf_flux_rolling_avg_array",
       "weight": 1.0
     },
@@ -14514,20 +14502,9 @@
       "confidence": "EXTRACTED",
       "context": "call",
       "relation": "calls",
-      "source": "tests_analyse_test_modelled_obs_alignment_test_fp_x_flux_time_resolved_aligns_all_irregular_footprint_times",
+      "source": "tests_analyse_test_modelled_obs_alignment_test_fp_x_flux_time_resolved_uses_flux_intervals_for_irregular_footprint_times",
       "source_file": "tests/analyse/test_modelled_obs_alignment.py",
       "source_location": "L55",
-      "target": "tests_analyse_test_modelled_obs_alignment_irregular_time_resolved_fp_and_flux",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "context": "call",
-      "relation": "calls",
-      "source": "tests_analyse_test_modelled_obs_alignment_test_high_freq_flux_without_second_reindex_reproduces_dropped_times",
-      "source_file": "tests/analyse/test_modelled_obs_alignment.py",
-      "source_location": "L64",
       "target": "tests_analyse_test_modelled_obs_alignment_irregular_time_resolved_fp_and_flux",
       "weight": 1.0
     },
@@ -51476,7 +51453,7 @@
       "relation": "references",
       "source": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L216",
+      "source_location": "L210",
       "target": "openghg_analyse_modelled_obs_py_dataarray",
       "weight": 1.0
     },
@@ -51487,7 +51464,7 @@
       "relation": "references",
       "source": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L216",
+      "source_location": "L210",
       "target": "openghg_analyse_modelled_obs_py_dataset",
       "weight": 1.0
     },
@@ -60655,7 +60632,7 @@
       "relation": "contains",
       "source": "openghg_analyse_modelled_obs",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L216",
+      "source_location": "L210",
       "target": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
       "weight": 1.0
     },
@@ -67796,17 +67773,7 @@
       "source": "tests_analyse_test_modelled_obs_alignment",
       "source_file": "tests/analyse/test_modelled_obs_alignment.py",
       "source_location": "L53",
-      "target": "tests_analyse_test_modelled_obs_alignment_test_fp_x_flux_time_resolved_aligns_all_irregular_footprint_times",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "relation": "contains",
-      "source": "tests_analyse_test_modelled_obs_alignment",
-      "source_file": "tests/analyse/test_modelled_obs_alignment.py",
-      "source_location": "L62",
-      "target": "tests_analyse_test_modelled_obs_alignment_test_high_freq_flux_without_second_reindex_reproduces_dropped_times",
+      "target": "tests_analyse_test_modelled_obs_alignment_test_fp_x_flux_time_resolved_uses_flux_intervals_for_irregular_footprint_times",
       "weight": 1.0
     },
     {
@@ -81883,9 +81850,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_analyse_modelled_obs_rationale_236",
+      "source": "openghg_analyse_modelled_obs_rationale_230",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L236",
+      "source_location": "L230",
       "target": "openghg_analyse_modelled_obs",
       "weight": 1.0
     },
@@ -81893,9 +81860,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_analyse_modelled_obs_rationale_237",
+      "source": "openghg_analyse_modelled_obs_rationale_231",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L237",
+      "source_location": "L231",
       "target": "openghg_analyse_modelled_obs",
       "weight": 1.0
     },
@@ -91946,17 +91913,7 @@
       "source": "tests_analyse_test_modelled_obs_alignment_rationale_54",
       "source_file": "tests/analyse/test_modelled_obs_alignment.py",
       "source_location": "L54",
-      "target": "tests_analyse_test_modelled_obs_alignment_test_fp_x_flux_time_resolved_aligns_all_irregular_footprint_times",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "relation": "rationale_for",
-      "source": "tests_analyse_test_modelled_obs_alignment_rationale_63",
-      "source_file": "tests/analyse/test_modelled_obs_alignment.py",
-      "source_location": "L63",
-      "target": "tests_analyse_test_modelled_obs_alignment_test_high_freq_flux_without_second_reindex_reproduces_dropped_times",
+      "target": "tests_analyse_test_modelled_obs_alignment_test_fp_x_flux_time_resolved_uses_flux_intervals_for_irregular_footprint_times",
       "weight": 1.0
     },
     {
@@ -100533,7 +100490,7 @@
       "relation": "calls",
       "source": "openghg_standardise_eulerian_model_openghg_parse_openghg",
       "source_file": "openghg/standardise/eulerian_model/_openghg.py",
-      "source_location": "L82",
+      "source_location": "L80",
       "target": "openghg_util_time_timestamp_now",
       "weight": 1.0
     },
@@ -100545,7 +100502,7 @@
       "relation": "calls",
       "source": "openghg_standardise_eulerian_model_openghg_parse_openghg",
       "source_file": "openghg/standardise/eulerian_model/_openghg.py",
-      "source_location": "L87",
+      "source_location": "L92",
       "target": "openghg_util_time_timestamp_tzaware",
       "weight": 1.0
     },
@@ -109525,7 +109482,7 @@
       "id": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
       "label": "fp_x_flux_time_resolved()",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L216"
+      "source_location": "L210"
     },
     {
       "_callable": true,
@@ -118117,19 +118074,10 @@
       "_callable": true,
       "_origin": "ast",
       "file_type": "code",
-      "id": "tests_analyse_test_modelled_obs_alignment_test_fp_x_flux_time_resolved_aligns_all_irregular_footprint_times",
-      "label": "test_fp_x_flux_time_resolved_aligns_all_irregular_footprint_times()",
+      "id": "tests_analyse_test_modelled_obs_alignment_test_fp_x_flux_time_resolved_uses_flux_intervals_for_irregular_footprint_times",
+      "label": "test_fp_x_flux_time_resolved_uses_flux_intervals_for_irregular_footprint_times()",
       "source_file": "tests/analyse/test_modelled_obs_alignment.py",
       "source_location": "L53"
-    },
-    {
-      "_callable": true,
-      "_origin": "ast",
-      "file_type": "code",
-      "id": "tests_analyse_test_modelled_obs_alignment_test_high_freq_flux_without_second_reindex_reproduces_dropped_times",
-      "label": "test_high_freq_flux_without_second_reindex_reproduces_dropped_times()",
-      "source_file": "tests/analyse/test_modelled_obs_alignment.py",
-      "source_location": "L62"
     },
     {
       "_callable": true,
@@ -132891,18 +132839,18 @@
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_analyse_modelled_obs_rationale_236",
+      "id": "openghg_analyse_modelled_obs_rationale_230",
       "label": "# TODO: could check if resampling is necessary",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L236"
+      "source_location": "L230"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_analyse_modelled_obs_rationale_237",
+      "id": "openghg_analyse_modelled_obs_rationale_231",
       "label": "# TODO: we might also want to change how we resample, depending on whether…",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L237"
+      "source_location": "L231"
     },
     {
       "_origin": "ast",
@@ -140940,17 +140888,9 @@
       "_origin": "ast",
       "file_type": "rationale",
       "id": "tests_analyse_test_modelled_obs_alignment_rationale_54",
-      "label": "Irregular footprint times should not be dropped by xarray's exact coordinate…",
+      "label": "Irregular footprint times should use the containing left-labelled flux…",
       "source_file": "tests/analyse/test_modelled_obs_alignment.py",
       "source_location": "L54"
-    },
-    {
-      "_origin": "ast",
-      "file_type": "rationale",
-      "id": "tests_analyse_test_modelled_obs_alignment_rationale_63",
-      "label": "Probe the old behaviour: only footprint times already on the generated grid…",
-      "source_file": "tests/analyse/test_modelled_obs_alignment.py",
-      "source_location": "L63"
     },
     {
       "_origin": "ast",
@@ -141084,7 +141024,7 @@
       "_origin": "ast",
       "file_type": "rationale",
       "id": "tests_analyse_test_modelled_obs_rationale_339",
-      "label": "High-frequency flux should be forward-filled to irregular fp_time_resolved…",
+      "label": "Each resolved lag should use its containing flux interval at irregular times.",
       "source_file": "tests/analyse/test_modelled_obs.py",
       "source_location": "L339"
     },
