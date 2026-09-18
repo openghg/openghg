@@ -2860,11 +2860,11 @@ wheels = [
 
 [[package]]
 name = "openghg-defs"
-version = "0.0.13"
+version = "0.0.14"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/fd/33/45f8e29f0fb30343b54c6877ad801fb55732d075966636bbcfa694237718/openghg_defs-0.0.13.tar.gz", hash = "sha256:135544a784cb0c27b853115baa5215bec4c2ac50220fc00b3c6e2f81bc9279f7", size = 63846, upload-time = "2026-09-17T13:04:53.194Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/94/85/8660f53cbc796effcf233cc3f272c51c26c115e5d230dd89e717e08e55a9/openghg_defs-0.0.14.tar.gz", hash = "sha256:c66685b95f5bccbc5798f0b41e2a8f632ce598da42d76c6bb7cacd795c6b24dc", size = 63902, upload-time = "2026-09-18T09:42:34.959Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ea/30/6818990ee2cb6585ea81d5f1cc280667685e14abf16fb56701636f279599/openghg_defs-0.0.13-py3-none-any.whl", hash = "sha256:40718554cf381638329c3ff52a069fda09028e6bebfbd7a03ac42efe90420f4d", size = 72790, upload-time = "2026-09-17T13:04:51.931Z" },
+    { url = "https://files.pythonhosted.org/packages/a7/53/615365671fc42fa5da4b4ef94aa9b13b73ba2134df6b5d51dd5efc58524d/openghg_defs-0.0.14-py3-none-any.whl", hash = "sha256:4ae8486f014139d475c57c7d0714b0f8e7bf68663c3485110a0465ceb6180903", size = 72842, upload-time = "2026-09-18T09:42:33.648Z" },
 ]
 
 [[package]]
