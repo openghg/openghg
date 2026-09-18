@@ -1,20 +1,38 @@
-name: Graphify freshness
+name: Update Graphify graph
 
 on:
   pull_request:
+    types: [closed]
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: graphify-${{ github.event.pull_request.base.ref || github.ref_name }}
+  cancel-in-progress: false
 
 jobs:
-  freshness:
-    name: Check generated repository graph
+  update:
+    name: Update generated repository graph
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.base.ref || github.ref_name }}
       - uses: astral-sh/setup-uv@v10.0.1
         with:
           python-version: "3.12"
-      - name: Check the generated code graph
-        run: python scripts/update_graphify.py --check
+      - name: Update the generated code graph
+        run: python scripts/update_graphify.py
+      - name: Commit the updated graph
+        env:
+          TARGET_BRANCH: ${{ github.event.pull_request.base.ref || github.ref_name }}
+        run: |
+          git diff --quiet -- graphify-out/graph.json && exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add graphify-out/graph.json
+          git commit -m "chore: update Graphify graph [skip ci]"
+          git push origin "HEAD:$TARGET_BRANCH"
