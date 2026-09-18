@@ -18,6 +18,7 @@ from openghg.util import (
 )
 from openghg.store import infer_date_range, update_zero_dim
 from openghg.retrieve import get_footprint
+from openghg.standardise.boundary_conditions._units import normalise_boundary_condition_units
 
 logger = logging.getLogger("openghg.transform.boundary_conditions")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -333,8 +334,7 @@ def set_units(ds: xr.Dataset, units: str) -> None:
         ds: dataset with variable vmr_n/s/w/e
         units: units of the variables
     """
-    for c in ["n", "s", "e", "w"]:
-        ds[f"vmr_{c}"].attrs["units"] = units
+    normalise_boundary_condition_units(ds, vmr_units=units)
 
 
 def parse_cams(

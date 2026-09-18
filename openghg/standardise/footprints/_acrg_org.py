@@ -14,6 +14,7 @@ from openghg.util import (
 )
 from openghg.store import infer_date_range, update_zero_dim
 from openghg.types import ParseError
+from openghg.standardise.footprints._units import normalise_footprint_units
 
 logger = logging.getLogger("openghg.standardise.footprint")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -195,6 +196,8 @@ def parse_acrg_org(
     for dv, attr_details in dv_attribute_updates.items():
         for key, value in attr_details.items():
             fp_data[dv].attrs[key] = value
+
+    normalise_footprint_units(fp_data)
 
     # Need to read the metadata from the footprints and then store it
     # Do we need to chunk the footprints / will a Datasource store it correctly?

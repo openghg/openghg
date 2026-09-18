@@ -10,25 +10,24 @@ from openghg.analyse._modelled_obs import fp_x_flux_integrated
 from openghg.dataobjects import FluxData, FootprintData, ObsData
 
 
-def test_convert_units_preserves_unitless_observation_counts():
+@pytest.mark.parametrize("count_name", ["number_of_observations", "mf_number_of_observations"])
+def test_convert_units_preserves_unitless_observation_counts(count_name):
     """Converting mole fractions to ppm must not alter unitless observation counts."""
     dataset = xr.Dataset(
         {
             "mf": ("time", [1.0]),
-            "mf_number_of_observations": ("time", [2]),
+            count_name: ("time", [2]),
         },
         coords={"time": pd.to_datetime(["2012-01-01"])},
     )
     dataset.mf.attrs["units"] = "1"
-    dataset.mf_number_of_observations.attrs["units"] = "1"
+    dataset[count_name].attrs["units"] = "1"
     original = dataset.copy(deep=True)
 
     converted = ModelScenario().convert_units(dataset, output_units="ppm")
 
     xr.testing.assert_identical(dataset, original)
-    xr.testing.assert_identical(
-        converted.mf_number_of_observations, original.mf_number_of_observations
-    )
+    xr.testing.assert_identical(converted[count_name], original[count_name])
     assert converted.mf.item() == pytest.approx(1_000_000)
 
 
@@ -119,10 +118,7 @@ def test_modelled_obs_integrated_co2_uses_integrated_pipeline(integrated_co2_sce
     xr.testing.assert_allclose(flux_monthly, expected_flux)
 
     expected = (
-        fp_x_flux_integrated(combined, flux_monthly)
-        .pint.quantify()
-        .sum(["lat", "lon"])
-        .pint.dequantify()
+        fp_x_flux_integrated(combined, flux_monthly).pint.quantify().sum(["lat", "lon"]).pint.dequantify()
     )
     xr.testing.assert_allclose(combined.mf_mod, expected)
 
