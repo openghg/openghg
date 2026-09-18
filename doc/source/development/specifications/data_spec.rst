@@ -47,8 +47,7 @@ data types in the storage class's ``schema()`` method:
 
 Extra variables are allowed, and dimensions listed for a required variable
 must be present but may appear in a different order. Dtype constraints for
-coordinates remain optional when the coordinate is absent, matching the
-historical OpenGHG schema behaviour.
+coordinates are checked only when the coordinate is present.
 
 ObsSurface
 ----------
