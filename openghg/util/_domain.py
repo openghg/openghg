@@ -88,22 +88,24 @@ def _get_coord_data(coord: str, data: dict[str, Any], domain: str) -> ndarray:
     Returns:
         array: Extracted or derived coordinate values
     """
-    from openghg_defs import data_path
+    from openghg_defs import openghg_defs_files
 
     # Look for explicit file keyword in data e.g. "latitude_file"
     # Extract data from file if found and return
     filename_str = f"{coord}_file"
     if filename_str in data:
-        full_filename = data_path / data[filename_str]
-        coord_data: ndarray = np.loadtxt(full_filename)
+        full_filename = openghg_defs_files / data[filename_str]
+        with full_filename.open() as file:
+            coord_data: ndarray = np.loadtxt(file)
         return coord_data
 
     # If no explicit file name defined, look within known location to see
     # if data is present by looking for file of form "domain/{domain}_{coord}.csv"
     # e.g. "domain/EUROPE_latitude.csv" (within "openghg/openghg/data" folder)
     try:
-        full_filename = data_path / "domain" / f"{domain}_{coord}.dat"
-        coord_data = np.loadtxt(full_filename)
+        full_filename = openghg_defs_files / "domain" / f"{domain}_{coord}.dat"
+        with full_filename.open() as file:
+            coord_data = np.loadtxt(file)
     except OSError:
         pass
     else:

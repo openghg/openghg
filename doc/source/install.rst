@@ -108,15 +108,11 @@ First create a virtual environment and activate it
 
 Here change ``/path/to/env`` with your own path.
 
-Next install OpenGHG. While the latest ``openghg-defs`` release incorrectly
-declares ``pytest<=7.0.0`` as a runtime dependency, use a temporary override
-for the install:
+Next install OpenGHG:
 
 .. code-block:: bash
 
-    pip install uv
-    printf 'pytest>=7.0.0,<=9.1.1\n' > openghg-overrides.txt
-    uv pip install --overrides openghg-overrides.txt openghg
+    pip install openghg
 
 
 conda
