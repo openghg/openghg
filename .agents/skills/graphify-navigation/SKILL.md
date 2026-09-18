@@ -19,6 +19,6 @@ description: Use the tracked OpenGHG Graphify graph to orient in an unfamiliar s
 5. If Graphify is unavailable or reports stale output, continue with normal source search and
    report the limitation. Do not edit generated output by hand.
 
-When relevant Python changes make the freshness check fail, run
-`python scripts/update_graphify.py` and include the regenerated `graphify-out/graph.json` in
-the change.
+The committed graph is regenerated automatically after pull requests merge. Do not include
+`graphify-out/graph.json` in ordinary pull requests. To update it manually, run
+`python scripts/update_graphify.py`.
