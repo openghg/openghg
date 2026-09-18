@@ -23,6 +23,7 @@ maintainers = [
 
 dependencies = [
     "addict<=2.4.0",
+    "attrs>=22",
     "cdsapi>=0.7.7",
     "cf-xarray<=0.10.6",
     "dask<2026.9",
@@ -64,6 +65,7 @@ dependencies = [
     "toml<=0.10.2",
     "urllib3>=1.26.3",
     "xarray>=2025.4.0, <=2025.9.1",
+    "xarray-validate==0.0.5",
     "zarr==2.18.3",
 ]
 classifiers = [
