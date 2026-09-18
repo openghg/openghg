@@ -8,7 +8,7 @@ The source code for OpenGHG is available on `GitHub <https://github.com/openghg/
 Setting up your computer
 =========================
 
-You'll need `git <https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`_ and Python >= 3.10, so please make sure you have both installed before continuing further.
+You'll need `git <https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`_ and Python >= 3.11, so please make sure you have both installed before continuing further.
 
 
 Clone OpenGHG
@@ -173,7 +173,12 @@ To ensure everything is working on your system running the tests is a good idea.
 
 .. code-block:: bash
 
-    pytest -v tests
+    python -m pytest -v tests
+
+Invoking pytest as a Python module ensures that it uses the interpreter from
+the active environment. If the project was installed with ``uv``, run
+``uv run pytest -v tests`` instead; this explicitly uses the project's
+``.venv`` even when another Python installation is also on ``PATH``.
 
 Testing against multiple versions of Python
 -------------------------------------------
@@ -191,24 +196,25 @@ After following the installation instructions, you can install multiple versions
 
 .. code-block:: bash
 
-    pyenv install 3.10
     pyenv install 3.11
     pyenv install 3.12
+    pyenv install 3.13
+    pyenv install 3.14
 
 To view all available versions, call ``pyenv versions``. To view and set your preferred version globally, use ``pyenv global``.
 To activate multiple versions of Python, you can use ``pyenv local``:
 
 .. code-block:: bash
 
-    pyenv local 3.10 3.11 3.12
+    pyenv local 3.11 3.12 3.13 3.14
 
-This makes Python 3.10, 3.11, and 3.12 available in the current directory.
-The ``python`` command will default to the first version in the list; in this case, Python 3.10.
+This makes Python 3.11 through 3.14 available in the current directory.
+The ``python`` command will default to the first version in the list; in this case, Python 3.11.
 
 Running tests with ``tox``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To run tests against Python 3.10, 3.11, and 3.12, as well as run ``ruff`` and ``mypy``, call ``tox``
+To run tests against Python 3.11 through 3.14, as well as run ``ruff`` and ``mypy``, call ``tox``
 in your OpenGHG repo.
 
 To see all jobs that ``tox`` can run, use ``tox -l``. You can run a specific job with ``tox run -e <env>``.
@@ -216,21 +222,21 @@ For instance
 
 .. code-block:: bash
 
-   tox run -e py312
+   tox run -e py314
 
-will run the tests against Python 3.12.
+will run the tests against Python 3.14.
 
 To pass arguments to ``pytest``, you can append them after the ``tox`` command as follows:
 
 .. code-block:: bash
 
-   tox run -e py312 -- tests/analyse/test_scenario.py
+   tox run -e py314 -- tests/analyse/test_scenario.py
 
 
 Coding Style
 ============
 
-OpenGHG is written in Python 3 (>= 3.9). We aim as much as possible to follow a
+OpenGHG is written in Python 3 (>= 3.11). We aim as much as possible to follow a
 `PEP8 <https://www.python.org/dev/peps/pep-0008/>`__ python coding style and
 use `Ruff <https://docs.astral.sh/ruff/>`__ for linting and formatting.
 
@@ -448,7 +454,7 @@ To run the full test suite, simply type:
 
 .. code-block:: bash
 
-   pytest tests/
+   python -m pytest tests/
 
 
 To get more detailed information about each test, run pytests using the
@@ -456,7 +462,7 @@ To get more detailed information about each test, run pytests using the
 
 .. code-block:: bash
 
-   pytest -v tests/
+   python -m pytest -v tests/
 
 For more information on the capabilties of ``pytest`` please see the
 `pytest documentation <https://docs.pytest.org/en/stable/contents.html>`__.
