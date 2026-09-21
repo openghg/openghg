@@ -8,7 +8,7 @@ The source code for OpenGHG is available on `GitHub <https://github.com/openghg/
 Setting up your computer
 =========================
 
-You'll need `git <https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`_ and Python >= 3.11, so please make sure you have both installed before continuing further.
+You'll need `git <https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`_ and Python 3.11 to 3.13, so please make sure you have both installed before continuing further.
 
 
 Clone OpenGHG
@@ -235,7 +235,7 @@ To pass arguments to ``pytest``, you can append them after the ``tox`` command a
 Coding Style
 ============
 
-OpenGHG is written in Python 3 (>= 3.11). We aim as much as possible to follow a
+OpenGHG is written in Python 3 (3.11 to 3.13). We aim as much as possible to follow a
 `PEP8 <https://www.python.org/dev/peps/pep-0008/>`__ python coding style and
 use `Ruff <https://docs.astral.sh/ruff/>`__ for linting and formatting.
 
