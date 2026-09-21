@@ -12,9 +12,7 @@ OpenGHG is developed and `tested on Linux and MacOS <https://github.com/openghg/
 support for Windows is planned.
 
 To install OpenGHG, you first need to install Python 3.11, 3.12, or 3.13.
-Python 3.13 is the recommended version for local installations. Python 3.14
-is not currently supported because a required ``numcodecs`` release has no
-Python 3.14 wheel. To check if you have a supported Python installed type;
+Python 3.13 is the recommended version for local installations. To check if you have a supported Python installed type;
 
 .. code-block:: bash
 
@@ -96,8 +94,7 @@ pip
 ---
 
 For pip installations, use Python 3.11 through 3.13. We recommend Python
-3.13. Python 3.14 is rejected by OpenGHG's package metadata until its Zarr
-and ``numcodecs`` dependency combination can be upgraded.
+3.13.
 
 First create a virtual environment and activate it
 
