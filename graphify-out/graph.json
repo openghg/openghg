@@ -1230,22 +1230,10 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
-      "source": "tests_analyse_test_modelled_obs_alignment_test_fp_x_flux_time_resolved_aligns_all_irregular_footprint_times",
+      "source": "tests_analyse_test_modelled_obs_alignment_test_fp_x_flux_time_resolved_uses_flux_intervals_for_irregular_footprint_times",
       "source_file": "tests/analyse/test_modelled_obs_alignment.py",
       "source_location": "L57",
       "target": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "tests_analyse_test_modelled_obs_alignment_test_high_freq_flux_without_second_reindex_reproduces_dropped_times",
-      "source_file": "tests/analyse/test_modelled_obs_alignment.py",
-      "source_location": "L66",
-      "target": "openghg_analyse_modelled_obs_make_high_freq_flux",
       "weight": 1.0
     },
     {
@@ -3186,6 +3174,18 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "tests_store_test_flux_test_flux_schema_with_file_data",
+      "source_file": "tests/store/test_flux.py",
+      "source_location": "L525",
+      "target": "openghg_store_flux_flux_schema",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "tests_store_test_footprints_clear_store",
       "source_file": "tests/store/test_footprints.py",
       "source_location": "L19",
@@ -4257,6 +4257,18 @@
       "source": "pkg_openghg",
       "source_file": "pyproject.toml",
       "source_location": "L1",
+      "target": "pkg_attrs",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "dependency",
+      "relation": "depends_on",
+      "source": "pkg_openghg",
+      "source_file": "pyproject.toml",
+      "source_location": "L1",
       "target": "pkg_cdsapi",
       "weight": 1.0
     },
@@ -4749,6 +4761,18 @@
       "source": "pkg_openghg",
       "source_file": "pyproject.toml",
       "source_location": "L1",
+      "target": "pkg_xarray_validate",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "dependency",
+      "relation": "depends_on",
+      "source": "pkg_openghg",
+      "source_file": "pyproject.toml",
+      "source_location": "L1",
       "target": "pkg_zarr",
       "weight": 1.0
     },
@@ -5144,7 +5168,7 @@
       "relation": "calls",
       "source": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L226",
+      "source_location": "L220",
       "target": "openghg_analyse_modelled_obs_time_resolved_and_residual_footprints",
       "weight": 1.0
     },
@@ -5155,7 +5179,7 @@
       "relation": "calls",
       "source": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L228",
+      "source_location": "L222",
       "target": "openghg_analyse_utils_reindex_on_dims",
       "weight": 1.0
     },
@@ -5166,7 +5190,7 @@
       "relation": "calls",
       "source": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L245",
+      "source_location": "L239",
       "target": "openghg_analyse_modelled_obs_make_low_freq_flux",
       "weight": 1.0
     },
@@ -5177,7 +5201,7 @@
       "relation": "calls",
       "source": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L249",
+      "source_location": "L243",
       "target": "openghg_analyse_modelled_obs_calc_hourly_freq",
       "weight": 1.0
     },
@@ -5188,7 +5212,7 @@
       "relation": "calls",
       "source": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L252",
+      "source_location": "L246",
       "target": "openghg_analyse_modelled_obs_max_h_back",
       "weight": 1.0
     },
@@ -5199,7 +5223,7 @@
       "relation": "calls",
       "source": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L260",
+      "source_location": "L254",
       "target": "openghg_analyse_modelled_obs_make_high_freq_flux",
       "weight": 1.0
     },
@@ -5232,7 +5256,7 @@
       "relation": "calls",
       "source": "openghg_analyse_modelled_obs_make_high_freq_flux",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L171",
+      "source_location": "L169",
       "target": "openghg_analyse_modelled_obs_fp_time_and_h_back_freq_gcd",
       "weight": 1.0
     },
@@ -5243,7 +5267,7 @@
       "relation": "calls",
       "source": "openghg_analyse_modelled_obs_make_high_freq_flux",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L172",
+      "source_location": "L170",
       "target": "openghg_analyse_modelled_obs_padded_flux_slice_start_and_end",
       "weight": 1.0
     },
@@ -5254,18 +5278,7 @@
       "relation": "calls",
       "source": "openghg_analyse_modelled_obs_make_high_freq_flux",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L173",
-      "target": "openghg_analyse_alignment_time_of_day_offset",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "context": "call",
-      "relation": "calls",
-      "source": "openghg_analyse_modelled_obs_make_high_freq_flux",
-      "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L180",
+      "source_location": "L171",
       "target": "openghg_analyse_modelled_obs_calc_hourly_freq",
       "weight": 1.0
     },
@@ -5276,7 +5289,18 @@
       "relation": "calls",
       "source": "openghg_analyse_modelled_obs_make_high_freq_flux",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L195",
+      "source_location": "L172",
+      "target": "openghg_analyse_alignment_time_of_day_offset",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_analyse_modelled_obs_make_high_freq_flux",
+      "source_file": "openghg/analyse/_modelled_obs.py",
+      "source_location": "L194",
       "target": "openghg_analyse_modelled_obs_make_hf_flux_rolling_avg_array",
       "weight": 1.0
     },
@@ -10774,39 +10798,6 @@
       "confidence": "EXTRACTED",
       "context": "call",
       "relation": "calls",
-      "source": "openghg_store_data_schema_dataschema_validate_data",
-      "source_file": "openghg/store/_data_schema.py",
-      "source_location": "L138",
-      "target": "openghg_store_data_schema_dataschema_check_data_vars",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "context": "call",
-      "relation": "calls",
-      "source": "openghg_store_data_schema_dataschema_validate_data",
-      "source_file": "openghg/store/_data_schema.py",
-      "source_location": "L141",
-      "target": "openghg_store_data_schema_dataschema_check_dims",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "context": "call",
-      "relation": "calls",
-      "source": "openghg_store_data_schema_dataschema_validate_data",
-      "source_file": "openghg/store/_data_schema.py",
-      "source_location": "L144",
-      "target": "openghg_store_data_schema_dataschema_check_dtypes",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "context": "call",
-      "relation": "calls",
       "source": "openghg_store_eulerian_model_eulerianmodel_schema",
       "source_file": "openghg/store/_eulerian_model.py",
       "source_location": "L78",
@@ -14514,20 +14505,9 @@
       "confidence": "EXTRACTED",
       "context": "call",
       "relation": "calls",
-      "source": "tests_analyse_test_modelled_obs_alignment_test_fp_x_flux_time_resolved_aligns_all_irregular_footprint_times",
+      "source": "tests_analyse_test_modelled_obs_alignment_test_fp_x_flux_time_resolved_uses_flux_intervals_for_irregular_footprint_times",
       "source_file": "tests/analyse/test_modelled_obs_alignment.py",
       "source_location": "L55",
-      "target": "tests_analyse_test_modelled_obs_alignment_irregular_time_resolved_fp_and_flux",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "context": "call",
-      "relation": "calls",
-      "source": "tests_analyse_test_modelled_obs_alignment_test_high_freq_flux_without_second_reindex_reproduces_dropped_times",
-      "source_file": "tests/analyse/test_modelled_obs_alignment.py",
-      "source_location": "L64",
       "target": "tests_analyse_test_modelled_obs_alignment_irregular_time_resolved_fp_and_flux",
       "weight": 1.0
     },
@@ -20267,9 +20247,9 @@
       "confidence": "EXTRACTED",
       "context": "call",
       "relation": "calls",
-      "source": "tests_store_test_flux_test_info_metadata",
+      "source": "tests_store_test_flux_test_flux_schema_with_file_data",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L545",
+      "source_location": "L522",
       "target": "tests_helpers_helpers_get_flux_datapath",
       "weight": 1.0
     },
@@ -20280,7 +20260,18 @@
       "relation": "calls",
       "source": "tests_store_test_flux_test_info_metadata",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L550",
+      "source_location": "L553",
+      "target": "tests_helpers_helpers_get_flux_datapath",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_store_test_flux_test_info_metadata",
+      "source_file": "tests/store/test_flux.py",
+      "source_location": "L558",
       "target": "openghg_transform_transform_transform_flux_data",
       "weight": 1.0
     },
@@ -20291,7 +20282,7 @@
       "relation": "calls",
       "source": "tests_store_test_flux_test_info_metadata_raise_error",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L525",
+      "source_location": "L533",
       "target": "tests_helpers_helpers_get_flux_datapath",
       "weight": 1.0
     },
@@ -20302,7 +20293,7 @@
       "relation": "calls",
       "source": "tests_store_test_flux_test_info_metadata_raise_error",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L531",
+      "source_location": "L539",
       "target": "openghg_transform_transform_transform_flux_data",
       "weight": 1.0
     },
@@ -24713,7 +24704,7 @@
       "relation": "references",
       "source": "tests_store_test_data_schema_data_schema_1",
       "source_file": "tests/store/test_data_schema.py",
-      "source_location": "L32",
+      "source_location": "L33",
       "target": "tests_store_test_data_schema_py_fixture",
       "weight": 1.0
     },
@@ -24724,7 +24715,7 @@
       "relation": "references",
       "source": "tests_store_test_data_schema_dummy_data_1",
       "source_file": "tests/store/test_data_schema.py",
-      "source_location": "L18",
+      "source_location": "L19",
       "target": "tests_store_test_data_schema_py_fixture",
       "weight": 1.0
     },
@@ -32380,7 +32371,7 @@
       "relation": "imports",
       "source": "openghg_store_data_schema",
       "source_file": "openghg/store/_data_schema.py",
-      "source_location": "L2",
+      "source_location": "L3",
       "target": "logging",
       "weight": 1.0
     },
@@ -32391,8 +32382,19 @@
       "relation": "imports",
       "source": "openghg_store_data_schema",
       "source_file": "openghg/store/_data_schema.py",
-      "source_location": "L3",
+      "source_location": "L5",
       "target": "numpy",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "openghg_store_data_schema",
+      "source_file": "openghg/store/_data_schema.py",
+      "source_location": "L7",
+      "target": "xarray_validate",
       "weight": 1.0
     },
     {
@@ -45283,8 +45285,8 @@
       "relation": "imports_from",
       "source": "openghg_store_data_schema",
       "source_file": "openghg/store/_data_schema.py",
-      "source_location": "L4",
-      "target": "xarray",
+      "source_location": "L2",
+      "target": "functools",
       "weight": 1.0
     },
     {
@@ -45295,6 +45297,17 @@
       "source": "openghg_store_data_schema",
       "source_file": "openghg/store/_data_schema.py",
       "source_location": "L6",
+      "target": "xarray",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "openghg_store_data_schema",
+      "source_file": "openghg/store/_data_schema.py",
+      "source_location": "L9",
       "target": "openghg_types",
       "weight": 1.0
     },
@@ -49648,6 +49661,17 @@
       "confidence": "EXTRACTED",
       "context": "import",
       "relation": "imports_from",
+      "source": "tests_store_test_data_schema",
+      "source_file": "tests/store/test_data_schema.py",
+      "source_location": "L5",
+      "target": "openghg_types",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
       "source_location": "L11",
@@ -51476,7 +51500,7 @@
       "relation": "references",
       "source": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L216",
+      "source_location": "L210",
       "target": "openghg_analyse_modelled_obs_py_dataarray",
       "weight": 1.0
     },
@@ -51487,7 +51511,7 @@
       "relation": "references",
       "source": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L216",
+      "source_location": "L210",
       "target": "openghg_analyse_modelled_obs_py_dataset",
       "weight": 1.0
     },
@@ -56116,10 +56140,10 @@
       "confidence": "EXTRACTED",
       "context": "parameter_type",
       "relation": "references",
-      "source": "openghg_store_data_schema_dataschema_check_data_vars",
+      "source": "openghg_store_data_schema_check_dims",
       "source_file": "openghg/store/_data_schema.py",
-      "source_location": "L34",
-      "target": "openghg_store_data_schema_py_dataset",
+      "source_location": "L17",
+      "target": "openghg_store_data_schema_py_dataarray",
       "weight": 1.0
     },
     {
@@ -56127,20 +56151,9 @@
       "confidence": "EXTRACTED",
       "context": "parameter_type",
       "relation": "references",
-      "source": "openghg_store_data_schema_dataschema_check_dims",
+      "source": "openghg_store_data_schema_dataschema_check_remaining_constraints",
       "source_file": "openghg/store/_data_schema.py",
-      "source_location": "L68",
-      "target": "openghg_store_data_schema_py_dataset",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "context": "parameter_type",
-      "relation": "references",
-      "source": "openghg_store_data_schema_dataschema_check_dtypes",
-      "source_file": "openghg/store/_data_schema.py",
-      "source_location": "L91",
+      "source_location": "L48",
       "target": "openghg_store_data_schema_py_dataset",
       "weight": 1.0
     },
@@ -56151,7 +56164,7 @@
       "relation": "references",
       "source": "openghg_store_data_schema_dataschema_validate_data",
       "source_file": "openghg/store/_data_schema.py",
-      "source_location": "L116",
+      "source_location": "L61",
       "target": "openghg_store_data_schema_py_dataset",
       "weight": 1.0
     },
@@ -60655,7 +60668,7 @@
       "relation": "contains",
       "source": "openghg_analyse_modelled_obs",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L216",
+      "source_location": "L210",
       "target": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
       "weight": 1.0
     },
@@ -63975,7 +63988,17 @@
       "relation": "contains",
       "source": "openghg_store_data_schema",
       "source_file": "openghg/store/_data_schema.py",
-      "source_location": "L15",
+      "source_location": "L17",
+      "target": "openghg_store_data_schema_check_dims",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "openghg_store_data_schema",
+      "source_file": "openghg/store/_data_schema.py",
+      "source_location": "L26",
       "target": "openghg_store_data_schema_dataschema",
       "weight": 1.0
     },
@@ -67796,17 +67819,7 @@
       "source": "tests_analyse_test_modelled_obs_alignment",
       "source_file": "tests/analyse/test_modelled_obs_alignment.py",
       "source_location": "L53",
-      "target": "tests_analyse_test_modelled_obs_alignment_test_fp_x_flux_time_resolved_aligns_all_irregular_footprint_times",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "relation": "contains",
-      "source": "tests_analyse_test_modelled_obs_alignment",
-      "source_file": "tests/analyse/test_modelled_obs_alignment.py",
-      "source_location": "L62",
-      "target": "tests_analyse_test_modelled_obs_alignment_test_high_freq_flux_without_second_reindex_reproduces_dropped_times",
+      "target": "tests_analyse_test_modelled_obs_alignment_test_fp_x_flux_time_resolved_uses_flux_intervals_for_irregular_footprint_times",
       "weight": 1.0
     },
     {
@@ -73455,7 +73468,7 @@
       "relation": "contains",
       "source": "tests_store_test_data_schema",
       "source_file": "tests/store/test_data_schema.py",
-      "source_location": "L19",
+      "source_location": "L20",
       "target": "tests_store_test_data_schema_dummy_data_1",
       "weight": 1.0
     },
@@ -73465,7 +73478,7 @@
       "relation": "contains",
       "source": "tests_store_test_data_schema",
       "source_file": "tests/store/test_data_schema.py",
-      "source_location": "L33",
+      "source_location": "L34",
       "target": "tests_store_test_data_schema_data_schema_1",
       "weight": 1.0
     },
@@ -73475,7 +73488,7 @@
       "relation": "contains",
       "source": "tests_store_test_data_schema",
       "source_file": "tests/store/test_data_schema.py",
-      "source_location": "L43",
+      "source_location": "L44",
       "target": "tests_store_test_data_schema_test_data_schema_match",
       "weight": 1.0
     },
@@ -73485,7 +73498,7 @@
       "relation": "contains",
       "source": "tests_store_test_data_schema",
       "source_file": "tests/store/test_data_schema.py",
-      "source_location": "L49",
+      "source_location": "L50",
       "target": "tests_store_test_data_schema_test_data_schema_extra",
       "weight": 1.0
     },
@@ -73495,7 +73508,7 @@
       "relation": "contains",
       "source": "tests_store_test_data_schema",
       "source_file": "tests/store/test_data_schema.py",
-      "source_location": "L60",
+      "source_location": "L61",
       "target": "tests_store_test_data_schema_test_data_schema_empty",
       "weight": 1.0
     },
@@ -73505,8 +73518,38 @@
       "relation": "contains",
       "source": "tests_store_test_data_schema",
       "source_file": "tests/store/test_data_schema.py",
-      "source_location": "L7",
+      "source_location": "L70",
+      "target": "tests_store_test_data_schema_test_data_schema_missing_variable",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_store_test_data_schema",
+      "source_file": "tests/store/test_data_schema.py",
+      "source_location": "L75",
+      "target": "tests_store_test_data_schema_test_data_schema_wrong_dtype",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_store_test_data_schema",
+      "source_file": "tests/store/test_data_schema.py",
+      "source_location": "L8",
       "target": "tests_store_test_data_schema_test_data_schema",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_store_test_data_schema",
+      "source_file": "tests/store/test_data_schema.py",
+      "source_location": "L80",
+      "target": "tests_store_test_data_schema_test_data_schema_missing_variable_dimension",
       "weight": 1.0
     },
     {
@@ -74046,6 +74089,16 @@
       "source": "tests_store_test_flux",
       "source_file": "tests/store/test_flux.py",
       "source_location": "L520",
+      "target": "tests_store_test_flux_test_flux_schema_with_file_data",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_store_test_flux",
+      "source_file": "tests/store/test_flux.py",
+      "source_location": "L528",
       "target": "tests_store_test_flux_test_info_metadata_raise_error",
       "weight": 1.0
     },
@@ -74055,7 +74108,7 @@
       "relation": "contains",
       "source": "tests_store_test_flux",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L540",
+      "source_location": "L548",
       "target": "tests_store_test_flux_test_info_metadata",
       "weight": 1.0
     },
@@ -80775,18 +80828,8 @@
       "relation": "method",
       "source": "openghg_store_data_schema_dataschema",
       "source_file": "openghg/store/_data_schema.py",
-      "source_location": "L116",
-      "target": "openghg_store_data_schema_dataschema_validate_data",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "relation": "method",
-      "source": "openghg_store_data_schema_dataschema",
-      "source_file": "openghg/store/_data_schema.py",
       "source_location": "L34",
-      "target": "openghg_store_data_schema_dataschema_check_data_vars",
+      "target": "openghg_store_data_schema_dataschema_post_init",
       "weight": 1.0
     },
     {
@@ -80795,8 +80838,8 @@
       "relation": "method",
       "source": "openghg_store_data_schema_dataschema",
       "source_file": "openghg/store/_data_schema.py",
-      "source_location": "L68",
-      "target": "openghg_store_data_schema_dataschema_check_dims",
+      "source_location": "L48",
+      "target": "openghg_store_data_schema_dataschema_check_remaining_constraints",
       "weight": 1.0
     },
     {
@@ -80805,8 +80848,8 @@
       "relation": "method",
       "source": "openghg_store_data_schema_dataschema",
       "source_file": "openghg/store/_data_schema.py",
-      "source_location": "L91",
-      "target": "openghg_store_data_schema_dataschema_check_dtypes",
+      "source_location": "L61",
+      "target": "openghg_store_data_schema_dataschema_validate_data",
       "weight": 1.0
     },
     {
@@ -81883,9 +81926,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_analyse_modelled_obs_rationale_236",
+      "source": "openghg_analyse_modelled_obs_rationale_230",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L236",
+      "source_location": "L230",
       "target": "openghg_analyse_modelled_obs",
       "weight": 1.0
     },
@@ -81893,9 +81936,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_analyse_modelled_obs_rationale_237",
+      "source": "openghg_analyse_modelled_obs_rationale_231",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L237",
+      "source_location": "L231",
       "target": "openghg_analyse_modelled_obs",
       "weight": 1.0
     },
@@ -87633,29 +87676,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_data_schema_rationale_120",
+      "source": "openghg_store_data_schema_rationale_27",
       "source_file": "openghg/store/_data_schema.py",
-      "source_location": "L120",
-      "target": "openghg_store_data_schema_dataschema_validate_data",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "relation": "rationale_for",
-      "source": "openghg_store_data_schema_rationale_146",
-      "source_file": "openghg/store/_data_schema.py",
-      "source_location": "L146",
-      "target": "openghg_store_data_schema",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "relation": "rationale_for",
-      "source": "openghg_store_data_schema_rationale_16",
-      "source_file": "openghg/store/_data_schema.py",
-      "source_location": "L16",
+      "source_location": "L27",
       "target": "openghg_store_data_schema_dataschema",
       "weight": 1.0
     },
@@ -87663,30 +87686,20 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_data_schema_rationale_35",
+      "source": "openghg_store_data_schema_rationale_49",
       "source_file": "openghg/store/_data_schema.py",
-      "source_location": "L35",
-      "target": "openghg_store_data_schema_dataschema_check_data_vars",
+      "source_location": "L49",
+      "target": "openghg_store_data_schema_dataschema_check_remaining_constraints",
       "weight": 1.0
     },
     {
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_data_schema_rationale_69",
+      "source": "openghg_store_data_schema_rationale_62",
       "source_file": "openghg/store/_data_schema.py",
-      "source_location": "L69",
-      "target": "openghg_store_data_schema_dataschema_check_dims",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "relation": "rationale_for",
-      "source": "openghg_store_data_schema_rationale_92",
-      "source_file": "openghg/store/_data_schema.py",
-      "source_location": "L92",
-      "target": "openghg_store_data_schema_dataschema_check_dtypes",
+      "source_location": "L62",
+      "target": "openghg_store_data_schema_dataschema_validate_data",
       "weight": 1.0
     },
     {
@@ -91946,17 +91959,7 @@
       "source": "tests_analyse_test_modelled_obs_alignment_rationale_54",
       "source_file": "tests/analyse/test_modelled_obs_alignment.py",
       "source_location": "L54",
-      "target": "tests_analyse_test_modelled_obs_alignment_test_fp_x_flux_time_resolved_aligns_all_irregular_footprint_times",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "relation": "rationale_for",
-      "source": "tests_analyse_test_modelled_obs_alignment_rationale_63",
-      "source_file": "tests/analyse/test_modelled_obs_alignment.py",
-      "source_location": "L63",
-      "target": "tests_analyse_test_modelled_obs_alignment_test_high_freq_flux_without_second_reindex_reproduces_dropped_times",
+      "target": "tests_analyse_test_modelled_obs_alignment_test_fp_x_flux_time_resolved_uses_flux_intervals_for_irregular_footprint_times",
       "weight": 1.0
     },
     {
@@ -96083,9 +96086,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_store_test_data_schema_rationale_44",
+      "source": "tests_store_test_data_schema_rationale_45",
       "source_file": "tests/store/test_data_schema.py",
-      "source_location": "L44",
+      "source_location": "L45",
       "target": "tests_store_test_data_schema_test_data_schema_match",
       "weight": 1.0
     },
@@ -96093,20 +96096,10 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_store_test_data_schema_rationale_50",
+      "source": "tests_store_test_data_schema_rationale_51",
       "source_file": "tests/store/test_data_schema.py",
-      "source_location": "L50",
+      "source_location": "L51",
       "target": "tests_store_test_data_schema_test_data_schema_extra",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "relation": "rationale_for",
-      "source": "tests_store_test_data_schema_rationale_61",
-      "source_file": "tests/store/test_data_schema.py",
-      "source_location": "L61",
-      "target": "tests_store_test_data_schema_test_data_schema_empty",
       "weight": 1.0
     },
     {
@@ -96116,6 +96109,16 @@
       "source": "tests_store_test_data_schema_rationale_62",
       "source_file": "tests/store/test_data_schema.py",
       "source_location": "L62",
+      "target": "tests_store_test_data_schema_test_data_schema_empty",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "tests_store_test_data_schema_rationale_63",
+      "source_file": "tests/store/test_data_schema.py",
+      "source_location": "L63",
       "target": "tests_store_test_data_schema",
       "weight": 1.0
     },
@@ -96123,9 +96126,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_store_test_data_schema_rationale_8",
+      "source": "tests_store_test_data_schema_rationale_9",
       "source_file": "tests/store/test_data_schema.py",
-      "source_location": "L8",
+      "source_location": "L9",
       "target": "tests_store_test_data_schema_test_data_schema",
       "weight": 1.0
     },
@@ -96406,6 +96409,16 @@
       "source": "tests_store_test_flux_rationale_521",
       "source_file": "tests/store/test_flux.py",
       "source_location": "L521",
+      "target": "tests_store_test_flux_test_flux_schema_with_file_data",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "tests_store_test_flux_rationale_529",
+      "source_file": "tests/store/test_flux.py",
+      "source_location": "L529",
       "target": "tests_store_test_flux_test_info_metadata_raise_error",
       "weight": 1.0
     },
@@ -96423,9 +96436,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_store_test_flux_rationale_541",
+      "source": "tests_store_test_flux_rationale_549",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L541",
+      "source_location": "L549",
       "target": "tests_store_test_flux_test_info_metadata",
       "weight": 1.0
     },
@@ -98527,6 +98540,18 @@
       "confidence_score": 0.85,
       "context": "argument",
       "relation": "indirect_call",
+      "source": "openghg_store_data_schema_dataschema_post_init",
+      "source_file": "openghg/store/_data_schema.py",
+      "source_location": "L39",
+      "target": "openghg_store_data_schema_check_dims",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
       "source": "openghg_transform_boundary_conditions_cams_xr_interp",
       "source_file": "openghg/transform/boundary_conditions/_cams.py",
       "source_location": "L71",
@@ -98651,6 +98676,18 @@
       "source_file": "tests/store/test_datasource.py",
       "source_location": "L86",
       "target": "tests_store_test_datasource_mock_uuid",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
+      "source": "tests_store_test_flux_test_flux_schema_with_file_data",
+      "source_file": "tests/store/test_flux.py",
+      "source_location": "L525",
+      "target": "tests_store_test_datasource_data",
       "weight": 1.0
     },
     {
@@ -102079,33 +102116,9 @@
       "confidence_score": 0.85,
       "context": "call",
       "relation": "calls",
-      "source": "openghg_store_data_schema_dataschema_check_data_vars",
+      "source": "openghg_store_data_schema_dataschema_validate_data",
       "source_file": "openghg/store/_data_schema.py",
       "source_location": "L66",
-      "target": "openghg_types_errors_validationerror",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "call",
-      "relation": "calls",
-      "source": "openghg_store_data_schema_dataschema_check_dims",
-      "source_file": "openghg/store/_data_schema.py",
-      "source_location": "L89",
-      "target": "openghg_types_errors_validationerror",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "call",
-      "relation": "calls",
-      "source": "openghg_store_data_schema_dataschema_check_dtypes",
-      "source_file": "openghg/store/_data_schema.py",
-      "source_location": "L112",
       "target": "openghg_types_errors_validationerror",
       "weight": 1.0
     },
@@ -105033,7 +105046,7 @@
       "relation": "calls",
       "source": "tests_store_test_data_schema_data_schema_1",
       "source_file": "tests/store/test_data_schema.py",
-      "source_location": "L38",
+      "source_location": "L39",
       "target": "openghg_store_data_schema_dataschema",
       "weight": 1.0
     },
@@ -105045,7 +105058,7 @@
       "relation": "calls",
       "source": "tests_store_test_data_schema_test_data_schema",
       "source_file": "tests/store/test_data_schema.py",
-      "source_location": "L11",
+      "source_location": "L12",
       "target": "openghg_store_data_schema_dataschema",
       "weight": 1.0
     },
@@ -105057,7 +105070,7 @@
       "relation": "calls",
       "source": "tests_store_test_data_schema_test_data_schema_empty",
       "source_file": "tests/store/test_data_schema.py",
-      "source_location": "L64",
+      "source_location": "L65",
       "target": "openghg_store_data_schema_dataschema",
       "weight": 1.0
     },
@@ -105129,7 +105142,7 @@
       "relation": "calls",
       "source": "tests_store_test_flux_test_info_metadata",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L561",
+      "source_location": "L569",
       "target": "openghg_retrieve_search_search_flux",
       "weight": 1.0
     },
@@ -108572,7 +108585,7 @@
       "id": "openghg_store_data_schema_dataschema",
       "label": "DataSchema",
       "source_file": "openghg/store/_data_schema.py",
-      "source_location": "L15"
+      "source_location": "L26"
     },
     {
       "_callable": true,
@@ -109525,7 +109538,7 @@
       "id": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
       "label": "fp_x_flux_time_resolved()",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L216"
+      "source_location": "L210"
     },
     {
       "_callable": true,
@@ -114742,28 +114755,28 @@
       "_callable": true,
       "_origin": "ast",
       "file_type": "code",
-      "id": "openghg_store_data_schema_dataschema_check_data_vars",
-      "label": "._check_data_vars()",
+      "id": "openghg_store_data_schema_check_dims",
+      "label": "_check_dims()",
+      "source_file": "openghg/store/_data_schema.py",
+      "source_location": "L17"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_store_data_schema_dataschema_check_remaining_constraints",
+      "label": "._check_remaining_constraints()",
+      "source_file": "openghg/store/_data_schema.py",
+      "source_location": "L48"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_store_data_schema_dataschema_post_init",
+      "label": ".__post_init__()",
       "source_file": "openghg/store/_data_schema.py",
       "source_location": "L34"
-    },
-    {
-      "_callable": true,
-      "_origin": "ast",
-      "file_type": "code",
-      "id": "openghg_store_data_schema_dataschema_check_dims",
-      "label": "._check_dims()",
-      "source_file": "openghg/store/_data_schema.py",
-      "source_location": "L68"
-    },
-    {
-      "_callable": true,
-      "_origin": "ast",
-      "file_type": "code",
-      "id": "openghg_store_data_schema_dataschema_check_dtypes",
-      "label": "._check_dtypes()",
-      "source_file": "openghg/store/_data_schema.py",
-      "source_location": "L91"
     },
     {
       "_callable": true,
@@ -114772,7 +114785,7 @@
       "id": "openghg_store_data_schema_dataschema_validate_data",
       "label": ".validate_data()",
       "source_file": "openghg/store/_data_schema.py",
-      "source_location": "L116"
+      "source_location": "L61"
     },
     {
       "_callable": true,
@@ -118117,19 +118130,10 @@
       "_callable": true,
       "_origin": "ast",
       "file_type": "code",
-      "id": "tests_analyse_test_modelled_obs_alignment_test_fp_x_flux_time_resolved_aligns_all_irregular_footprint_times",
-      "label": "test_fp_x_flux_time_resolved_aligns_all_irregular_footprint_times()",
+      "id": "tests_analyse_test_modelled_obs_alignment_test_fp_x_flux_time_resolved_uses_flux_intervals_for_irregular_footprint_times",
+      "label": "test_fp_x_flux_time_resolved_uses_flux_intervals_for_irregular_footprint_times()",
       "source_file": "tests/analyse/test_modelled_obs_alignment.py",
       "source_location": "L53"
-    },
-    {
-      "_callable": true,
-      "_origin": "ast",
-      "file_type": "code",
-      "id": "tests_analyse_test_modelled_obs_alignment_test_high_freq_flux_without_second_reindex_reproduces_dropped_times",
-      "label": "test_high_freq_flux_without_second_reindex_reproduces_dropped_times()",
-      "source_file": "tests/analyse/test_modelled_obs_alignment.py",
-      "source_location": "L62"
     },
     {
       "_callable": true,
@@ -123367,7 +123371,7 @@
       "id": "tests_store_test_data_schema_data_schema_1",
       "label": "data_schema_1()",
       "source_file": "tests/store/test_data_schema.py",
-      "source_location": "L33"
+      "source_location": "L34"
     },
     {
       "_callable": true,
@@ -123376,7 +123380,7 @@
       "id": "tests_store_test_data_schema_dummy_data_1",
       "label": "dummy_data_1()",
       "source_file": "tests/store/test_data_schema.py",
-      "source_location": "L19"
+      "source_location": "L20"
     },
     {
       "_callable": true,
@@ -123385,7 +123389,7 @@
       "id": "tests_store_test_data_schema_test_data_schema",
       "label": "test_data_schema()",
       "source_file": "tests/store/test_data_schema.py",
-      "source_location": "L7"
+      "source_location": "L8"
     },
     {
       "_callable": true,
@@ -123394,7 +123398,7 @@
       "id": "tests_store_test_data_schema_test_data_schema_empty",
       "label": "test_data_schema_empty()",
       "source_file": "tests/store/test_data_schema.py",
-      "source_location": "L60"
+      "source_location": "L61"
     },
     {
       "_callable": true,
@@ -123403,7 +123407,7 @@
       "id": "tests_store_test_data_schema_test_data_schema_extra",
       "label": "test_data_schema_extra()",
       "source_file": "tests/store/test_data_schema.py",
-      "source_location": "L49"
+      "source_location": "L50"
     },
     {
       "_callable": true,
@@ -123412,7 +123416,34 @@
       "id": "tests_store_test_data_schema_test_data_schema_match",
       "label": "test_data_schema_match()",
       "source_file": "tests/store/test_data_schema.py",
-      "source_location": "L43"
+      "source_location": "L44"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_store_test_data_schema_test_data_schema_missing_variable",
+      "label": "test_data_schema_missing_variable()",
+      "source_file": "tests/store/test_data_schema.py",
+      "source_location": "L70"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_store_test_data_schema_test_data_schema_missing_variable_dimension",
+      "label": "test_data_schema_missing_variable_dimension()",
+      "source_file": "tests/store/test_data_schema.py",
+      "source_location": "L80"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_store_test_data_schema_test_data_schema_wrong_dtype",
+      "label": "test_data_schema_wrong_dtype()",
+      "source_file": "tests/store/test_data_schema.py",
+      "source_location": "L75"
     },
     {
       "_callable": true,
@@ -123841,10 +123872,19 @@
       "_callable": true,
       "_origin": "ast",
       "file_type": "code",
+      "id": "tests_store_test_flux_test_flux_schema_with_file_data",
+      "label": "test_flux_schema_with_file_data()",
+      "source_file": "tests/store/test_flux.py",
+      "source_location": "L520"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
       "id": "tests_store_test_flux_test_info_metadata",
       "label": "test_info_metadata()",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L540"
+      "source_location": "L548"
     },
     {
       "_callable": true,
@@ -123853,7 +123893,7 @@
       "id": "tests_store_test_flux_test_info_metadata_raise_error",
       "label": "test_info_metadata_raise_error()",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L520"
+      "source_location": "L528"
     },
     {
       "_callable": true,
@@ -129283,6 +129323,14 @@
     {
       "_origin": "ast",
       "file_type": "code",
+      "id": "openghg_store_data_schema_py_dataarray",
+      "label": "DataArray",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "_origin": "ast",
+      "file_type": "code",
       "id": "openghg_store_data_schema_py_dataset",
       "label": "Dataset",
       "source_file": "",
@@ -132891,18 +132939,18 @@
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_analyse_modelled_obs_rationale_236",
+      "id": "openghg_analyse_modelled_obs_rationale_230",
       "label": "# TODO: could check if resampling is necessary",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L236"
+      "source_location": "L230"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_analyse_modelled_obs_rationale_237",
+      "id": "openghg_analyse_modelled_obs_rationale_231",
       "label": "# TODO: we might also want to change how we resample, depending on whether…",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L237"
+      "source_location": "L231"
     },
     {
       "_origin": "ast",
@@ -137491,50 +137539,26 @@
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_data_schema_rationale_120",
-      "label": "Validate input data based on schema. Currently check can include: - data…",
+      "id": "openghg_store_data_schema_rationale_27",
+      "label": "OpenGHG compatibility wrapper around :mod:`xarray_validate` schemas.",
       "source_file": "openghg/store/_data_schema.py",
-      "source_location": "L120"
+      "source_location": "L27"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_data_schema_rationale_146",
-      "label": "# TODO: Add string method for pretty printing",
+      "id": "openghg_store_data_schema_rationale_49",
+      "label": "Retain the old optional-coordinate dtype and dataset-dimension checks.",
       "source_file": "openghg/store/_data_schema.py",
-      "source_location": "L146"
+      "source_location": "L49"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_data_schema_rationale_16",
-      "label": "Create schema for a data type based on inputs for components of the data.…",
+      "id": "openghg_store_data_schema_rationale_62",
+      "label": "Validate an xarray Dataset, exposing OpenGHG's public error type.",
       "source_file": "openghg/store/_data_schema.py",
-      "source_location": "L16"
-    },
-    {
-      "_origin": "ast",
-      "file_type": "rationale",
-      "id": "openghg_store_data_schema_rationale_35",
-      "label": "Check data variables and their dimensions of data against the schema. Args:…",
-      "source_file": "openghg/store/_data_schema.py",
-      "source_location": "L35"
-    },
-    {
-      "_origin": "ast",
-      "file_type": "rationale",
-      "id": "openghg_store_data_schema_rationale_69",
-      "label": "Check dimensions of data against the the schema. Args: data : xarray Dataset to…",
-      "source_file": "openghg/store/_data_schema.py",
-      "source_location": "L69"
-    },
-    {
-      "_origin": "ast",
-      "file_type": "rationale",
-      "id": "openghg_store_data_schema_rationale_92",
-      "label": "Check dtypes of variables and coordinates of data against the schema. Args:…",
-      "source_file": "openghg/store/_data_schema.py",
-      "source_location": "L92"
+      "source_location": "L62"
     },
     {
       "_origin": "ast",
@@ -140940,17 +140964,9 @@
       "_origin": "ast",
       "file_type": "rationale",
       "id": "tests_analyse_test_modelled_obs_alignment_rationale_54",
-      "label": "Irregular footprint times should not be dropped by xarray's exact coordinate…",
+      "label": "Irregular footprint times should use the containing left-labelled flux…",
       "source_file": "tests/analyse/test_modelled_obs_alignment.py",
       "source_location": "L54"
-    },
-    {
-      "_origin": "ast",
-      "file_type": "rationale",
-      "id": "tests_analyse_test_modelled_obs_alignment_rationale_63",
-      "label": "Probe the old behaviour: only footprint times already on the generated grid…",
-      "source_file": "tests/analyse/test_modelled_obs_alignment.py",
-      "source_location": "L63"
     },
     {
       "_origin": "ast",
@@ -141084,7 +141100,7 @@
       "_origin": "ast",
       "file_type": "rationale",
       "id": "tests_analyse_test_modelled_obs_rationale_339",
-      "label": "High-frequency flux should be forward-filled to irregular fp_time_resolved…",
+      "label": "Each resolved lag should use its containing flux interval at irregular times.",
       "source_file": "tests/analyse/test_modelled_obs.py",
       "source_location": "L339"
     },
@@ -144251,42 +144267,42 @@
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_store_test_data_schema_rationale_44",
+      "id": "tests_store_test_data_schema_rationale_45",
       "label": "Check DataSchema can validate matching dummy data",
       "source_file": "tests/store/test_data_schema.py",
-      "source_location": "L44"
+      "source_location": "L45"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_store_test_data_schema_rationale_50",
+      "id": "tests_store_test_data_schema_rationale_51",
       "label": "Check DataSchema can validate dummy data with extra variables",
       "source_file": "tests/store/test_data_schema.py",
-      "source_location": "L50"
-    },
-    {
-      "_origin": "ast",
-      "file_type": "rationale",
-      "id": "tests_store_test_data_schema_rationale_61",
-      "label": "Check empty DataSchema does nothing with dummy data",
-      "source_file": "tests/store/test_data_schema.py",
-      "source_location": "L61"
+      "source_location": "L51"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
       "id": "tests_store_test_data_schema_rationale_62",
-      "label": "# TODO: May want to change this behaviour?",
+      "label": "Check empty DataSchema does nothing with dummy data",
       "source_file": "tests/store/test_data_schema.py",
       "source_location": "L62"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_store_test_data_schema_rationale_8",
+      "id": "tests_store_test_data_schema_rationale_63",
+      "label": "# TODO: May want to change this behaviour?",
+      "source_file": "tests/store/test_data_schema.py",
+      "source_location": "L63"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "tests_store_test_data_schema_rationale_9",
       "label": "Test DataSchema can be initialised correctly and store defaults",
       "source_file": "tests/store/test_data_schema.py",
-      "source_location": "L8"
+      "source_location": "L9"
     },
     {
       "_origin": "ast",
@@ -144508,9 +144524,17 @@
       "_origin": "ast",
       "file_type": "rationale",
       "id": "tests_store_test_flux_rationale_521",
-      "label": "Test to verify required keys present in optional metadata supplied as…",
+      "label": "Validate an existing flux test file against the schema.",
       "source_file": "tests/store/test_flux.py",
       "source_location": "L521"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "tests_store_test_flux_rationale_529",
+      "label": "Test to verify required keys present in optional metadata supplied as…",
+      "source_file": "tests/store/test_flux.py",
+      "source_location": "L529"
     },
     {
       "_origin": "ast",
@@ -144523,10 +144547,10 @@
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_store_test_flux_rationale_541",
+      "id": "tests_store_test_flux_rationale_549",
       "label": "Test to verify optional metadata supplied as dictionary gets stored as metadata",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L541"
+      "source_location": "L549"
     },
     {
       "_origin": "ast",
