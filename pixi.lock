@@ -7771,7 +7771,7 @@ packages:
   - rapidfuzz<=3.14.5
   - requests<=2.34.2
   - rich<=15.0.0
-  - scipy<=1.17.1
+  - scipy<=1.15.3
   - sympy<=1.14.0
   - tinydb<=4.9.0
   - toml<=0.10.2
@@ -7816,7 +7816,7 @@ packages:
   - sphinxcontrib-mermaid<=2.1.1 ; extra == 'doc'
   - sphinxcontrib-programoutput ; extra == 'doc'
   - numba>=0.59 ; extra == 'fp-x-flux'
-  requires_python: '>=3.11'
+  requires_python: '>=3.11,<3.14'
 - pypi: git+https://github.com/openghg/cf-checker?rev=master#0830fd52f9cc401f15518b4e16853f7be77e27c2
   name: cfchecker
   version: 4.1.0

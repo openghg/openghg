@@ -4,7 +4,7 @@ channels:
   - conda-forge
   - anaconda
 dependencies:
-  - python>=3.11
+  - python>=3.11,<3.14
   - addict
   - cf_xarray
   - dask<2025.10

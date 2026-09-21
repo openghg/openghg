@@ -12,7 +12,7 @@ For more information, please visit [our documentation](https://docs.openghg.org/
 
 ## Install OpenGHG
 
-OpenGHG supports Python 3.11 through 3.14 on Linux or MacOS (Python 3.13 is the recommended version). To install the released package, you can use `uv` or `conda`. For development installs from a local checkout, you can also use `pixi`.
+OpenGHG supports Python 3.11 through 3.13 on Linux or MacOS (Python 3.13 is the recommended version). Python 3.14 is not currently supported because a required `numcodecs` release has no Python 3.14 wheel. To install the released package, you can use `uv` or `conda`. For development installs from a local checkout, you can also use `pixi`.
 
 ### Installing with Pixi for development
 
@@ -82,7 +82,7 @@ Do not run commands such as `pip install -U h5py h5netcdf netcdf4` inside the Pi
    uv venv openghg-env --python 3.13
    ```
    Python 3.13 is the recommended version. Additionally, any supported python
-   version (3.11-3.14) can be specified while creating the environment as
+   version (3.11-3.13) can be specified while creating the environment as
    follows.
    ```bash
    uv venv openghg-env --python 3.12
@@ -109,7 +109,7 @@ To get OpenGHG installed using `conda`, follow these steps:
    conda activate openghg_env
    ```
    Python 3.13 is the recommended version. Any supported python version
-   (3.11-3.14) can be used instead.
+   (3.11-3.13) can be used instead.
 
 2. **Install OpenGHG and its dependencies using the `conda-forge` and `openghg` channels:**
    ```bash
@@ -180,7 +180,7 @@ If you'd like to contribute to OpenGHG, here are the steps to set up a developme
    ```
    Python 3.13 is the recommended version. A python environment with name can
    also be created, as showed in non-developer instance previously.
-   Additionally, any supported python version (3.11-3.14) can be specified
+   Additionally, any supported python version (3.11-3.13) can be specified
    while creating the environment as follows.
    ```bash
    uv venv --python 3.12
@@ -223,7 +223,7 @@ If you'd like to contribute to OpenGHG, here are the steps to set up a developme
    conda activate openghg-dev
    ```
    Python 3.13 is the recommended version. Any supported python version
-   (3.11-3.14) can be used instead.
+   (3.11-3.13) can be used instead.
 
 3. **Install development dependencies:**
    ```bash

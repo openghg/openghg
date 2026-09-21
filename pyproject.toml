@@ -7,7 +7,7 @@ name = "openghg"
 dynamic = ["version"]
 description = "OpenGHG: A platform for greenhouse​ gas data analysis"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.14"
 license-files = ["LICEN[CS]E*"]
 authors = [
     { name = "Prasad Sutar", email = "prasad.sutar@bristol.ac.uk" },
@@ -58,7 +58,7 @@ dependencies = [
     "rapidfuzz<=3.14.5",
     "requests<=2.34.2",
     "rich<=15.0.0",
-    "scipy<=1.17.1",
+    "scipy<=1.15.3",
     "sympy<=1.14.0",
     "tinydb<=4.9.0",
     "toml<=0.10.2",
@@ -70,7 +70,6 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
-    "Programming Language :: Python :: 3.14",
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS"]
 [project.optional-dependencies]

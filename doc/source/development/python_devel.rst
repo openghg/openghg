@@ -199,22 +199,21 @@ After following the installation instructions, you can install multiple versions
     pyenv install 3.11
     pyenv install 3.12
     pyenv install 3.13
-    pyenv install 3.14
 
 To view all available versions, call ``pyenv versions``. To view and set your preferred version globally, use ``pyenv global``.
 To activate multiple versions of Python, you can use ``pyenv local``:
 
 .. code-block:: bash
 
-    pyenv local 3.11 3.12 3.13 3.14
+    pyenv local 3.11 3.12 3.13
 
-This makes Python 3.11 through 3.14 available in the current directory.
+This makes Python 3.11 through 3.13 available in the current directory.
 The ``python`` command will default to the first version in the list; in this case, Python 3.11.
 
 Running tests with ``tox``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To run tests against Python 3.11 through 3.14, as well as run ``ruff`` and ``mypy``, call ``tox``
+To run tests against Python 3.11 through 3.13, as well as run ``ruff`` and ``mypy``, call ``tox``
 in your OpenGHG repo.
 
 To see all jobs that ``tox`` can run, use ``tox -l``. You can run a specific job with ``tox run -e <env>``.
@@ -222,15 +221,15 @@ For instance
 
 .. code-block:: bash
 
-   tox run -e py314
+   tox run -e py313
 
-will run the tests against Python 3.14.
+will run the tests against Python 3.13.
 
 To pass arguments to ``pytest``, you can append them after the ``tox`` command as follows:
 
 .. code-block:: bash
 
-   tox run -e py314 -- tests/analyse/test_scenario.py
+   tox run -e py313 -- tests/analyse/test_scenario.py
 
 
 Coding Style
