@@ -2046,6 +2046,162 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "tests_objectstore_test_irods_access_shared_irods",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L59",
+      "target": "openghg_objectstore_irods_admin_create_user",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_access_shared_irods",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L61",
+      "target": "openghg_objectstore_irods_admin_setup_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_admin_test_cli_never_falls_back_to_echoed_password_input",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L243",
+      "target": "openghg_objectstore_irods_admin_main",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_admin_test_cli_password_prompt_and_existing_user_are_safe",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L230",
+      "target": "openghg_objectstore_irods_admin_main",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_admin_test_existing_nonempty_collection_needs_explicit_adoption",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L165",
+      "target": "openghg_objectstore_irods_admin_setup_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_admin_test_invalid_principals_make_no_changes",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L189",
+      "target": "openghg_objectstore_irods_admin_setup_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_admin_test_membership_removal_is_idempotent_and_does_not_claim_full_revocation",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L195",
+      "target": "openghg_objectstore_irods_admin_setup_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_admin_test_membership_removal_is_idempotent_and_does_not_claim_full_revocation",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L197",
+      "target": "openghg_objectstore_irods_admin_set_membership",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_admin_test_membership_removal_is_idempotent_and_does_not_claim_full_revocation",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L200",
+      "target": "openghg_objectstore_irods_admin_access_report",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_admin_test_partial_user_provisioning_does_not_leak_password",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L222",
+      "target": "openghg_objectstore_irods_admin_create_user",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_admin_test_setup_is_repeatable_and_grants_only_scoped_access",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L137",
+      "target": "openghg_objectstore_irods_admin_setup_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_admin_test_user_creation_preserves_existing_password_and_can_be_reset_explicitly",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L206",
+      "target": "openghg_objectstore_irods_admin_create_user",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_admin_test_user_creation_preserves_existing_password_and_can_be_reset_explicitly",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L210",
+      "target": "openghg_objectstore_irods_admin_set_password",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "tests_objectstore_test_irods_metastore_test_encoder_rejects_values_that_cannot_roundtrip",
       "source_file": "tests/objectstore/test_irods_metastore.py",
       "source_location": "L228",
@@ -7156,6 +7312,391 @@
       "source_file": "openghg/objectstore/_integrity.py",
       "source_location": "L35",
       "target": "openghg_objectstore_objectstore_open_object_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_access_report",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L265",
+      "target": "openghg_objectstore_irods_storage_validate_collection",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_access_report",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L271",
+      "target": "openghg_objectstore_irods_admin_setup_record",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_create_user",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L100",
+      "target": "openghg_objectstore_irods_admin_password",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_create_user",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L102",
+      "target": "openghg_objectstore_irods_admin_regular_user",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_create_user",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L109",
+      "target": "openghg_objectstore_irods_admin_set_password",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_create_user",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L98",
+      "target": "openghg_objectstore_irods_admin_require_admin",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_create_user",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L99",
+      "target": "openghg_objectstore_irods_admin_name",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_group_name",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L46",
+      "target": "openghg_objectstore_irods_admin_name",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_main",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L328",
+      "target": "openghg_objectstore_irods_admin_setup_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_main",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L338",
+      "target": "openghg_objectstore_irods_admin_access_report",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_main",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L340",
+      "target": "openghg_objectstore_irods_admin_require_admin",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_main",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L342",
+      "target": "openghg_objectstore_irods_admin_regular_user",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_main",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L344",
+      "target": "openghg_objectstore_irods_admin_create_user",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_main",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L344",
+      "target": "openghg_objectstore_irods_admin_read_password",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_main",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L351",
+      "target": "openghg_objectstore_irods_admin_set_password",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_main",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L354",
+      "target": "openghg_objectstore_irods_admin_set_membership",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_read_password",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L293",
+      "target": "openghg_objectstore_irods_admin_password",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_regular_user",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L58",
+      "target": "openghg_objectstore_irods_admin_name",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_set_membership",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L123",
+      "target": "openghg_objectstore_irods_admin_require_admin",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_set_membership",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L124",
+      "target": "openghg_objectstore_irods_admin_group_name",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_set_membership",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L125",
+      "target": "openghg_objectstore_irods_admin_regular_user",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_set_password",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L80",
+      "target": "openghg_objectstore_irods_admin_require_admin",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_set_password",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L81",
+      "target": "openghg_objectstore_irods_admin_regular_user",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_set_password",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L82",
+      "target": "openghg_objectstore_irods_admin_password",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_setup_record",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L149",
+      "target": "openghg_objectstore_irods_storage_read_document",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_setup_store",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L179",
+      "target": "openghg_objectstore_irods_admin_require_admin",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_setup_store",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L180",
+      "target": "openghg_objectstore_irods_storage_validate_collection",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_setup_store",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L190",
+      "target": "openghg_objectstore_irods_admin_group_name",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_setup_store",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L195",
+      "target": "openghg_objectstore_irods_admin_regular_user",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_setup_store",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L200",
+      "target": "openghg_objectstore_irods_storage_validate_ordinary_collection",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_setup_store",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L201",
+      "target": "openghg_objectstore_irods_admin_setup_record",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_setup_store",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L232",
+      "target": "openghg_objectstore_irods_admin_ensure_group",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_setup_store",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L258",
+      "target": "openghg_objectstore_irods_admin_set_membership",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_setup_store",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L259",
+      "target": "openghg_objectstore_irods_storage_write_document",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_admin_setup_store",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L260",
+      "target": "openghg_objectstore_irods_admin_access_report",
       "weight": 1.0
     },
     {
@@ -18240,6 +18781,28 @@
       "confidence": "EXTRACTED",
       "context": "call",
       "relation": "calls",
+      "source": "tests_objectstore_test_irods_access_test_live_reader_writer_and_revocation",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L142",
+      "target": "openghg_objectstore_irods_storage_irodszarrmapping",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_access_test_live_reader_writer_and_revocation",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L154",
+      "target": "openghg_objectstore_irods_admin_set_membership",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
       "source": "tests_objectstore_test_irods_backend_test_borrowed_session_is_not_closed",
       "source_file": "tests/objectstore/test_irods_backend.py",
       "source_location": "L197",
@@ -25291,6 +25854,39 @@
       "confidence": "EXTRACTED",
       "context": "decorator",
       "relation": "references",
+      "source": "tests_objectstore_test_irods_access_shared_irods",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L31",
+      "target": "tests_objectstore_test_irods_access_py_fixture",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "decorator",
+      "relation": "references",
+      "source": "tests_objectstore_test_irods_admin_catalog",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L19",
+      "target": "tests_objectstore_test_irods_admin_py_fixture",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "decorator",
+      "relation": "references",
+      "source": "tests_objectstore_test_irods_admin_test_invalid_principals_make_no_changes",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L177",
+      "target": "tests_objectstore_test_irods_admin_py_parametrize",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "decorator",
+      "relation": "references",
       "source": "tests_objectstore_test_irods_backend_backend",
       "source_file": "tests/objectstore/test_irods_backend.py",
       "source_location": "L21",
@@ -31752,6 +32348,116 @@
       "source_file": "openghg/objectstore/_irods.py",
       "source_location": "L8",
       "target": "hashlib",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "openghg_objectstore_irods_admin",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L10",
+      "target": "argparse",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "openghg_objectstore_irods_admin",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L13",
+      "target": "getpass",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "openghg_objectstore_irods_admin",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L14",
+      "target": "json",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "openghg_objectstore_irods_admin",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L15",
+      "target": "os",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "openghg_objectstore_irods_admin",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L17",
+      "target": "re",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "openghg_objectstore_irods_admin",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L19",
+      "target": "warnings",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "openghg_objectstore_irods_admin",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L21",
+      "target": "openghg_objectstore_irods_storage_read_document",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "openghg_objectstore_irods_admin",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L21",
+      "target": "openghg_objectstore_irods_storage_validate_collection",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "openghg_objectstore_irods_admin",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L21",
+      "target": "openghg_objectstore_irods_storage_validate_ordinary_collection",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "openghg_objectstore_irods_admin",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L21",
+      "target": "openghg_objectstore_irods_storage_write_document",
       "weight": 1.0
     },
     {
@@ -39426,6 +40132,138 @@
       "confidence": "EXTRACTED",
       "context": "import",
       "relation": "imports",
+      "source": "tests_objectstore_test_irods_access",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L10",
+      "target": "os",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_objectstore_test_irods_access",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L12",
+      "target": "secrets",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_objectstore_test_irods_access",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L16",
+      "target": "numpy",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_objectstore_test_irods_access",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L17",
+      "target": "pytest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_objectstore_test_irods_access",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L18",
+      "target": "xarray",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_objectstore_test_irods_access",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L27",
+      "target": "openghg_objectstore_irods_storage_irodszarrmapping",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_objectstore_test_irods_access",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L28",
+      "target": "openghg_objectstore_irods_admin_create_user",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_objectstore_test_irods_access",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L28",
+      "target": "openghg_objectstore_irods_admin_set_membership",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_objectstore_test_irods_access",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L28",
+      "target": "openghg_objectstore_irods_admin_setup_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_objectstore_test_irods_access",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L9",
+      "target": "json",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_objectstore_test_irods_admin",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L10",
+      "target": "pytest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_objectstore_test_irods_admin",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L8",
+      "target": "warnings",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
       "source": "tests_objectstore_test_irods_backend",
       "source_file": "tests/objectstore/test_irods_backend.py",
       "source_location": "L14",
@@ -45414,6 +46252,61 @@
       "source_file": "openghg/objectstore/_irods.py",
       "source_location": "L9",
       "target": "pathlib",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "openghg_objectstore_irods_admin",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L11",
+      "target": "collections_abc",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "openghg_objectstore_irods_admin",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L12",
+      "target": "contextlib",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "openghg_objectstore_irods_admin",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L16",
+      "target": "pathlib",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "openghg_objectstore_irods_admin",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L18",
+      "target": "typing",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "openghg_objectstore_irods_admin",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L21",
+      "target": "openghg_objectstore_irods_storage",
       "weight": 1.0
     },
     {
@@ -52175,6 +53068,204 @@
       "confidence": "EXTRACTED",
       "context": "import",
       "relation": "imports_from",
+      "source": "tests_objectstore_test_irods_access",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L11",
+      "target": "pathlib",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods_access",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L13",
+      "target": "types",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods_access",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L14",
+      "target": "uuid",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods_access",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L22",
+      "target": "irods_exception",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods_access",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L23",
+      "target": "irods",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods_access",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L24",
+      "target": "irods_session",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods_access",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L26",
+      "target": "openghg_objectstore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods_access",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L27",
+      "target": "openghg_objectstore_irods_storage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods_access",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L28",
+      "target": "openghg_objectstore_irods_admin",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods_access",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L8",
+      "target": "contextlib",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods_admin",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L13",
+      "target": "irods_access",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods_admin",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L14",
+      "target": "irods_exception",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods_admin",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L16",
+      "target": "openghg_objectstore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods_admin",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L3",
+      "target": "contextlib",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods_admin",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L4",
+      "target": "copy",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods_admin",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L5",
+      "target": "pathlib",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods_admin",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L6",
+      "target": "types",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods_admin",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L7",
+      "target": "unittest_mock",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
       "source": "tests_objectstore_test_irods_backend",
       "source_file": "tests/objectstore/test_irods_backend.py",
       "source_location": "L12",
@@ -56975,6 +58066,105 @@
       "source_file": "openghg/objectstore/_encoding.py",
       "source_location": "L5",
       "target": "datetime",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "parameter_type",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_admin_access_report",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L263",
+      "target": "openghg_objectstore_irods_admin_py_any",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "parameter_type",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_admin_create_user",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L86",
+      "target": "openghg_objectstore_irods_admin_py_any",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "parameter_type",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_admin_ensure_group",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L135",
+      "target": "openghg_objectstore_irods_admin_py_any",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "parameter_type",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_admin_regular_user",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L57",
+      "target": "openghg_objectstore_irods_admin_py_any",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "parameter_type",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_admin_require_admin",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L52",
+      "target": "openghg_objectstore_irods_admin_py_any",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "parameter_type",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_admin_set_membership",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L117",
+      "target": "openghg_objectstore_irods_admin_py_any",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "parameter_type",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_admin_set_password",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L78",
+      "target": "openghg_objectstore_irods_admin_py_any",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "parameter_type",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_admin_setup_record",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L147",
+      "target": "openghg_objectstore_irods_admin_py_any",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "parameter_type",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_admin_setup_store",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L154",
+      "target": "openghg_objectstore_irods_admin_py_any",
       "weight": 1.0
     },
     {
@@ -64845,6 +66035,17 @@
     {
       "_origin": "ast",
       "confidence": "EXTRACTED",
+      "context": "submodule_import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods_admin",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L16",
+      "target": "openghg_objectstore_irods_admin",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
       "relation": "contains",
       "source": "openghg_analyse_alignment",
       "source_file": "openghg/analyse/_alignment.py",
@@ -66130,6 +67331,146 @@
       "source_file": "openghg/objectstore/_irods.py",
       "source_location": "L70",
       "target": "openghg_objectstore_irods_irodsdatasource",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "openghg_objectstore_irods_admin",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L117",
+      "target": "openghg_objectstore_irods_admin_set_membership",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "openghg_objectstore_irods_admin",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L135",
+      "target": "openghg_objectstore_irods_admin_ensure_group",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "openghg_objectstore_irods_admin",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L147",
+      "target": "openghg_objectstore_irods_admin_setup_record",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "openghg_objectstore_irods_admin",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L154",
+      "target": "openghg_objectstore_irods_admin_setup_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "openghg_objectstore_irods_admin",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L263",
+      "target": "openghg_objectstore_irods_admin_access_report",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "openghg_objectstore_irods_admin",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L286",
+      "target": "openghg_objectstore_irods_admin_read_password",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "openghg_objectstore_irods_admin",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L297",
+      "target": "openghg_objectstore_irods_admin_main",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "openghg_objectstore_irods_admin",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L39",
+      "target": "openghg_objectstore_irods_admin_name",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "openghg_objectstore_irods_admin",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L45",
+      "target": "openghg_objectstore_irods_admin_group_name",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "openghg_objectstore_irods_admin",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L52",
+      "target": "openghg_objectstore_irods_admin_require_admin",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "openghg_objectstore_irods_admin",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L57",
+      "target": "openghg_objectstore_irods_admin_regular_user",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "openghg_objectstore_irods_admin",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L64",
+      "target": "openghg_objectstore_irods_admin_password",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "openghg_objectstore_irods_admin",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L78",
+      "target": "openghg_objectstore_irods_admin_set_password",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "openghg_objectstore_irods_admin",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L86",
+      "target": "openghg_objectstore_irods_admin_create_user",
       "weight": 1.0
     },
     {
@@ -75040,6 +76381,116 @@
       "source_file": "tests/objectstore/test_irods.py",
       "source_location": "L68",
       "target": "tests_objectstore_test_irods_test_live_irods_round_trip",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods_access",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L32",
+      "target": "tests_objectstore_test_irods_access_shared_irods",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods_access",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L95",
+      "target": "tests_objectstore_test_irods_access_test_live_reader_writer_and_revocation",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods_admin",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L131",
+      "target": "tests_objectstore_test_irods_admin_test_setup_is_repeatable_and_grants_only_scoped_access",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods_admin",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L158",
+      "target": "tests_objectstore_test_irods_admin_test_existing_nonempty_collection_needs_explicit_adoption",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods_admin",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L187",
+      "target": "tests_objectstore_test_irods_admin_test_invalid_principals_make_no_changes",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods_admin",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L193",
+      "target": "tests_objectstore_test_irods_admin_test_membership_removal_is_idempotent_and_does_not_claim_full_revocation",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods_admin",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L20",
+      "target": "tests_objectstore_test_irods_admin_catalog",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods_admin",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L204",
+      "target": "tests_objectstore_test_irods_admin_test_user_creation_preserves_existing_password_and_can_be_reset_explicitly",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods_admin",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L219",
+      "target": "tests_objectstore_test_irods_admin_test_partial_user_provisioning_does_not_leak_password",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods_admin",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L227",
+      "target": "tests_objectstore_test_irods_admin_test_cli_password_prompt_and_existing_user_are_safe",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods_admin",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L236",
+      "target": "tests_objectstore_test_irods_admin_test_cli_never_falls_back_to_echoed_password_input",
       "weight": 1.0
     },
     {
@@ -89806,6 +91257,76 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_admin_rationale_1",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L1",
+      "target": "openghg_objectstore_irods_admin",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_admin_rationale_118",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L118",
+      "target": "openghg_objectstore_irods_admin_set_membership",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_admin_rationale_164",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L164",
+      "target": "openghg_objectstore_irods_admin_setup_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_admin_rationale_264",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L264",
+      "target": "openghg_objectstore_irods_admin_access_report",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_admin_rationale_298",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L298",
+      "target": "openghg_objectstore_irods_admin_main",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_admin_rationale_79",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L79",
+      "target": "openghg_objectstore_irods_admin_set_password",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_admin_rationale_87",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L87",
+      "target": "openghg_objectstore_irods_admin_create_user",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
       "source": "openghg_objectstore_irods_metastore_rationale_1",
       "source_file": "openghg/objectstore/_irods_metastore.py",
       "source_location": "L1",
@@ -100466,6 +101987,36 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
+      "source": "tests_objectstore_test_irods_access_rationale_1",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L1",
+      "target": "tests_objectstore_test_irods_access",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "tests_objectstore_test_irods_access_rationale_96",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L96",
+      "target": "tests_objectstore_test_irods_access_test_live_reader_writer_and_revocation",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "tests_objectstore_test_irods_admin_rationale_1",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L1",
+      "target": "tests_objectstore_test_irods_admin",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
       "source": "tests_objectstore_test_irods_backend_rationale_1",
       "source_file": "tests/objectstore/test_irods_backend.py",
       "source_location": "L1",
@@ -105282,6 +106833,18 @@
       "source_file": "tests/dataobjects/test_datamanager.py",
       "source_location": "L132",
       "target": "tests_objectstore_test_objectstore_objectstore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
+      "source": "tests_objectstore_test_irods_admin_catalog",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L100",
+      "target": "openghg_objectstore_irods_admin_create_user",
       "weight": 1.0
     },
     {
@@ -111182,6 +112745,18 @@
       "confidence_score": 0.85,
       "context": "call",
       "relation": "calls",
+      "source": "tests_objectstore_test_irods_access_test_live_reader_writer_and_revocation",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L103",
+      "target": "openghg_objectstore_irods_irodsobjectstore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "relation": "calls",
       "source": "tests_objectstore_test_irods_storage_test_writer_context_guard_blocks_retained_mutable_mapping",
       "source_file": "tests/objectstore/test_irods_storage.py",
       "source_location": "L256",
@@ -115232,6 +116807,17 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "relation": "uses",
+      "source": "tests_objectstore_test_irods_access_test_live_reader_writer_and_revocation",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L142",
+      "target": "openghg_objectstore_irods_storage_irodszarrmapping",
+      "weight": 0.8
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "relation": "uses",
       "source": "tests_objectstore_test_irods_backend_backend",
       "source_file": "tests/objectstore/test_irods_backend.py",
       "source_location": "L43",
@@ -118735,6 +120321,132 @@
       "label": "integrity_check()",
       "source_file": "openghg/objectstore/_integrity.py",
       "source_location": "L14"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_admin_access_report",
+      "label": "access_report()",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L263"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_admin_create_user",
+      "label": "create_user()",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L86"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_admin_ensure_group",
+      "label": "_ensure_group()",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L135"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_admin_group_name",
+      "label": "_group_name()",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L45"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_admin_main",
+      "label": "main()",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L297"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_admin_name",
+      "label": "_name()",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L39"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_admin_password",
+      "label": "_password()",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L64"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_admin_read_password",
+      "label": "_read_password()",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L286"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_admin_regular_user",
+      "label": "_regular_user()",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L57"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_admin_require_admin",
+      "label": "_require_admin()",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L52"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_admin_set_membership",
+      "label": "set_membership()",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L117"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_admin_set_password",
+      "label": "set_password()",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L78"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_admin_setup_record",
+      "label": "_setup_record()",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L147"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_admin_setup_store",
+      "label": "setup_store()",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L154"
     },
     {
       "_callable": true,
@@ -128721,6 +130433,105 @@
       "_callable": true,
       "_origin": "ast",
       "file_type": "code",
+      "id": "tests_objectstore_test_irods_access_shared_irods",
+      "label": "shared_irods()",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L32"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_access_test_live_reader_writer_and_revocation",
+      "label": "test_live_reader_writer_and_revocation()",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L95"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_admin_catalog",
+      "label": "catalog()",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L20"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_admin_test_cli_never_falls_back_to_echoed_password_input",
+      "label": "test_cli_never_falls_back_to_echoed_password_input()",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L236"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_admin_test_cli_password_prompt_and_existing_user_are_safe",
+      "label": "test_cli_password_prompt_and_existing_user_are_safe()",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L227"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_admin_test_existing_nonempty_collection_needs_explicit_adoption",
+      "label": "test_existing_nonempty_collection_needs_explicit_adoption()",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L158"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_admin_test_invalid_principals_make_no_changes",
+      "label": "test_invalid_principals_make_no_changes()",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L187"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_admin_test_membership_removal_is_idempotent_and_does_not_claim_full_revocation",
+      "label": "test_membership_removal_is_idempotent_and_does_not_claim_full_revocation()",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L193"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_admin_test_partial_user_provisioning_does_not_leak_password",
+      "label": "test_partial_user_provisioning_does_not_leak_password()",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L219"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_admin_test_setup_is_repeatable_and_grants_only_scoped_access",
+      "label": "test_setup_is_repeatable_and_grants_only_scoped_access()",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L131"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_admin_test_user_creation_preserves_existing_password_and_can_be_reset_explicitly",
+      "label": "test_user_creation_preserves_existing_password_and_can_be_reset_explicitly()",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L204"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
       "id": "tests_objectstore_test_irods_backend_backend",
       "label": "backend()",
       "source_file": "tests/objectstore/test_irods_backend.py",
@@ -136575,6 +138386,22 @@
     {
       "_origin": "ast",
       "file_type": "code",
+      "id": "openghg_objectstore_irods_admin",
+      "label": "irods_admin.py",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_admin_py_any",
+      "label": "Any",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "_origin": "ast",
+      "file_type": "code",
       "id": "openghg_objectstore_irods_metastore",
       "label": "_irods_metastore.py",
       "source_file": "openghg/objectstore/_irods_metastore.py",
@@ -140167,6 +141994,46 @@
     {
       "_origin": "ast",
       "file_type": "code",
+      "id": "tests_objectstore_test_irods_access",
+      "label": "test_irods_access.py",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_access_py_fixture",
+      "label": "fixture",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_admin",
+      "label": "test_irods_admin.py",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_admin_py_fixture",
+      "label": "fixture",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_admin_py_parametrize",
+      "label": "parametrize",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "_origin": "ast",
+      "file_type": "code",
       "id": "tests_objectstore_test_irods_backend",
       "label": "test_irods_backend.py",
       "source_file": "tests/objectstore/test_irods_backend.py",
@@ -143563,6 +145430,62 @@
       "label": "Check the integrity of object stores. Args: raise_error: if True, raise…",
       "source_file": "openghg/objectstore/_integrity.py",
       "source_location": "L15"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_admin_rationale_1",
+      "label": "Set up explicit iRODS users, groups, and ACLs for a shared prototype store. Run…",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_admin_rationale_118",
+      "label": "Add or remove an explicit regular user; return whether membership changed.…",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L118"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_admin_rationale_164",
+      "label": "Create a shared store, inherit ACLs, and grant explicit reader/writer groups.…",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L164"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_admin_rationale_264",
+      "label": "Report root ACLs, inheritance, and group rosters without claiming effective…",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L264"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_admin_rationale_298",
+      "label": "Run the administration CLI using native client authentication settings.",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L298"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_admin_rationale_79",
+      "label": "Explicitly reset a regular local user's native password; never persist it…",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L79"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_admin_rationale_87",
+      "label": "Create a local rodsuser with a native password, leaving existing users…",
+      "source_file": "openghg/objectstore/irods_admin.py",
+      "source_location": "L87"
     },
     {
       "_origin": "ast",
@@ -152091,6 +154014,30 @@
       "label": "Check that the metastore can be modified by a second metastore instance even if…",
       "source_file": "tests/objectstore/test_file_locks.py",
       "source_location": "L65"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "tests_objectstore_test_irods_access_rationale_1",
+      "label": "Opt-in checks of server-enforced roles using temporary native iRODS users.…",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "tests_objectstore_test_irods_access_rationale_96",
+      "label": "Readers search/download but cannot mutate; writers update and delete peer-owned…",
+      "source_file": "tests/objectstore/test_irods_access.py",
+      "source_location": "L96"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "tests_objectstore_test_irods_admin_rationale_1",
+      "label": "Administration is explicit, repeatable, and independent of Unix memberships.",
+      "source_file": "tests/objectstore/test_irods_admin.py",
+      "source_location": "L1"
     },
     {
       "_origin": "ast",

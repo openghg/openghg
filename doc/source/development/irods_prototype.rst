@@ -12,6 +12,8 @@ This guide is for developers evaluating the backend with a dedicated test
 collection. It describes the implemented interface and its limits; it does not
 establish production readiness or compatibility with every scientific data type.
 See :doc:`objectstore_backends` for the generic factory contract.
+Operators creating a shared collection and assigning named readers and writers
+should follow :doc:`irods_administration`.
 
 Prepare a service and configure a store
 =======================================
@@ -311,8 +313,10 @@ PostgreSQL 16.15. They exercised configured surface standardisation, historical
 and current retrieval, metadata and attribute edits, custom metadata keys,
 deletion, writer contention, version policies, large catalogue records, and
 replication followed by refresh of a stale replica. Both storage resources were
-on one test host; laptop networking and a persistent shared service remain
-deployment work.
+on one test host. The relocated TLS service also passed the separate
+:doc:`administration access check <irods_administration>` with native reader,
+writer, and unprivileged accounts, including inherited permissions, server-side
+write rejection, and reader revocation. A real laptop connection remains untested.
 
 What else iRODS could provide
 =============================
