@@ -30,6 +30,7 @@ from uuid import uuid4
 
 import tinydb
 from openghg.objectstore._datasource import DatasourceFactory, DatasourceT
+from openghg.objectstore._documents import DocumentStore
 from openghg.objectstore._legacy_datasource import Datasource, get_legacy_datasource_factory
 from openghg.objectstore.metastore import MetaStore, TinyDBMetaStore, open_metastore
 from openghg.objectstore.metastore._classic_metastore import DataClassMetaStore, FileLock, LockingError
@@ -364,9 +365,11 @@ class ObjectStore(Generic[DatasourceT, T]):
         metastore: MetaStore,
         datasource_factory: DatasourceFactory[DatasourceT],
         metadata_updater: MetadataUpdaterT | None = None,
+        documents: DocumentStore | None = None,
     ) -> None:
         self.metastore = metastore
         self.datasource_factory = datasource_factory
+        self._documents = documents
 
         # use default metadata updater if None is passed
         self.metadata_updater = metadata_updater or _default_metadata_updater
@@ -389,6 +392,23 @@ class ObjectStore(Generic[DatasourceT, T]):
 
     def close(self) -> None:
         self.metastore.close()
+
+    def read_document(self, key: str) -> dict[str, Any] | None:
+        """Read backend-owned store state or configuration, without payload access.
+
+        Keys are opaque to callers and relative to the store. Missing documents
+        return None. Factories used by normal OpenGHG workflows must supply a
+        document store; lightweight standalone ObjectStore instances may omit it.
+        """
+        if self._documents is None:
+            raise NotImplementedError("This object store does not provide document persistence.")
+        return self._documents.read(key)
+
+    def write_document(self, key: str, value: dict[str, Any]) -> None:
+        """Persist backend-owned state or configuration, subject to store permissions."""
+        if self._documents is None:
+            raise NotImplementedError("This object store does not provide document persistence.")
+        self._documents.write(key, value)
 
     def _search_params(self, metadata: MetaData | None = None, **kwargs: Any) -> dict:
         """Prepare metastore search parameters from metadata and keyword arguments."""
@@ -706,6 +726,15 @@ def make_metadata_updater_fn(
 def open_object_store(
     bucket: str, data_type: str, mode: Literal["r", "rw"] = "rw"
 ) -> Generator[ObjectStore[Datasource, xr.Dataset], None, None]:
+    from ._factory import configured_object_store
+    from ._documents import LocalDocuments
+
+    configured_store = configured_object_store(bucket=bucket, data_type=data_type, mode=mode)
+    if configured_store is not None:
+        with configured_store as object_store:
+            yield object_store
+        return
+
     with open_metastore(bucket=bucket, data_type=data_type, mode=mode) as ms:
         ds_factory = get_legacy_datasource_factory(bucket=bucket, data_type=data_type, mode=mode)
 
@@ -718,7 +747,10 @@ def open_object_store(
         metadata_updater = make_metadata_updater_fn(extend_keys=list_keys)
 
         object_store = ObjectStore(
-            metastore=ms, datasource_factory=ds_factory, metadata_updater=metadata_updater
+            metastore=ms,
+            datasource_factory=ds_factory,
+            metadata_updater=metadata_updater,
+            documents=LocalDocuments(bucket, mode),
         )
         yield object_store
 
@@ -774,9 +806,13 @@ class LockingObjectStore(ObjectStore[DatasourceT, T]):
         datasource_factory: DatasourceFactory,
         metadata_updater: MetadataUpdaterT,
         lock: FileLock,
+        documents: DocumentStore | None = None,
     ) -> None:
         super().__init__(
-            metastore=metastore, datasource_factory=datasource_factory, metadata_updater=metadata_updater
+            metastore=metastore,
+            datasource_factory=datasource_factory,
+            metadata_updater=metadata_updater,
+            documents=documents,
         )
         self.lock = lock
 
@@ -835,11 +871,26 @@ def locking_object_store(
     skip_keys: list | None = None,
     extend_keys: list | None = None,
 ) -> LockingObjectStoreType:
+    from typing import cast
+
+    from ._factory import configured_object_store
+    from ._documents import LocalDocuments
+
+    configured_store = configured_object_store(
+        bucket=bucket, data_type=data_type, mode=mode, skip_keys=skip_keys, extend_keys=extend_keys
+    )
+    if configured_store is not None:
+        return cast(LockingObjectStoreType, configured_store)
+
     ms = DataClassMetaStore(bucket=bucket, data_type=data_type)
     ds_factory = get_legacy_datasource_factory(bucket=bucket, data_type=data_type, mode=mode)
     metadata_updater = make_metadata_updater_fn(skip_keys=skip_keys, extend_keys=extend_keys)
     object_store = LockingObjectStore(
-        metastore=ms, datasource_factory=ds_factory, metadata_updater=metadata_updater, lock=ms.lock
+        metastore=ms,
+        datasource_factory=ds_factory,
+        metadata_updater=metadata_updater,
+        lock=ms.lock,
+        documents=LocalDocuments(bucket, mode),
     )
 
     return object_store

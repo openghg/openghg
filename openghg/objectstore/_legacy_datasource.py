@@ -1,6 +1,6 @@
 from __future__ import annotations
 from collections import defaultdict
-from collections.abc import Callable
+from collections.abc import Callable, MutableMapping
 from dataclasses import dataclass
 from functools import wraps
 from pathlib import Path
@@ -16,6 +16,7 @@ from openghg.types import DataOverlapError, ObjectStoreError, ZarrStoreError
 from ._datasource import AbstractDatasource, DatasourceFactory
 
 if TYPE_CHECKING:
+    from openghg.storage._zarr_store import VersionedZarrStore
     from pandas import Timestamp
     import xarray as xr
     from xarray import Dataset as XrDataset
@@ -88,9 +89,20 @@ class Datasource(AbstractDatasource[XrDataset]):
     """
 
     _datasource_root = "datasource"
+    _runtime_state_keys = frozenset(
+        {
+            "_store",
+            "_root_store_key",
+            "_stores_path",
+            "_bucket",
+            "_mode",
+            "_status",
+            "_start_date",
+            "_end_date",
+        }
+    )
 
     def __init__(self, bucket: str, uuid: str, mode: Literal["r", "rw"] = "rw", data_type: str = "") -> None:
-        from openghg.storage import get_versioned_zarr_directory_store
         from openghg.util._time import timestamp_now
 
         self._uuid = uuid
@@ -110,11 +122,40 @@ class Datasource(AbstractDatasource[XrDataset]):
 
         self._mode = mode
         self._bucket = bucket
-        self._root_store_key = f"data/{uuid}/zarr"
-        self._stores_path = Path(bucket, self._root_store_key).expanduser().resolve()
-        self._store = get_versioned_zarr_directory_store(path=self._stores_path)
+        self._store = self._create_store()
 
         self.update_daterange()
+
+    def _create_store(self) -> VersionedZarrStore[Any]:
+        """Open versioned payload storage; subclasses may supply another Zarr store."""
+        from openghg.storage import get_versioned_zarr_directory_store
+
+        self._root_store_key = f"data/{self.uuid}/zarr"
+        self._stores_path = Path(self._bucket, self._root_store_key).expanduser().resolve()
+        return get_versioned_zarr_directory_store(path=self._stores_path)
+
+    @classmethod
+    def _read_state(cls, bucket: str, uuid: str) -> dict:
+        """Read persisted datasource state, raising ObjectStoreError when absent."""
+        key = f"{cls._datasource_root}/uuid/{uuid}"
+        if not exists(bucket=bucket, key=key):
+            raise ObjectStoreError(f"No Datasource with uuid {uuid} found in bucket {bucket}")
+        return get_object_from_json(bucket=bucket, key=key)
+
+    def _write_state(self, state: dict) -> None:
+        """Persist datasource state without the fields in `_runtime_state_keys`."""
+        from openghg.objectstore import set_object_from_json
+
+        set_object_from_json(bucket=self._bucket, key=self.key, data=state)
+
+    def _delete_state(self) -> None:
+        """Remove persisted datasource state."""
+        delete_object(bucket=self._bucket, key=self.key)
+
+    def _delete_store_directory(self) -> None:
+        """Remove the local payload directory after deleting all versions."""
+        if self._stores_path.exists():
+            self._stores_path.rmdir()
 
     def _set_store_encoding(self, compressor: Any | None = None, filters: Any | None = None) -> None:
         """Set encoding options used for newly written zarr variables."""
@@ -145,11 +186,7 @@ class Datasource(AbstractDatasource[XrDataset]):
     # Methods to satisfy AbstractDatasource ABC
     @classmethod
     def load(cls, uuid: str, bucket: str, mode: Literal["r", "rw"] = "rw", data_type: str = "") -> Self:
-        key = f"{Datasource._datasource_root}/uuid/{uuid}"
-        if exists(bucket=bucket, key=key):
-            stored_data = get_object_from_json(bucket=bucket, key=key)
-        else:
-            raise ObjectStoreError(f"No Datasource with uuid {uuid} found in bucket {bucket}")
+        stored_data = cls._read_state(bucket=bucket, uuid=uuid)
 
         ds = cls(bucket, uuid, mode, data_type)
         ds.__dict__.update(stored_data)
@@ -159,29 +196,13 @@ class Datasource(AbstractDatasource[XrDataset]):
         return ds
 
     def save(self) -> None:
-        """Save this Datasource object as JSON to the object store
+        """Persist datasource state through the backend's `_write_state` hook.
 
-        Args:
-            bucket: Bucket to hold data
-            compression: True if data should be compressed on save
-        Returns:
-            None
+        Subclasses with additional runtime fields must extend `_runtime_state_keys`
+        so that sessions and other non-persistent objects are excluded.
         """
-        from openghg.objectstore import set_object_from_json
-
-        DO_NOT_STORE = {
-            "_store",
-            "_root_store_key",
-            "_stores_path",
-            "_bucket",
-            "_mode",
-            "_status",
-            "_start_date",
-            "_end_date",
-        }
-
-        internal_metadata = {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
-        set_object_from_json(bucket=self._bucket, key=self.key, data=internal_metadata)
+        internal_metadata = {k: v for k, v in self.__dict__.items() if k not in self._runtime_state_keys}
+        self._write_state(internal_metadata)
 
     @_requires_write
     def add(self, data: xr.Dataset, **kwargs) -> None:
@@ -207,7 +228,66 @@ class Datasource(AbstractDatasource[XrDataset]):
     @_requires_write
     def delete(self) -> None:
         self.delete_all_data()
-        delete_object(bucket=self._bucket, key=self.key)
+        self._delete_state()
+
+    @_requires_write
+    def update_attributes(
+        self,
+        version: str = "latest",
+        data_vars: str | list[str] | None = None,
+        update_global: bool = True,
+        to_update: dict | None = None,
+        to_delete: str | list[str] | None = None,
+    ) -> bool:
+        """Edit dataset attributes in one stored version and consolidate metadata.
+
+        Args:
+            version: Version to edit, or ``"latest"``.
+            data_vars: Variables whose attributes should be edited, if any.
+            update_global: Whether to also edit global dataset attributes.
+            to_update: Attribute values to add or replace.
+            to_delete: Attribute names to remove. Missing names raise KeyError.
+
+        Returns:
+            Whether attributes were edited. Call `save` afterwards to commit any
+            backend-specific state associated with the edit.
+
+        Raises:
+            PermissionError: If this datasource is read-only.
+            ZarrStoreError: If the requested version does not exist.
+        """
+        import zarr
+
+        if not (to_update or to_delete) or (not update_global and data_vars is None):
+            return False
+
+        def updater(attrs: MutableMapping) -> bool:
+            if to_delete:
+                keys = [to_delete] if isinstance(to_delete, str) else to_delete
+                for key in keys:
+                    attrs.pop(key)
+            if to_update:
+                attrs.update(to_update)
+            return bool(to_delete or to_update)
+
+        self._checkout_version(self.latest_version if version == "latest" else version)
+        store = self._store.store
+        group = zarr.open_group(store)
+        updated = updater(group.attrs) if update_global else False
+        if data_vars is not None:
+            variables = [data_vars] if isinstance(data_vars, str) else data_vars
+            for variable in variables:
+                try:
+                    array = group[variable]
+                except KeyError:
+                    logger.warning(f"Data variable {variable} not present in zarr store. Skipping.")
+                else:
+                    updated = updater(array.attrs) or updated
+
+        if updated:
+            zarr.consolidate_metadata(store)
+            logger.info(f"Modified attributes for {self.uuid}.")
+        return updated
 
     # Context manager
     def __enter__(self) -> Datasource:
@@ -238,7 +318,7 @@ class Datasource(AbstractDatasource[XrDataset]):
     @property
     def key(self) -> str:
         """Key for Datasource in object store."""
-        return f"{Datasource._datasource_root}/uuid/{self._uuid}"
+        return f"{self._datasource_root}/uuid/{self._uuid}"
 
     @property
     def uuid(self) -> str:
@@ -480,8 +560,7 @@ class Datasource(AbstractDatasource[XrDataset]):
             None
         """
         self._store.delete_all_versions()
-        if self._stores_path.exists():
-            self._stores_path.rmdir()
+        self._delete_store_directory()
         self._data_keys.clear()
         self._metadata.clear()
         self._timestamps.clear()
