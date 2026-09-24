@@ -1,5 +1,6 @@
 # No host ports are published. The client runs on the private Compose network.
 x-server: &server
+  init: true
   build:
     context: ../../..
     dockerfile: tests/integration/irods_mirror/Dockerfile
