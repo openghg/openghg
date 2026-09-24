@@ -58,7 +58,7 @@ def test_context_reentry_catalog_state_and_deferred_lazy_reads(backend, remote):
     with backend:
         uuid = backend.create({"species": "ch4"}, original, period="3600s")
         datasource = backend.get_datasource(uuid)
-        state = read_document(backend._sessions, backend.metastore.path(uuid), "datasource")
+        state = read_document(backend._sessions, backend.metastore.path(uuid), "publication")["datasource"]
         assert not (set(state) & datasource._runtime_state_keys)
         assert state["_uuid"] == uuid
         assert state["_latest_version"] == "v1"
@@ -101,8 +101,8 @@ def test_version_overlap_attribute_edit_and_delete_parity(backend, remote):
         assert set(backend.search(uuid=uuid)[0]["versions"]) == {"v2"}
         backend.delete(uuid)
         assert backend.uuids == []
-        assert not remote.session.collections.exists(backend.metastore.path(uuid))
-    assert not remote.payloads
+        assert remote.session.collections.exists(backend.metastore.path(uuid))
+    assert remote.payloads  # Immutable generations outlive logical deletion.
     assert remote.state.opened == remote.state.closed
 
 
@@ -166,7 +166,7 @@ def test_escaped_writable_datasource_cannot_mutate_without_lock(backend, remote,
         "mapping": lambda: datasource.mapping().__setitem__("unsafe", b"bad"),
         "metastore": lambda: backend.metastore.update({"uuid": uuid}, {"comment": "bad"}),
     }
-    with pytest.raises(ObjectStoreError, match="writer lock"):
+    with pytest.raises(PermissionError if operation == "mapping" else ObjectStoreError):
         actions[operation]()
     assert (remote.payloads, remote.avus) == before
     assert remote.state.opened == remote.state.closed
@@ -221,16 +221,16 @@ def test_session_cleanup_failure_discards_context_before_deferred_reads(backend,
 
 
 def test_failed_datasource_state_write_does_not_publish_a_searchable_record(backend, monkeypatch):
-    from openghg.objectstore import _irods
+    from openghg.objectstore import _irods_metastore
 
-    write = _irods.write_document
+    write = _irods_metastore.write_document
 
     def fail_state(session_factory, collection, key, value):
-        if key == "datasource":
+        if key == "publication":
             raise ObjectStoreError("cannot save datasource state")
         return write(session_factory, collection, key, value)
 
-    monkeypatch.setattr(_irods, "write_document", fail_state)
+    monkeypatch.setattr(_irods_metastore, "write_document", fail_state)
     with backend:
         with pytest.raises(ObjectStoreError, match="cannot save datasource state"):
             backend.create({"species": "ch4"}, dataset(), period="3600s")

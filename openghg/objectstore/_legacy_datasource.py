@@ -477,7 +477,8 @@ class Datasource(AbstractDatasource[XrDataset]):
         if self._latest_version and not plan.new_version:
             version_str = self._latest_version
         else:
-            version_str = f"v{len(self._data_keys) + 1!s}"
+            next_version = max((int(version[1:]) for version in self._data_keys), default=0) + 1
+            version_str = f"v{next_version}"
 
         current_date_keys = (
             list(self._data_keys[self._latest_version])

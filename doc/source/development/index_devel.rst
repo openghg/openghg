@@ -35,6 +35,7 @@ Configure and implement alternative persistence for OpenGHG object stores.
 
    objectstore_backends
    irods_prototype
+   irods_publication
    irods_administration
 
 Packaging & Release

@@ -11,7 +11,8 @@ which allows a laptop to use the same remotely catalogued data.
 This guide is for developers evaluating the backend with a dedicated test
 collection. It describes the implemented interface and its limits; it does not
 establish production readiness or compatibility with every scientific data type.
-See :doc:`objectstore_backends` for the generic factory contract.
+See :doc:`objectstore_backends` for the generic factory contract and
+:doc:`irods_publication` for snapshot, conflict, and retention guarantees.
 Operators creating a shared collection and assigning named readers and writers
 should follow :doc:`irods_administration`.
 
@@ -247,12 +248,12 @@ Persistence, writer locks, and failure recovery
 The existing ``ObjectStore`` facade coordinates the iRODS metastore and a
 subclass of the normal ``Datasource``. ``VersionedZarrStore`` retains the shared
 append, overlap, combination, and version behaviour. Each Zarr key is an iRODS
-object beneath ``<root>/<data_type>/<uuid>/<version>/``; iRODS controls its
-physical placement. Root-level standardisation and configuration documents,
-raw records, and datasource state are JSON documents in collection metadata.
-Numbered Attribute-Value-Units (AVU) chunks permit documents larger than one
-AVU field. A manifest checks their completeness, and each document replacement
-uses one atomic metadata operation.
+object beneath ``<root>/<data_type>/<uuid>/generations/<generation_uuid>/``;
+iRODS controls its physical placement. One catalogue publication contains a
+datasource's raw record, state, revision, and logical-version-to-generation map.
+Root-level standardisation and configuration documents are stored separately.
+Numbered Attribute-Value-Units (AVU) chunks permit JSON documents larger than one
+AVU field, with completeness checks and atomic replacement of each document.
 
 The backend serializes writers across clients by creating
 ``<root>/.openghg-write-lock`` nonrecursively in the catalogue. A second writer
@@ -262,20 +263,23 @@ is no automatic expiry or ownership guessing. Before an operator removes an
 abandoned lock, verify that no writer is still active and inspect the interrupted
 operation's dataset state. Deleting a live writer's lock breaks serialization.
 
-A catalogue metadata operation is atomic, but a whole dataset update is not.
-Zarr chunks, version collections, datasource state, and raw records are separate
-operations. Readers are not locked and do not receive snapshot isolation while
-a writer changes data. Coordinate reads with writers when a consistent dataset
-snapshot is required. Interrupted writes can leave partial or unpublished data
-for inspection; the backend does not automatically roll back or reconcile them.
-Do not edit the backend's AVUs directly.
+Writers prepare immutable generations and publish their references, raw metadata,
+and datasource state together. Readers pin one publication and keep seeing its
+complete dataset while writers update or logically delete it. Stale datasource
+and store-document saves raise ``PublicationConflictError`` instead of silently
+replacing newer state. Searches across several datasources and updates involving
+store-level documents are not one transaction. Interrupted uploads can leave
+unreferenced generations, and abandoned locks require operator recovery. Do not
+edit the backend's AVUs directly.
 
-Deletion moves payload objects and collections to iRODS trash. Unpublished
-records disappear from OpenGHG search, while previously downloaded cache files
-remain. The cache has no eviction, automatic deletion propagation, local edit
-synchronisation, or independent version-retention policy. It is not an offline
-object store or a backup. No automatic migration of existing local OpenGHG
-stores is implemented.
+Deletion publishes a tombstone or removes a version reference. Physical
+generations remain available to existing readers; deletion does not reclaim
+storage or move payloads to trash. There is no garbage collector or retention
+expiry. The cache has no eviction, deletion propagation, local edit
+synchronisation, or offline fallback. See :doc:`irods_publication` for the
+publication protocol, explicit conflict checks, legacy prototype migration, and
+storage-retention boundaries. No migration of local filesystem stores is
+implemented.
 
 Run the checks
 ==============
@@ -286,7 +290,7 @@ behaviour. To run them without a server:
 
 .. code-block:: bash
 
-   python -m pytest tests/objectstore/test_irods_storage.py tests/objectstore/test_irods_metastore.py tests/objectstore/test_irods_backend.py
+   python -m pytest tests/objectstore/test_irods_storage.py tests/objectstore/test_irods_metastore.py tests/objectstore/test_irods_backend.py tests/objectstore/test_irods_publication.py
 
 The opt-in integration check requires an existing writable collection reserved
 for tests. It creates temporary child collections and removes its test data:
@@ -299,8 +303,8 @@ for tests. It creates temporary child collections and removes its test data:
 
 The live fixture requires both variables, including an explicit environment
 file. Set ``OPENGHG_IRODS_TEST_RESOURCE`` to an
-existing second resource to exercise managed replication, including refresh
-of an existing replica after an update. The account must be allowed to use it.
+existing second resource to exercise managed replication of both original and
+replacement generations. The account must be allowed to use it.
 Without both required variables, the live checks are skipped.
 
 A mock transport cannot establish server compatibility, authentication, network
@@ -308,15 +312,17 @@ routing, or resource policy. Record the actual client and server versions and
 which workflows passed when reporting a live result. A successful surface-data
 workflow does not establish coverage for every OpenGHG data type or parser.
 
-The two live checks passed on iRODS 5.0.2 with Python iRODS Client 3.3.0 and
-PostgreSQL 16.15. They exercised configured surface standardisation, historical
-and current retrieval, metadata and attribute edits, custom metadata keys,
-deletion, writer contention, version policies, large catalogue records, and
-replication followed by refresh of a stale replica. Both storage resources were
-on one test host. The relocated TLS service also passed the separate
-:doc:`administration access check <irods_administration>` with native reader,
-writer, and unprivileged accounts, including inherited permissions, server-side
-write rejection, and reader revocation. A real laptop connection remains untested.
+The three workflow/publication checks and the separate administration access
+check passed on iRODS 5.0.2 with Python iRODS Client 3.3.0 and PostgreSQL 16.15.
+They exercised configured surface standardisation, historical and current
+retrieval, metadata and attribute edits, custom metadata keys, logical deletion,
+writer contention, version policies, large catalogue records, replication of
+immutable generations, stale writer detection, and retained lazy readers.
+The TLS service also passed the :doc:`administration access check
+<irods_administration>` with native reader, writer, and unprivileged accounts,
+including inherited permissions, server-side write rejection, and reader
+revocation. Both storage resources were on one test host. A real laptop
+connection remains untested.
 
 What else iRODS could provide
 =============================
@@ -374,8 +380,8 @@ The next useful evaluations are:
 2. Measure catalogue scan latency, per-chunk connection overhead, and update
    cost with representative datasets. Indexes, batching, or connection pooling
    may be justified by those measurements.
-3. Design publication and recovery for partial multi-object writes, reader
-   coordination, cache limits, and retention before moving production stores.
+3. Define garbage collection, retention, cache limits, and operational recovery
+   for abandoned generations before moving production stores.
 4. Plan migration and operational policies together with the service owner,
    including server backups and replica or tiering policies.
 
@@ -383,4 +389,4 @@ The generic factory also leaves room for a future fsspec-based backend. No
 fsspec transport is implemented by this change; such a backend would still need
 to provide metadata, document persistence, locking, and lazy-session semantics.
 The iRODS adapter demonstrates the transport and catalogue integration, while
-service operation and production consistency remain separate work.
+service operation and cross-datasource transactions remain separate work.
