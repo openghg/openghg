@@ -231,10 +231,14 @@ def test_live_irods_round_trip(tmp_path):
             target_resource = os.environ.get("OPENGHG_IRODS_TEST_RESOURCE")
             if target_resource:
                 writer.replicate(uuid, target_resource)
-                assert any(
-                    r.resource_name == target_resource
-                    for r in session.data_objects.get(writer.metastore.path(uuid)).replicas
-                )
+                remote = session.data_objects.get(writer.metastore.path(uuid))
+                assert any(r.resource_name == target_resource for r in remote.replicas)
+                provenance = datasource.provenance
+                assert str(remote.id) == provenance["source"]["data_id"]
+                good_replicas = [r for r in remote.replicas if str(r.status) == "1"]
+                assert len(good_replicas) >= 2
+                assert {r.checksum for r in good_replicas} == {provenance["source"]["checksum"]}
+                xr.testing.assert_identical(reader.get_datasource(uuid).get_data(), data)
             writer.delete(uuid)
             assert reader.search() == []
         finally:
