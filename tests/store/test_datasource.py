@@ -814,3 +814,14 @@ def test_delete_version_refreshes_metadata_after_reload(datasource, datasets_wit
 
     assert set(reloaded.metadata["versions"]) == {"v2"}
     assert reloaded.metadata["versions"] == reloaded.all_data_keys()
+
+
+def test_new_version_after_deleting_older_version_does_not_overwrite_latest(datasource, datasets_with_gaps):
+    first, second, third = datasets_with_gaps
+    for data in (first, second):
+        datasource.add_data(metadata=create_attributes(), data=data, data_type="surface", if_exists="new")
+    datasource.delete_version("v1")
+    datasource.add_data(metadata=create_attributes(), data=third, data_type="surface", if_exists="new")
+    assert datasource.latest_version == "v3"
+    xr.testing.assert_equal(datasource.get_data("v2").load(), second)
+    xr.testing.assert_equal(datasource.get_data("v3").load(), third)
