@@ -175,16 +175,19 @@ def list_collections(session_factory: SessionFactory, collection: str) -> list[s
         return sorted(c.path for c in parent.subcollections)
 
 
-def _digest(path: Path, checksum: str) -> str:
+def _digest(payload: Path | bytes, checksum: str) -> str:
     if checksum.startswith("sha2:"):
         hasher = hashlib.sha256()
     elif len(checksum) == 32 and all(c in "0123456789abcdef" for c in checksum.lower()):
         hasher = hashlib.md5()  # noqa: S324 - compatibility with iRODS catalogs
     else:
         raise ObjectStoreError("A supported catalog checksum (SHA-256 or MD5) is required.")
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            hasher.update(chunk)
+    if isinstance(payload, bytes):
+        hasher.update(payload)
+    else:
+        with payload.open("rb") as stream:
+            for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                hasher.update(chunk)
     return (
         "sha2:" + base64.b64encode(hasher.digest()).decode("ascii")
         if checksum.startswith("sha2:")
@@ -214,18 +217,19 @@ def _snapshot(session: Any, path: str) -> dict[str, Any]:
 
 
 class IRODSZarrMapping(MutableMapping[str, bytes]):
-    """Store each Zarr key as an iRODS object with verified read-through caching.
+    """Store each Zarr key as an iRODS object with checksum-verified reads.
 
-    Reads check the live catalog even on cache hits. Cached objects and receipts
-    are immutable per catalog identity; deleting remote data does not evict
-    cached bytes. Cache entries are not registered iRODS replicas.
+    Reads fetch bytes into memory unless ``cache_dir`` explicitly enables a
+    persistent cache. Reads check the live catalog even on cache hits. Cached
+    objects and receipts are immutable per catalog identity; deleting remote
+    data does not evict cached bytes. Cache entries are not iRODS replicas.
     """
 
     def __init__(
         self,
         session_factory: SessionFactory,
         collection: str,
-        cache_dir: str | Path,
+        cache_dir: str | Path | None = None,
         *,
         read_only: bool = False,
         resource: str | None = None,
@@ -233,7 +237,7 @@ class IRODSZarrMapping(MutableMapping[str, bytes]):
     ) -> None:
         self.session_factory = session_factory
         self.collection = validate_collection(collection)
-        self.cache_dir = Path(cache_dir)
+        self.cache_dir = Path(cache_dir).expanduser() if cache_dir is not None else None
         self.read_only = read_only
         self.resource = resource
         self.write_guard = write_guard
@@ -249,10 +253,12 @@ class IRODSZarrMapping(MutableMapping[str, bytes]):
             self.write_guard()
 
     def local_path(self, key: str) -> Path:
-        """Fetch or verify a key and return its cached file, with a JSON receipt."""
+        """Return a verified cached file; raise ValueError if caching is disabled."""
         from irods import keywords as kw
         from irods.exception import DataObjectDoesNotExist
 
+        if self.cache_dir is None:
+            raise ValueError("Persistent caching is disabled; set cache_dir to enable it.")
         path = self._path(key)
         with self.session_factory() as session:
             try:
@@ -303,11 +309,33 @@ class IRODSZarrMapping(MutableMapping[str, bytes]):
             return target
 
     def provenance(self, key: str) -> dict[str, Any]:
-        """Verify a cached key and read its provenance receipt."""
+        """Read a verified cache receipt; raise ValueError if caching is disabled."""
         return json.loads(self.local_path(key).with_name("provenance.json").read_text())
 
     def __getitem__(self, key: str) -> bytes:
-        return self.local_path(key).read_bytes()
+        from irods import keywords as kw
+        from irods.exception import DataObjectDoesNotExist
+
+        if self.cache_dir is not None:
+            return self.local_path(key).read_bytes()
+        path = self._path(key)
+        with self.session_factory() as session:
+            try:
+                identity = _snapshot(session, path)
+                with session.data_objects.open(
+                    path, "r", **{kw.REPL_NUM_KW: str(identity["replica_number"])}
+                ) as stream:
+                    payload: bytes = stream.read(identity["size"] + 1)
+            except DataObjectDoesNotExist as exc:
+                raise KeyError(key) from exc
+            if (
+                len(payload) != identity["size"]
+                or _digest(payload, identity["checksum"]) != identity["checksum"]
+            ):
+                raise ObjectStoreError("Downloaded bytes do not match the catalog checksum and size.")
+            if _snapshot(session, path) != identity:
+                raise ObjectStoreError("Remote object changed during download; retry the read.")
+            return payload
 
     def __setitem__(self, key: str, value: bytes) -> None:
         from irods import keywords as kw

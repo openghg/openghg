@@ -141,7 +141,8 @@ class IRODSObjectStore(ObjectStore[IRODSDatasource, xr.Dataset]):
     Args:
         session: Borrowed authenticated session, or None with ``session_factory``.
         collection: Existing absolute logical collection dedicated to this store.
-        cache_dir: Local directory for checksum-verified Zarr keys and receipts.
+        cache_dir: Opt-in directory for verified Zarr keys and receipts. None
+            (the default) reads into memory without a persistent data cache.
         mode: Read-only (``r``) or read/write (``rw``) access.
         resource: Optional registered iRODS resource for new payload objects.
         data_type: OpenGHG data type, or empty for store-level documents.
@@ -159,7 +160,7 @@ class IRODSObjectStore(ObjectStore[IRODSDatasource, xr.Dataset]):
         self,
         session: Any,
         collection: str,
-        cache_dir: str | Path,
+        cache_dir: str | Path | None = None,
         mode: Literal["r", "rw"] = "r",
         resource: str | None = None,
         *,
@@ -183,7 +184,7 @@ class IRODSObjectStore(ObjectStore[IRODSDatasource, xr.Dataset]):
         if data_type and (not data_type.isidentifier() or not data_type.isascii()):
             raise ValueError("data_type must be a simple ASCII identifier.")
         self.data_type = data_type
-        self.cache_dir = Path(cache_dir).expanduser().resolve()
+        self.cache_dir = Path(cache_dir).expanduser().resolve() if cache_dir is not None else None
         self.mode = mode
         self.resource = resource
         self._connection: Any = None
@@ -323,7 +324,7 @@ def irods_object_store(
     skip_keys: list | None = None,
     extend_keys: list | None = None,
     environment_file: str | None = None,
-    cache_dir: str = "~/.cache/openghg/irods",
+    cache_dir: str | Path | None = None,
     resource: str | None = None,
     **session_options: Any,
 ) -> IRODSObjectStore:
@@ -333,6 +334,8 @@ def irods_object_store(
     passed to python-irodsclient's iRODSSession, including a ``password`` resolved
     by OpenGHG's ``credentials_env`` configuration when needed. Credentials are
     retained only in memory and never written into dataset state or cache receipts.
+    Persistent data caching is disabled unless ``cache_dir`` is supplied; use a
+    private directory with sufficient space and inodes when opting in.
     """
     import os
 

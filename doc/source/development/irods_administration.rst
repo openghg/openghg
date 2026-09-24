@@ -111,9 +111,12 @@ Configure and verify each client
 Give each user the service address, port, zone, logical collection, trusted CA
 certificate if needed, and their own account credentials. Configure the
 ObjectStore factory as shown in :doc:`irods_prototype`, with
-``permissions = "r"`` for readers and ``"rw"`` for writers. Give every user a
-private local cache directory. Server ACLs enforce access even if a reader
-changes the local setting to ``"rw"``.
+``permissions = "r"`` for readers and ``"rw"`` for writers. Persistent client
+data caching is disabled by default: downloaded chunks are verified in memory
+and no cache directory is needed. Users who opt in should choose their own
+private work directory with ``cache_dir`` as described in the client guide;
+the cache has no automatic eviction. Server ACLs enforce access even if a
+reader changes the local setting to ``"rw"``.
 
 Read-only remote use needs the same authenticated connection as local use.
 Where the service is reachable through an SSH host, a loopback-forwarded
@@ -160,8 +163,9 @@ Removing a reader from the reader group removes that route to future access.
 Check with a fresh authenticated connection, and account for other grants and
 existing transfers. Downloaded files and computed arrays already belong to the
 recipient; revocation cannot recall them. The backend rechecks catalogue
-visibility when it uses its verified cache, but recipients can still read
-previously downloaded bytes directly from disk.
+visibility for both uncached reads and optional cache reuse. If a user enabled
+caching or saved data themselves, they can still read those previously
+downloaded bytes directly from disk.
 
 Keep the service recoverable
 ============================

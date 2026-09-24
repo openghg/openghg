@@ -46,7 +46,7 @@ def live_irods(tmp_path, monkeypatch):
                 "path": collection,
                 "permissions": "rw",
                 "factory": "openghg.objectstore._irods:irods_object_store",
-                "options": {"environment_file": environment_file, "cache_dir": str(cache)},
+                "options": {"environment_file": environment_file},
             }
         },
     }
@@ -120,6 +120,7 @@ def test_live_irods_round_trip(live_irods):
     assert changed.data.mf.attrs["backend_attribute"] == "edited"
     assert search_surface(**selected).metadata[uuid]["comment"] == "metadata edited through catalog"
     assert "backend_attribute" not in get_obs_surface(**selected, version="v1").data.attrs
+    assert not live.cache.exists()
 
     writer = IRODSObjectStore(live.session, live.collection, live.cache, mode="rw")
     with writer:

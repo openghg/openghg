@@ -3,6 +3,7 @@
 import base64
 from contextlib import contextmanager
 import hashlib
+from io import BytesIO
 from pathlib import Path, PurePosixPath
 from types import SimpleNamespace
 from unittest.mock import Mock
@@ -72,6 +73,18 @@ def remote(tmp_path):
         payloads[path] = Path(local_path).read_bytes()
         ids.setdefault(path, len(ids) + 1)
 
+    def open_object(path, mode, **options):
+        assert state.active
+        assert mode == "r"
+        assert options["replNum"] == "0"
+        if path not in payloads:
+            raise DataObjectDoesNotExist()
+        state.downloads += 1
+        payload = b"bad" if state.corrupt else payloads[path]
+        if state.changed:
+            ids[path] += 1
+        return BytesIO(payload)
+
     def create_collection(path, **options):
         assert state.active
         collections.update(
@@ -126,6 +139,7 @@ def remote(tmp_path):
 
     session.data_objects.get.side_effect = get_object
     session.data_objects.put.side_effect = put_object
+    session.data_objects.open.side_effect = open_object
     session.data_objects.exists.side_effect = lambda path: path in payloads
     session.data_objects.unlink.side_effect = lambda path, **options: payloads.pop(path)
     session.collections.get.side_effect = get_collection
@@ -219,9 +233,34 @@ def test_read_through_cache_mutation_provenance_and_scoped_deletion(remote):
     assert t.state.opened == t.state.closed
 
 
+def test_default_reads_do_not_create_local_files(remote, monkeypatch):
+    store = IRODSZarrMapping(remote.factory, remote.root + "/v1")
+    store["a"] = b"verified"
+
+    def unexpected_local_file(*args, **kwargs):
+        pytest.fail("An uncached read must not create cache or temporary files.")
+
+    monkeypatch.setattr(Path, "mkdir", unexpected_local_file)
+    monkeypatch.setattr(
+        "openghg.objectstore._irods_storage.tempfile.TemporaryDirectory", unexpected_local_file
+    )
+    assert store["a"] == b"verified"
+    assert store["a"] == b"verified"
+    assert remote.state.downloads == 2
+    assert not remote.cache.exists()
+    for operation in (store.local_path, store.provenance):
+        with pytest.raises(ValueError, match="caching is disabled"):
+            operation("a")
+    del remote.payloads[remote.root + "/v1/a"]
+    with pytest.raises(KeyError):
+        store["a"]
+    assert remote.state.opened == remote.state.closed
+
+
+@pytest.mark.parametrize("cached", [False, True])
 @pytest.mark.parametrize("failure", ["corrupt", "changed"])
-def test_failed_download_does_not_publish_cache(remote, failure):
-    store = mapping(remote)
+def test_failed_download_does_not_publish_cache(remote, failure, cached):
+    store = IRODSZarrMapping(remote.factory, remote.root + "/v1", remote.cache if cached else None)
     store["a"] = b"valid"
     setattr(remote.state, failure, True)
     with pytest.raises(ObjectStoreError):

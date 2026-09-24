@@ -5,8 +5,9 @@ iRODS object store prototype
 The experimental ``IRODSObjectStore`` backend stores OpenGHG metadata in an
 iRODS catalogue and versioned Zarr data as iRODS data objects. Configure its
 factory to use the normal standardisation, search, retrieval, and data-management
-entry points. Requested Zarr chunks are downloaded into a local, verified cache,
-which allows a laptop to use the same remotely catalogued data.
+entry points. Requested Zarr chunks are read through iRODS and verified in
+memory. Persistent client data caching is disabled by default; a laptop can
+read the remotely catalogued data without maintaining a local data cache.
 
 This guide is for developers evaluating the backend with a dedicated test
 collection. It describes the implemented interface and its limits; it does not
@@ -54,7 +55,6 @@ illustrative collection with one you have already created:
 
    [object_store.irods.options]
    environment_file = "~/.irods/irods_environment.json"
-   cache_dir = "~/.cache/openghg/irods"
    # resource = "an_existing_storage_resource"
 
 ``path`` is an iRODS logical collection, not a local directory. The constructor
@@ -62,8 +62,10 @@ requires it to exist and does not create a collection when opening a store.
 ``resource`` optionally chooses an existing resource for uploads; otherwise
 iRODS applies its normal resource selection. If ``environment_file`` is omitted,
 the factory uses ``IRODS_ENVIRONMENT_FILE`` or
-``~/.irods/irods_environment.json``. Cache and environment paths expand ``~``.
-Use ``permissions = "r"`` for a laptop that should only read.
+``~/.irods/irods_environment.json``. Environment paths expand ``~``.
+Omitting ``cache_dir`` disables persistent data caching; direct Python callers
+can also pass ``cache_dir=None``. Use ``permissions = "r"`` for a laptop that
+should only read.
 
 Native iRODS authentication files may supply credentials. If you instead need
 to pass a password from the process environment, add the following optional
@@ -129,7 +131,6 @@ or checking a scientific data-type specification.
 .. code-block:: python
 
    import os
-   from pathlib import Path
    from uuid import uuid4
 
    import numpy as np
@@ -156,7 +157,6 @@ or checking a scientific data-type specification.
        with IRODSObjectStore(
            session,
            collection,
-           cache_dir=Path.home() / ".cache" / "openghg-irods-demo",
            mode="rw",
            data_type="surface",
        ) as store:
@@ -178,13 +178,13 @@ constructor defaults to ``mode="r"``. The example borrows its supplied session:
 keep that session open while using its datasources. Closing the store releases
 its writer lock but does not close a borrowed session.
 
-Use data and its provenance from a laptop
-=========================================
+Use remote data and optional caching
+====================================
 
-Configure the laptop for the same service and logical collection, with its own
-``cache_dir``. Its account must have access to the collection and its ancestors.
-The configured factory opens sessions when needed, so a lazy dataset remains
-usable after the ObjectStore context closes:
+Configure the laptop for the same service and logical collection. Its account
+must have access to the collection and its ancestors. No cache directory is
+needed. The configured factory opens sessions when needed, so a lazy dataset
+remains usable after the ObjectStore context closes:
 
 .. code-block:: python
 
@@ -197,26 +197,54 @@ usable after the ObjectStore context closes:
 
    selected = lazy_data.isel(time=slice(0, 10)).load()
    print(selected)
-   mapping = datasource.mapping(version="latest")
-   # Pick a data chunk rather than a Zarr metadata object.
-   key = next(k for k in mapping if not any(p.startswith(".") for p in k.split("/")))
-   print(mapping.provenance(key))
 
 Opening an xarray dataset reads Zarr metadata and coordinate data. Loading a
 selection fetches the data chunks needed for that selection; a chunk can be
-larger than the selected range. ``mapping.local_path(key)`` returns the verified
-local file for an individual Zarr key. ``mapping.provenance(key)`` fetches or
-verifies that key and returns its JSON receipt. Receipts identify the remote
-endpoint, zone, logical path, catalogue data ID, checksum, size, replica, resource,
-and download time. They do not establish scientific processing history:
-record source identifiers and processing details in datasource metadata.
+larger than the selected range. With caching disabled, each storage-key read
+transfers its bytes through iRODS into memory and verifies their checksum and
+size. The backend writes no persistent downloaded data or receipts. Arrays
+already loaded by xarray remain available in memory.
 
-Every key access checks the live catalogue and hashes any cached bytes before
-reuse. A supported catalogue checksum (SHA-256 or legacy MD5) and consistent
-good replicas are required. Connection, permission, and integrity errors do
-not fall back to potentially stale local bytes. Cache hits avoid repeat payload
-transfers but still require catalogue and local disk reads. Coordinate access
-and many small chunks can generate substantial request overhead.
+To retain verified downloads for reuse, explicitly add ``cache_dir`` to the
+store's existing options table. Choose a private, writable work directory on
+the client; replace the example ``<user>`` path for your system:
+
+.. code-block:: toml
+
+   [object_store.irods.options]
+   environment_file = "~/.irods/irods_environment.json"
+   cache_dir = "/work/<user>/openghg-irods-cache"
+
+Cache paths expand ``~``, but there is no default home-directory cache.
+Reopen the configured store after changing this option. Direct Python callers
+can supply the same directory as ``IRODSObjectStore(..., cache_dir=...)``.
+With caching enabled, the datasource's mapping also exposes cached files and
+download receipts:
+
+.. code-block:: python
+
+   with open_object_store(get_bucket("irods"), "surface", mode="r") as store:
+       datasource = store.get_datasource(record["uuid"])
+       mapping = datasource.mapping(version="latest")
+       # Pick a data chunk rather than a Zarr metadata object.
+       key = next(k for k in mapping if not any(p.startswith(".") for p in k.split("/")))
+       print(mapping.local_path(key))
+       print(mapping.provenance(key))
+
+``mapping.local_path(key)`` fetches or verifies the local file for an individual
+Zarr key. ``mapping.provenance(key)`` returns its JSON receipt. Both methods
+raise ``ValueError`` when persistent caching is disabled. Receipts identify the
+remote endpoint, zone, logical path, catalogue data ID, checksum, size, replica,
+resource, and download time. They do not establish scientific processing
+history: record source identifiers and processing details in datasource metadata.
+
+Both read modes check the live catalogue and require a supported checksum
+(SHA-256 or legacy MD5) and consistent good replicas. Cached bytes are hashed
+before reuse. Connection, permission, and integrity errors do not fall back to
+local bytes. Cache hits avoid repeat payload transfers but still require
+catalogue and local disk reads. The optional cache has no automatic eviction;
+manage its disk usage explicitly. Coordinate access and many small chunks can
+generate substantial request overhead with either mode.
 
 An iRODS **replica** is a physical copy on a registered storage resource with
 the same catalogue data ID as its sibling replicas. A normal client download
@@ -238,8 +266,9 @@ object retains its own data ID, and the backend checks destination replica
 status, size, and checksum. Replicas describe placement of one object, while
 OpenGHG versions describe dataset revisions. Making a laptop a managed iRODS
 resource would require a reachable server and an operational design for its
-intermittent connectivity. The implemented laptop workflow is a verified cache
-of the remote store, with no offline discovery or offline fallback.
+intermittent connectivity. The implemented laptop workflow reads from the
+remote store, with optional verified caching and no offline discovery or
+offline fallback.
 
 Persistence, writer locks, and failure recovery
 ===============================================
@@ -271,18 +300,18 @@ for inspection; the backend does not automatically roll back or reconcile them.
 Do not edit the backend's AVUs directly.
 
 Deletion moves payload objects and collections to iRODS trash. Unpublished
-records disappear from OpenGHG search, while previously downloaded cache files
-remain. The cache has no eviction, automatic deletion propagation, local edit
-synchronisation, or independent version-retention policy. It is not an offline
-object store or a backup. No automatic migration of existing local OpenGHG
-stores is implemented.
+records disappear from OpenGHG search, while any explicitly enabled client cache
+retains its downloaded files. The cache has no eviction, automatic deletion
+propagation, local edit synchronisation, or independent version-retention policy.
+It is not an offline object store or a backup. No automatic migration of existing
+local OpenGHG stores is implemented.
 
 Run the checks
 ==============
 
-Unit tests exercise catalogue documents, cache integrity, read-only guards,
-writer-context guards, and shared Zarr append, update, copy, and version deletion
-behaviour. To run them without a server:
+Unit tests exercise catalogue documents, verified in-memory reads, optional
+cache integrity, read-only guards, writer-context guards, and shared Zarr
+append, update, copy, and version deletion behaviour. To run them without a server:
 
 .. code-block:: bash
 
@@ -370,7 +399,8 @@ belong in private deployment notes on that system, outside Git.
 The next useful evaluations are:
 
 1. Connect a laptop through the site's supported network route and test its
-   authentication, cache reuse, interrupted downloads, and permission changes.
+   authentication, uncached reads, optional cache reuse, interrupted downloads,
+   and permission changes.
 2. Measure catalogue scan latency, per-chunk connection overhead, and update
    cost with representative datasets. Indexes, batching, or connection pooling
    may be justified by those measurements.
