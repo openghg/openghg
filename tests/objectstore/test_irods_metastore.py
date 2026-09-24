@@ -1,142 +1,100 @@
-"""Catalog behavior using real client AVU/query types and no iRODS server."""
+"""Catalog metastore contracts without a running iRODS server."""
 
+from contextlib import nullcontext
+from copy import deepcopy
 import json
 from types import SimpleNamespace
 from uuid import uuid4
 
 import pytest
 
-pytest.importorskip("irods")
-from irods.exception import DataObjectDoesNotExist
-from irods.meta import iRODSMeta
-from irods.models import Collection, DataObject, DataObjectMeta
-
-from openghg.objectstore._irods_metastore import (
-    FIELD_PREFIX,
-    MAX_AVU_BYTES,
-    RECORD_ATTRIBUTE,
-    IRODSMetaStore,
-    encode_metadata,
-)
+from openghg.objectstore import _irods_metastore
+from openghg.objectstore._irods_metastore import IRODSMetaStore, encode_metadata
 from openghg.types import MetastoreError, ObjectStoreError
 
 
-class CatalogMetadata:
-    def __init__(self):
-        self.avus = [iRODSMeta("unrelated", "keep me")]
-        self.calls = 0
-        self.fail = False
-
-    def get_all(self, name):
-        return [avu for avu in self.avus if avu.name == name]
-
-    def items(self):
-        return list(self.avus)
-
-    def apply_atomic_operations(self, *operations):
-        self.calls += 1
-        updated = list(self.avus)
-        for operation in operations:
-            if operation.operation == "remove":
-                updated.remove(operation.avu)
-            else:
-                updated.append(operation.avu)
-        if self.fail:
-            raise RuntimeError("catalog rejected atomic metadata update")
-        self.avus = updated
-
-
-class CatalogQuery:
-    def __init__(self, session):
-        self.session = session
-        self.criteria = []
-        self.keywords = {}
-
-    def filter(self, *criteria):
-        self.criteria.extend(criteria)
-        return self
-
-    def add_keyword(self, name, value):
-        self.keywords[name] = value
-        return self
-
-    def __iter__(self):
-        for path, obj in self.session.objects.items():
-            collection, name = path.rsplit("/", 1)
-            for avu in obj.metadata.items():
-                values = {
-                    Collection.name: collection,
-                    DataObjectMeta.name: avu.name,
-                    DataObjectMeta.value: avu.value,
-                }
-                assert all(criterion.op == "=" for criterion in self.criteria)
-                if all(values[criterion.query_key] == criterion.value for criterion in self.criteria):
-                    yield {DataObject.name: name}
-
-
-class CatalogSession:
-    def __init__(self):
-        self.objects = {}
-        self.data_objects = SimpleNamespace(get=self.get)
-        self.queries = []
-
-    def get(self, path):
-        try:
-            return self.objects[path]
-        except KeyError:
-            raise DataObjectDoesNotExist(path)
-
-    def query(self, *columns):
-        assert columns == (DataObject.name,)
-        query = CatalogQuery(self)
-        self.queries.append(query)
-        return query
-
-
 @pytest.fixture
-def metastore():
-    return IRODSMetaStore(CatalogSession(), "/testZone/home/alice/snapshots", "rw")
+def catalog(monkeypatch):
+    documents, collections, reads = {}, set(), []
+    state = SimpleNamespace(documents=documents, collections=collections, reads=reads, fail=False)
+
+    def create(path, recurse):
+        assert recurse
+        collections.add(path)
+
+    session = SimpleNamespace(collections=SimpleNamespace(create=create))
+
+    def factory():
+        return nullcontext(session)
+
+    def read(session_factory, collection, key):
+        assert session_factory is factory
+        reads.append((collection, key))
+        value = documents[(collection, key)]
+        if isinstance(value, Exception):
+            raise value
+        return deepcopy(value)
+
+    def write(session_factory, collection, key, value):
+        assert session_factory is factory
+        assert collection in collections
+        if state.fail:
+            raise RuntimeError("catalog rejected atomic metadata update")
+        documents[(collection, key)] = deepcopy(value)
+
+    def delete(session_factory, collection, key):
+        assert session_factory is factory
+        documents.pop((collection, key), None)
+
+    def children(session_factory, collection):
+        assert session_factory is factory
+        return sorted(path for path in collections if path.rsplit("/", 1)[0] == collection)
+
+    monkeypatch.setattr(_irods_metastore, "read_document", read)
+    monkeypatch.setattr(_irods_metastore, "write_document", write)
+    monkeypatch.setattr(_irods_metastore, "delete_document", delete)
+    monkeypatch.setattr(_irods_metastore, "list_collections", children)
+    state.factory = factory
+    state.metastore = IRODSMetaStore(factory, "/testZone/home/alice/openghg/surface", "rw")
+    return state
 
 
-def upload(metastore, metadata):
-    """Simulate an existing payload, then publish its catalog record."""
+def publish(metastore, metadata):
     uuid = str(uuid4())
-    metastore.session.objects[metastore.path(uuid)] = SimpleNamespace(metadata=CatalogMetadata())
     metastore.insert({"uuid": uuid, **metadata})
     return uuid
 
 
-def test_publish_search_scope_and_typed_metadata(metastore):
-    uuid = upload(metastore, {"Site": "TAC", "levels": [1, 2], "info": {"Flag": True}})
-    nested = IRODSMetaStore(metastore.session, metastore.collection + "/nested", "rw")
-    upload(nested, {"site": "TAC"})
+def test_published_scope_typed_metadata_and_no_payload_access(catalog):
+    metastore = catalog.metastore
+    uuid = publish(metastore, {"Site": "TAC", "levels": [1, 2], "info": {"Flag": True}})
+    nested = IRODSMetaStore(catalog.factory, metastore.collection + "/nested", "rw")
+    publish(nested, {"site": "TAC"})
     unpublished = str(uuid4())
-    metastore.session.objects[metastore.path(unpublished)] = SimpleNamespace(metadata=CatalogMetadata())
+    catalog.collections.add(metastore.path(unpublished))
+    catalog.documents[(metastore.path(unpublished), "datasource")] = {"_uuid": unpublished}
+    catalog.collections.add(metastore.collection + "/not-a-uuid")
 
     expected = {"uuid": uuid, "site": "TAC", "levels": [1, 2], "info": {"Flag": True}}
     assert metastore.search({"SITE": "TAC"}) == [expected]
     assert metastore.search() == [expected]
-    assert metastore.session.queries[0].keywords == {"zone": "testZone"}
-    assert any(
-        c.query_key is DataObjectMeta.name and c.value == FIELD_PREFIX + "site"
-        for c in metastore.session.queries[0].criteria
-    )
-    assert metastore.session.get(metastore.path(uuid)).metadata.get_all("unrelated")[0].value == "keep me"
+    assert all(key == "record" for _, key in catalog.reads)
     with pytest.raises(ObjectStoreError, match="published"):
         metastore.record(unpublished)
 
 
-def test_search_preserves_predicates_lists_and_numeric_equality(metastore):
-    uuid = upload(metastore, {"site": "TAC", "level": 1, "groups": ["user", "admin"]})
-    upload(metastore, {"site": "MHD", "level": 2, "groups": ["user"], "extra": "present"})
+def test_search_preserves_predicates_lists_and_numeric_equality(catalog):
+    metastore = catalog.metastore
+    uuid = publish(metastore, {"site": "TAC", "level": 1, "groups": ["user", "admin"]})
+    publish(metastore, {"site": "MHD", "level": 2, "groups": ["user"], "extra": "present"})
     assert [r["uuid"] for r in metastore.search({"level": 1.0})] == [uuid]
     assert [r["uuid"] for r in metastore.search({"level": True})] == [uuid]
     assert [
         r["uuid"]
         for r in metastore.search(
-            search_functions={"level": lambda value: value < 2},
+            search_functions={"LEVEL": lambda value: value < 2},
             search_list_keys={"groups": "admin"},
-            negative_lookup_keys=["extra"],
+            negative_lookup_keys=["EXTRA"],
         )
     ] == [uuid]
 
@@ -144,63 +102,85 @@ def test_search_preserves_predicates_lists_and_numeric_equality(metastore):
 @pytest.mark.parametrize(
     "key,value", [("owner", "O'Brien"), ("path", "a\\b"), ("label", 'a"b'), ("owner's", "name")]
 )
-def test_search_scans_marker_when_genquery_cannot_escape_term(metastore, key, value):
-    uuid = upload(metastore, {key: value})
-    assert [record["uuid"] for record in metastore.search({key: value})] == [uuid]
-    assert any(
-        criterion.query_key is DataObjectMeta.name and criterion.value == RECORD_ATTRIBUTE
-        for criterion in metastore.session.queries[-1].criteria
-    )
+def test_quoted_metadata_does_not_become_catalog_query_syntax(catalog, key, value):
+    uuid = publish(catalog.metastore, {key: value})
+    assert [record["uuid"] for record in catalog.metastore.search({key: value})] == [uuid]
 
 
-def test_atomic_update_and_delete_preserve_foreign_avus_and_payload(metastore):
-    uuid = upload(metastore, {"site": "TAC", "groups": ["user"], "old": "value"})
-    obj = metastore.session.get(metastore.path(uuid))
+def test_update_delete_preserve_datasource_state_and_payload_collection(catalog):
+    metastore = catalog.metastore
+    uuid = publish(metastore, {"site": "TAC", "groups": ["user"], "old": "value"})
+    path = metastore.path(uuid)
+    catalog.documents[(path, "datasource")] = {"_uuid": uuid, "_latest_version": "v1"}
+    catalog.collections.add(path + "/v1")
+
     metastore.update({"uuid": uuid}, {"site": "MHD"}, "old", {"groups": "admin"})
-    assert metastore.record(uuid) == {"uuid": uuid, "site": "MHD", "groups": ["user", "admin"]}
-    assert obj.metadata.calls == 2
+    expected = {"uuid": uuid, "site": "MHD", "groups": ["user", "admin"]}
+    assert metastore.record(uuid) == expected
     assert not metastore.search({"site": "TAC"})
     assert metastore.search({"site": "MHD"})
-    assert obj.metadata.get_all("unrelated")
 
-    before = obj.metadata.items()
-    obj.metadata.fail = True
+    catalog.fail = True
     with pytest.raises(RuntimeError, match="catalog rejected"):
         metastore.update({"uuid": uuid}, {"site": "failed"})
-    assert obj.metadata.items() == before
+    assert metastore.record(uuid) == expected
+    catalog.fail = False
 
-    obj.metadata.fail = False
     metastore.delete({"uuid": uuid})
-    assert metastore.session.get(metastore.path(uuid)) is obj
-    assert obj.metadata.items() == [iRODSMeta("unrelated", "keep me")]
+    assert path in catalog.collections
+    assert path + "/v1" in catalog.collections
+    assert catalog.documents[(path, "datasource")] == {"_uuid": uuid, "_latest_version": "v1"}
     assert not metastore.search()
 
 
-def test_mutation_requires_one_match_and_preserves_uuid(metastore):
-    uuid = upload(metastore, {"site": "TAC"})
-    upload(metastore, {"site": "TAC"})
+def test_mutation_requires_one_match_and_preserves_uuid(catalog):
+    metastore = catalog.metastore
+    uuid = publish(metastore, {"site": "TAC"})
+    publish(metastore, {"site": "TAC"})
     for where in ({"site": "TAC"}, {"site": "absent"}):
         with pytest.raises(MetastoreError):
             metastore.update(where, {"site": "other"})
         with pytest.raises(MetastoreError):
             metastore.delete(where)
-    with pytest.raises(ValueError, match="UUID"):
-        metastore.update({"uuid": uuid}, to_delete="uuid")
-    with pytest.raises(ValueError, match="UUID"):
-        metastore.update({"uuid": uuid}, {"uuid": str(uuid4())})
+    for change in (
+        {"to_delete": "uuid"},
+        {"to_update": {"uuid": str(uuid4())}},
+        {"to_extend": {"uuid": "other"}},
+    ):
+        with pytest.raises(ValueError, match="UUID"):
+            metastore.update({"uuid": uuid}, **change)
     with pytest.raises(MetastoreError, match="already published"):
         metastore.insert({"uuid": uuid})
     metastore.delete({"site": "TAC"}, delete_one=False)
     assert not metastore.search()
 
 
-def test_read_only_rejects_all_mutation_before_catalog_access(metastore):
-    readonly = IRODSMetaStore(metastore.session, metastore.collection)
+def test_large_metadata_roundtrip_update_and_validation(catalog):
+    metastore = catalog.metastore
+    metadata = {"description": "é" * 8000, "versions": {f"v{i}": ["start_end"] for i in range(150)}}
+    assert len(encode_metadata(metadata).encode("utf-8")) > 2700
+    uuid = publish(metastore, metadata)
+    assert metastore.record(uuid) == {"uuid": uuid, **metadata}
+    metastore.update(
+        {"uuid": uuid}, to_update={"versions": {**metadata["versions"], "v150": ["next_start_end"]}}
+    )
+    assert metastore.record(uuid)["versions"]["v150"] == ["next_start_end"]
+    assert metastore.search({"description": metadata["description"]})
+    before = metastore.record(uuid)
+    with pytest.raises(ValueError):
+        metastore.update({"uuid": uuid}, {"bad": float("nan")})
+    assert metastore.record(uuid) == before
+
+
+def test_read_only_rejects_all_mutation_before_catalog_access(catalog):
+    readonly = IRODSMetaStore(catalog.factory, catalog.metastore.collection)
     for mutate in (lambda: readonly.insert({}), lambda: readonly.update({}), lambda: readonly.delete({})):
         with pytest.raises(PermissionError):
             mutate()
     readonly.close()
-    assert not metastore.session.queries
+    assert not catalog.reads
+    assert not catalog.collections
+    assert readonly.search() == []
 
 
 @pytest.mark.parametrize(
@@ -213,26 +193,24 @@ def test_read_only_rejects_all_mutation_before_catalog_access(metastore):
         "123456781234123412341234567890ab",
     ],
 )
-def test_path_rejects_unsafe_or_noncanonical_identifiers(metastore, uuid):
+def test_path_rejects_unsafe_or_noncanonical_identifiers(catalog, uuid):
     with pytest.raises(ValueError):
-        metastore.path(uuid)
+        catalog.metastore.path(uuid)
 
 
-def test_record_rejects_malformed_or_ambiguous_publication(metastore):
-    uuid = upload(metastore, {"site": "TAC"})
-    avus = metastore.session.get(metastore.path(uuid)).metadata
-    for value in (
-        "not json",
-        "[]",
-        json.dumps({"uuid": str(uuid4())}),
-        json.dumps({"uuid": uuid, "bad": float("nan")}),
-    ):
-        avus.avus = [iRODSMeta(RECORD_ATTRIBUTE, value)]
-        with pytest.raises(MetastoreError, match="Invalid"):
-            metastore.record(uuid)
-    avus.avus = [iRODSMeta(RECORD_ATTRIBUTE, "{}"), iRODSMeta(RECORD_ATTRIBUTE, "{}")]
-    with pytest.raises(MetastoreError, match="Multiple"):
+@pytest.mark.parametrize(
+    "corruption", [[], {"uuid": "other"}, {"bad": float("nan")}, ObjectStoreError("broken document")]
+)
+def test_record_and_search_reject_corruption_instead_of_hiding_it(catalog, corruption):
+    metastore = catalog.metastore
+    uuid = publish(metastore, {"site": "TAC"})
+    if isinstance(corruption, dict) and "uuid" not in corruption:
+        corruption["uuid"] = uuid
+    catalog.documents[(metastore.path(uuid), "record")] = corruption
+    with pytest.raises(MetastoreError, match="Invalid"):
         metastore.record(uuid)
+    with pytest.raises(MetastoreError, match="Invalid"):
+        metastore.search()
 
 
 @pytest.mark.parametrize(
@@ -242,6 +220,7 @@ def test_record_rejects_malformed_or_ambiguous_publication(metastore):
         ({"value": float("inf")}, ValueError),
         ({"nested": {1: "value"}}, TypeError),
         ({"value": object()}, TypeError),
+        ({"bad\x00key": "value"}, ValueError),
     ],
 )
 def test_encoder_rejects_values_that_cannot_roundtrip(metadata, exception):
@@ -249,14 +228,8 @@ def test_encoder_rejects_values_that_cannot_roundtrip(metadata, exception):
         encode_metadata(metadata)
 
 
-def test_encoder_enforces_utf8_avu_boundaries():
-    overhead = len(encode_metadata({"value": ""}).encode("utf-8"))
-    assert len(encode_metadata({"value": "x" * (MAX_AVU_BYTES - overhead)}).encode("utf-8")) == MAX_AVU_BYTES
-    with pytest.raises(ValueError, match="records"):
-        encode_metadata({"value": "x" * (MAX_AVU_BYTES - overhead + 1)})
-    with pytest.raises(ValueError, match="records"):
-        encode_metadata({"value": "é" * (MAX_AVU_BYTES // 2)})
-    with pytest.raises(ValueError, match="names"):
-        encode_metadata({"x" * (MAX_AVU_BYTES - len(FIELD_PREFIX) + 1): 0})
-    with pytest.raises(ValueError, match="control"):
-        encode_metadata({"bad\x00key": "value"})
+def test_encoder_keeps_values_and_nested_keys():
+    assert json.loads(encode_metadata({"Site": "TAC", "nested": {"Keep": [True, 1, None]}})) == {
+        "site": "TAC",
+        "nested": {"Keep": [True, 1, None]},
+    }

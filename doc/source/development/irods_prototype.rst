@@ -2,72 +2,127 @@
 iRODS object store prototype
 ============================
 
-``IRODSObjectStore`` is an experimental backend for evaluating iRODS as the
-catalogue and storage service behind OpenGHG. It stores an ``xarray.Dataset``
-snapshot in iRODS, searches its catalogue metadata, and downloads requested
-data into a local cache with a provenance receipt.
+The experimental ``IRODSObjectStore`` backend stores OpenGHG metadata in an
+iRODS catalogue and versioned Zarr data as iRODS data objects. Configure its
+factory to use the normal standardisation, search, retrieval, and data-management
+entry points. Requested Zarr chunks are downloaded into a local, verified cache,
+which allows a laptop to use the same remotely catalogued data.
 
-This guide is for developers testing the backend directly. The normal
-``standardise_*``, ``get_obs_*``, and configured local object store workflows
-do not select this backend. Start with a dedicated collection and synthetic
-data, as in the example below.
+This guide is for developers evaluating the backend with a dedicated test
+collection. It describes the implemented interface and its limits; it does not
+establish production readiness or compatibility with every scientific data type.
+See :doc:`objectstore_backends` for the generic factory contract.
 
-How the prototype fits together
-===============================
+Prepare a service and configure a store
+=======================================
 
-The existing ``ObjectStore`` class already coordinates a ``MetaStore`` and a
-datasource factory. ``IRODSObjectStore`` uses that interface with an iRODS
-metastore and datasource implementation; a second abstract facade is not
-needed for this experiment.
+You need an accessible iRODS service, an authenticated account, an existing
+collection dedicated to OpenGHG, and permission to read and write its data and
+metadata. The collection and every ancestor except ``/`` must be visible to
+catalogue queries and be ordinary collections. Linked and mounted collections
+are rejected because their creation semantics cannot provide the writer lock
+used here. Store paths must be absolute, with no traversal components, single
+quotes, backslashes, or control characters.
 
-Each datasource has an OpenGHG UUID and one immutable NetCDF snapshot at
-``<collection>/<uuid>.nc``. Metadata is stored in the iRODS catalogue as
-Attribute-Value-Units (AVUs): a JSON record preserves metadata values, and
-per-field AVUs provide catalogue search indexes. The application still chooses
-logical object names, while iRODS manages the mapping to physical storage.
-Metadata must be JSON-compatible. The complete encoded record, including the
-generated UUID, is limited to 2700 UTF-8 bytes in this prototype. This is a
-conservative bound for the catalogue AVU field; large processing manifests
-need a different representation before they can be stored here.
+The backend uses the authentication and TLS settings supplied by the Python
+iRODS Client. Follow its `secure connection instructions
+<https://github.com/irods/python-irodsclient#establishing-a-secure-connection>`__
+and verify access to your service before running OpenGHG. The backend does not
+configure a server or issue credentials.
 
-``search()`` and ``retrieve()`` inspect catalogue metadata without downloading
-the NetCDF data. A returned datasource downloads its snapshot when
-``get_data()`` or ``local_path()`` is called. The cache verifies file size and
-checksum before publishing the downloaded file. Its identity includes the
-remote endpoint, zone, catalogue data ID, logical path, and checksum, so
-unrelated stores and changed content do not share a cache entry.
-
-The ``provenance`` property exposes the cache receipt after data retrieval.
-Accessing that property also fetches and verifies the snapshot if necessary.
-The receipt records where the bytes came from and their identity without storing
-authentication credentials. It does not establish the scientific processing
-history: record source identifiers, processing versions, and revision
-relationships in datasource metadata when creating a snapshot.
-
-Try a synthetic snapshot
-========================
-
-You need an accessible iRODS service, an account allowed to create data and
-metadata in a dedicated collection, and a configured iRODS client environment.
-The client uses the authentication and TLS settings supplied through that
-environment; the prototype does not configure a server or issue credentials.
-See the `Python iRODS Client connection instructions
-<https://github.com/irods/python-irodsclient#establishing-a-secure-connection>`__.
-
-From this OpenGHG checkout, install the optional client dependency in your
-development environment:
+From this checkout, install the optional client in your development environment:
 
 .. code-block:: bash
 
    python -m pip install -e '.[irods]'
 
-The extra uses ``python-irodsclient>=3.3,<4``. It is a Python client, so
-installing this extra does not install an iRODS server or catalogue database.
-See :doc:`quickstart_devel` for general development environment setup.
+This installs ``python-irodsclient>=3.3,<4``, not an iRODS server or catalogue
+database. See :doc:`quickstart_devel` for general environment setup.
 
-Run the following with your normal iRODS client environment. It creates a
-new demonstration collection on every run and leaves the synthetic snapshot
-there for a later laptop retrieval.
+Add an entry to the ``~/.openghg/openghg.conf`` created during OpenGHG setup.
+Keep its existing ``user_id`` and ``config_version`` entries. Replace the
+illustrative collection with one you have already created:
+
+.. code-block:: toml
+
+   [object_store.irods]
+   path = "/yourZone/home/yourUser/openghg"
+   permissions = "rw"
+   factory = "openghg.objectstore._irods:irods_object_store"
+
+   [object_store.irods.options]
+   environment_file = "~/.irods/irods_environment.json"
+   cache_dir = "~/.cache/openghg/irods"
+   # resource = "an_existing_storage_resource"
+
+``path`` is an iRODS logical collection, not a local directory. The constructor
+requires it to exist and does not create a collection when opening a store.
+``resource`` optionally chooses an existing resource for uploads; otherwise
+iRODS applies its normal resource selection. If ``environment_file`` is omitted,
+the factory uses ``IRODS_ENVIRONMENT_FILE`` or
+``~/.irods/irods_environment.json``. Cache and environment paths expand ``~``.
+Use ``permissions = "r"`` for a laptop that should only read.
+
+Native iRODS authentication files may supply credentials. If you instead need
+to pass a password from the process environment, add the following optional
+mapping and arrange for that environment variable to be populated:
+
+.. code-block:: toml
+
+   [object_store.irods.credentials_env]
+   password = "OPENGHG_IRODS_PASSWORD"
+
+This records the environment-variable name, not its value. An unset mapped
+variable raises a configuration error. Credentials remain in memory and are
+excluded from datasource state and cache receipts; do not put passwords in
+committed configuration or examples.
+
+Use normal OpenGHG workflows
+============================
+
+The configured name, ``irods`` above, is passed through ``store=``. For example,
+with a CRDS input file containing Bilsdale measurements from the 248 m inlet:
+
+.. code-block:: python
+
+   from openghg.standardise import standardise_surface
+   from openghg.retrieve import get_obs_surface, search_surface
+
+   standardise_surface(
+       filepath="/path/to/bsd.picarro.1minute.248m.min.dat",
+       source_format="CRDS",
+       site="bsd",
+       network="decc",
+       store="irods",
+   )
+   results = search_surface(store="irods", site="bsd", species="co2", inlet="248m")
+   print(results.metadata)
+   observations = get_obs_surface(
+       store="irods", site="bsd", species="co2", inlet="248m", version="latest"
+   )
+   assert observations is not None
+   print(observations.data.isel(time=slice(0, 10)).load())
+
+Replace the input path and the scientific identifiers together for your data.
+The parser and normal data-type validation still run. Standardisation retains
+its existing ``if_exists`` and ``save_current`` choices; retrieval accepts
+``version="v1"`` and later versions. Metadata, dataset-attribute edits, custom
+metadata-key configuration, and deletion use the normal data-management
+interfaces. These reuse the shared OpenGHG implementations rather than a second
+set of scientific update rules.
+
+Search reads catalogue metadata without transferring Zarr payloads. The current
+metastore scans the direct UUID collections for the requested data type and
+applies the existing predicates to those records. It has no persistent TinyDB
+file and no AVU search index. Catalogue round trips can therefore become
+expensive as the number of datasources grows.
+
+Try a small synthetic dataset directly
+======================================
+
+This example creates a fresh demonstration collection and leaves two versions
+there for inspection. It uses constructed xarray data without invoking a parser
+or checking a scientific data-type specification.
 
 .. code-block:: python
 
@@ -80,173 +135,198 @@ there for a later laptop retrieval.
    from irods.session import iRODSSession
    from openghg.objectstore import IRODSObjectStore
 
-   dataset = xr.Dataset(
+   original = xr.Dataset(
        {"ch4": ("time", [1900.0, 1901.0], {"units": "nmol mol-1"})},
-       coords={"time": np.array(["2025-01-01", "2025-01-02"], dtype="datetime64[ns]")},
+       coords={
+           "time": np.array(
+               ["2025-01-01T00:00", "2025-01-01T01:00"], dtype="datetime64[ns]"
+           )
+       },
    )
-
+   later = xr.Dataset(
+       {"ch4": ("time", [1902.0], {"units": "nmol mol-1"})},
+       coords={"time": np.array(["2025-01-01T02:00"], dtype="datetime64[ns]")},
+   )
    environment = os.path.expanduser("~/.irods/irods_environment.json")
    with iRODSSession(irods_env_file=environment) as session:
        collection = f"/{session.zone}/home/{session.username}/openghg-demo-{uuid4().hex}"
        session.collections.create(collection, recurse=True)
-       store = IRODSObjectStore(
+       with IRODSObjectStore(
            session,
            collection,
            cache_dir=Path.home() / ".cache" / "openghg-irods-demo",
            mode="rw",
-       )
-       uuid = store.create(
-           metadata={"species": "ch4", "site": "synthetic", "revision": "1"},
-           data=dataset,
-       )
-       print("Collection:", collection)
-       print("UUID:", uuid)
+           data_type="surface",
+       ) as store:
+           uuid = store.create(
+               metadata={"species": "ch4", "site": "synthetic", "data_type": "surface"},
+               data=original,
+               period="3600s",
+           )
+           store.update(uuid, data=later, if_exists="auto", new_version=True)
+           datasource = store.get_datasource(uuid)
+           xr.testing.assert_equal(datasource.get_data(version="v1").load(), original)
+           assert datasource.get_data(version="v2").sizes["time"] == 3
+           assert store.search({"species": "ch4"})[0]["uuid"] == uuid
+           print("Collection:", collection)
+           print("UUID:", uuid)
 
-       records = store.search(species="ch4")
-       assert records[0]["uuid"] == uuid
-       datasource = store.get_datasource(uuid)
-       recovered = datasource.get_data()
-       xr.testing.assert_equal(recovered, dataset)
-       print(datasource.local_path())
-       print(datasource.provenance)
+A writable store must be entered with ``with`` before any mutations. The
+constructor defaults to ``mode="r"``. The example borrows its supplied session:
+keep that session open while using its datasources. Closing the store releases
+its writer lock but does not close a borrowed session.
 
-This uses already constructed xarray data. It does not run an OpenGHG parser
-or validate a scientific data-type specification.
-
-Keep the ``iRODSSession`` open while using the store or its datasources. The
-store borrows that session and does not close it on your behalf. The
-constructor requires an existing collection. Its default mode is ``"r"``;
-use ``"rw"`` to create snapshots or modify catalogue metadata. The optional
-``resource`` argument selects an existing iRODS resource for uploads; leaving
-it unset allows normal iRODS resource selection.
-
-Use the same data from a laptop
-===============================
-
-Configure the laptop's iRODS client environment for the same remote service
-and account, or another account granted access to the collection. With
-``collection`` and ``uuid`` set to the values printed above:
-
-.. code-block:: python
-
-   import os
-   from pathlib import Path
-
-   from irods.session import iRODSSession
-   from openghg.objectstore import IRODSObjectStore
-
-   with iRODSSession(
-       irods_env_file=os.path.expanduser("~/.irods/irods_environment.json")
-   ) as session:
-       store = IRODSObjectStore(
-           session, collection, cache_dir=Path.home() / ".cache" / "openghg-irods"
-       )
-       datasource = store.get_datasource(uuid)  # Catalogue access only.
-       data = datasource.get_data()  # Downloads and verifies on a cache miss.
-       print(datasource.provenance)
-
-This is a local cache of remotely catalogued data. In iRODS terminology a
-**replica** is a physical copy on a registered storage resource, associated
-with the same catalogue data ID as its sibling replicas. A normal client
-download does not register the laptop filesystem as a storage resource. See
-the `iRODS data object and replica model
-<https://github.com/irods/irods_docs/blob/main/docs/system_overview/data_objects.md>`__.
-
-For a managed replica, an administrator first provisions another resource
-within the iRODS zone. A writable store can then request replication:
-
-.. code-block:: python
-
-   store.replicate(uuid, resource="another_registered_resource")
-
-This delegates the transfer to iRODS. The resource name is not a laptop
-directory. Making a laptop a managed resource would require an iRODS server
-and reachable storage there; intermittent connectivity and network routing
-would need operational design. A remote iRODS service with the client cache
-is the simpler starting point for an intermittently connected laptop, but
-the current prototype still requires catalogue access and does not provide
-offline discovery.
-
-Every cache access checks the remote catalogue and hashes the local file,
-even on a cache hit. A supported catalogue checksum (SHA-256 or legacy MD5)
-and consistent good replicas are required. Connection, permission, and
-integrity errors are reported without falling back to potentially stale local
-bytes. Repeated access saves network transfer but still incurs catalogue and
-local disk reads.
-
-Metadata, revisions, and prototype limits
+Use data and its provenance from a laptop
 =========================================
 
-``store.update(uuid, metadata={...})`` updates catalogue metadata. Snapshot
-bytes cannot be updated in place: create a new UUID with distinct revision
-metadata instead. For example, record ``revision="2"`` and
-``derived_from=<previous UUID>`` in the new snapshot's metadata. These are
-application conventions, not an automatically maintained revision history.
-iRODS replicas describe placement and consistency of one data object;
-they do not supply OpenGHG's scientific versioning policy.
+Configure the laptop for the same service and logical collection, with its own
+``cache_dir``. Its account must have access to the collection and its ancestors.
+The configured factory opens sessions when needed, so a lazy dataset remains
+usable after the ObjectStore context closes:
 
-Use one writer for this prototype. A metadata operation can be atomic within
-the iRODS catalogue, but an upload and its metadata publication are separate
-operations. The prototype does not provide distributed transactions or
-concurrent writer conflict resolution. Do not edit its catalogue AVUs directly:
-the JSON record and field indexes must agree.
+.. code-block:: python
 
-If upload completes but publication fails, the new object is removed where
-possible. An interrupted upload can leave an unpublished object for an
-administrator to inspect; the client cannot safely infer ownership after an
-ambiguous transfer failure. Unpublished objects do not appear in searches.
-Provenance receipts retain metadata captured at download time; later catalogue
-metadata edits are visible through the datasource's ``metadata`` attribute.
+   from openghg.objectstore import get_bucket, open_object_store
 
-The first implementation deliberately uses whole NetCDF snapshots. A small
-time selection still requires downloading the snapshot, and ``get_data()``
-loads it fully into memory. For application-managed lazy xarray reads, open
-the path returned by ``local_path()`` instead. There is no remote
-Zarr chunk access, append operation, or automatic migration of existing
-OpenGHG stores. There is also no automatic synchronisation of local changes,
-remote deletion propagation, cache eviction, or version retention policy.
-Treat the cache as a working copy with a receipt, not an independent backup
-or an offline object store.
+   with open_object_store(get_bucket("irods"), "surface", mode="r") as store:
+       record = store.search({"site": "bsd", "species": "co2"})[0]
+       datasource = store.get_datasource(record["uuid"])
+       lazy_data = datasource.get_data(version="latest")
 
-``store.delete(uuid)`` moves the remote object and its AVUs to iRODS trash.
-Existing local cache files are retained. Later access through the store still
-requires a published remote object, so those retained files do not provide an
-offline fallback.
+   selected = lazy_data.isel(time=slice(0, 10)).load()
+   print(selected)
+   mapping = datasource.mapping(version="latest")
+   # Pick a data chunk rather than a Zarr metadata object.
+   key = next(k for k in mapping if not any(p.startswith(".") for p in k.split("/")))
+   print(mapping.provenance(key))
 
-Run the live integration check
-==============================
+Opening an xarray dataset reads Zarr metadata and coordinate data. Loading a
+selection fetches the data chunks needed for that selection; a chunk can be
+larger than the selected range. ``mapping.local_path(key)`` returns the verified
+local file for an individual Zarr key. ``mapping.provenance(key)`` fetches or
+verifies that key and returns its JSON receipt. Receipts identify the remote
+endpoint, zone, logical path, catalogue data ID, checksum, size, replica, resource,
+and download time. They do not establish scientific processing history:
+record source identifiers and processing details in datasource metadata.
 
-The tests include an opt-in check against a real service. Supply an existing,
-writable collection reserved for testing and your iRODS client environment:
+Every key access checks the live catalogue and hashes any cached bytes before
+reuse. A supported catalogue checksum (SHA-256 or legacy MD5) and consistent
+good replicas are required. Connection, permission, and integrity errors do
+not fall back to potentially stale local bytes. Cache hits avoid repeat payload
+transfers but still require catalogue and local disk reads. Coordinate access
+and many small chunks can generate substantial request overhead.
+
+An iRODS **replica** is a physical copy on a registered storage resource with
+the same catalogue data ID as its sibling replicas. A normal client download
+does not register the laptop filesystem as such a resource. See the
+`iRODS data object and replica model
+<https://github.com/irods/irods_docs/blob/main/docs/system_overview/data_objects.md>`__.
+An administrator must provision another registered resource before requesting
+managed replication:
+
+.. code-block:: python
+
+   from openghg.objectstore import get_bucket, locking_object_store
+
+   with locking_object_store(get_bucket("irods"), "surface", mode="rw") as store:
+       store.replicate(record["uuid"], resource="another_registered_resource")
+
+Replication covers every Zarr object in every version of that datasource. Each
+object retains its own data ID, and the backend checks destination replica
+status, size, and checksum. Replicas describe placement of one object, while
+OpenGHG versions describe dataset revisions. Making a laptop a managed iRODS
+resource would require a reachable server and an operational design for its
+intermittent connectivity. The implemented laptop workflow is a verified cache
+of the remote store, with no offline discovery or offline fallback.
+
+Persistence, writer locks, and failure recovery
+===============================================
+
+The existing ``ObjectStore`` facade coordinates the iRODS metastore and a
+subclass of the normal ``Datasource``. ``VersionedZarrStore`` retains the shared
+append, overlap, combination, and version behaviour. Each Zarr key is an iRODS
+object beneath ``<root>/<data_type>/<uuid>/<version>/``; iRODS controls its
+physical placement. Root-level standardisation and configuration documents,
+raw records, and datasource state are JSON documents in collection metadata.
+Numbered Attribute-Value-Units (AVU) chunks permit documents larger than one
+AVU field. A manifest checks their completeness, and each document replacement
+uses one atomic metadata operation.
+
+The backend serializes writers across clients by creating
+``<root>/.openghg-write-lock`` nonrecursively in the catalogue. A second writer
+fails while that collection exists. Successful context exit removes the lock.
+A crashed process or ambiguous connection failure can leave it behind; there
+is no automatic expiry or ownership guessing. Before an operator removes an
+abandoned lock, verify that no writer is still active and inspect the interrupted
+operation's dataset state. Deleting a live writer's lock breaks serialization.
+
+A catalogue metadata operation is atomic, but a whole dataset update is not.
+Zarr chunks, version collections, datasource state, and raw records are separate
+operations. Readers are not locked and do not receive snapshot isolation while
+a writer changes data. Coordinate reads with writers when a consistent dataset
+snapshot is required. Interrupted writes can leave partial or unpublished data
+for inspection; the backend does not automatically roll back or reconcile them.
+Do not edit the backend's AVUs directly.
+
+Deletion moves payload objects and collections to iRODS trash. Unpublished
+records disappear from OpenGHG search, while previously downloaded cache files
+remain. The cache has no eviction, automatic deletion propagation, local edit
+synchronisation, or independent version-retention policy. It is not an offline
+object store or a backup. No automatic migration of existing local OpenGHG
+stores is implemented.
+
+Run the checks
+==============
+
+Unit tests exercise catalogue documents, cache integrity, read-only guards,
+writer-context guards, and shared Zarr append, update, copy, and version deletion
+behaviour. To run them without a server:
+
+.. code-block:: bash
+
+   python -m pytest tests/objectstore/test_irods_storage.py tests/objectstore/test_irods_metastore.py tests/objectstore/test_irods_backend.py
+
+The opt-in integration check requires an existing writable collection reserved
+for tests. It creates temporary child collections and removes its test data:
 
 .. code-block:: bash
 
    export OPENGHG_IRODS_TEST_COLLECTION='/yourZone/home/yourUser/openghg-test'
-   python -m pytest tests/objectstore/test_irods.py::test_live_irods_round_trip
+   export IRODS_ENVIRONMENT_FILE="$HOME/.irods/irods_environment.json"
+   python -m pytest tests/objectstore/test_irods.py
 
-The collection is illustrative; replace it with one you control. Without
-``OPENGHG_IRODS_TEST_COLLECTION``, the live check is skipped. Unit checks use
-a test double and do not establish server compatibility, authentication,
-network behaviour, or storage resource policy. Record the actual server and
-client versions when reporting a live result.
+The live fixture requires both variables, including an explicit environment
+file. Set ``OPENGHG_IRODS_TEST_RESOURCE`` to an
+existing second resource to exercise managed replication, including refresh
+of an existing replica after an update. The account must be allowed to use it.
+Without both required variables, the live checks are skipped.
 
-Set ``IRODS_ENVIRONMENT_FILE`` if the test should use a client environment
-file other than ``~/.irods/irods_environment.json``. Optionally set
-``OPENGHG_IRODS_TEST_RESOURCE`` to the name of a second registered resource
-to include managed replication in the live check. This resource must already
-exist and permit the test account's replication operation.
+A mock transport cannot establish server compatibility, authentication, network
+routing, or resource policy. Record the actual client and server versions and
+which workflows passed when reporting a live result. A successful surface-data
+workflow does not establish coverage for every OpenGHG data type or parser.
+
+The two live checks passed on iRODS 5.0.2 with Python iRODS Client 3.3.0 and
+PostgreSQL 16.15. They exercised configured surface standardisation, historical
+and current retrieval, metadata and attribute edits, custom metadata keys,
+deletion, writer contention, version policies, large catalogue records, and
+replication followed by refresh of a stale replica. Both storage resources were
+on one test host; laptop networking and a persistent shared service remain
+deployment work.
 
 What else iRODS could provide
 =============================
 
-These are iRODS capabilities to evaluate, rather than features enabled by
-the OpenGHG prototype:
+The catalogue and managed replicas provide a starting point for further iRODS
+features. The following extensions need additional integration or server
+configuration:
 
-* **A shared catalogue and logical namespace.** Search data identifiers and
+* **Native catalogue search.** Search data identifiers and
   AVUs with `GenQuery
   <https://github.com/irods/irods_docs/blob/main/docs/system_overview/genquery.md>`__
-  while the server controls physical placement. This could remove the need
-  for clients to understand the server's file layout.
+  while the server controls physical placement. Indexed AVUs could replace
+  the prototype's metadata scan when its scale justifies the extra index
+  maintenance.
 * **Storage tiers and replica policies.** The `storage tiering plugin
   <https://github.com/irods/irods_capability_storage_tiering>`__ can migrate
   data between resources using age or metadata rules, preserve chosen
@@ -275,29 +355,28 @@ the OpenGHG prototype:
 Deployment and next experiments
 ===============================
 
-The client adapter is only part of the work. An iRODS service needs a
-catalogue database, persistent resource storage, authentication, network
-access, and an owner responsible for operation and backup. Official
+An iRODS service needs a catalogue database, persistent resource storage,
+authentication, network access, backups, and an operational owner. Official
 `installation information <https://irods.org/download/>`__ describes server
-and database plugin packages. A user-owned container can be a useful test
-deployment where the host permits it; a compiler or Pixi environment alone
-does not provision the service. Site-specific hostnames, credentials, and
-Blue Pebble run instructions belong in local deployment notes, outside Git.
+and database plugin packages. A user-owned container can provide a test service
+where the host permits it; a compiler or Pixi environment alone does not
+provision the service. Blue Pebble hostnames, credentials, and run instructions
+belong in private deployment notes on that system, outside Git.
 
-The next useful milestones are:
+The next useful evaluations are:
 
-1. Run the synthetic and live checks against the intended server, then test
-   a laptop connecting through the site's supported network route.
-2. Exercise two registered resources and inspect the common data ID,
-   replica checksums, interrupted transfers, and stale replicas.
-3. Measure metadata query latency and whole-file transfer costs on
-   representative datasets before choosing NetCDF snapshots or remote
-   chunked storage.
-4. Design publication, revision retention, cache limits, and concurrent
-   writer behaviour before integrating the standardisation and retrieval
-   entry points or migrating real stores.
+1. Connect a laptop through the site's supported network route and test its
+   authentication, cache reuse, interrupted downloads, and permission changes.
+2. Measure catalogue scan latency, per-chunk connection overhead, and update
+   cost with representative datasets. Indexes, batching, or connection pooling
+   may be justified by those measurements.
+3. Design publication and recovery for partial multi-object writes, reader
+   coordination, cache limits, and retention before moving production stores.
+4. Plan migration and operational policies together with the service owner,
+   including server backups and replica or tiering policies.
 
-The operational service and the semantics of versioning and synchronisation
-need separate evaluation. This prototype establishes an interface to test
-those choices; it does not estimate production readiness from a successful
-client round trip.
+The generic factory also leaves room for a future fsspec-based backend. No
+fsspec transport is implemented by this change; such a backend would still need
+to provide metadata, document persistence, locking, and lazy-session semantics.
+The iRODS adapter demonstrates the transport and catalogue integration, while
+service operation and production consistency remain separate work.

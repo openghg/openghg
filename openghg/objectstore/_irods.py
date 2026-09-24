@@ -1,198 +1,158 @@
-"""Experimental catalog-backed storage of immutable NetCDF snapshots.
-
-The supplied iRODS session is borrowed. Keep it open while using the store or
-its datasources. See the developer guide for deployment and cache semantics.
-"""
+"""Experimental iRODS ObjectStore with catalog metadata and versioned Zarr data."""
 
 from __future__ import annotations
 
-import base64
-from datetime import datetime, timezone
+from collections import defaultdict
+from collections.abc import Iterator
+from contextlib import contextmanager, nullcontext
 import hashlib
-import json
-import logging
-from pathlib import Path, PurePosixPath
-import tempfile
+from pathlib import Path
 from typing import Any, Literal
-from uuid import uuid4
 
-from filelock import FileLock
+from typing_extensions import Self
 import xarray as xr
 
-from openghg.objectstore._datasource import AbstractDatasource, DatasourceFactory
-from openghg.objectstore._irods_metastore import IRODSMetaStore, encode_metadata
-from openghg.objectstore._objectstore import ObjectStore
+from openghg.objectstore._datasource import DatasourceFactory
+from openghg.objectstore._irods_metastore import IRODSMetaStore
+from openghg.objectstore._irods_storage import (
+    IRODSKVStore,
+    IRODSZarrMapping,
+    SessionFactory,
+    _snapshot,
+    delete_document,
+    list_collections,
+    read_document,
+    validate_collection,
+    validate_ordinary_collection,
+    write_document,
+)
+from openghg.objectstore._legacy_datasource import Datasource
+from openghg.objectstore._objectstore import ObjectStore, make_metadata_updater_fn
+from openghg.storage._zarr_store import VersionedZarrStore
 from openghg.types import ObjectStoreError
 
-logger = logging.getLogger(__name__)
+
+class _Sessions:
+    """Reuse the context's connection, reopening connections for deferred reads."""
+
+    def __init__(self, factory: SessionFactory) -> None:
+        self.factory = factory
+        self.active: Any = None
+
+    @contextmanager
+    def __call__(self) -> Iterator[Any]:
+        if self.active is not None:
+            yield self.active
+        else:
+            with self.factory() as session:
+                yield session
 
 
-def _digest(path: Path, checksum: str) -> str:
-    """Hash local bytes using an iRODS SHA-256 or legacy MD5 checksum format."""
-    if checksum.startswith("sha2:"):
-        hasher = hashlib.sha256()
-    elif len(checksum) == 32 and all(c in "0123456789abcdef" for c in checksum.lower()):
-        hasher = hashlib.md5()  # noqa: S324 - compatibility with iRODS catalogs
-    else:
-        raise ObjectStoreError("A supported catalog checksum (SHA-256 or MD5) is required.")
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            hasher.update(chunk)
-    if checksum.startswith("sha2:"):
-        return "sha2:" + base64.b64encode(hasher.digest()).decode("ascii")
-    return hasher.hexdigest()
+class _Documents:
+    def __init__(self, store: IRODSObjectStore) -> None:
+        self.store = store
+
+    @staticmethod
+    def _key(key: str) -> str:
+        return "store-" + hashlib.sha256(key.encode()).hexdigest()
+
+    def read(self, key: str) -> dict[str, Any] | None:
+        try:
+            return read_document(self.store._sessions, self.store.collection, self._key(key))
+        except KeyError:
+            return None
+
+    def write(self, key: str, value: dict[str, Any]) -> None:
+        self.store._require_write()
+        write_document(self.store._sessions, self.store.collection, self._key(key), value)
 
 
-def _snapshot(session: Any, path: str) -> dict[str, Any]:
-    """Read catalog identity and select a good, checksummed physical replica."""
-    obj = session.data_objects.get(path)
-    replicas = [r for r in obj.replicas if str(r.status) == "1"]
-    if not replicas or any(not r.checksum for r in replicas):
-        raise ObjectStoreError("The object needs a good replica with a registered checksum.")
-    if len({(r.checksum, int(r.size)) for r in replicas}) != 1:
-        raise ObjectStoreError("Good replicas disagree about checksum or size; repair the remote object.")
-    replica = min(replicas, key=lambda r: int(r.number))
-    return {
-        "host": session.host,
-        "port": session.port,
-        "zone": path.split("/")[1],
-        "data_id": str(obj.id),
-        "logical_path": path,
-        "checksum": replica.checksum,
-        "size": int(replica.size),
-        "replica_number": int(replica.number),
-        "resource": replica.resource_name,
-    }
+class IRODSDatasource(Datasource):
+    """Use OpenGHG's datasource behaviour with iRODS persistence hooks.
 
-
-class IRODSDatasource(AbstractDatasource[xr.Dataset]):
-    """Catalog reference whose payload is downloaded only on explicit access.
-
-    Obtain instances through :class:`IRODSObjectStore`. ``get_data`` loads the
-    whole snapshot into memory; ``local_path`` permits application-managed lazy
-    xarray reads. Both require an open session, even for cache hits.
+    Datasources obtained from a configured factory support lazy reads after the
+    store context exits. A borrowed session must remain open for those reads.
     """
 
-    def __init__(self, uuid: str, store: IRODSObjectStore) -> None:
-        super().__init__(uuid)
-        self._store = store
-        self.metadata = store.metastore.record(uuid)
-        self._provenance: dict[str, Any] | None = None
+    _runtime_state_keys = Datasource._runtime_state_keys | {"_owner", "_collection"}
+
+    def __init__(self, uuid: str, owner: IRODSObjectStore) -> None:
+        self._owner = owner
+        self._collection = owner.metastore.path(uuid)
+        super().__init__(owner.collection, uuid, owner.mode, owner.data_type)
+
+    def _create_store(self) -> VersionedZarrStore[IRODSKVStore]:
+        versions = [
+            path.rsplit("/", 1)[1] for path in list_collections(self._owner._sessions, self._collection)
+        ]
+        versions = [v for v in versions if v.startswith("v") and v[1:].isdigit()]
+        versions.sort(key=lambda version: int(version[1:]))
+
+        def factory(version: str) -> IRODSKVStore:
+            return IRODSKVStore(self.mapping(version))
+
+        return VersionedZarrStore(factory=factory, versions=versions)
+
+    def mapping(self, version: str = "latest") -> IRODSZarrMapping:
+        """Return a version's transport for chunk cache and provenance inspection."""
+        if version == "latest":
+            version = self.latest_version
+        if not version.startswith("v") or not version[1:].isdigit():
+            raise ValueError("A version must have the form v1, v2, ...")
+        return IRODSZarrMapping(
+            self._owner._sessions,
+            self._collection + "/" + version,
+            self._owner.cache_dir,
+            read_only=self._mode == "r",
+            resource=self._owner.resource,
+            write_guard=self._owner._require_write,
+        )
 
     @classmethod
-    def load(cls, uuid: str, store: IRODSObjectStore) -> IRODSDatasource:
-        """Read catalog metadata without transferring dataset bytes."""
-        return cls(uuid=uuid, store=store)
+    def load(cls, uuid: str, owner: IRODSObjectStore, **kwargs: Any) -> Self:  # type: ignore[override]
+        """Load catalog state and version names without transferring data chunks."""
+        try:
+            state = read_document(owner._sessions, owner.metastore.path(uuid), "datasource")
+        except KeyError as exc:
+            raise ObjectStoreError(f"No iRODS datasource state found for {uuid}.") from exc
+        if state.get("_uuid") != uuid:
+            raise ObjectStoreError("The catalog datasource UUID does not match its collection.")
+        ds = cls(uuid, owner)
+        ds.__dict__.update({k: v for k, v in state.items() if k not in cls._runtime_state_keys})
+        ds._data_keys = defaultdict(list, ds._data_keys)
+        return ds
 
-    def local_path(self) -> Path:
-        """Return a verified cached snapshot, downloading it when necessary.
+    def _write_state(self, state: dict) -> None:
+        self._owner._require_write()
+        write_document(self._owner._sessions, self._collection, "datasource", state)
 
-        Every call rechecks remote identity and hashes cached bytes. Corrupt
-        cache entries are replaced only after a successful verified download.
-        A JSON receipt beside the NetCDF records remote identity and metadata;
-        this local copy is not a registered iRODS replica. No offline fallback
-        is performed on connection, permission, or integrity failures.
-        """
-        from irods import keywords as kw
+    def _delete_state(self) -> None:
+        self._owner._require_write()
+        delete_document(self._owner._sessions, self._collection, "datasource")
 
-        store = self._store
-        self.metadata = store.metastore.record(self.uuid)
-        remote_path = store.metastore.path(self.uuid)
-        identity = _snapshot(store.session, remote_path)
-        key = hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()
-        directory = store.cache_dir / key
-        directory.mkdir(parents=True, exist_ok=True)
-        target = directory / "data.nc"
-        receipt = directory / "provenance.json"
-        with FileLock(str(directory / "download.lock")):
-            if target.exists() and receipt.exists():
-                try:
-                    provenance = json.loads(receipt.read_text())
-                    if (
-                        isinstance(provenance, dict)
-                        and provenance.get("schema_version") == 1
-                        and provenance.get("kind") == "verified_local_cache"
-                        and provenance.get("uuid") == self.uuid
-                        and isinstance(provenance.get("metadata"), dict)
-                        and isinstance(provenance.get("downloaded_at"), str)
-                        and provenance.get("source") == identity
-                        and target.stat().st_size == identity["size"]
-                        and _digest(target, identity["checksum"]) == identity["checksum"]
-                    ):
-                        self._provenance = provenance
-                        return target
-                except (ValueError, KeyError, TypeError):
-                    pass
-
-            with tempfile.TemporaryDirectory(dir=directory) as temporary:
-                staged = Path(temporary) / "data.nc"
-                store.session.data_objects.get(
-                    remote_path,
-                    str(staged),
-                    num_threads=1,
-                    **{kw.REPL_NUM_KW: str(identity["replica_number"])},
-                )
-                if (
-                    staged.stat().st_size != identity["size"]
-                    or _digest(staged, identity["checksum"]) != identity["checksum"]
-                ):
-                    raise ObjectStoreError("Downloaded bytes do not match the catalog checksum and size.")
-                if _snapshot(store.session, remote_path) != identity:
-                    raise ObjectStoreError("Remote object changed during download; retry the read.")
-                provenance = {
-                    "schema_version": 1,
-                    "kind": "verified_local_cache",
-                    "uuid": self.uuid,
-                    "source": identity,
-                    "metadata": self.metadata,
-                    "downloaded_at": datetime.now(timezone.utc).isoformat(),
-                }
-                staged_receipt = Path(temporary) / "provenance.json"
-                staged_receipt.write_text(json.dumps(provenance, indent=2, sort_keys=True) + "\n")
-                staged.replace(target)
-                staged_receipt.replace(receipt)
-                self._provenance = provenance
-        return target
-
-    @property
-    def provenance(self) -> dict[str, Any]:
-        """Return a copy of the receipt, fetching and verifying data if needed."""
-        self.local_path()
-        return json.loads(json.dumps(self._provenance))
-
-    def get_data(self) -> xr.Dataset:
-        """Load the complete verified NetCDF snapshot into memory."""
-        with xr.open_dataset(self.local_path(), engine="h5netcdf") as data:
-            return data.load()
-
-    def add(self, data: xr.Dataset, **kwargs: Any) -> None:
-        """Reject mutation: publish another snapshot using the store's create method."""
-        raise NotImplementedError("iRODS snapshots are immutable; create a new datasource.")
-
-    def save(self) -> None:
-        """Reject independent saves; the store publishes payload and metadata together."""
-        raise NotImplementedError("Use IRODSObjectStore.create to publish a snapshot.")
-
-    def delete(self) -> None:
-        """Move the remote snapshot to iRODS trash; retain existing local caches."""
-        self._store.delete(self.uuid)
+    def _delete_store_directory(self) -> None:
+        # The enclosing store removes the UUID collection after its raw record.
+        pass
 
 
 class IRODSObjectStore(ObjectStore[IRODSDatasource, xr.Dataset]):
-    """Experimental ObjectStore using the iRODS catalog and data objects.
+    """ObjectStore using an ordinary iRODS collection as its catalog root.
 
     Args:
-        session: Borrowed authenticated python-irodsclient session. Closing this
-            store does not close the session.
-        collection: Existing absolute logical collection, dedicated to this store.
-        cache_dir: Local directory for checksum-verified downloads and receipts.
-        mode: ``r`` for read-only access (default), or ``rw`` for publication,
-            metadata updates, trash deletion and managed-resource replication.
-        resource: Optional registered resource to use for new uploads.
+        session: Borrowed authenticated session, or None with ``session_factory``.
+        collection: Existing absolute logical collection dedicated to this store.
+        cache_dir: Local directory for checksum-verified Zarr keys and receipts.
+        mode: Read-only (``r``) or read/write (``rw``) access.
+        resource: Optional registered iRODS resource for new payload objects.
+        data_type: OpenGHG data type, or empty for store-level documents.
+        session_factory: Context-manager factory that opens authenticated sessions.
+        skip_keys: Metadata keys excluded from normalization.
+        extend_keys: Metadata keys merged as lists.
 
-    Payloads are immutable NetCDF snapshots with JSON-compatible catalog
-    metadata. Writes assume one application writer. This explicit API does not
-    register a backend for the standardise/get_obs workflows or local config.
+    Writers must use a context manager. A catalog collection serializes writers
+    across clients; a crashed writer leaves a lock for deliberate operator
+    recovery. Multi-object writes are not transactions. Readers need external
+    coordination with writers when a consistent whole-dataset snapshot matters.
     """
 
     def __init__(
@@ -202,107 +162,107 @@ class IRODSObjectStore(ObjectStore[IRODSDatasource, xr.Dataset]):
         cache_dir: str | Path,
         mode: Literal["r", "rw"] = "r",
         resource: str | None = None,
+        *,
+        data_type: str = "surface",
+        session_factory: SessionFactory | None = None,
+        skip_keys: list | None = None,
+        extend_keys: list | None = None,
     ) -> None:
-        try:
-            import irods  # noqa: F401
-        except ImportError as exc:
-            raise ImportError("Install the optional client with pip install 'openghg[irods]'.") from exc
         if mode not in ("r", "rw"):
             raise ValueError("mode must be 'r' or 'rw'.")
-        collection = collection.rstrip("/")
-        if (
-            not collection.startswith("/")
-            or collection.startswith("//")
-            or str(PurePosixPath(collection)) != collection
-            or ".." in PurePosixPath(collection).parts
-            or any(ord(char) < 32 or char in "'\\" for char in collection)
-        ):
-            raise ValueError(
-                "collection must be an absolute normalized iRODS path without quotes or controls."
-            )
-        session.collections.get(collection)
-        self.session = session
+        if session_factory is None:
+            if session is None:
+                raise ValueError("Provide a session or a session_factory.")
+
+            def session_factory() -> Any:
+                return nullcontext(session)
+        elif session is not None:
+            raise ValueError("Provide only one of session and session_factory.")
+        self._sessions = _Sessions(session_factory)
+        self.collection = validate_collection(collection)
+        if data_type and (not data_type.isidentifier() or not data_type.isascii()):
+            raise ValueError("data_type must be a simple ASCII identifier.")
+        self.data_type = data_type
         self.cache_dir = Path(cache_dir).expanduser().resolve()
         self.mode = mode
         self.resource = resource
-        super().__init__(
-            IRODSMetaStore(session, collection, mode=mode),
-            DatasourceFactory(IRODSDatasource, new_kwargs={"store": self}, load_kwargs={"store": self}),
+        self._connection: Any = None
+        self._depth = 0
+        self._locked = False
+        self.lock_path = collection + "/.openghg-write-lock"
+        with self._sessions() as connection:
+            validate_ordinary_collection(connection, collection)
+        metastore = IRODSMetaStore(
+            self._sessions,
+            collection + ("/" + data_type if data_type else ""),
+            mode,
+            write_guard=self._require_write,
         )
+        super().__init__(
+            metastore,
+            DatasourceFactory(IRODSDatasource, new_kwargs={"owner": self}, load_kwargs={"owner": self}),
+            make_metadata_updater_fn(skip_keys=skip_keys, extend_keys=extend_keys),
+            documents=_Documents(self),
+        )
+
+    def __enter__(self) -> Self:
+        from irods.exception import CATALOG_ALREADY_HAS_ITEM_BY_THAT_NAME
+
+        if self._depth:
+            self._depth += 1
+            return self
+        connection = self._sessions.factory()
+        active = connection.__enter__()
+        self._connection = connection
+        self._sessions.active = active
+        try:
+            if self.mode == "rw":
+                try:
+                    self._sessions.active.collections.create(self.lock_path, recurse=False)
+                except CATALOG_ALREADY_HAS_ITEM_BY_THAT_NAME as exc:
+                    raise ObjectStoreError(
+                        "The iRODS store has an active or abandoned writer lock. "
+                        "Retry after the writer exits; an operator must inspect a crashed writer's lock."
+                    ) from exc
+                self._locked = True
+            self._depth = 1
+            return self
+        except BaseException:
+            connection = self._connection
+            self._sessions.active = None
+            self._connection = None
+            connection.__exit__(None, None, None)
+            raise
+
+    def close(self) -> None:
+        """Release this context's writer lock and connection; deferred reads reopen."""
+        if self._depth > 1:
+            self._depth -= 1
+            return
+        try:
+            if self._locked:
+                self._sessions.active.collections.remove(self.lock_path, recurse=False, force=True)
+                self._locked = False
+        finally:
+            self._locked = False
+            self._depth = 0
+            if self._connection is not None:
+                connection = self._connection
+                self._connection = None
+                self._sessions.active = None
+                connection.__exit__(None, None, None)
 
     def _require_write(self) -> None:
         if self.mode != "rw":
-            raise PermissionError("This iRODS object store was opened read-only.")
-
-    def search(self, metadata: dict[str, Any] | None = None, **kwargs: Any) -> list[dict[str, Any]]:
-        """Search authoritative catalog metadata without downloading payloads."""
-        return self.metastore.search(**self._search_params(metadata, **kwargs))
-
-    def retrieve(self, metadata: dict[str, Any] | None = None, **kwargs: Any) -> list[IRODSDatasource]:
-        """Return catalog references matching search; dataset bytes remain remote."""
-        return [self.get_datasource(record["uuid"]) for record in self.search(metadata, **kwargs)]
-
-    def get_uuids(self, metadata: dict[str, Any] | None = None) -> list[str]:
-        """Return UUIDs matching catalog metadata."""
-        return [record["uuid"] for record in self.search(metadata)]
+            raise PermissionError("This iRODS ObjectStore is read-only.")
+        if not self._locked:
+            raise ObjectStoreError("Use a with statement to acquire the iRODS writer lock.")
 
     def create(self, metadata: dict[str, Any], data: xr.Dataset, **kwargs: Any) -> str:
-        """Publish a new immutable snapshot, returning its UUID.
-
-        Metadata must be JSON-compatible and uniquely identify the datasource;
-        include a revision descriptor when publishing a replacement. Dataset
-        serialization and metadata validation precede upload. Publication uses
-        one atomic AVU operation after upload and checksum verification. Failed
-        publication attempts remove their new object when the server permits it.
-        Extra storage kwargs are not supported by this prototype.
-        """
-        from irods import keywords as kw
-
         self._require_write()
-        if kwargs:
-            raise TypeError(f"Unsupported iRODS snapshot options: {', '.join(kwargs)}")
-        record = json.loads(encode_metadata(metadata))
-        if "uuid" in record:
-            raise ValueError("UUIDs are assigned by the object store.")
-        if self.search(record):
-            raise ObjectStoreError(
-                "This metadata already identifies a datasource; use distinct revision metadata."
-            )
-        uuid = str(uuid4())
-        record["uuid"] = uuid
-        encode_metadata(record)
-        path = self.metastore.path(uuid)
-        options: dict[str, Any] = {kw.FORCE_FLAG_KW: False}
-        if self.resource is not None:
-            options[kw.DEST_RESC_NAME_KW] = self.resource
-        with tempfile.TemporaryDirectory() as temporary:
-            local = Path(temporary) / "data.nc"
-            data.to_netcdf(local, engine="h5netcdf")
-            # A random UUID plus no-force upload protects other catalog objects.
-            if self.session.data_objects.exists(path):
-                raise ObjectStoreError("The generated UUID already exists in the catalog.")
-            uploaded = False
-            try:
-                self.session.data_objects.put(str(local), path, num_threads=1, **options)
-                uploaded = True
-                self.session.data_objects.chksum(path)
-                identity = _snapshot(self.session, path)
-                if (
-                    identity["size"] != local.stat().st_size
-                    or _digest(local, identity["checksum"]) != identity["checksum"]
-                ):
-                    raise ObjectStoreError("Uploaded snapshot failed checksum verification.")
-                self.metastore.insert(record)
-            except BaseException:
-                try:
-                    # A failed transfer may be ambiguous (including a collision).
-                    # Only remove objects whose upload this call completed.
-                    if uploaded and self.session.data_objects.exists(path):
-                        self.session.data_objects.unlink(path, force=True)
-                except Exception:
-                    logger.exception("Could not remove unpublished snapshot %s; inspect the catalog.", path)
-                raise
-        return uuid
+        if not self.data_type:
+            raise ValueError("A data_type is required for datasource operations.")
+        return super().create(metadata, data, **kwargs)
 
     def update(
         self,
@@ -313,33 +273,88 @@ class IRODSObjectStore(ObjectStore[IRODSDatasource, xr.Dataset]):
         extend_keys: list[str] | None = None,
         **kwargs: Any,
     ) -> None:
-        """Update catalog metadata; reject payload updates before any mutation."""
         self._require_write()
-        if data is not None:
-            raise NotImplementedError(
-                "iRODS snapshots are immutable; create a new datasource with revision metadata."
-            )
-        if kwargs:
-            raise TypeError(f"Unsupported iRODS metadata options: {', '.join(kwargs)}")
-        super().update(
-            uuid,
-            metadata=dict(metadata) if metadata is not None else None,
-            keys_to_delete=keys_to_delete,
-            extend_keys=extend_keys,
-        )
+        super().update(uuid, metadata, data, keys_to_delete, extend_keys, **kwargs)
 
     def delete(self, uuid: str) -> None:
-        """Move a published object and its AVUs to trash; do not delete local caches."""
         self._require_write()
-        self.metastore.record(uuid)
-        self.session.data_objects.unlink(self.metastore.path(uuid), force=False)
+        super().delete(uuid)
+        with self._sessions() as session:
+            session.collections.remove(self.metastore.path(uuid), recurse=True)
 
     def replicate(self, uuid: str, resource: str) -> None:
-        """Ask iRODS for a replica on an existing server-managed storage resource.
+        """Replicate every Zarr object to a registered resource under its existing data ID."""
+        from irods import keywords as kw
 
-        This is distinct from downloading into ``cache_dir``. Resource creation,
-        reachability and permissions must be arranged with the zone administrator.
-        """
         self._require_write()
-        self.metastore.record(uuid)
-        self.session.data_objects.replicate(self.metastore.path(uuid), resource=resource)
+        if not isinstance(resource, str) or not resource.strip():
+            raise ValueError("A registered destination resource is required.")
+        datasource = self.get_datasource(uuid)
+        with self._sessions() as session:
+            for version in datasource._store.versions:
+                mapping = datasource.mapping(version)
+                for key in mapping:
+                    path = mapping.collection + "/" + key
+                    before = _snapshot(session, path)
+                    session.data_objects.replicate(
+                        path,
+                        **{kw.DEST_RESC_NAME_KW: resource, kw.UPDATE_REPL_KW: "", kw.VERIFY_CHKSUM_KW: ""},
+                    )
+                    after = _snapshot(session, path)
+                    identity_keys = ("data_id", "logical_path", "checksum", "size")
+                    if any(before[k] != after[k] for k in identity_keys):
+                        raise ObjectStoreError("Replica creation changed the source identity or content.")
+                    obj = session.data_objects.get(path)
+                    if not any(
+                        str(r.status) == "1"
+                        and resource in r.resc_hier.split(";")
+                        and r.checksum == before["checksum"]
+                        and int(r.size) == before["size"]
+                        for r in obj.replicas
+                    ):
+                        raise ObjectStoreError("The destination has no verified good replica.")
+
+
+def irods_object_store(
+    *,
+    bucket: str,
+    data_type: str,
+    mode: Literal["r", "rw"] = "r",
+    skip_keys: list | None = None,
+    extend_keys: list | None = None,
+    environment_file: str | None = None,
+    cache_dir: str = "~/.cache/openghg/irods",
+    resource: str | None = None,
+    **session_options: Any,
+) -> IRODSObjectStore:
+    """Configured factory using a native iRODS environment and optional credentials.
+
+    ``bucket`` is an absolute iRODS collection path. ``session_options`` are
+    passed to python-irodsclient's iRODSSession, including a ``password`` resolved
+    by OpenGHG's ``credentials_env`` configuration when needed. Credentials are
+    retained only in memory and never written into dataset state or cache receipts.
+    """
+    import os
+
+    try:
+        from irods.session import iRODSSession
+    except ImportError as exc:
+        raise ImportError("Install the optional client with pip install 'openghg[irods]'.") from exc
+    environment_file = environment_file or os.environ.get(
+        "IRODS_ENVIRONMENT_FILE", "~/.irods/irods_environment.json"
+    )
+
+    def sessions() -> Any:
+        return iRODSSession(irods_env_file=str(Path(environment_file).expanduser()), **session_options)
+
+    return IRODSObjectStore(
+        None,
+        bucket,
+        cache_dir,
+        mode,
+        resource,
+        data_type=data_type,
+        session_factory=sessions,
+        skip_keys=skip_keys,
+        extend_keys=extend_keys,
+    )

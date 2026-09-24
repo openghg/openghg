@@ -25,14 +25,15 @@ Covers how we develop OpenGHG and the standards we adhere to
 
    python_devel
 
-Storage experiments
--------------------
+ObjectStore backends
+--------------------
 
-Prototype backends for evaluating changes to OpenGHG storage.
+Configure and implement alternative persistence for OpenGHG object stores.
 
 .. toctree::
    :maxdepth: 1
 
+   objectstore_backends
    irods_prototype
 
 Packaging & Release

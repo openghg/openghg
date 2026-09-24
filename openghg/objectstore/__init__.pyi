@@ -1,4 +1,6 @@
 from ._encoding import bytes_to_string as bytes_to_string
+from ._documents import DocumentStore as DocumentStore
+from ._objectstore import ObjectStore as ObjectStore
 from ._encoding import datetime_to_datetime as datetime_to_datetime
 from ._encoding import get_datetime_now as get_datetime_now
 from ._encoding import string_to_bytes as string_to_bytes

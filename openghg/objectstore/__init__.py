@@ -3,6 +3,8 @@ from typing import Any
 
 __all__ = [
     "IRODSObjectStore",
+    "ObjectStore",
+    "DocumentStore",
     "delete_object",
     "delete_objects",
     "exists",
@@ -40,6 +42,8 @@ __all__ = [
 
 _EXPORTS = {
     "IRODSObjectStore": "._irods",
+    "ObjectStore": "._objectstore",
+    "DocumentStore": "._documents",
     "delete_object": "._local_store",
     "delete_objects": "._local_store",
     "exists": "._local_store",
