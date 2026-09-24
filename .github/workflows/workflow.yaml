@@ -65,7 +65,7 @@ jobs:
           enable-cache: true
 
       - name: Install project (including dev dependencies)
-        run: uv sync --extra dev --extra fp-x-flux
+        run: uv sync --extra dev --extra fp-x-flux --extra irods
 
       - name: Check formatting with Ruff
         run: |
