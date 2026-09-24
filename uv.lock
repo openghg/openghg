@@ -2382,7 +2382,7 @@ requires-dist = [
     { name = "numexpr", specifier = "<=2.14.1" },
     { name = "numpy", specifier = ">=2.0,<=2.3.3" },
     { name = "openghg-calscales", specifier = "<=0.1.3" },
-    { name = "openghg-defs", specifier = ">=0.0.13" },
+    { name = "openghg-defs", specifier = ">=0.0.14" },
     { name = "openpyxl", specifier = "<=3.1.5" },
     { name = "pandas", specifier = ">=2.0,<=2.3.3" },
     { name = "pint", specifier = "<=0.24.4" },
