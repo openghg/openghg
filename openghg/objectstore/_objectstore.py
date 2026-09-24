@@ -531,6 +531,9 @@ class ObjectStore(Generic[DatasourceT, T]):
     def create(self, metadata: MetaData, data: T, **kwargs: Any) -> UUID:
         """Create a new datasource and store its metadata and UUID in the metastore.
 
+        Persist datasource state before publishing its searchable metadata. A
+        failed publication may leave unindexed data for backend-specific cleanup.
+
         Args:
             metadata: metadata that should uniquely identify this datasource.
             data: data to store in datasource.
@@ -555,11 +558,8 @@ class ObjectStore(Generic[DatasourceT, T]):
         datasource = self.datasource_factory.new(uuid)
 
         datasource.add(data, **kwargs)
-        metadata["uuid"] = uuid
-
-        self.metastore.insert(metadata)
-        del metadata["uuid"]  # don't mutate the metadata
         datasource.save()
+        self.metastore.insert({**metadata, "uuid": uuid})
 
         return uuid
 
@@ -618,10 +618,13 @@ class ObjectStore(Generic[DatasourceT, T]):
             datasource.save()
 
     def delete(self, uuid: UUID) -> None:
-        """Delete data and metadata with given UUID."""
+        """Unpublish the record, then delete its data.
+
+        Failed data cleanup may leave unindexed data for backend-specific recovery.
+        """
         data = self.get_datasource(uuid)
-        data.delete()
         self.metastore.delete({"uuid": uuid})
+        data.delete()
 
 
 # Helper functions for creating object stores

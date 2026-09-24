@@ -588,6 +588,7 @@ class Datasource(AbstractDatasource[XrDataset]):
 
         del self._data_keys[version]
         del self._timestamps[version]
+        self._metadata["versions"] = self._data_keys
 
     # Metadata methods
     def add_metadata_key(self, key: str, value: str) -> None:

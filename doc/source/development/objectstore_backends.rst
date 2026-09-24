@@ -88,6 +88,11 @@ and context-manager methods. The existing ``ObjectStore`` facade in
 ``DatasourceFactory``, a metadata updater, and document persistence; it can be
 reused or subclassed. The backend owns locking and session management.
 
+The facade saves datasource state before publishing its searchable metadata,
+and unpublishes metadata before deleting payloads. A failed operation can leave
+unindexed data for backend-specific recovery, but should not publish an absent
+datasource. These ordered operations are not a multi-object transaction.
+
 The returned object must support reads before entering its write context and
 repeated entry into that context. Standardisation can process several files
 using the same object. Closing a completed write context must persist changes

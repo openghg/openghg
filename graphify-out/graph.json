@@ -284,7 +284,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_legacy_datasource_datasource_daterange_str",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L722",
+      "source_location": "L723",
       "target": "openghg_util_time_create_daterange_str",
       "weight": 1.0
     },
@@ -320,7 +320,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_legacy_datasource_datasource_integrity_check",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L736",
+      "source_location": "L737",
       "target": "openghg_util_time_split_daterange_str",
       "weight": 1.0
     },
@@ -332,7 +332,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_legacy_datasource_datasource_integrity_check",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L745",
+      "source_location": "L746",
       "target": "openghg_util_time_timestamp_tzaware",
       "weight": 1.0
     },
@@ -380,7 +380,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_legacy_datasource_datasource_update_daterange",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L693",
+      "source_location": "L694",
       "target": "openghg_util_time_split_daterange_str",
       "weight": 1.0
     },
@@ -416,7 +416,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_objectstore_lockingobjectstore_create",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L837",
+      "source_location": "L840",
       "target": "openghg_objectstore_metastore_classic_metastore_lockingerror",
       "weight": 1.0
     },
@@ -428,7 +428,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_objectstore_lockingobjectstore_delete",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L856",
+      "source_location": "L859",
       "target": "openghg_objectstore_metastore_classic_metastore_lockingerror",
       "weight": 1.0
     },
@@ -440,7 +440,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_objectstore_lockingobjectstore_update",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L850",
+      "source_location": "L853",
       "target": "openghg_objectstore_metastore_classic_metastore_lockingerror",
       "weight": 1.0
     },
@@ -452,7 +452,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_objectstore_open_object_store",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L732",
+      "source_location": "L735",
       "target": "openghg_objectstore_factory_configured_object_store",
       "weight": 1.0
     },
@@ -464,7 +464,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_objectstore_open_object_store",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L738",
+      "source_location": "L741",
       "target": "openghg_objectstore_metastore_classic_metastore_open_metastore",
       "weight": 1.0
     },
@@ -476,7 +476,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_objectstore_open_object_store",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L739",
+      "source_location": "L742",
       "target": "openghg_objectstore_legacy_datasource_get_legacy_datasource_factory",
       "weight": 1.0
     },
@@ -1832,7 +1832,7 @@
       "relation": "calls",
       "source": "tests_objectstore_test_objectstore_test_delete",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L216",
+      "source_location": "L240",
       "target": "openghg_objectstore_objectstore_get_datasource",
       "weight": 1.0
     },
@@ -1844,7 +1844,7 @@
       "relation": "calls",
       "source": "tests_objectstore_test_objectstore_test_update",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L171",
+      "source_location": "L195",
       "target": "openghg_objectstore_objectstore_get_datasource",
       "weight": 1.0
     },
@@ -3142,6 +3142,18 @@
       "source_file": "tests/store/test_datasource.py",
       "source_location": "L721",
       "target": "openghg_objectstore_legacy_datasource_datasource",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_store_test_datasource_test_delete_version_refreshes_metadata_after_reload",
+      "source_file": "tests/store/test_datasource.py",
+      "source_location": "L810",
+      "target": "openghg_objectstore_legacy_datasource_datasource_load",
       "weight": 1.0
     },
     {
@@ -7010,7 +7022,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_legacy_datasource_datasource_daterange",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L707",
+      "source_location": "L708",
       "target": "openghg_objectstore_legacy_datasource_datasource_update_daterange",
       "weight": 1.0
     },
@@ -7021,7 +7033,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_legacy_datasource_datasource_daterange_str",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L720",
+      "source_location": "L721",
       "target": "openghg_objectstore_legacy_datasource_datasource_daterange",
       "weight": 1.0
     },
@@ -7637,7 +7649,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_objectstore_get_datasource",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L777",
+      "source_location": "L780",
       "target": "openghg_objectstore_objectstore_open_object_store",
       "weight": 1.0
     },
@@ -7648,7 +7660,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_objectstore_get_datasource",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L783",
+      "source_location": "L786",
       "target": "openghg_store_spec_specification_define_data_types",
       "weight": 1.0
     },
@@ -7659,7 +7671,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_objectstore_locking_object_store",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L879",
+      "source_location": "L882",
       "target": "openghg_objectstore_factory_configured_object_store",
       "weight": 1.0
     },
@@ -7670,7 +7682,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_objectstore_locking_object_store",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L885",
+      "source_location": "L888",
       "target": "openghg_objectstore_metastore_classic_metastore_dataclassmetastore",
       "weight": 1.0
     },
@@ -7681,7 +7693,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_objectstore_locking_object_store",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L886",
+      "source_location": "L889",
       "target": "openghg_objectstore_legacy_datasource_get_legacy_datasource_factory",
       "weight": 1.0
     },
@@ -7692,7 +7704,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_objectstore_locking_object_store",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L887",
+      "source_location": "L890",
       "target": "openghg_objectstore_objectstore_make_metadata_updater_fn",
       "weight": 1.0
     },
@@ -7703,7 +7715,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_objectstore_locking_object_store",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L888",
+      "source_location": "L891",
       "target": "openghg_objectstore_objectstore_lockingobjectstore",
       "weight": 1.0
     },
@@ -7714,7 +7726,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_objectstore_locking_object_store",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L893",
+      "source_location": "L896",
       "target": "openghg_objectstore_documents_localdocuments",
       "weight": 1.0
     },
@@ -7725,7 +7737,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_objectstore_lockingobjectstore_exit",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L829",
+      "source_location": "L832",
       "target": "openghg_objectstore_objectstore_lockingobjectstore_close",
       "weight": 1.0
     },
@@ -7835,7 +7847,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_objectstore_objectstore_create",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L545",
+      "source_location": "L548",
       "target": "openghg_objectstore_objectstore_objectstore_search_fbb39a",
       "weight": 1.0
     },
@@ -7846,7 +7858,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_objectstore_objectstore_create",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L547",
+      "source_location": "L550",
       "target": "openghg_objectstore_objectstore_objectstore_get_uuids",
       "weight": 1.0
     },
@@ -7857,7 +7869,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_objectstore_objectstore_delete",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L622",
+      "source_location": "L625",
       "target": "openghg_objectstore_objectstore_get_datasource",
       "weight": 1.0
     },
@@ -7989,7 +8001,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_objectstore_open_object_store",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L747",
+      "source_location": "L750",
       "target": "openghg_objectstore_objectstore_make_metadata_updater_fn",
       "weight": 1.0
     },
@@ -8000,7 +8012,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_objectstore_open_object_store",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L749",
+      "source_location": "L752",
       "target": "openghg_objectstore_objectstore_objectstore",
       "weight": 1.0
     },
@@ -23893,6 +23905,28 @@
       "confidence": "EXTRACTED",
       "context": "decorator",
       "relation": "references",
+      "source": "tests_objectstore_test_objectstore_test_failed_create_does_not_publish_or_mutate_metadata",
+      "source_file": "tests/objectstore/test_objectstore.py",
+      "source_location": "L143",
+      "target": "tests_objectstore_test_objectstore_py_parametrize",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "decorator",
+      "relation": "references",
+      "source": "tests_objectstore_test_objectstore_test_failed_delete_never_leaves_a_record_pointing_to_deleted_data",
+      "source_file": "tests/objectstore/test_objectstore.py",
+      "source_location": "L243",
+      "target": "tests_objectstore_test_objectstore_py_parametrize",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "decorator",
+      "relation": "references",
       "source": "tests_objectstore_test_tinydb_metastore_alternate_metastore",
       "source_file": "tests/objectstore/test_tinydb_metastore.py",
       "source_location": "L27",
@@ -27382,7 +27416,7 @@
       "relation": "references",
       "source": "openghg_objectstore_legacy_datasource_datasource_daterange",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L699",
+      "source_location": "L700",
       "target": "openghg_objectstore_legacy_datasource_py_timestamp",
       "weight": 1.0
     },
@@ -27393,7 +27427,7 @@
       "relation": "references",
       "source": "openghg_objectstore_legacy_datasource_get_legacy_datasource_factory",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L769",
+      "source_location": "L770",
       "target": "openghg_objectstore_legacy_datasource_datasource",
       "weight": 1.0
     },
@@ -27459,7 +27493,7 @@
       "relation": "references",
       "source": "openghg_objectstore_objectstore_lockingobjectstore_exit",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L823",
+      "source_location": "L826",
       "target": "openghg_objectstore_objectstore_py_baseexception",
       "weight": 1.0
     },
@@ -27668,7 +27702,7 @@
       "relation": "references",
       "source": "openghg_objectstore_objectstore_open_object_store",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L726",
+      "source_location": "L729",
       "target": "openghg_objectstore_legacy_datasource_datasource",
       "weight": 1.0
     },
@@ -27679,7 +27713,7 @@
       "relation": "references",
       "source": "openghg_objectstore_objectstore_open_object_store",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L726",
+      "source_location": "L729",
       "target": "openghg_objectstore_objectstore_objectstore",
       "weight": 1.0
     },
@@ -27690,7 +27724,7 @@
       "relation": "references",
       "source": "openghg_objectstore_objectstore_open_object_store",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L726",
+      "source_location": "L729",
       "target": "openghg_objectstore_objectstore_py_dataset",
       "weight": 1.0
     },
@@ -27701,7 +27735,7 @@
       "relation": "references",
       "source": "openghg_objectstore_objectstore_update_one",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L628",
+      "source_location": "L631",
       "target": "openghg_objectstore_objectstore_py_any",
       "weight": 1.0
     },
@@ -29912,7 +29946,7 @@
       "relation": "imports",
       "source": "openghg_objectstore_legacy_datasource",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L686",
+      "source_location": "L687",
       "target": "openghg_util_time_split_daterange_str",
       "weight": 1.0
     },
@@ -29923,7 +29957,7 @@
       "relation": "imports",
       "source": "openghg_objectstore_legacy_datasource",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L718",
+      "source_location": "L719",
       "target": "openghg_util_time_create_daterange_str",
       "weight": 1.0
     },
@@ -29934,7 +29968,7 @@
       "relation": "imports",
       "source": "openghg_objectstore_legacy_datasource",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L733",
+      "source_location": "L734",
       "target": "openghg_util_time_timestamp_tzaware",
       "weight": 1.0
     },
@@ -30253,7 +30287,7 @@
       "relation": "imports",
       "source": "openghg_objectstore_objectstore",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L729",
+      "source_location": "L732",
       "target": "openghg_objectstore_factory_configured_object_store",
       "weight": 1.0
     },
@@ -30264,7 +30298,7 @@
       "relation": "imports",
       "source": "openghg_objectstore_objectstore",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L730",
+      "source_location": "L733",
       "target": "openghg_objectstore_documents_localdocuments",
       "weight": 1.0
     },
@@ -30275,7 +30309,7 @@
       "relation": "imports",
       "source": "openghg_objectstore_objectstore",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L781",
+      "source_location": "L784",
       "target": "openghg_store_spec_specification_define_data_types",
       "weight": 1.0
     },
@@ -53925,7 +53959,7 @@
       "relation": "references",
       "source": "openghg_objectstore_legacy_datasource_get_legacy_datasource_factory",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L769",
+      "source_location": "L770",
       "target": "openghg_objectstore_legacy_datasource_py_any",
       "weight": 1.0
     },
@@ -54123,7 +54157,7 @@
       "relation": "references",
       "source": "openghg_objectstore_objectstore_lockingobjectstore_create",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L835",
+      "source_location": "L838",
       "target": "openghg_objectstore_objectstore_py_any",
       "weight": 1.0
     },
@@ -54134,7 +54168,7 @@
       "relation": "references",
       "source": "openghg_objectstore_objectstore_lockingobjectstore_create",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L835",
+      "source_location": "L838",
       "target": "openghg_objectstore_objectstore_py_metadata",
       "weight": 1.0
     },
@@ -54145,7 +54179,7 @@
       "relation": "references",
       "source": "openghg_objectstore_objectstore_lockingobjectstore_create",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L835",
+      "source_location": "L838",
       "target": "openghg_objectstore_objectstore_py_t",
       "weight": 1.0
     },
@@ -54156,7 +54190,7 @@
       "relation": "references",
       "source": "openghg_objectstore_objectstore_lockingobjectstore_delete",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L854",
+      "source_location": "L857",
       "target": "tests_store_test_datasource_uuid",
       "weight": 1.0
     },
@@ -54167,7 +54201,7 @@
       "relation": "references",
       "source": "openghg_objectstore_objectstore_lockingobjectstore_exit",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L823",
+      "source_location": "L826",
       "target": "openghg_objectstore_objectstore_py_tracebacktype",
       "weight": 1.0
     },
@@ -54178,7 +54212,7 @@
       "relation": "references",
       "source": "openghg_objectstore_objectstore_lockingobjectstore_init",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L803",
+      "source_location": "L806",
       "target": "metadataupdatert",
       "weight": 1.0
     },
@@ -54189,7 +54223,7 @@
       "relation": "references",
       "source": "openghg_objectstore_objectstore_lockingobjectstore_init",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L803",
+      "source_location": "L806",
       "target": "openghg_objectstore_datasource_datasourcefactory",
       "weight": 1.0
     },
@@ -54200,7 +54234,7 @@
       "relation": "references",
       "source": "openghg_objectstore_objectstore_lockingobjectstore_init",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L803",
+      "source_location": "L806",
       "target": "openghg_objectstore_documents_documentstore",
       "weight": 1.0
     },
@@ -54211,7 +54245,7 @@
       "relation": "references",
       "source": "openghg_objectstore_objectstore_lockingobjectstore_init",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L803",
+      "source_location": "L806",
       "target": "openghg_objectstore_metastore_classic_metastore_filelock",
       "weight": 1.0
     },
@@ -54222,7 +54256,7 @@
       "relation": "references",
       "source": "openghg_objectstore_objectstore_lockingobjectstore_init",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L803",
+      "source_location": "L806",
       "target": "openghg_objectstore_metastore_metastore_metastore",
       "weight": 1.0
     },
@@ -54233,7 +54267,7 @@
       "relation": "references",
       "source": "openghg_objectstore_objectstore_lockingobjectstore_update",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L840",
+      "source_location": "L843",
       "target": "openghg_objectstore_objectstore_py_any",
       "weight": 1.0
     },
@@ -54244,7 +54278,7 @@
       "relation": "references",
       "source": "openghg_objectstore_objectstore_lockingobjectstore_update",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L840",
+      "source_location": "L843",
       "target": "openghg_objectstore_objectstore_py_metadata",
       "weight": 1.0
     },
@@ -54255,7 +54289,7 @@
       "relation": "references",
       "source": "openghg_objectstore_objectstore_lockingobjectstore_update",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L840",
+      "source_location": "L843",
       "target": "openghg_objectstore_objectstore_py_t",
       "weight": 1.0
     },
@@ -54266,7 +54300,7 @@
       "relation": "references",
       "source": "openghg_objectstore_objectstore_lockingobjectstore_update",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L840",
+      "source_location": "L843",
       "target": "tests_store_test_datasource_uuid",
       "weight": 1.0
     },
@@ -54684,7 +54718,7 @@
       "relation": "references",
       "source": "openghg_objectstore_objectstore_update_one",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L628",
+      "source_location": "L631",
       "target": "openghg_objectstore_objectstore_py_datasourcet",
       "weight": 1.0
     },
@@ -54695,7 +54729,7 @@
       "relation": "references",
       "source": "openghg_objectstore_objectstore_update_one",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L628",
+      "source_location": "L631",
       "target": "openghg_objectstore_objectstore_py_metadata",
       "weight": 1.0
     },
@@ -59777,7 +59811,7 @@
       "relation": "references",
       "source": "openghg_objectstore_legacy_datasource_get_legacy_datasource_factory",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L769",
+      "source_location": "L770",
       "target": "openghg_objectstore_datasource_datasourcefactory",
       "weight": 1.0
     },
@@ -59920,7 +59954,7 @@
       "relation": "references",
       "source": "openghg_objectstore_objectstore_get_datasource",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L758",
+      "source_location": "L761",
       "target": "openghg_objectstore_legacy_datasource_datasource",
       "weight": 1.0
     },
@@ -59931,7 +59965,7 @@
       "relation": "references",
       "source": "openghg_objectstore_objectstore_locking_object_store",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L867",
+      "source_location": "L870",
       "target": "openghg_objectstore_objectstore_py_lockingobjectstoretype",
       "weight": 1.0
     },
@@ -59942,7 +59976,7 @@
       "relation": "references",
       "source": "openghg_objectstore_objectstore_lockingobjectstore_create",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L835",
+      "source_location": "L838",
       "target": "tests_store_test_datasource_uuid",
       "weight": 1.0
     },
@@ -59953,7 +59987,7 @@
       "relation": "references",
       "source": "openghg_objectstore_objectstore_lockingobjectstore_enter",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L819",
+      "source_location": "L822",
       "target": "openghg_objectstore_objectstore_py_self",
       "weight": 1.0
     },
@@ -59964,7 +59998,7 @@
       "relation": "references",
       "source": "openghg_objectstore_objectstore_make_metadata_updater_fn",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L671",
+      "source_location": "L674",
       "target": "metadataupdatert",
       "weight": 1.0
     },
@@ -62663,7 +62697,7 @@
       "relation": "contains",
       "source": "openghg_objectstore_legacy_datasource",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L769",
+      "source_location": "L770",
       "target": "openghg_objectstore_legacy_datasource_get_legacy_datasource_factory",
       "weight": 1.0
     },
@@ -63023,7 +63057,7 @@
       "relation": "contains",
       "source": "openghg_objectstore_objectstore",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L628",
+      "source_location": "L631",
       "target": "openghg_objectstore_objectstore_update_one",
       "weight": 1.0
     },
@@ -63033,7 +63067,7 @@
       "relation": "contains",
       "source": "openghg_objectstore_objectstore",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L671",
+      "source_location": "L674",
       "target": "openghg_objectstore_objectstore_make_metadata_updater_fn",
       "weight": 1.0
     },
@@ -63053,7 +63087,7 @@
       "relation": "contains",
       "source": "openghg_objectstore_objectstore",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L726",
+      "source_location": "L729",
       "target": "openghg_objectstore_objectstore_open_object_store",
       "weight": 1.0
     },
@@ -63063,7 +63097,7 @@
       "relation": "contains",
       "source": "openghg_objectstore_objectstore",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L758",
+      "source_location": "L761",
       "target": "openghg_objectstore_objectstore_get_datasource",
       "weight": 1.0
     },
@@ -63083,7 +63117,7 @@
       "relation": "contains",
       "source": "openghg_objectstore_objectstore",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L797",
+      "source_location": "L800",
       "target": "openghg_objectstore_objectstore_lockingobjectstore",
       "weight": 1.0
     },
@@ -63093,7 +63127,7 @@
       "relation": "contains",
       "source": "openghg_objectstore_objectstore",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L867",
+      "source_location": "L870",
       "target": "openghg_objectstore_objectstore_locking_object_store",
       "weight": 1.0
     },
@@ -71493,7 +71527,17 @@
       "relation": "contains",
       "source": "tests_objectstore_test_objectstore",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L143",
+      "source_location": "L144",
+      "target": "tests_objectstore_test_objectstore_test_failed_create_does_not_publish_or_mutate_metadata",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_objectstore",
+      "source_file": "tests/objectstore/test_objectstore.py",
+      "source_location": "L167",
       "target": "tests_objectstore_test_objectstore_test_create_twice_raises_error",
       "weight": 1.0
     },
@@ -71503,7 +71547,7 @@
       "relation": "contains",
       "source": "tests_objectstore_test_objectstore",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L150",
+      "source_location": "L174",
       "target": "tests_objectstore_test_objectstore_test_create_many",
       "weight": 1.0
     },
@@ -71513,7 +71557,7 @@
       "relation": "contains",
       "source": "tests_objectstore_test_objectstore",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L161",
+      "source_location": "L185",
       "target": "tests_objectstore_test_objectstore_test_update",
       "weight": 1.0
     },
@@ -71523,7 +71567,7 @@
       "relation": "contains",
       "source": "tests_objectstore_test_objectstore",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L177",
+      "source_location": "L201",
       "target": "tests_objectstore_test_objectstore_test_update_raises_error_if_uuid_not_found",
       "weight": 1.0
     },
@@ -71533,18 +71577,8 @@
       "relation": "contains",
       "source": "tests_objectstore_test_objectstore",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L182",
+      "source_location": "L206",
       "target": "tests_objectstore_test_objectstore_test_update_metadata",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "relation": "contains",
-      "source": "tests_objectstore_test_objectstore",
-      "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L199",
-      "target": "tests_objectstore_test_objectstore_test_delete",
       "weight": 1.0
     },
     {
@@ -71563,7 +71597,27 @@
       "relation": "contains",
       "source": "tests_objectstore_test_objectstore",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L219",
+      "source_location": "L223",
+      "target": "tests_objectstore_test_objectstore_test_delete",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_objectstore",
+      "source_file": "tests/objectstore/test_objectstore.py",
+      "source_location": "L244",
+      "target": "tests_objectstore_test_objectstore_test_failed_delete_never_leaves_a_record_pointing_to_deleted_data",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_objectstore",
+      "source_file": "tests/objectstore/test_objectstore.py",
+      "source_location": "L266",
       "target": "tests_objectstore_test_objectstore_test_search_uses_datasource_only_metadata_when_metastore_index_lacks_key",
       "weight": 1.0
     },
@@ -71573,7 +71627,7 @@
       "relation": "contains",
       "source": "tests_objectstore_test_objectstore",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L237",
+      "source_location": "L284",
       "target": "tests_objectstore_test_objectstore_test_search_returns_raw_and_datasource_only_metadata_matches",
       "weight": 1.0
     },
@@ -71583,7 +71637,7 @@
       "relation": "contains",
       "source": "tests_objectstore_test_objectstore",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L255",
+      "source_location": "L302",
       "target": "tests_objectstore_test_objectstore_test_search_skips_unrelated_missing_datasource_candidate",
       "weight": 1.0
     },
@@ -71593,28 +71647,8 @@
       "relation": "contains",
       "source": "tests_objectstore_test_objectstore",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L274",
+      "source_location": "L321",
       "target": "tests_objectstore_test_objectstore_test_merged_metadata_view_applies_function_negative_and_list_searches",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "relation": "contains",
-      "source": "tests_objectstore_test_objectstore",
-      "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L300",
-      "target": "tests_objectstore_test_objectstore_test_merged_metadata_view_select_uses_raw_value_for_duplicate_keys",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "relation": "contains",
-      "source": "tests_objectstore_test_objectstore",
-      "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L307",
-      "target": "tests_objectstore_test_objectstore_test_datasource_managed_metadata_overrides_raw_metastore_metadata",
       "weight": 1.0
     },
     {
@@ -71633,7 +71667,27 @@
       "relation": "contains",
       "source": "tests_objectstore_test_objectstore",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L333",
+      "source_location": "L347",
+      "target": "tests_objectstore_test_objectstore_test_merged_metadata_view_select_uses_raw_value_for_duplicate_keys",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_objectstore",
+      "source_file": "tests/objectstore/test_objectstore.py",
+      "source_location": "L354",
+      "target": "tests_objectstore_test_objectstore_test_datasource_managed_metadata_overrides_raw_metastore_metadata",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_objectstore",
+      "source_file": "tests/objectstore/test_objectstore.py",
+      "source_location": "L380",
       "target": "tests_objectstore_test_objectstore_test_search_does_not_mutate_datasource_metadata",
       "weight": 1.0
     },
@@ -71643,7 +71697,7 @@
       "relation": "contains",
       "source": "tests_objectstore_test_objectstore",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L347",
+      "source_location": "L394",
       "target": "tests_objectstore_test_objectstore_test_retrieve_returns_datasource_with_merged_metadata_without_saving",
       "weight": 1.0
     },
@@ -71653,7 +71707,7 @@
       "relation": "contains",
       "source": "tests_objectstore_test_objectstore",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L364",
+      "source_location": "L411",
       "target": "tests_objectstore_test_objectstore_test_create_rejects_duplicate_from_datasource_only_metadata",
       "weight": 1.0
     },
@@ -71663,7 +71717,7 @@
       "relation": "contains",
       "source": "tests_objectstore_test_objectstore",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L372",
+      "source_location": "L419",
       "target": "tests_objectstore_test_objectstore_test_create_rejects_duplicate_from_raw_metadata_when_datasource_has_duplicate_key",
       "weight": 1.0
     },
@@ -71673,7 +71727,7 @@
       "relation": "contains",
       "source": "tests_objectstore_test_objectstore",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L382",
+      "source_location": "L429",
       "target": "tests_objectstore_test_objectstore_test_uuids_uses_raw_metastore_when_unfiltered",
       "weight": 1.0
     },
@@ -75145,6 +75199,16 @@
       "source_file": "tests/store/test_datasource.py",
       "source_location": "L784",
       "target": "tests_store_test_datasource_test_update_attributes_edits_only_requested_version",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_store_test_datasource",
+      "source_file": "tests/store/test_datasource.py",
+      "source_location": "L804",
+      "target": "tests_store_test_datasource_test_delete_version_refreshes_metadata_after_reload",
       "weight": 1.0
     },
     {
@@ -80573,7 +80637,7 @@
       "relation": "method",
       "source": "openghg_objectstore_legacy_datasource_datasource",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L593",
+      "source_location": "L594",
       "target": "openghg_objectstore_legacy_datasource_datasource_add_metadata_key",
       "weight": 1.0
     },
@@ -80583,7 +80647,7 @@
       "relation": "method",
       "source": "openghg_objectstore_legacy_datasource_datasource",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L606",
+      "source_location": "L607",
       "target": "openghg_objectstore_legacy_datasource_datasource_add_metadata",
       "weight": 1.0
     },
@@ -80593,7 +80657,7 @@
       "relation": "method",
       "source": "openghg_objectstore_legacy_datasource_datasource",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L653",
+      "source_location": "L654",
       "target": "openghg_objectstore_legacy_datasource_datasource_data_keys",
       "weight": 1.0
     },
@@ -80603,7 +80667,7 @@
       "relation": "method",
       "source": "openghg_objectstore_legacy_datasource_datasource",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L671",
+      "source_location": "L672",
       "target": "openghg_objectstore_legacy_datasource_datasource_all_data_keys",
       "weight": 1.0
     },
@@ -80613,7 +80677,7 @@
       "relation": "method",
       "source": "openghg_objectstore_legacy_datasource_datasource",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L680",
+      "source_location": "L681",
       "target": "openghg_objectstore_legacy_datasource_datasource_update_daterange",
       "weight": 1.0
     },
@@ -80623,7 +80687,7 @@
       "relation": "method",
       "source": "openghg_objectstore_legacy_datasource_datasource",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L699",
+      "source_location": "L700",
       "target": "openghg_objectstore_legacy_datasource_datasource_daterange",
       "weight": 1.0
     },
@@ -80633,7 +80697,7 @@
       "relation": "method",
       "source": "openghg_objectstore_legacy_datasource_datasource",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L711",
+      "source_location": "L712",
       "target": "openghg_objectstore_legacy_datasource_datasource_daterange_str",
       "weight": 1.0
     },
@@ -80643,7 +80707,7 @@
       "relation": "method",
       "source": "openghg_objectstore_legacy_datasource_datasource",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L725",
+      "source_location": "L726",
       "target": "openghg_objectstore_legacy_datasource_datasource_integrity_check",
       "weight": 1.0
     },
@@ -81013,7 +81077,7 @@
       "relation": "method",
       "source": "openghg_objectstore_objectstore_lockingobjectstore",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L803",
+      "source_location": "L806",
       "target": "openghg_objectstore_objectstore_lockingobjectstore_init",
       "weight": 1.0
     },
@@ -81023,7 +81087,7 @@
       "relation": "method",
       "source": "openghg_objectstore_objectstore_lockingobjectstore",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L819",
+      "source_location": "L822",
       "target": "openghg_objectstore_objectstore_lockingobjectstore_enter",
       "weight": 1.0
     },
@@ -81033,7 +81097,7 @@
       "relation": "method",
       "source": "openghg_objectstore_objectstore_lockingobjectstore",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L823",
+      "source_location": "L826",
       "target": "openghg_objectstore_objectstore_lockingobjectstore_exit",
       "weight": 1.0
     },
@@ -81043,7 +81107,7 @@
       "relation": "method",
       "source": "openghg_objectstore_objectstore_lockingobjectstore",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L831",
+      "source_location": "L834",
       "target": "openghg_objectstore_objectstore_lockingobjectstore_close",
       "weight": 1.0
     },
@@ -81053,7 +81117,7 @@
       "relation": "method",
       "source": "openghg_objectstore_objectstore_lockingobjectstore",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L835",
+      "source_location": "L838",
       "target": "openghg_objectstore_objectstore_lockingobjectstore_create",
       "weight": 1.0
     },
@@ -81063,7 +81127,7 @@
       "relation": "method",
       "source": "openghg_objectstore_objectstore_lockingobjectstore",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L840",
+      "source_location": "L843",
       "target": "openghg_objectstore_objectstore_lockingobjectstore_update",
       "weight": 1.0
     },
@@ -81073,7 +81137,7 @@
       "relation": "method",
       "source": "openghg_objectstore_objectstore_lockingobjectstore",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L854",
+      "source_location": "L857",
       "target": "openghg_objectstore_objectstore_lockingobjectstore_delete",
       "weight": 1.0
     },
@@ -85481,9 +85545,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_objectstore_legacy_datasource_rationale_594",
+      "source": "openghg_objectstore_legacy_datasource_rationale_595",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L594",
+      "source_location": "L595",
       "target": "openghg_objectstore_legacy_datasource_datasource_add_metadata_key",
       "weight": 1.0
     },
@@ -85491,9 +85555,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_objectstore_legacy_datasource_rationale_609",
+      "source": "openghg_objectstore_legacy_datasource_rationale_610",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L609",
+      "source_location": "L610",
       "target": "openghg_objectstore_legacy_datasource_datasource_add_metadata",
       "weight": 1.0
     },
@@ -85511,9 +85575,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_objectstore_legacy_datasource_rationale_654",
+      "source": "openghg_objectstore_legacy_datasource_rationale_655",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L654",
+      "source_location": "L655",
       "target": "openghg_objectstore_legacy_datasource_datasource_data_keys",
       "weight": 1.0
     },
@@ -85521,9 +85585,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_objectstore_legacy_datasource_rationale_672",
+      "source": "openghg_objectstore_legacy_datasource_rationale_673",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L672",
+      "source_location": "L673",
       "target": "openghg_objectstore_legacy_datasource_datasource_all_data_keys",
       "weight": 1.0
     },
@@ -85531,9 +85595,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_objectstore_legacy_datasource_rationale_681",
+      "source": "openghg_objectstore_legacy_datasource_rationale_682",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L681",
+      "source_location": "L682",
       "target": "openghg_objectstore_legacy_datasource_datasource_update_daterange",
       "weight": 1.0
     },
@@ -85541,9 +85605,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_objectstore_legacy_datasource_rationale_700",
+      "source": "openghg_objectstore_legacy_datasource_rationale_701",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L700",
+      "source_location": "L701",
       "target": "openghg_objectstore_legacy_datasource_datasource_daterange",
       "weight": 1.0
     },
@@ -85551,9 +85615,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_objectstore_legacy_datasource_rationale_712",
+      "source": "openghg_objectstore_legacy_datasource_rationale_713",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L712",
+      "source_location": "L713",
       "target": "openghg_objectstore_legacy_datasource_datasource_daterange_str",
       "weight": 1.0
     },
@@ -85561,9 +85625,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_objectstore_legacy_datasource_rationale_726",
+      "source": "openghg_objectstore_legacy_datasource_rationale_727",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L726",
+      "source_location": "L727",
       "target": "openghg_objectstore_legacy_datasource_datasource_integrity_check",
       "weight": 1.0
     },
@@ -85571,9 +85635,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_objectstore_legacy_datasource_rationale_776",
+      "source": "openghg_objectstore_legacy_datasource_rationale_777",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L776",
+      "source_location": "L777",
       "target": "openghg_objectstore_legacy_datasource_get_legacy_datasource_factory",
       "weight": 1.0
     },
@@ -86421,9 +86485,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_objectstore_objectstore_rationale_631",
+      "source": "openghg_objectstore_objectstore_rationale_634",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L631",
+      "source_location": "L634",
       "target": "openghg_objectstore_objectstore_update_one",
       "weight": 1.0
     },
@@ -86431,9 +86495,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_objectstore_objectstore_rationale_674",
+      "source": "openghg_objectstore_objectstore_rationale_677",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L674",
+      "source_location": "L677",
       "target": "openghg_objectstore_objectstore_make_metadata_updater_fn",
       "weight": 1.0
     },
@@ -86451,9 +86515,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_objectstore_objectstore_rationale_759",
+      "source": "openghg_objectstore_objectstore_rationale_762",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L759",
+      "source_location": "L762",
       "target": "openghg_objectstore_objectstore_get_datasource",
       "weight": 1.0
     },
@@ -86471,9 +86535,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_objectstore_objectstore_rationale_798",
+      "source": "openghg_objectstore_objectstore_rationale_801",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L798",
+      "source_location": "L801",
       "target": "openghg_objectstore_objectstore_lockingobjectstore",
       "weight": 1.0
     },
@@ -95561,9 +95625,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_objectstore_test_objectstore_rationale_151",
+      "source": "tests_objectstore_test_objectstore_rationale_175",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L151",
+      "source_location": "L175",
       "target": "tests_objectstore_test_objectstore_test_create_many",
       "weight": 1.0
     },
@@ -95571,9 +95635,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_objectstore_test_objectstore_rationale_162",
+      "source": "tests_objectstore_test_objectstore_rationale_186",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L162",
+      "source_location": "L186",
       "target": "tests_objectstore_test_objectstore_test_update",
       "weight": 1.0
     },
@@ -95581,20 +95645,10 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_objectstore_test_objectstore_rationale_183",
+      "source": "tests_objectstore_test_objectstore_rationale_207",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L183",
+      "source_location": "L207",
       "target": "tests_objectstore_test_objectstore_test_update_metadata",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "relation": "rationale_for",
-      "source": "tests_objectstore_test_objectstore_rationale_200",
-      "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L200",
-      "target": "tests_objectstore_test_objectstore_test_delete",
       "weight": 1.0
     },
     {
@@ -95605,6 +95659,16 @@
       "source_file": "tests/objectstore/test_objectstore.py",
       "source_location": "L22",
       "target": "tests_objectstore_test_objectstore_metastore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "tests_objectstore_test_objectstore_rationale_224",
+      "source_file": "tests/objectstore/test_objectstore.py",
+      "source_location": "L224",
+      "target": "tests_objectstore_test_objectstore_test_delete",
       "weight": 1.0
     },
     {
@@ -100887,7 +100951,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_legacy_datasource_datasource_add_metadata",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L632",
+      "source_location": "L633",
       "target": "openghg_util_strings_to_lowercase",
       "weight": 1.0
     },
@@ -100899,7 +100963,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_legacy_datasource_datasource_add_metadata",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L635",
+      "source_location": "L636",
       "target": "openghg_util_metadata_util_merge_dict",
       "weight": 1.0
     },
@@ -100911,7 +100975,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_legacy_datasource_datasource_add_metadata",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L648",
+      "source_location": "L649",
       "target": "openghg_util_metadata_util_merge_and_extend_dict",
       "weight": 1.0
     },
@@ -100971,7 +101035,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_legacy_datasource_datasource_integrity_check",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L740",
+      "source_location": "L741",
       "target": "openghg_types_errors_objectstoreerror",
       "weight": 1.0
     },
@@ -101235,7 +101299,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_objectstore_get_datasource",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L793",
+      "source_location": "L796",
       "target": "openghg_types_errors_objectstoreerror",
       "weight": 1.0
     },
@@ -101271,7 +101335,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_objectstore_objectstore_create",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L550",
+      "source_location": "L553",
       "target": "openghg_types_errors_objectstoreerror",
       "weight": 1.0
     },
@@ -101307,7 +101371,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_objectstore_open_object_store",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L744",
+      "source_location": "L747",
       "target": "openghg_store_metakeys_config_find_list_metakeys",
       "weight": 1.0
     },
@@ -101319,7 +101383,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_objectstore_update_one",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L658",
+      "source_location": "L661",
       "target": "openghg_util_strings_to_lowercase",
       "weight": 1.0
     },
@@ -101331,7 +101395,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_objectstore_update_one",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L668",
+      "source_location": "L671",
       "target": "openghg_util_metadata_util_merge_and_extend_dict",
       "weight": 1.0
     },
@@ -109450,7 +109514,7 @@
       "relation": "uses",
       "source": "openghg_objectstore_legacy_datasource_get_legacy_datasource_factory",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L775",
+      "source_location": "L776",
       "target": "openghg_objectstore_datasource_datasourcefactory",
       "weight": 0.8
     },
@@ -109461,7 +109525,7 @@
       "relation": "uses",
       "source": "openghg_objectstore_objectstore_get_datasource",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L758",
+      "source_location": "L761",
       "target": "openghg_objectstore_legacy_datasource_datasource",
       "weight": 0.8
     },
@@ -109472,7 +109536,7 @@
       "relation": "uses",
       "source": "openghg_objectstore_objectstore_locking_object_store",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L885",
+      "source_location": "L888",
       "target": "openghg_objectstore_metastore_classic_metastore_dataclassmetastore",
       "weight": 0.8
     },
@@ -109483,7 +109547,7 @@
       "relation": "uses",
       "source": "openghg_objectstore_objectstore_locking_object_store",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L893",
+      "source_location": "L896",
       "target": "openghg_objectstore_documents_localdocuments",
       "weight": 0.8
     },
@@ -109494,7 +109558,7 @@
       "relation": "uses",
       "source": "openghg_objectstore_objectstore_lockingobjectstore",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L806",
+      "source_location": "L809",
       "target": "openghg_objectstore_datasource_datasourcefactory",
       "weight": 0.8
     },
@@ -109505,7 +109569,7 @@
       "relation": "uses",
       "source": "openghg_objectstore_objectstore_lockingobjectstore",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L808",
+      "source_location": "L811",
       "target": "openghg_objectstore_metastore_classic_metastore_filelock",
       "weight": 0.8
     },
@@ -109516,7 +109580,7 @@
       "relation": "uses",
       "source": "openghg_objectstore_objectstore_lockingobjectstore",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L809",
+      "source_location": "L812",
       "target": "openghg_objectstore_documents_documentstore",
       "weight": 0.8
     },
@@ -109527,7 +109591,7 @@
       "relation": "uses",
       "source": "openghg_objectstore_objectstore_lockingobjectstore",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L837",
+      "source_location": "L840",
       "target": "openghg_objectstore_metastore_classic_metastore_lockingerror",
       "weight": 0.8
     },
@@ -109571,7 +109635,7 @@
       "relation": "uses",
       "source": "openghg_objectstore_objectstore_open_object_store",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L728",
+      "source_location": "L731",
       "target": "openghg_objectstore_legacy_datasource_datasource",
       "weight": 0.8
     },
@@ -109582,7 +109646,7 @@
       "relation": "uses",
       "source": "openghg_objectstore_objectstore_open_object_store",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L753",
+      "source_location": "L756",
       "target": "openghg_objectstore_documents_localdocuments",
       "weight": 0.8
     },
@@ -110386,7 +110450,7 @@
       "id": "openghg_objectstore_objectstore_lockingobjectstore",
       "label": "LockingObjectStore",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L797"
+      "source_location": "L800"
     },
     {
       "_callable": true,
@@ -113083,7 +113147,7 @@
       "id": "openghg_objectstore_legacy_datasource_datasource_add_metadata",
       "label": ".add_metadata()",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L606"
+      "source_location": "L607"
     },
     {
       "_callable": true,
@@ -113092,7 +113156,7 @@
       "id": "openghg_objectstore_legacy_datasource_datasource_add_metadata_key",
       "label": ".add_metadata_key()",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L593"
+      "source_location": "L594"
     },
     {
       "_callable": true,
@@ -113110,7 +113174,7 @@
       "id": "openghg_objectstore_legacy_datasource_datasource_all_data_keys",
       "label": ".all_data_keys()",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L671"
+      "source_location": "L672"
     },
     {
       "_callable": true,
@@ -113137,7 +113201,7 @@
       "id": "openghg_objectstore_legacy_datasource_datasource_data_keys",
       "label": ".data_keys()",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L653"
+      "source_location": "L654"
     },
     {
       "_callable": true,
@@ -113155,7 +113219,7 @@
       "id": "openghg_objectstore_legacy_datasource_datasource_daterange",
       "label": ".daterange()",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L699"
+      "source_location": "L700"
     },
     {
       "_callable": true,
@@ -113164,7 +113228,7 @@
       "id": "openghg_objectstore_legacy_datasource_datasource_daterange_str",
       "label": ".daterange_str()",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L711"
+      "source_location": "L712"
     },
     {
       "_callable": true,
@@ -113272,7 +113336,7 @@
       "id": "openghg_objectstore_legacy_datasource_datasource_integrity_check",
       "label": ".integrity_check()",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L725"
+      "source_location": "L726"
     },
     {
       "_callable": true,
@@ -113380,7 +113444,7 @@
       "id": "openghg_objectstore_legacy_datasource_datasource_update_daterange",
       "label": ".update_daterange()",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L680"
+      "source_location": "L681"
     },
     {
       "_callable": true,
@@ -113407,7 +113471,7 @@
       "id": "openghg_objectstore_legacy_datasource_get_legacy_datasource_factory",
       "label": "get_legacy_datasource_factory()",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L769"
+      "source_location": "L770"
     },
     {
       "_callable": true,
@@ -114001,7 +114065,7 @@
       "id": "openghg_objectstore_objectstore_get_datasource",
       "label": "get_datasource()",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L758"
+      "source_location": "L761"
     },
     {
       "_callable": true,
@@ -114010,7 +114074,7 @@
       "id": "openghg_objectstore_objectstore_locking_object_store",
       "label": "locking_object_store()",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L867"
+      "source_location": "L870"
     },
     {
       "_callable": true,
@@ -114019,7 +114083,7 @@
       "id": "openghg_objectstore_objectstore_lockingobjectstore_close",
       "label": ".close()",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L831"
+      "source_location": "L834"
     },
     {
       "_callable": true,
@@ -114028,7 +114092,7 @@
       "id": "openghg_objectstore_objectstore_lockingobjectstore_create",
       "label": ".create()",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L835"
+      "source_location": "L838"
     },
     {
       "_callable": true,
@@ -114037,7 +114101,7 @@
       "id": "openghg_objectstore_objectstore_lockingobjectstore_delete",
       "label": ".delete()",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L854"
+      "source_location": "L857"
     },
     {
       "_callable": true,
@@ -114046,7 +114110,7 @@
       "id": "openghg_objectstore_objectstore_lockingobjectstore_enter",
       "label": ".__enter__()",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L819"
+      "source_location": "L822"
     },
     {
       "_callable": true,
@@ -114055,7 +114119,7 @@
       "id": "openghg_objectstore_objectstore_lockingobjectstore_exit",
       "label": ".__exit__()",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L823"
+      "source_location": "L826"
     },
     {
       "_callable": true,
@@ -114064,7 +114128,7 @@
       "id": "openghg_objectstore_objectstore_lockingobjectstore_init",
       "label": ".__init__()",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L803"
+      "source_location": "L806"
     },
     {
       "_callable": true,
@@ -114073,7 +114137,7 @@
       "id": "openghg_objectstore_objectstore_lockingobjectstore_update",
       "label": ".update()",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L840"
+      "source_location": "L843"
     },
     {
       "_callable": true,
@@ -114082,7 +114146,7 @@
       "id": "openghg_objectstore_objectstore_make_metadata_updater_fn",
       "label": "make_metadata_updater_fn()",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L671"
+      "source_location": "L674"
     },
     {
       "_callable": true,
@@ -114334,7 +114398,7 @@
       "id": "openghg_objectstore_objectstore_open_object_store",
       "label": "open_object_store()",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L726"
+      "source_location": "L729"
     },
     {
       "_callable": true,
@@ -114343,7 +114407,7 @@
       "id": "openghg_objectstore_objectstore_update_one",
       "label": "_update_one()",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L628"
+      "source_location": "L631"
     },
     {
       "_callable": true,
@@ -122704,7 +122768,7 @@
       "id": "tests_objectstore_test_objectstore_test_create_many",
       "label": "test_create_many()",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L150"
+      "source_location": "L174"
     },
     {
       "_callable": true,
@@ -122713,7 +122777,7 @@
       "id": "tests_objectstore_test_objectstore_test_create_rejects_duplicate_from_datasource_only_metadata",
       "label": "test_create_rejects_duplicate_from_datasource_only_metadata()",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L364"
+      "source_location": "L411"
     },
     {
       "_callable": true,
@@ -122722,7 +122786,7 @@
       "id": "tests_objectstore_test_objectstore_test_create_rejects_duplicate_from_raw_metadata_when_datasource_has_duplicate_key",
       "label": "test_create_rejects_duplicate_from_raw_metadata_when_datasource_has_duplicate_key()",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L372"
+      "source_location": "L419"
     },
     {
       "_callable": true,
@@ -122731,7 +122795,7 @@
       "id": "tests_objectstore_test_objectstore_test_create_twice_raises_error",
       "label": "test_create_twice_raises_error()",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L143"
+      "source_location": "L167"
     },
     {
       "_callable": true,
@@ -122740,7 +122804,7 @@
       "id": "tests_objectstore_test_objectstore_test_datasource_managed_metadata_overrides_raw_metastore_metadata",
       "label": "test_datasource_managed_metadata_overrides_raw_metastore_metadata()",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L307"
+      "source_location": "L354"
     },
     {
       "_callable": true,
@@ -122749,7 +122813,25 @@
       "id": "tests_objectstore_test_objectstore_test_delete",
       "label": "test_delete()",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L199"
+      "source_location": "L223"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_objectstore_test_failed_create_does_not_publish_or_mutate_metadata",
+      "label": "test_failed_create_does_not_publish_or_mutate_metadata()",
+      "source_file": "tests/objectstore/test_objectstore.py",
+      "source_location": "L144"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_objectstore_test_failed_delete_never_leaves_a_record_pointing_to_deleted_data",
+      "label": "test_failed_delete_never_leaves_a_record_pointing_to_deleted_data()",
+      "source_file": "tests/objectstore/test_objectstore.py",
+      "source_location": "L244"
     },
     {
       "_callable": true,
@@ -122758,7 +122840,7 @@
       "id": "tests_objectstore_test_objectstore_test_merged_metadata_view_applies_function_negative_and_list_searches",
       "label": "test_merged_metadata_view_applies_function_negative_and_list_searches()",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L274"
+      "source_location": "L321"
     },
     {
       "_callable": true,
@@ -122767,7 +122849,7 @@
       "id": "tests_objectstore_test_objectstore_test_merged_metadata_view_select_uses_raw_value_for_duplicate_keys",
       "label": "test_merged_metadata_view_select_uses_raw_value_for_duplicate_keys()",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L300"
+      "source_location": "L347"
     },
     {
       "_callable": true,
@@ -122776,7 +122858,7 @@
       "id": "tests_objectstore_test_objectstore_test_retrieve_returns_datasource_with_merged_metadata_without_saving",
       "label": "test_retrieve_returns_datasource_with_merged_metadata_without_saving()",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L347"
+      "source_location": "L394"
     },
     {
       "_callable": true,
@@ -122785,7 +122867,7 @@
       "id": "tests_objectstore_test_objectstore_test_search_does_not_mutate_datasource_metadata",
       "label": "test_search_does_not_mutate_datasource_metadata()",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L333"
+      "source_location": "L380"
     },
     {
       "_callable": true,
@@ -122794,7 +122876,7 @@
       "id": "tests_objectstore_test_objectstore_test_search_returns_raw_and_datasource_only_metadata_matches",
       "label": "test_search_returns_raw_and_datasource_only_metadata_matches()",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L237"
+      "source_location": "L284"
     },
     {
       "_callable": true,
@@ -122803,7 +122885,7 @@
       "id": "tests_objectstore_test_objectstore_test_search_skips_unrelated_missing_datasource_candidate",
       "label": "test_search_skips_unrelated_missing_datasource_candidate()",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L255"
+      "source_location": "L302"
     },
     {
       "_callable": true,
@@ -122812,7 +122894,7 @@
       "id": "tests_objectstore_test_objectstore_test_search_uses_datasource_only_metadata_when_metastore_index_lacks_key",
       "label": "test_search_uses_datasource_only_metadata_when_metastore_index_lacks_key()",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L219"
+      "source_location": "L266"
     },
     {
       "_callable": true,
@@ -122821,7 +122903,7 @@
       "id": "tests_objectstore_test_objectstore_test_update",
       "label": "test_update()",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L161"
+      "source_location": "L185"
     },
     {
       "_callable": true,
@@ -122830,7 +122912,7 @@
       "id": "tests_objectstore_test_objectstore_test_update_metadata",
       "label": "test_update_metadata()",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L182"
+      "source_location": "L206"
     },
     {
       "_callable": true,
@@ -122839,7 +122921,7 @@
       "id": "tests_objectstore_test_objectstore_test_update_raises_error_if_uuid_not_found",
       "label": "test_update_raises_error_if_uuid_not_found()",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L177"
+      "source_location": "L201"
     },
     {
       "_callable": true,
@@ -122848,7 +122930,7 @@
       "id": "tests_objectstore_test_objectstore_test_uuids_uses_raw_metastore_when_unfiltered",
       "label": "test_uuids_uses_raw_metastore_when_unfiltered()",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L382"
+      "source_location": "L429"
     },
     {
       "_callable": true,
@@ -125846,6 +125928,15 @@
       "label": "test_datasource_persistence_hooks_reuse_versioning()",
       "source_file": "tests/store/test_datasource.py",
       "source_location": "L726"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_store_test_datasource_test_delete_version_refreshes_metadata_after_reload",
+      "label": "test_delete_version_refreshes_metadata_after_reload()",
+      "source_file": "tests/store/test_datasource.py",
+      "source_location": "L804"
     },
     {
       "_callable": true,
@@ -133473,6 +133564,14 @@
     {
       "_origin": "ast",
       "file_type": "code",
+      "id": "tests_objectstore_test_objectstore_py_parametrize",
+      "label": "parametrize",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "_origin": "ast",
+      "file_type": "code",
       "id": "tests_objectstore_test_objectstore_py_self",
       "label": "Self",
       "source_file": "",
@@ -136961,18 +137060,18 @@
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_objectstore_legacy_datasource_rationale_594",
+      "id": "openghg_objectstore_legacy_datasource_rationale_595",
       "label": "Add a label to the metadata dictionary with the key value pair This will…",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L594"
+      "source_location": "L595"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_objectstore_legacy_datasource_rationale_609",
+      "id": "openghg_objectstore_legacy_datasource_rationale_610",
       "label": "Add all metadata in the dictionary to this Datasource. This will overwrite any…",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L609"
+      "source_location": "L610"
     },
     {
       "_origin": "ast",
@@ -136985,58 +137084,58 @@
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_objectstore_legacy_datasource_rationale_654",
+      "id": "openghg_objectstore_legacy_datasource_rationale_655",
       "label": "Returns the dateranges of data covered by a specific version of the data…",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L654"
+      "source_location": "L655"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_objectstore_legacy_datasource_rationale_672",
+      "id": "openghg_objectstore_legacy_datasource_rationale_673",
       "label": "Return a summary of the versions of data stored for this Datasource Returns:…",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L672"
+      "source_location": "L673"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_objectstore_legacy_datasource_rationale_681",
+      "id": "openghg_objectstore_legacy_datasource_rationale_682",
       "label": "Update the dates stored by this Datasource Returns: None",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L681"
+      "source_location": "L682"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_objectstore_legacy_datasource_rationale_700",
+      "id": "openghg_objectstore_legacy_datasource_rationale_701",
       "label": "Get the daterange the data in this Datasource covers as tuple of start, end…",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L700"
+      "source_location": "L701"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_objectstore_legacy_datasource_rationale_712",
+      "id": "openghg_objectstore_legacy_datasource_rationale_713",
       "label": "Get the daterange this Datasource covers as a string in the form start_end…",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L712"
+      "source_location": "L713"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_objectstore_legacy_datasource_rationale_726",
+      "id": "openghg_objectstore_legacy_datasource_rationale_727",
       "label": "Checks to ensure all data stored by this Datasource exists in the object store.…",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L726"
+      "source_location": "L727"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_objectstore_legacy_datasource_rationale_776",
+      "id": "openghg_objectstore_legacy_datasource_rationale_777",
       "label": "Create DatasourceFactory for legacy Datasource class. Args: bucket: bucket of…",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
-      "source_location": "L776"
+      "source_location": "L777"
     },
     {
       "_origin": "ast",
@@ -137690,7 +137789,7 @@
       "_origin": "ast",
       "file_type": "rationale",
       "id": "openghg_objectstore_objectstore_rationale_532",
-      "label": "Create a new datasource and store its metadata and UUID in the metastore. Args:…",
+      "label": "Create a new datasource and store its metadata and UUID in the metastore.…",
       "source_file": "openghg/objectstore/_objectstore.py",
       "source_location": "L532"
     },
@@ -137706,25 +137805,25 @@
       "_origin": "ast",
       "file_type": "rationale",
       "id": "openghg_objectstore_objectstore_rationale_621",
-      "label": "Delete data and metadata with given UUID.",
+      "label": "Unpublish the record, then delete its data. Failed data cleanup may leave…",
       "source_file": "openghg/objectstore/_objectstore.py",
       "source_location": "L621"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_objectstore_objectstore_rationale_631",
+      "id": "openghg_objectstore_objectstore_rationale_634",
       "label": "Helper function for make_metadata_updater_fn. Updates one pair of metadata and…",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L631"
+      "source_location": "L634"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_objectstore_objectstore_rationale_674",
+      "id": "openghg_objectstore_objectstore_rationale_677",
       "label": "Create metadata updater function using given `skip_keys` and `extend_keys`.…",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L674"
+      "source_location": "L677"
     },
     {
       "_origin": "ast",
@@ -137737,10 +137836,10 @@
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_objectstore_objectstore_rationale_759",
+      "id": "openghg_objectstore_objectstore_rationale_762",
       "label": "Open Datasource with given bucket and uuid. Passing the data type is slightly…",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L759"
+      "source_location": "L762"
     },
     {
       "_origin": "ast",
@@ -137753,10 +137852,10 @@
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_objectstore_objectstore_rationale_798",
+      "id": "openghg_objectstore_objectstore_rationale_801",
       "label": "ObjectStore with lock that can be acquired and released with a context manager.…",
       "source_file": "openghg/objectstore/_objectstore.py",
-      "source_location": "L798"
+      "source_location": "L801"
     },
     {
       "_origin": "ast",
@@ -145025,34 +145124,26 @@
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_objectstore_test_objectstore_rationale_151",
+      "id": "tests_objectstore_test_objectstore_rationale_175",
       "label": "Check that creating different datasources with different metadata works.",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L151"
+      "source_location": "L175"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_objectstore_test_objectstore_rationale_162",
+      "id": "tests_objectstore_test_objectstore_rationale_186",
       "label": "Test that we can update an existing Datasource.",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L162"
+      "source_location": "L186"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_objectstore_test_objectstore_rationale_183",
+      "id": "tests_objectstore_test_objectstore_rationale_207",
       "label": "Test that we can modify the metadata stored in the metastore. NOTE: eventually,…",
       "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L183"
-    },
-    {
-      "_origin": "ast",
-      "file_type": "rationale",
-      "id": "tests_objectstore_test_objectstore_rationale_200",
-      "label": "Check that deleting an entry in the object store clears metadata and…",
-      "source_file": "tests/objectstore/test_objectstore.py",
-      "source_location": "L200"
+      "source_location": "L207"
     },
     {
       "_origin": "ast",
@@ -145061,6 +145152,14 @@
       "label": "Open metastore with no data type. Note: `tmp_path` is function scope, so the…",
       "source_file": "tests/objectstore/test_objectstore.py",
       "source_location": "L22"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "tests_objectstore_test_objectstore_rationale_224",
+      "label": "Check that deleting an entry in the object store clears metadata and…",
+      "source_file": "tests/objectstore/test_objectstore.py",
+      "source_location": "L224"
     },
     {
       "_origin": "ast",

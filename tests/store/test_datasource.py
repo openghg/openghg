@@ -799,3 +799,18 @@ def test_update_attributes_edits_only_requested_version(datasource, datasets_wit
         data_vars="missing", update_global=False, to_update={"comment": "ignored"}
     )
     assert "Data variable missing not present" in caplog.text
+
+
+def test_delete_version_refreshes_metadata_after_reload(datasource, datasets_with_gaps):
+    first, second, _ = datasets_with_gaps
+    datasource.add(first, period="60s")
+    datasource.add(second, if_exists="new")
+    datasource.save()
+
+    reloaded = Datasource.load(bucket=datasource._bucket, uuid=datasource.uuid)
+    reloaded.delete_version("v1")
+    reloaded.save()
+    reloaded = Datasource.load(bucket=datasource._bucket, uuid=datasource.uuid)
+
+    assert set(reloaded.metadata["versions"]) == {"v2"}
+    assert reloaded.metadata["versions"] == reloaded.all_data_keys()
