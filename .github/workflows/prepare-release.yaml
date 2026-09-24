@@ -1,0 +1,105 @@
+name: Prepare release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release version without a prefix (for example, 0.20.0)
+        required: true
+        type: string
+
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: prepare-release
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out devel
+        uses: actions/checkout@v7
+        with:
+          ref: devel
+          fetch-depth: 0
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Validate release version and branch
+        id: release
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          python3 - <<'PY'
+          import os
+          import re
+          import subprocess
+
+          version = os.environ["VERSION"]
+          if not re.fullmatch(r"(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)", version):
+              raise SystemExit("version must look like 0.20.0")
+          tags = subprocess.check_output(["git", "tag", "--list"], text=True).splitlines()
+          releases = [tuple(map(int, tag.split("."))) for tag in tags if re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", tag)]
+          if releases and tuple(map(int, version.split("."))) <= max(releases):
+              raise SystemExit(f"version {version} must be newer than the latest release tag")
+          PY
+          BRANCH="release/v${VERSION}"
+          if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null; then
+            echo "Branch $BRANCH already exists."
+            exit 1
+          fi
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+
+      - name: Assemble changelog and push branch
+        env:
+          BRANCH: ${{ steps.release.outputs.branch }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          git switch -c "$BRANCH"
+          uvx --from 'towncrier>=24.8' towncrier build --version "$VERSION" --yes
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- CHANGELOG.md newsfragments
+          git commit -m "Prepare release ${VERSION}"
+          git push --set-upstream origin "$BRANCH"
+
+      - name: Open release preparation PR
+        id: pull-request
+        env:
+          BRANCH: ${{ steps.release.outputs.branch }}
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          {
+            echo "## Prepare ${VERSION} release notes"
+            echo
+            echo "Towncrier assembled the pending fragments from devel."
+            echo
+            echo "- [ ] Review the generated notes and move any pre-Towncrier Unreleased entries into this release; leave Unreleased empty"
+            echo "- [ ] Check CI, then merge this PR into devel"
+            echo "- [ ] Open the devel-to-master release PR, then tag the approved master commit ${VERSION}"
+          } > "$RUNNER_TEMP/release-pr.md"
+          URL=$(gh pr create --base devel --head "$BRANCH" --title "Prepare release ${VERSION}" --body-file "$RUNNER_TEMP/release-pr.md")
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
+      # PRs created with GITHUB_TOKEN do not trigger pull_request workflows.
+      - name: Run checks on the preparation branch
+        env:
+          BRANCH: ${{ steps.release.outputs.branch }}
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          gh workflow run workflow.yaml --ref "$BRANCH" -f tag="$VERSION"
+          gh workflow run conda.yaml --ref "$BRANCH"
+          gh workflow run build_documentation.yaml --ref "$BRANCH"
+
+      - name: Show preparation PR
+        env:
+          URL: ${{ steps.pull-request.outputs.url }}
+        run: |
+          echo "Release preparation PR: $URL" >> "$GITHUB_STEP_SUMMARY"

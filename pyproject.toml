@@ -91,6 +91,7 @@ classifiers = [
         "requests-mock<=1.12.1",
         "ruff==0.16.7",
         "tox<=4.61.4",
+        "towncrier>=24.8",
         "types-paramiko<=5.0.0.20260724",
         "types-pyyaml<=6.0.12.20260906",
         "types-requests<=2.33.0.20260906",
@@ -239,6 +240,45 @@ pythonpath = [
     "."
 ]
 timeout = 300
+
 markers = [
     "xesmf: marks tests as requiring xesmf (deselect with '-m \"not xesmf\"')"
 ]
+
+[tool.towncrier]
+package = "openghg"
+filename = "CHANGELOG.md"
+directory = "newsfragments"
+start_string = "<!-- towncrier release notes start -->\n"
+title_format = "## [{version}] - {project_date}"
+issue_format = "[#{issue}](https://github.com/openghg/openghg/issues/{issue})"
+
+[[tool.towncrier.type]]
+directory = "feature"
+name = "Added"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "update"
+name = "Updated"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "bugfix"
+name = "Fixed"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "doc"
+name = "Documentation"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "removal"
+name = "Removed"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "misc"
+name = "Miscellaneous"
+showcontent = true

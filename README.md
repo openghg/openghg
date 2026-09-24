@@ -260,6 +260,10 @@ For further details, refer to [our documentation](https://docs.openghg.org/).
 
 ---
 
+### Contributing to the changelog
+
+For user-visible changes, add a short news fragment to `newsfragments/` alongside your code. Name it `{issue_or_pr_number}.{type}`, such as `1462.feature`. Supported types are `feature`, `update`, `bugfix`, `doc`, `removal`, and `misc`. See [the fragment guide](newsfragments/README.md) for examples. Maintainers collect fragments into `CHANGELOG.md` when preparing a release.
+
 ## Community and Contributions
 
 We encourage contributions and are happy to assist where needed. Raise issues and pull requests in [our repository](https://github.com/openghg/openghg).
