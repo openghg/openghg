@@ -290,6 +290,9 @@ def test_read_only_load_cannot_modify_data(bucket, datasource, datasets_with_gap
     with pytest.raises(PermissionError):
         read_only.delete_all_data()
 
+    with pytest.raises(PermissionError):
+        read_only.update_attributes(to_update={"comment": "cannot write"})
+
     assert read_only.latest_version == "v1"
     assert "v2" not in read_only._store.versions
 
@@ -718,3 +721,96 @@ def test_bytes_stored(data, bucket, datasource):
     d = Datasource(uuid="xyz456", bucket=bucket)
 
     assert d.nbytes == 0
+
+
+def test_datasource_persistence_hooks_reuse_versioning(tmp_path, datasets_with_gaps):
+    """A different persistence layer uses the same update planner without local files."""
+    from copy import deepcopy
+    import zarr
+    from openghg.storage._zarr_store import VersionedZarrStore
+
+    states = {}
+    stores = {}
+
+    class MemoryDatasource(Datasource):
+        _runtime_state_keys = Datasource._runtime_state_keys | {"_session"}
+
+        def _create_store(self):
+            self._session = object()
+            versions = stores.setdefault(self.uuid, {})
+
+            def factory(version):
+                return versions.setdefault(version, zarr.MemoryStore())
+
+            return VersionedZarrStore(factory=factory, versions=list(versions))
+
+        @classmethod
+        def _read_state(cls, bucket, uuid):
+            if uuid not in states:
+                raise ObjectStoreError("No datasource")
+            return deepcopy(states[uuid])
+
+        def _write_state(self, state):
+            states[self.uuid] = deepcopy(state)
+
+        def _delete_state(self):
+            del states[self.uuid]
+
+        def _delete_store_directory(self):
+            del stores[self.uuid]
+
+    bucket = str(tmp_path / "unused-local-bucket")
+    first, second, _ = datasets_with_gaps
+    datasource = MemoryDatasource(bucket=bucket, uuid="memory", data_type="surface")
+    datasource.add(first, period="60s")
+    datasource.save()
+    assert "_session" not in states[datasource.uuid]
+
+    reloaded = MemoryDatasource.load(bucket=bucket, uuid=datasource.uuid)
+    reloaded.add(second, if_exists="combine", new_version=True)
+    reloaded.save()
+    reloaded = MemoryDatasource.load(bucket=bucket, uuid=datasource.uuid)
+    xr.testing.assert_equal(reloaded.get_data("v1"), first)
+    xr.testing.assert_equal(reloaded.get_data(), xr.concat([first, second], dim="time"))
+    assert reloaded.latest_version == "v2"
+    assert set(reloaded.metadata["versions"]) == {"v1", "v2"}
+
+    reloaded.delete()
+    assert not states
+    assert not stores
+    assert not (tmp_path / "unused-local-bucket").exists()
+
+
+def test_update_attributes_edits_only_requested_version(datasource, datasets_with_gaps, caplog):
+    first, second, _ = datasets_with_gaps
+    datasource.add(first, period="60s")
+    datasource.add(second, if_exists="new")
+
+    assert datasource.update_attributes(version="v1", to_update={"comment": "edited"}, data_vars="mf")
+    assert datasource.get_data("v1").attrs["comment"] == "edited"
+    assert datasource.get_data("v1").mf.attrs["comment"] == "edited"
+    assert "comment" not in datasource.get_data("v2").attrs
+    assert "comment" not in datasource.get_data("v2").mf.attrs
+
+    assert datasource.update_attributes(version="v1", to_delete="comment", data_vars="mf")
+    assert "comment" not in datasource.get_data("v1").attrs
+    assert "comment" not in datasource.get_data("v1").mf.attrs
+    assert not datasource.update_attributes(
+        data_vars="missing", update_global=False, to_update={"comment": "ignored"}
+    )
+    assert "Data variable missing not present" in caplog.text
+
+
+def test_delete_version_refreshes_metadata_after_reload(datasource, datasets_with_gaps):
+    first, second, _ = datasets_with_gaps
+    datasource.add(first, period="60s")
+    datasource.add(second, if_exists="new")
+    datasource.save()
+
+    reloaded = Datasource.load(bucket=datasource._bucket, uuid=datasource.uuid)
+    reloaded.delete_version("v1")
+    reloaded.save()
+    reloaded = Datasource.load(bucket=datasource._bucket, uuid=datasource.uuid)
+
+    assert set(reloaded.metadata["versions"]) == {"v2"}
+    assert reloaded.metadata["versions"] == reloaded.all_data_keys()
