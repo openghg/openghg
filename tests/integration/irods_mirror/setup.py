@@ -38,8 +38,9 @@ def initialize() -> None:
     SECRETS.chmod(0o700)
     if (SECRETS / "ready").exists():
         return
-    for name in ("database-password", "admin-password"):
-        private_write(SECRETS / name, secrets.token_urlsafe(32))
+    private_write(SECRETS / "database-password", secrets.token_urlsafe(32))
+    # The native installer's credential encoder accepts at most 42 characters.
+    private_write(SECRETS / "admin-password", secrets.token_urlsafe(24))
     private_write(SECRETS / "zone-key", secrets.token_hex(24))
     private_write(SECRETS / "negotiation-key", secrets.token_hex(16))
     quiet(
@@ -265,7 +266,7 @@ def server(role: str) -> None:
 
 def client(command: list[str]) -> None:
     """Create private native credential files and execute the integration tests."""
-    from irods.client_init import write_native_irodsA_file
+    from irods.password_obfuscation import encode
 
     runtime = Path("/run/irods-client")
     runtime.mkdir(mode=0o700, parents=True, exist_ok=True)
@@ -274,7 +275,7 @@ def client(command: list[str]) -> None:
         path = runtime / filename
         auth = runtime / f"{host}.irodsA"
         private_write(path, json.dumps(environment(host, runtime / "ca.pem", auth)))
-        write_native_irodsA_file((SECRETS / "admin-password").read_text(), irods_env_file=str(path))
+        private_write(auth, encode((SECRETS / "admin-password").read_text()))
     os.execvp(command[0], command)
 
 

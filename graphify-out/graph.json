@@ -19289,7 +19289,7 @@
       "relation": "calls",
       "source": "tests_integration_irods_mirror_setup_client",
       "source_file": "tests/integration/irods_mirror/setup.py",
-      "source_location": "L270",
+      "source_location": "L271",
       "target": "tests_integration_irods_mirror_setup_py_path",
       "weight": 1.0
     },
@@ -19300,7 +19300,7 @@
       "relation": "calls",
       "source": "tests_integration_irods_mirror_setup_client",
       "source_file": "tests/integration/irods_mirror/setup.py",
-      "source_location": "L276",
+      "source_location": "L277",
       "target": "tests_integration_irods_mirror_setup_environment",
       "weight": 1.0
     },
@@ -19311,7 +19311,7 @@
       "relation": "calls",
       "source": "tests_integration_irods_mirror_setup_client",
       "source_file": "tests/integration/irods_mirror/setup.py",
-      "source_location": "L276",
+      "source_location": "L277",
       "target": "tests_integration_irods_mirror_setup_private_write",
       "weight": 1.0
     },
@@ -19322,7 +19322,7 @@
       "relation": "calls",
       "source": "tests_integration_irods_mirror_setup_initialize",
       "source_file": "tests/integration/irods_mirror/setup.py",
-      "source_location": "L42",
+      "source_location": "L41",
       "target": "tests_integration_irods_mirror_setup_private_write",
       "weight": 1.0
     },
@@ -19333,7 +19333,7 @@
       "relation": "calls",
       "source": "tests_integration_irods_mirror_setup_initialize",
       "source_file": "tests/integration/irods_mirror/setup.py",
-      "source_location": "L45",
+      "source_location": "L46",
       "target": "tests_integration_irods_mirror_setup_quiet",
       "weight": 1.0
     },
@@ -19344,7 +19344,7 @@
       "relation": "calls",
       "source": "tests_integration_irods_mirror_setup_server",
       "source_file": "tests/integration/irods_mirror/setup.py",
-      "source_location": "L158",
+      "source_location": "L159",
       "target": "tests_integration_irods_mirror_setup_py_path",
       "weight": 1.0
     },
@@ -19355,7 +19355,7 @@
       "relation": "calls",
       "source": "tests_integration_irods_mirror_setup_server",
       "source_file": "tests/integration/irods_mirror/setup.py",
-      "source_location": "L171",
+      "source_location": "L172",
       "target": "tests_integration_irods_mirror_setup_private_write",
       "weight": 1.0
     },
@@ -19366,7 +19366,7 @@
       "relation": "calls",
       "source": "tests_integration_irods_mirror_setup_server",
       "source_file": "tests/integration/irods_mirror/setup.py",
-      "source_location": "L215",
+      "source_location": "L216",
       "target": "tests_integration_irods_mirror_setup_environment",
       "weight": 1.0
     },
@@ -19377,7 +19377,7 @@
       "relation": "calls",
       "source": "tests_integration_irods_mirror_setup_server",
       "source_file": "tests/integration/irods_mirror/setup.py",
-      "source_location": "L252",
+      "source_location": "L253",
       "target": "tests_integration_irods_mirror_setup_quiet",
       "weight": 1.0
     },
@@ -65852,7 +65852,7 @@
       "relation": "references",
       "source": "tests_integration_irods_mirror_setup_environment",
       "source_file": "tests/integration/irods_mirror/setup.py",
-      "source_location": "L123",
+      "source_location": "L124",
       "target": "tests_integration_irods_mirror_setup_py_path",
       "weight": 1.0
     },
@@ -78443,7 +78443,7 @@
       "relation": "contains",
       "source": "tests_integration_irods_mirror_setup",
       "source_file": "tests/integration/irods_mirror/setup.py",
-      "source_location": "L123",
+      "source_location": "L124",
       "target": "tests_integration_irods_mirror_setup_environment",
       "weight": 1.0
     },
@@ -78453,7 +78453,7 @@
       "relation": "contains",
       "source": "tests_integration_irods_mirror_setup",
       "source_file": "tests/integration/irods_mirror/setup.py",
-      "source_location": "L156",
+      "source_location": "L157",
       "target": "tests_integration_irods_mirror_setup_server",
       "weight": 1.0
     },
@@ -78473,7 +78473,7 @@
       "relation": "contains",
       "source": "tests_integration_irods_mirror_setup",
       "source_file": "tests/integration/irods_mirror/setup.py",
-      "source_location": "L266",
+      "source_location": "L267",
       "target": "tests_integration_irods_mirror_setup_client",
       "weight": 1.0
     },
@@ -104961,9 +104961,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_integration_irods_mirror_setup_rationale_124",
+      "source": "tests_integration_irods_mirror_setup_rationale_125",
       "source_file": "tests/integration/irods_mirror/setup.py",
-      "source_location": "L124",
+      "source_location": "L125",
       "target": "tests_integration_irods_mirror_setup_environment",
       "weight": 1.0
     },
@@ -104971,9 +104971,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_integration_irods_mirror_setup_rationale_157",
+      "source": "tests_integration_irods_mirror_setup_rationale_158",
       "source_file": "tests/integration/irods_mirror/setup.py",
-      "source_location": "L157",
+      "source_location": "L158",
       "target": "tests_integration_irods_mirror_setup_server",
       "weight": 1.0
     },
@@ -104991,9 +104991,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_integration_irods_mirror_setup_rationale_267",
+      "source": "tests_integration_irods_mirror_setup_rationale_268",
       "source_file": "tests/integration/irods_mirror/setup.py",
-      "source_location": "L267",
+      "source_location": "L268",
       "target": "tests_integration_irods_mirror_setup_client",
       "weight": 1.0
     },
@@ -134016,7 +134016,7 @@
       "id": "tests_integration_irods_mirror_setup_client",
       "label": "client()",
       "source_file": "tests/integration/irods_mirror/setup.py",
-      "source_location": "L266"
+      "source_location": "L267"
     },
     {
       "_callable": true,
@@ -134025,7 +134025,7 @@
       "id": "tests_integration_irods_mirror_setup_environment",
       "label": "environment()",
       "source_file": "tests/integration/irods_mirror/setup.py",
-      "source_location": "L123"
+      "source_location": "L124"
     },
     {
       "_callable": true,
@@ -134061,7 +134061,7 @@
       "id": "tests_integration_irods_mirror_setup_server",
       "label": "server()",
       "source_file": "tests/integration/irods_mirror/setup.py",
-      "source_location": "L156"
+      "source_location": "L157"
     },
     {
       "_callable": true,
@@ -158304,18 +158304,18 @@
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_integration_irods_mirror_setup_rationale_124",
+      "id": "tests_integration_irods_mirror_setup_rationale_125",
       "label": "Return client settings with required TLS and hostname verification.",
       "source_file": "tests/integration/irods_mirror/setup.py",
-      "source_location": "L124"
+      "source_location": "L125"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_integration_irods_mirror_setup_rationale_157",
+      "id": "tests_integration_irods_mirror_setup_rationale_158",
       "label": "Set up one server using the stock unattended installer, then run it in front.",
       "source_file": "tests/integration/irods_mirror/setup.py",
-      "source_location": "L157"
+      "source_location": "L158"
     },
     {
       "_origin": "ast",
@@ -158328,10 +158328,10 @@
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_integration_irods_mirror_setup_rationale_267",
+      "id": "tests_integration_irods_mirror_setup_rationale_268",
       "label": "Create private native credential files and execute the integration tests.",
       "source_file": "tests/integration/irods_mirror/setup.py",
-      "source_location": "L267"
+      "source_location": "L268"
     },
     {
       "_origin": "ast",
