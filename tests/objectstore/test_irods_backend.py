@@ -13,7 +13,7 @@ from irods.exception import CATALOG_ALREADY_HAS_ITEM_BY_THAT_NAME
 
 from test_irods_storage import remote as remote  # noqa: F401 - shared transport fixture
 
-from openghg.objectstore._irods import IRODSObjectStore
+from openghg.objectstore._irods import IRODSObjectStore, irods_object_store
 from openghg.objectstore._irods_storage import read_document
 from openghg.types import DataOverlapError, ObjectStoreError
 
@@ -51,6 +51,20 @@ def dataset(start="2020-01-01", values=(1.0, 2.0, 3.0)):
         coords={"time": pd.date_range(start, periods=len(values), freq="h")},
         attrs={"units": "ppb"},
     )
+
+
+def test_factory_reads_without_cache_by_default(backend, remote, monkeypatch):
+    original = dataset()
+    monkeypatch.setattr("irods.session.iRODSSession", lambda **kwargs: remote.factory())
+    store = irods_object_store(bucket=remote.root, data_type="surface", mode="rw")
+    assert store.cache_dir is None
+    with store:
+        uuid = store.create({"species": "ch4"}, original, period="3600s")
+    lazy = store.get_datasource(uuid).get_data()
+    with store:
+        assert store.search(species="ch4")[0]["uuid"] == uuid
+    xr.testing.assert_equal(lazy.load(), original)
+    assert not remote.cache.exists()
 
 
 def test_context_reentry_catalog_state_and_deferred_lazy_reads(backend, remote):
