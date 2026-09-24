@@ -2,6 +2,7 @@ from importlib import import_module as _import_module
 from typing import Any
 
 __all__ = [
+    "IRODSObjectStore",
     "delete_object",
     "delete_objects",
     "exists",
@@ -38,6 +39,7 @@ __all__ = [
 ]
 
 _EXPORTS = {
+    "IRODSObjectStore": "._irods",
     "delete_object": "._local_store",
     "delete_objects": "._local_store",
     "exists": "._local_store",

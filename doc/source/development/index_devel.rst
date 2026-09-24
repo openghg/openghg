@@ -25,6 +25,16 @@ Covers how we develop OpenGHG and the standards we adhere to
 
    python_devel
 
+Storage experiments
+-------------------
+
+Prototype backends for evaluating changes to OpenGHG storage.
+
+.. toctree::
+   :maxdepth: 1
+
+   irods_prototype
+
 Packaging & Release
 -------------------
 

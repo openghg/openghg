@@ -3,6 +3,7 @@ from ._encoding import datetime_to_datetime as datetime_to_datetime
 from ._encoding import get_datetime_now as get_datetime_now
 from ._encoding import string_to_bytes as string_to_bytes
 from ._integrity import integrity_check as integrity_check
+from ._irods import IRODSObjectStore as IRODSObjectStore
 from ._legacy_datasource import Datasource as Datasource
 from ._local_store import delete_object as delete_object
 from ._local_store import delete_objects as delete_objects

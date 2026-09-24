@@ -246,6 +246,66 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "openghg_objectstore_irods_irodsobjectstore_create",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L264",
+      "target": "openghg_objectstore_irods_metastore_encode_metadata",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_irodsobjectstore_init",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L229",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_irodsobjectstore_init",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L230",
+      "target": "openghg_objectstore_datasource_datasourcefactory",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore_search",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L202",
+      "target": "openghg_objectstore_objectstore_memory_metastore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore_update",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L271",
+      "target": "openghg_objectstore_objectstore_memory_metastore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "openghg_objectstore_legacy_datasource_datasource_add_timed_data",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
       "source_location": "L372",
@@ -1230,22 +1290,10 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
-      "source": "tests_analyse_test_modelled_obs_alignment_test_fp_x_flux_time_resolved_aligns_all_irregular_footprint_times",
+      "source": "tests_analyse_test_modelled_obs_alignment_test_fp_x_flux_time_resolved_uses_flux_intervals_for_irregular_footprint_times",
       "source_file": "tests/analyse/test_modelled_obs_alignment.py",
       "source_location": "L57",
       "target": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "tests_analyse_test_modelled_obs_alignment_test_high_freq_flux_without_second_reindex_reproduces_dropped_times",
-      "source_file": "tests/analyse/test_modelled_obs_alignment.py",
-      "source_location": "L66",
-      "target": "openghg_analyse_modelled_obs_make_high_freq_flux",
       "weight": 1.0
     },
     {
@@ -1726,6 +1774,66 @@
       "source_file": "tests/objectstore/test_integrity.py",
       "source_location": "L34",
       "target": "openghg_standardise_standardise_standardise_flux",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_metastore_test_encoder_rejects_values_that_cannot_roundtrip",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L249",
+      "target": "openghg_objectstore_irods_metastore_encode_metadata",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_test_live_irods_round_trip",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L220",
+      "target": "openghg_objectstore_irods_irodsobjectstore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_test_publish_search_and_verified_read_through_cache",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L99",
+      "target": "openghg_objectstore_irods_irodsobjectstore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_test_readonly_and_managed_replication_are_explicit",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L193",
+      "target": "openghg_objectstore_irods_irodsobjectstore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_transport",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L66",
+      "target": "openghg_objectstore_irods_irodsobjectstore",
       "weight": 1.0
     },
     {
@@ -5144,7 +5252,7 @@
       "relation": "calls",
       "source": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L226",
+      "source_location": "L220",
       "target": "openghg_analyse_modelled_obs_time_resolved_and_residual_footprints",
       "weight": 1.0
     },
@@ -5155,7 +5263,7 @@
       "relation": "calls",
       "source": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L228",
+      "source_location": "L222",
       "target": "openghg_analyse_utils_reindex_on_dims",
       "weight": 1.0
     },
@@ -5166,7 +5274,7 @@
       "relation": "calls",
       "source": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L245",
+      "source_location": "L239",
       "target": "openghg_analyse_modelled_obs_make_low_freq_flux",
       "weight": 1.0
     },
@@ -5177,7 +5285,7 @@
       "relation": "calls",
       "source": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L249",
+      "source_location": "L243",
       "target": "openghg_analyse_modelled_obs_calc_hourly_freq",
       "weight": 1.0
     },
@@ -5188,7 +5296,7 @@
       "relation": "calls",
       "source": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L252",
+      "source_location": "L246",
       "target": "openghg_analyse_modelled_obs_max_h_back",
       "weight": 1.0
     },
@@ -5199,7 +5307,7 @@
       "relation": "calls",
       "source": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L260",
+      "source_location": "L254",
       "target": "openghg_analyse_modelled_obs_make_high_freq_flux",
       "weight": 1.0
     },
@@ -5232,7 +5340,7 @@
       "relation": "calls",
       "source": "openghg_analyse_modelled_obs_make_high_freq_flux",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L171",
+      "source_location": "L169",
       "target": "openghg_analyse_modelled_obs_fp_time_and_h_back_freq_gcd",
       "weight": 1.0
     },
@@ -5243,7 +5351,7 @@
       "relation": "calls",
       "source": "openghg_analyse_modelled_obs_make_high_freq_flux",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L172",
+      "source_location": "L170",
       "target": "openghg_analyse_modelled_obs_padded_flux_slice_start_and_end",
       "weight": 1.0
     },
@@ -5254,18 +5362,7 @@
       "relation": "calls",
       "source": "openghg_analyse_modelled_obs_make_high_freq_flux",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L173",
-      "target": "openghg_analyse_alignment_time_of_day_offset",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "context": "call",
-      "relation": "calls",
-      "source": "openghg_analyse_modelled_obs_make_high_freq_flux",
-      "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L180",
+      "source_location": "L171",
       "target": "openghg_analyse_modelled_obs_calc_hourly_freq",
       "weight": 1.0
     },
@@ -5276,7 +5373,18 @@
       "relation": "calls",
       "source": "openghg_analyse_modelled_obs_make_high_freq_flux",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L195",
+      "source_location": "L172",
+      "target": "openghg_analyse_alignment_time_of_day_offset",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_analyse_modelled_obs_make_high_freq_flux",
+      "source_file": "openghg/analyse/_modelled_obs.py",
+      "source_location": "L194",
       "target": "openghg_analyse_modelled_obs_make_hf_flux_rolling_avg_array",
       "weight": 1.0
     },
@@ -6697,6 +6805,380 @@
       "source_file": "openghg/objectstore/_integrity.py",
       "source_location": "L35",
       "target": "openghg_objectstore_objectstore_open_object_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_irodsdatasource_get_data",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L165",
+      "target": "openghg_objectstore_irods_irodsdatasource_local_path",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_irodsdatasource_init",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L77",
+      "target": "openghg_objectstore_irods_irodsobjectstore_init",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_irodsdatasource_local_path",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L101",
+      "target": "openghg_objectstore_irods_snapshot",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_irodsdatasource_local_path",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L120",
+      "target": "openghg_objectstore_irods_digest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_irodsdatasource_local_path",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L128",
+      "target": "openghg_objectstore_irods_py_path",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_irodsdatasource_provenance",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L160",
+      "target": "openghg_objectstore_irods_irodsdatasource_local_path",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_irodsobjectstore_create",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L261",
+      "target": "openghg_objectstore_irods_irodsobjectstore_require_write",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_irodsobjectstore_create",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L267",
+      "target": "openghg_objectstore_irods_irodsobjectstore_search",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_irodsobjectstore_create",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L279",
+      "target": "openghg_objectstore_irods_py_path",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_irodsobjectstore_create",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L289",
+      "target": "openghg_objectstore_irods_snapshot",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_irodsobjectstore_create",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L292",
+      "target": "openghg_objectstore_irods_digest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_irodsobjectstore_delete",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L333",
+      "target": "openghg_objectstore_irods_irodsobjectstore_require_write",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_irodsobjectstore_get_uuids",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L247",
+      "target": "openghg_objectstore_irods_irodsobjectstore_search",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_irodsobjectstore_init",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L225",
+      "target": "openghg_objectstore_irods_py_path",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_irodsobjectstore_replicate",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L343",
+      "target": "openghg_objectstore_irods_irodsobjectstore_require_write",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_irodsobjectstore_retrieve",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L243",
+      "target": "openghg_objectstore_irods_irodsobjectstore_search",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_irodsobjectstore_update",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L317",
+      "target": "openghg_objectstore_irods_irodsobjectstore_require_write",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore_delete",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L291",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore_require_write",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore_delete",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L292",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore_search",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore_delete",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L296",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore_path",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore_insert",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L240",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore_require_write",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore_insert",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L241",
+      "target": "openghg_objectstore_irods_metastore_encode_metadata",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore_insert",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L242",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore_path",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore_insert",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L245",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore_publish",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore_publish",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L213",
+      "target": "openghg_objectstore_irods_metastore_encode_metadata",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore_publish",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L215",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore_path",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore_record",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L126",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore_path",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore_record",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L138",
+      "target": "openghg_objectstore_irods_metastore_encode_metadata",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore_search",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L165",
+      "target": "openghg_objectstore_irods_metastore_encode_metadata",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore_search",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L194",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore_path",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore_search",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L198",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore_record",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore_update",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L269",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore_require_write",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore_update",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L270",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore_search",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore_update",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L276",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore_publish",
       "weight": 1.0
     },
     {
@@ -14514,20 +14996,9 @@
       "confidence": "EXTRACTED",
       "context": "call",
       "relation": "calls",
-      "source": "tests_analyse_test_modelled_obs_alignment_test_fp_x_flux_time_resolved_aligns_all_irregular_footprint_times",
+      "source": "tests_analyse_test_modelled_obs_alignment_test_fp_x_flux_time_resolved_uses_flux_intervals_for_irregular_footprint_times",
       "source_file": "tests/analyse/test_modelled_obs_alignment.py",
       "source_location": "L55",
-      "target": "tests_analyse_test_modelled_obs_alignment_irregular_time_resolved_fp_and_flux",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "context": "call",
-      "relation": "calls",
-      "source": "tests_analyse_test_modelled_obs_alignment_test_high_freq_flux_without_second_reindex_reproduces_dropped_times",
-      "source_file": "tests/analyse/test_modelled_obs_alignment.py",
-      "source_location": "L64",
       "target": "tests_analyse_test_modelled_obs_alignment_irregular_time_resolved_fp_and_flux",
       "weight": 1.0
     },
@@ -16960,6 +17431,160 @@
       "source_file": "tests/objectstore/test_file_locks.py",
       "source_location": "L78",
       "target": "openghg_objectstore_metastore_classic_metastore_dataclassmetastore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_metastore_catalogsession_query",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L91",
+      "target": "tests_objectstore_test_irods_metastore_catalogquery",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_metastore_metastore",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L98",
+      "target": "tests_objectstore_test_irods_metastore_catalogsession",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_metastore_test_atomic_update_and_delete_preserve_foreign_avus_and_payload",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L157",
+      "target": "tests_objectstore_test_irods_metastore_upload",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_metastore_test_encoder_enforces_utf8_avu_boundaries",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L253",
+      "target": "openghg_objectstore_irods_metastore_encode_metadata",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_metastore_test_mutation_requires_one_match_and_preserves_uuid",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L180",
+      "target": "tests_objectstore_test_irods_metastore_upload",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_metastore_test_publish_search_scope_and_typed_metadata",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L110",
+      "target": "tests_objectstore_test_irods_metastore_upload",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_metastore_test_publish_search_scope_and_typed_metadata",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L111",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_metastore_test_publish_search_scope_and_typed_metadata",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L114",
+      "target": "tests_objectstore_test_irods_metastore_catalogmetadata",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_metastore_test_read_only_rejects_all_mutation_before_catalog_access",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L198",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_metastore_test_record_rejects_malformed_or_ambiguous_publication",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L222",
+      "target": "tests_objectstore_test_irods_metastore_upload",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_metastore_test_search_preserves_predicates_lists_and_numeric_equality",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L130",
+      "target": "tests_objectstore_test_irods_metastore_upload",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_metastore_test_search_scans_marker_when_genquery_cannot_escape_term",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L148",
+      "target": "tests_objectstore_test_irods_metastore_upload",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_metastore_upload",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L104",
+      "target": "tests_objectstore_test_irods_metastore_catalogmetadata",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_test_publish_search_and_verified_read_through_cache",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L93",
+      "target": "tests_objectstore_test_irods_checksum",
       "weight": 1.0
     },
     {
@@ -23402,6 +24027,83 @@
       "confidence": "EXTRACTED",
       "context": "decorator",
       "relation": "references",
+      "source": "tests_objectstore_test_irods_metastore_metastore",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L96",
+      "target": "tests_objectstore_test_irods_metastore_py_fixture",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "decorator",
+      "relation": "references",
+      "source": "tests_objectstore_test_irods_metastore_test_encoder_rejects_values_that_cannot_roundtrip",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L238",
+      "target": "tests_objectstore_test_irods_metastore_py_parametrize",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "decorator",
+      "relation": "references",
+      "source": "tests_objectstore_test_irods_metastore_test_path_rejects_unsafe_or_noncanonical_identifiers",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L206",
+      "target": "tests_objectstore_test_irods_metastore_py_parametrize",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "decorator",
+      "relation": "references",
+      "source": "tests_objectstore_test_irods_metastore_test_search_scans_marker_when_genquery_cannot_escape_term",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L144",
+      "target": "tests_objectstore_test_irods_metastore_py_parametrize",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "decorator",
+      "relation": "references",
+      "source": "tests_objectstore_test_irods_test_corrupt_receipt_is_rebuilt",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L121",
+      "target": "tests_objectstore_test_irods_py_parametrize",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "decorator",
+      "relation": "references",
+      "source": "tests_objectstore_test_irods_test_failed_download_never_publishes_cache",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L132",
+      "target": "tests_objectstore_test_irods_py_parametrize",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "decorator",
+      "relation": "references",
+      "source": "tests_objectstore_test_irods_transport",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L26",
+      "target": "tests_objectstore_test_irods_py_fixture",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "decorator",
+      "relation": "references",
       "source": "tests_objectstore_test_objectstore_fake_data",
       "source_file": "tests/objectstore/test_objectstore.py",
       "source_location": "L124",
@@ -26856,6 +27558,160 @@
       "confidence": "EXTRACTED",
       "context": "generic_arg",
       "relation": "references",
+      "source": "openghg_objectstore_irods_irodsdatasource_provenance",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L158",
+      "target": "openghg_objectstore_irods_py_any",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "generic_arg",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_irodsobjectstore_create",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L249",
+      "target": "openghg_objectstore_irods_py_any",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "generic_arg",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_irodsobjectstore_get_uuids",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L245",
+      "target": "openghg_objectstore_irods_py_any",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "generic_arg",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_irodsobjectstore_retrieve",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L241",
+      "target": "openghg_objectstore_irods_irodsdatasource",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "generic_arg",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_irodsobjectstore_retrieve",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L241",
+      "target": "openghg_objectstore_irods_py_any",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "generic_arg",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_irodsobjectstore_search",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L237",
+      "target": "openghg_objectstore_irods_py_any",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "generic_arg",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_irodsobjectstore_update",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L307",
+      "target": "openghg_objectstore_irods_py_any",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "generic_arg",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_metastore_encode_metadata",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L24",
+      "target": "openghg_objectstore_irods_metastore_py_any",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "generic_arg",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore_delete",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L278",
+      "target": "openghg_objectstore_irods_metastore_py_any",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "generic_arg",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore_insert",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L230",
+      "target": "openghg_objectstore_irods_metastore_py_any",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "generic_arg",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore_publish",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L209",
+      "target": "openghg_objectstore_irods_metastore_py_any",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "generic_arg",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore_record",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L109",
+      "target": "openghg_objectstore_irods_metastore_py_any",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "generic_arg",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore_search",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L143",
+      "target": "openghg_objectstore_irods_metastore_py_any",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "generic_arg",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore_update",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L247",
+      "target": "openghg_objectstore_irods_metastore_py_any",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "generic_arg",
+      "relation": "references",
       "source": "openghg_objectstore_legacy_datasource_datasource_daterange",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
       "source_location": "L620",
@@ -29192,6 +30048,160 @@
       "source_file": "openghg/objectstore/_integrity.py",
       "source_location": "L7",
       "target": "openghg_objectstore_objectstore_open_object_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "openghg_objectstore_irods",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L11",
+      "target": "hashlib",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "openghg_objectstore_irods",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L12",
+      "target": "json",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "openghg_objectstore_irods",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L13",
+      "target": "logging",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "openghg_objectstore_irods",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L15",
+      "target": "tempfile",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "openghg_objectstore_irods",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L20",
+      "target": "xarray",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "openghg_objectstore_irods",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L22",
+      "target": "openghg_objectstore_datasource_abstractdatasource",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "openghg_objectstore_irods",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L22",
+      "target": "openghg_objectstore_datasource_datasourcefactory",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "openghg_objectstore_irods",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L23",
+      "target": "openghg_objectstore_irods_metastore_encode_metadata",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "openghg_objectstore_irods",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L23",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "openghg_objectstore_irods",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L24",
+      "target": "openghg_objectstore_objectstore_objectstore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "openghg_objectstore_irods",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L9",
+      "target": "base64",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "openghg_objectstore_irods_metastore",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L12",
+      "target": "json",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "openghg_objectstore_irods_metastore",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L16",
+      "target": "openghg_objectstore_metastore_metastore_metastore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "openghg_objectstore_irods_metastore",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L163",
+      "target": "openghg_objectstore_objectstore_memory_metastore",
       "weight": 1.0
     },
     {
@@ -36470,6 +37480,116 @@
       "confidence": "EXTRACTED",
       "context": "import",
       "relation": "imports",
+      "source": "tests_objectstore_test_irods",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L12",
+      "target": "pytest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_objectstore_test_irods",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L13",
+      "target": "xarray",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_objectstore_test_irods",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L3",
+      "target": "base64",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_objectstore_test_irods",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L4",
+      "target": "hashlib",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_objectstore_test_irods",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L5",
+      "target": "json",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_objectstore_test_irods",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L6",
+      "target": "os",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_objectstore_test_irods_metastore",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L14",
+      "target": "openghg_objectstore_irods_metastore_encode_metadata",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_objectstore_test_irods_metastore",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L14",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_objectstore_test_irods_metastore",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L3",
+      "target": "json",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_objectstore_test_irods_metastore",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L7",
+      "target": "pytest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
       "source": "tests_objectstore_test_local_object_store",
       "source_file": "tests/objectstore/test_local_object_store.py",
       "source_location": "L4",
@@ -41951,6 +43071,160 @@
       "source": "openghg_objectstore_integrity",
       "source_file": "openghg/objectstore/_integrity.py",
       "source_location": "L8",
+      "target": "openghg_types",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "openghg_objectstore_irods",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L10",
+      "target": "datetime",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "openghg_objectstore_irods",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L14",
+      "target": "pathlib",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "openghg_objectstore_irods",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L16",
+      "target": "typing",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "openghg_objectstore_irods",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L17",
+      "target": "uuid",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "openghg_objectstore_irods",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L19",
+      "target": "openghg_objectstore_metastore_classic_metastore_filelock",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "openghg_objectstore_irods",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L22",
+      "target": "openghg_objectstore_datasource",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "openghg_objectstore_irods",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L23",
+      "target": "openghg_objectstore_irods_metastore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "openghg_objectstore_irods",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L24",
+      "target": "openghg_objectstore_objectstore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "openghg_objectstore_irods",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L25",
+      "target": "openghg_types",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "openghg_objectstore_irods_metastore",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L11",
+      "target": "collections_abc",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "openghg_objectstore_irods_metastore",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L13",
+      "target": "typing",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "openghg_objectstore_irods_metastore",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L14",
+      "target": "uuid",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "openghg_objectstore_irods_metastore",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L16",
+      "target": "openghg_objectstore_metastore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "openghg_objectstore_irods_metastore",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L17",
       "target": "openghg_types",
       "weight": 1.0
     },
@@ -48207,6 +49481,149 @@
       "confidence": "EXTRACTED",
       "context": "import",
       "relation": "imports_from",
+      "source": "tests_objectstore_test_irods",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L10",
+      "target": "uuid",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L17",
+      "target": "openghg_objectstore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L19",
+      "target": "openghg_types",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L7",
+      "target": "pathlib",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L8",
+      "target": "types",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L9",
+      "target": "unittest_mock",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods_metastore",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L10",
+      "target": "irods_exception",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods_metastore",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L11",
+      "target": "irods_meta",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods_metastore",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L12",
+      "target": "irods_models",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods_metastore",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L14",
+      "target": "openghg_objectstore_irods_metastore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods_metastore",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L21",
+      "target": "openghg_types",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods_metastore",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L4",
+      "target": "types",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods_metastore",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L5",
+      "target": "uuid",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
       "source": "tests_objectstore_test_local_object_store",
       "source_file": "tests/objectstore/test_local_object_store.py",
       "source_location": "L14",
@@ -51476,7 +52893,7 @@
       "relation": "references",
       "source": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L216",
+      "source_location": "L210",
       "target": "openghg_analyse_modelled_obs_py_dataarray",
       "weight": 1.0
     },
@@ -51487,7 +52904,7 @@
       "relation": "references",
       "source": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L216",
+      "source_location": "L210",
       "target": "openghg_analyse_modelled_obs_py_dataset",
       "weight": 1.0
     },
@@ -52765,6 +54182,127 @@
       "source_file": "openghg/objectstore/_encoding.py",
       "source_location": "L5",
       "target": "datetime",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "parameter_type",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_digest",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L30",
+      "target": "openghg_objectstore_irods_py_path",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "parameter_type",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_irodsdatasource_add",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L168",
+      "target": "openghg_objectstore_irods_py_any",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "parameter_type",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_irodsdatasource_add",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L168",
+      "target": "openghg_objectstore_irods_py_dataset",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "parameter_type",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_irodsdatasource_init",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L76",
+      "target": "openghg_objectstore_irods_irodsobjectstore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "parameter_type",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_irodsdatasource_load",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L83",
+      "target": "openghg_objectstore_irods_irodsobjectstore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "parameter_type",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_irodsobjectstore_create",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L249",
+      "target": "openghg_objectstore_irods_py_dataset",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "parameter_type",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_irodsobjectstore_init",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L198",
+      "target": "openghg_objectstore_irods_py_any",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "parameter_type",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_irodsobjectstore_init",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L198",
+      "target": "openghg_objectstore_irods_py_path",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "parameter_type",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_irodsobjectstore_update",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L307",
+      "target": "openghg_objectstore_irods_py_dataset",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "parameter_type",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore_init",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L86",
+      "target": "openghg_objectstore_irods_metastore_py_any",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "parameter_type",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_snapshot",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L46",
+      "target": "openghg_objectstore_irods_py_any",
       "weight": 1.0
     },
     {
@@ -58593,8 +60131,41 @@
       "relation": "references",
       "source": "openghg_objectstore_init_getattr",
       "source_file": "openghg/objectstore/__init__.py",
-      "source_location": "L77",
+      "source_location": "L79",
       "target": "openghg_objectstore_init_py_any",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "return_type",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_irodsdatasource_get_data",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L163",
+      "target": "openghg_objectstore_irods_py_dataset",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "return_type",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_irodsdatasource_load",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L83",
+      "target": "openghg_objectstore_irods_irodsdatasource",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "return_type",
+      "relation": "references",
+      "source": "openghg_objectstore_irods_irodsdatasource_local_path",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L87",
+      "target": "openghg_objectstore_irods_py_path",
       "weight": 1.0
     },
     {
@@ -60272,6 +61843,17 @@
     {
       "_origin": "ast",
       "confidence": "EXTRACTED",
+      "context": "submodule_import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L18",
+      "target": "openghg_objectstore_irods",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
       "relation": "contains",
       "source": "openghg_analyse_alignment",
       "source_file": "openghg/analyse/_alignment.py",
@@ -60655,7 +62237,7 @@
       "relation": "contains",
       "source": "openghg_analyse_modelled_obs",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L216",
+      "source_location": "L210",
       "target": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
       "weight": 1.0
     },
@@ -61445,7 +63027,7 @@
       "relation": "contains",
       "source": "openghg_objectstore_init",
       "source_file": "openghg/objectstore/__init__.py",
-      "source_location": "L77",
+      "source_location": "L79",
       "target": "openghg_objectstore_init_getattr",
       "weight": 1.0
     },
@@ -61455,7 +63037,7 @@
       "relation": "contains",
       "source": "openghg_objectstore_init",
       "source_file": "openghg/objectstore/__init__.py",
-      "source_location": "L89",
+      "source_location": "L91",
       "target": "openghg_objectstore_init_dir",
       "weight": 1.0
     },
@@ -61467,6 +63049,66 @@
       "source_file": "openghg/objectstore/_integrity.py",
       "source_location": "L14",
       "target": "openghg_objectstore_integrity_integrity_check",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "openghg_objectstore_irods",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L181",
+      "target": "openghg_objectstore_irods_irodsobjectstore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "openghg_objectstore_irods",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L30",
+      "target": "openghg_objectstore_irods_digest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "openghg_objectstore_irods",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L46",
+      "target": "openghg_objectstore_irods_snapshot",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "openghg_objectstore_irods",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L68",
+      "target": "openghg_objectstore_irods_irodsdatasource",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "openghg_objectstore_irods_metastore",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L24",
+      "target": "openghg_objectstore_irods_metastore_encode_metadata",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "openghg_objectstore_irods_metastore",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L71",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore",
       "weight": 1.0
     },
     {
@@ -67796,17 +69438,7 @@
       "source": "tests_analyse_test_modelled_obs_alignment",
       "source_file": "tests/analyse/test_modelled_obs_alignment.py",
       "source_location": "L53",
-      "target": "tests_analyse_test_modelled_obs_alignment_test_fp_x_flux_time_resolved_aligns_all_irregular_footprint_times",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "relation": "contains",
-      "source": "tests_analyse_test_modelled_obs_alignment",
-      "source_file": "tests/analyse/test_modelled_obs_alignment.py",
-      "source_location": "L62",
-      "target": "tests_analyse_test_modelled_obs_alignment_test_high_freq_flux_without_second_reindex_reproduces_dropped_times",
+      "target": "tests_analyse_test_modelled_obs_alignment_test_fp_x_flux_time_resolved_uses_flux_intervals_for_irregular_footprint_times",
       "weight": 1.0
     },
     {
@@ -70097,6 +71729,276 @@
       "source_file": "tests/objectstore/test_integrity.py",
       "source_location": "L44",
       "target": "tests_objectstore_test_integrity_test_integrity_check_delete_datasource_keys",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L106",
+      "target": "tests_objectstore_test_irods_test_cache_corruption_and_remote_identity_change",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L122",
+      "target": "tests_objectstore_test_irods_test_corrupt_receipt_is_rebuilt",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L133",
+      "target": "tests_objectstore_test_irods_test_failed_download_never_publishes_cache",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L143",
+      "target": "tests_objectstore_test_irods_test_failed_metadata_publication_removes_only_new_object",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L154",
+      "target": "tests_objectstore_test_irods_test_uncertain_upload_failure_does_not_delete_another_object",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L170",
+      "target": "tests_objectstore_test_irods_test_invalid_metadata_and_serialization_do_not_upload",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L179",
+      "target": "tests_objectstore_test_irods_test_payload_update_rejected_before_metadata_changes",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L188",
+      "target": "tests_objectstore_test_irods_test_readonly_and_managed_replication_are_explicit",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L208",
+      "target": "tests_objectstore_test_irods_test_live_irods_round_trip",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L22",
+      "target": "tests_objectstore_test_irods_checksum",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L27",
+      "target": "tests_objectstore_test_irods_transport",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L78",
+      "target": "tests_objectstore_test_irods_test_publish_search_and_verified_read_through_cache",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods_metastore",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L101",
+      "target": "tests_objectstore_test_irods_metastore_upload",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods_metastore",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L109",
+      "target": "tests_objectstore_test_irods_metastore_test_publish_search_scope_and_typed_metadata",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods_metastore",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L129",
+      "target": "tests_objectstore_test_irods_metastore_test_search_preserves_predicates_lists_and_numeric_equality",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods_metastore",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L147",
+      "target": "tests_objectstore_test_irods_metastore_test_search_scans_marker_when_genquery_cannot_escape_term",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods_metastore",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L156",
+      "target": "tests_objectstore_test_irods_metastore_test_atomic_update_and_delete_preserve_foreign_avus_and_payload",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods_metastore",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L179",
+      "target": "tests_objectstore_test_irods_metastore_test_mutation_requires_one_match_and_preserves_uuid",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods_metastore",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L197",
+      "target": "tests_objectstore_test_irods_metastore_test_read_only_rejects_all_mutation_before_catalog_access",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods_metastore",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L216",
+      "target": "tests_objectstore_test_irods_metastore_test_path_rejects_unsafe_or_noncanonical_identifiers",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods_metastore",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L221",
+      "target": "tests_objectstore_test_irods_metastore_test_record_rejects_malformed_or_ambiguous_publication",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods_metastore",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L24",
+      "target": "tests_objectstore_test_irods_metastore_catalogmetadata",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods_metastore",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L247",
+      "target": "tests_objectstore_test_irods_metastore_test_encoder_rejects_values_that_cannot_roundtrip",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods_metastore",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L252",
+      "target": "tests_objectstore_test_irods_metastore_test_encoder_enforces_utf8_avu_boundaries",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods_metastore",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L49",
+      "target": "tests_objectstore_test_irods_metastore_catalogquery",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods_metastore",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L77",
+      "target": "tests_objectstore_test_irods_metastore_catalogsession",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods_metastore",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L97",
+      "target": "tests_objectstore_test_irods_metastore_metastore",
       "weight": 1.0
     },
     {
@@ -77163,6 +79065,16 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "inherits",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L71",
+      "target": "openghg_objectstore_metastore_metastore_metastore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "inherits",
       "source": "openghg_objectstore_metastore_classic_metastore_dataclassmetastore",
       "source_file": "openghg/objectstore/metastore/_classic_metastore.py",
       "source_location": "L267",
@@ -78877,6 +80789,276 @@
       "source_file": "openghg/objectstore/_datasource.py",
       "source_location": "L46",
       "target": "openghg_objectstore_datasource_datasourcefactory_load",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "openghg_objectstore_irods_irodsdatasource",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L158",
+      "target": "openghg_objectstore_irods_irodsdatasource_provenance",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "openghg_objectstore_irods_irodsdatasource",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L163",
+      "target": "openghg_objectstore_irods_irodsdatasource_get_data",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "openghg_objectstore_irods_irodsdatasource",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L168",
+      "target": "openghg_objectstore_irods_irodsdatasource_add",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "openghg_objectstore_irods_irodsdatasource",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L172",
+      "target": "openghg_objectstore_irods_irodsdatasource_save",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "openghg_objectstore_irods_irodsdatasource",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L176",
+      "target": "openghg_objectstore_irods_irodsdatasource_delete",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "openghg_objectstore_irods_irodsdatasource",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L76",
+      "target": "openghg_objectstore_irods_irodsdatasource_init",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "openghg_objectstore_irods_irodsdatasource",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L83",
+      "target": "openghg_objectstore_irods_irodsdatasource_load",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "openghg_objectstore_irods_irodsdatasource",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L87",
+      "target": "openghg_objectstore_irods_irodsdatasource_local_path",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "openghg_objectstore_irods_irodsobjectstore",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L198",
+      "target": "openghg_objectstore_irods_irodsobjectstore_init",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "openghg_objectstore_irods_irodsobjectstore",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L233",
+      "target": "openghg_objectstore_irods_irodsobjectstore_require_write",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "openghg_objectstore_irods_irodsobjectstore",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L237",
+      "target": "openghg_objectstore_irods_irodsobjectstore_search",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "openghg_objectstore_irods_irodsobjectstore",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L241",
+      "target": "openghg_objectstore_irods_irodsobjectstore_retrieve",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "openghg_objectstore_irods_irodsobjectstore",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L245",
+      "target": "openghg_objectstore_irods_irodsobjectstore_get_uuids",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "openghg_objectstore_irods_irodsobjectstore",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L249",
+      "target": "openghg_objectstore_irods_irodsobjectstore_create",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "openghg_objectstore_irods_irodsobjectstore",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L307",
+      "target": "openghg_objectstore_irods_irodsobjectstore_update",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "openghg_objectstore_irods_irodsobjectstore",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L331",
+      "target": "openghg_objectstore_irods_irodsobjectstore_delete",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "openghg_objectstore_irods_irodsobjectstore",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L337",
+      "target": "openghg_objectstore_irods_irodsobjectstore_replicate",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L109",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore_record",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L143",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore_search",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L205",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore_require_write",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L209",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore_publish",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L230",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore_insert",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L247",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore_update",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L278",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore_delete",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L305",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore_close",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L86",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore_init",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L93",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore_path",
       "weight": 1.0
     },
     {
@@ -81433,6 +83615,116 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "method",
+      "source": "tests_objectstore_test_irods_metastore_catalogmetadata",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L25",
+      "target": "tests_objectstore_test_irods_metastore_catalogmetadata_init",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "tests_objectstore_test_irods_metastore_catalogmetadata",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L30",
+      "target": "tests_objectstore_test_irods_metastore_catalogmetadata_get_all",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "tests_objectstore_test_irods_metastore_catalogmetadata",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L33",
+      "target": "tests_objectstore_test_irods_metastore_catalogmetadata_items",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "tests_objectstore_test_irods_metastore_catalogmetadata",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L36",
+      "target": "tests_objectstore_test_irods_metastore_catalogmetadata_apply_atomic_operations",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "tests_objectstore_test_irods_metastore_catalogquery",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L50",
+      "target": "tests_objectstore_test_irods_metastore_catalogquery_init",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "tests_objectstore_test_irods_metastore_catalogquery",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L55",
+      "target": "tests_objectstore_test_irods_metastore_catalogquery_filter",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "tests_objectstore_test_irods_metastore_catalogquery",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L59",
+      "target": "tests_objectstore_test_irods_metastore_catalogquery_add_keyword",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "tests_objectstore_test_irods_metastore_catalogquery",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L63",
+      "target": "tests_objectstore_test_irods_metastore_catalogquery_iter",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "tests_objectstore_test_irods_metastore_catalogsession",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L78",
+      "target": "tests_objectstore_test_irods_metastore_catalogsession_init",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "tests_objectstore_test_irods_metastore_catalogsession",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L83",
+      "target": "tests_objectstore_test_irods_metastore_catalogsession_get",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "tests_objectstore_test_irods_metastore_catalogsession",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L89",
+      "target": "tests_objectstore_test_irods_metastore_catalogsession_query",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
       "source": "tests_objectstore_test_objectstore_inmemorydatasource",
       "source_file": "tests/objectstore/test_objectstore.py",
       "source_location": "L48",
@@ -81883,9 +84175,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_analyse_modelled_obs_rationale_236",
+      "source": "openghg_analyse_modelled_obs_rationale_230",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L236",
+      "source_location": "L230",
       "target": "openghg_analyse_modelled_obs",
       "weight": 1.0
     },
@@ -81893,9 +84185,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_analyse_modelled_obs_rationale_237",
+      "source": "openghg_analyse_modelled_obs_rationale_231",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L237",
+      "source_location": "L231",
       "target": "openghg_analyse_modelled_obs",
       "weight": 1.0
     },
@@ -83613,9 +85905,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_objectstore_init_rationale_78",
+      "source": "openghg_objectstore_init_rationale_80",
       "source_file": "openghg/objectstore/__init__.py",
-      "source_location": "L78",
+      "source_location": "L80",
       "target": "openghg_objectstore_init_getattr",
       "weight": 1.0
     },
@@ -83623,9 +85915,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_objectstore_init_rationale_90",
+      "source": "openghg_objectstore_init_rationale_92",
       "source_file": "openghg/objectstore/__init__.py",
-      "source_location": "L90",
+      "source_location": "L92",
       "target": "openghg_objectstore_init_dir",
       "weight": 1.0
     },
@@ -83637,6 +85929,306 @@
       "source_file": "openghg/objectstore/_integrity.py",
       "source_location": "L15",
       "target": "openghg_objectstore_integrity_integrity_check",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_metastore_rationale_1",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L1",
+      "target": "openghg_objectstore_irods_metastore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_metastore_rationale_110",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L110",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore_record",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_metastore_rationale_150",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L150",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore_search",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_metastore_rationale_210",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L210",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore_publish",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_metastore_rationale_231",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L231",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore_insert",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_metastore_rationale_25",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L25",
+      "target": "openghg_objectstore_irods_metastore_encode_metadata",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_metastore_rationale_254",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L254",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore_update",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_metastore_rationale_279",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L279",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore_delete",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_metastore_rationale_306",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L306",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore_close",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_metastore_rationale_72",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L72",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_metastore_rationale_94",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L94",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore_path",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_rationale_1",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L1",
+      "target": "openghg_objectstore_irods",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_rationale_159",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L159",
+      "target": "openghg_objectstore_irods_irodsdatasource_provenance",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_rationale_164",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L164",
+      "target": "openghg_objectstore_irods_irodsdatasource_get_data",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_rationale_169",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L169",
+      "target": "openghg_objectstore_irods_irodsdatasource_add",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_rationale_173",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L173",
+      "target": "openghg_objectstore_irods_irodsdatasource_save",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_rationale_177",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L177",
+      "target": "openghg_objectstore_irods_irodsdatasource_delete",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_rationale_182",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L182",
+      "target": "openghg_objectstore_irods_irodsobjectstore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_rationale_238",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L238",
+      "target": "openghg_objectstore_irods_irodsobjectstore_search",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_rationale_242",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L242",
+      "target": "openghg_objectstore_irods_irodsobjectstore_retrieve",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_rationale_246",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L246",
+      "target": "openghg_objectstore_irods_irodsobjectstore_get_uuids",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_rationale_250",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L250",
+      "target": "openghg_objectstore_irods_irodsobjectstore_create",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_rationale_31",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L31",
+      "target": "openghg_objectstore_irods_digest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_rationale_316",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L316",
+      "target": "openghg_objectstore_irods_irodsobjectstore_update",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_rationale_332",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L332",
+      "target": "openghg_objectstore_irods_irodsobjectstore_delete",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_rationale_338",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L338",
+      "target": "openghg_objectstore_irods_irodsobjectstore_replicate",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_rationale_47",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L47",
+      "target": "openghg_objectstore_irods_snapshot",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_rationale_69",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L69",
+      "target": "openghg_objectstore_irods_irodsdatasource",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_rationale_84",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L84",
+      "target": "openghg_objectstore_irods_irodsdatasource_load",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_objectstore_irods_rationale_88",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L88",
+      "target": "openghg_objectstore_irods_irodsdatasource_local_path",
       "weight": 1.0
     },
     {
@@ -91946,17 +94538,7 @@
       "source": "tests_analyse_test_modelled_obs_alignment_rationale_54",
       "source_file": "tests/analyse/test_modelled_obs_alignment.py",
       "source_location": "L54",
-      "target": "tests_analyse_test_modelled_obs_alignment_test_fp_x_flux_time_resolved_aligns_all_irregular_footprint_times",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "relation": "rationale_for",
-      "source": "tests_analyse_test_modelled_obs_alignment_rationale_63",
-      "source_file": "tests/analyse/test_modelled_obs_alignment.py",
-      "source_location": "L63",
-      "target": "tests_analyse_test_modelled_obs_alignment_test_high_freq_flux_without_second_reindex_reproduces_dropped_times",
+      "target": "tests_analyse_test_modelled_obs_alignment_test_fp_x_flux_time_resolved_uses_flux_intervals_for_irregular_footprint_times",
       "weight": 1.0
     },
     {
@@ -93847,6 +96429,56 @@
       "source_file": "tests/objectstore/test_file_locks.py",
       "source_location": "L65",
       "target": "tests_objectstore_test_file_locks_test_lock_is_advisory",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "tests_objectstore_test_irods_metastore_rationale_1",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L1",
+      "target": "tests_objectstore_test_irods_metastore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "tests_objectstore_test_irods_metastore_rationale_102",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L102",
+      "target": "tests_objectstore_test_irods_metastore_upload",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "tests_objectstore_test_irods_rationale_1",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L1",
+      "target": "tests_objectstore_test_irods",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "tests_objectstore_test_irods_rationale_209",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L209",
+      "target": "tests_objectstore_test_irods_test_live_irods_round_trip",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "tests_objectstore_test_irods_rationale_28",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L28",
+      "target": "tests_objectstore_test_irods_transport",
       "weight": 1.0
     },
     {
@@ -98575,6 +101207,18 @@
       "confidence_score": 0.85,
       "context": "argument",
       "relation": "indirect_call",
+      "source": "tests_objectstore_test_irods_transport",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L64",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore_record",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
       "source": "tests_retrieve_icos_test_data_parsing_mock_icos_format_info",
       "source_file": "tests/retrieve/icos/test_data_parsing.py",
       "source_location": "L59",
@@ -98783,6 +101427,18 @@
       "source_file": "openghg/util/_cli.py",
       "source_location": "L100",
       "target": "openghg_objectstore_objectstore_objectstore_search_fbb39a",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "assignment",
+      "relation": "indirect_call",
+      "source": "tests_objectstore_test_irods_transport",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L54",
+      "target": "tests_objectstore_test_irods_metastore_catalogsession_get",
       "weight": 1.0
     },
     {
@@ -99129,6 +101785,126 @@
       "relation": "calls",
       "source": "openghg_objectstore_integrity_integrity_check",
       "source_file": "openghg/objectstore/_integrity.py",
+      "source_location": "L51",
+      "target": "openghg_types_errors_objectstoreerror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_digest",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L37",
+      "target": "openghg_types_errors_objectstoreerror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_irodsdatasource_local_path",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L107",
+      "target": "openghg_objectstore_metastore_classic_metastore_filelock",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_irodsdatasource_local_path",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L139",
+      "target": "openghg_types_errors_objectstoreerror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_irodsobjectstore_create",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L268",
+      "target": "openghg_types_errors_objectstoreerror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_irodsobjectstore_init",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L209",
+      "target": "importerror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore_delete",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L294",
+      "target": "openghg_types_errors_metastoreerror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore_insert",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L244",
+      "target": "openghg_types_errors_metastoreerror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore_record",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L128",
+      "target": "openghg_types_errors_objectstoreerror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_metastore_irodsmetastore_record",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L133",
+      "target": "openghg_types_errors_metastoreerror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_objectstore_irods_snapshot",
+      "source_file": "openghg/objectstore/_irods.py",
       "source_location": "L51",
       "target": "openghg_types_errors_objectstoreerror",
       "weight": 1.0
@@ -107549,6 +110325,50 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "relation": "uses",
+      "source": "openghg_objectstore_irods_irodsdatasource",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L68",
+      "target": "openghg_objectstore_datasource_abstractdatasource",
+      "weight": 0.8
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "relation": "uses",
+      "source": "openghg_objectstore_irods_irodsobjectstore",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L181",
+      "target": "openghg_objectstore_objectstore_objectstore",
+      "weight": 0.8
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "relation": "uses",
+      "source": "openghg_objectstore_irods_irodsobjectstore",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L229",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore",
+      "weight": 0.8
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "relation": "uses",
+      "source": "openghg_objectstore_irods_irodsobjectstore",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L230",
+      "target": "openghg_objectstore_datasource_datasourcefactory",
+      "weight": 0.8
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "relation": "uses",
       "source": "openghg_objectstore_legacy_datasource_datasource",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
       "source_location": "L83",
@@ -107828,6 +110648,39 @@
       "source_file": "tests/objectstore/test_classic_metastore.py",
       "source_location": "L99",
       "target": "openghg_objectstore_metastore_classic_metastore_safetycachingmiddleware",
+      "weight": 0.8
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "relation": "uses",
+      "source": "tests_objectstore_test_irods_metastore_metastore",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L98",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore",
+      "weight": 0.8
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "relation": "uses",
+      "source": "tests_objectstore_test_irods_metastore_test_publish_search_scope_and_typed_metadata",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L111",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore",
+      "weight": 0.8
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "relation": "uses",
+      "source": "tests_objectstore_test_irods_metastore_test_read_only_rejects_all_mutation_before_catalog_access",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L198",
+      "target": "openghg_objectstore_irods_metastore_irodsmetastore",
       "weight": 0.8
     },
     {
@@ -108313,6 +111166,36 @@
       "label": "DatasourceFactory",
       "source_file": "openghg/objectstore/_datasource.py",
       "source_location": "L14"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_irodsdatasource",
+      "label": "IRODSDatasource",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L68"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_irodsobjectstore",
+      "label": "IRODSObjectStore",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L181"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_metastore_irodsmetastore",
+      "label": "IRODSMetaStore",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L71"
     },
     {
       "_callable": true,
@@ -109179,6 +112062,36 @@
       "_callable_class": true,
       "_origin": "ast",
       "file_type": "code",
+      "id": "tests_objectstore_test_irods_metastore_catalogmetadata",
+      "label": "CatalogMetadata",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L24"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_metastore_catalogquery",
+      "label": "CatalogQuery",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L49"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_metastore_catalogsession",
+      "label": "CatalogSession",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L77"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "file_type": "code",
       "id": "tests_objectstore_test_objectstore_inmemorydatasource",
       "label": "InMemoryDatasource",
       "source_file": "tests/objectstore/test_objectstore.py",
@@ -109525,7 +112438,7 @@
       "id": "openghg_analyse_modelled_obs_fp_x_flux_time_resolved",
       "label": "fp_x_flux_time_resolved()",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L216"
+      "source_location": "L210"
     },
     {
       "_callable": true,
@@ -110992,7 +113905,7 @@
       "id": "openghg_objectstore_init_dir",
       "label": "__dir__()",
       "source_file": "openghg/objectstore/__init__.py",
-      "source_location": "L89"
+      "source_location": "L91"
     },
     {
       "_callable": true,
@@ -111001,7 +113914,7 @@
       "id": "openghg_objectstore_init_getattr",
       "label": "__getattr__()",
       "source_file": "openghg/objectstore/__init__.py",
-      "source_location": "L77"
+      "source_location": "L79"
     },
     {
       "_callable": true,
@@ -111011,6 +113924,276 @@
       "label": "integrity_check()",
       "source_file": "openghg/objectstore/_integrity.py",
       "source_location": "L14"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_digest",
+      "label": "_digest()",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L30"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_irodsdatasource_add",
+      "label": ".add()",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L168"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_irodsdatasource_delete",
+      "label": ".delete()",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L176"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_irodsdatasource_get_data",
+      "label": ".get_data()",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L163"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_irodsdatasource_init",
+      "label": ".__init__()",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L76"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_irodsdatasource_load",
+      "label": ".load()",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L83"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_irodsdatasource_local_path",
+      "label": ".local_path()",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L87"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_irodsdatasource_provenance",
+      "label": ".provenance()",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L158"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_irodsdatasource_save",
+      "label": ".save()",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L172"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_irodsobjectstore_create",
+      "label": ".create()",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L249"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_irodsobjectstore_delete",
+      "label": ".delete()",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L331"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_irodsobjectstore_get_uuids",
+      "label": ".get_uuids()",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L245"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_irodsobjectstore_init",
+      "label": ".__init__()",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L198"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_irodsobjectstore_replicate",
+      "label": ".replicate()",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L337"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_irodsobjectstore_require_write",
+      "label": "._require_write()",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L233"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_irodsobjectstore_retrieve",
+      "label": ".retrieve()",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L241"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_irodsobjectstore_search",
+      "label": ".search()",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L237"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_irodsobjectstore_update",
+      "label": ".update()",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L307"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_metastore_encode_metadata",
+      "label": "encode_metadata()",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L24"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_metastore_irodsmetastore_close",
+      "label": ".close()",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L305"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_metastore_irodsmetastore_delete",
+      "label": ".delete()",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L278"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_metastore_irodsmetastore_init",
+      "label": ".__init__()",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L86"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_metastore_irodsmetastore_insert",
+      "label": ".insert()",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L230"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_metastore_irodsmetastore_path",
+      "label": ".path()",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L93"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_metastore_irodsmetastore_publish",
+      "label": "._publish()",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L209"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_metastore_irodsmetastore_record",
+      "label": ".record()",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L109"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_metastore_irodsmetastore_require_write",
+      "label": "._require_write()",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L205"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_metastore_irodsmetastore_search",
+      "label": ".search()",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L143"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_metastore_irodsmetastore_update",
+      "label": ".update()",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L247"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_snapshot",
+      "label": "_snapshot()",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L46"
     },
     {
       "_callable": true,
@@ -118117,19 +121300,10 @@
       "_callable": true,
       "_origin": "ast",
       "file_type": "code",
-      "id": "tests_analyse_test_modelled_obs_alignment_test_fp_x_flux_time_resolved_aligns_all_irregular_footprint_times",
-      "label": "test_fp_x_flux_time_resolved_aligns_all_irregular_footprint_times()",
+      "id": "tests_analyse_test_modelled_obs_alignment_test_fp_x_flux_time_resolved_uses_flux_intervals_for_irregular_footprint_times",
+      "label": "test_fp_x_flux_time_resolved_uses_flux_intervals_for_irregular_footprint_times()",
       "source_file": "tests/analyse/test_modelled_obs_alignment.py",
       "source_location": "L53"
-    },
-    {
-      "_callable": true,
-      "_origin": "ast",
-      "file_type": "code",
-      "id": "tests_analyse_test_modelled_obs_alignment_test_high_freq_flux_without_second_reindex_reproduces_dropped_times",
-      "label": "test_high_freq_flux_without_second_reindex_reproduces_dropped_times()",
-      "source_file": "tests/analyse/test_modelled_obs_alignment.py",
-      "source_location": "L62"
     },
     {
       "_callable": true,
@@ -120299,6 +123473,321 @@
       "label": "test_integrity_check_delete_datasource_keys()",
       "source_file": "tests/objectstore/test_integrity.py",
       "source_location": "L44"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_checksum",
+      "label": "checksum()",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L22"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_metastore_catalogmetadata_apply_atomic_operations",
+      "label": ".apply_atomic_operations()",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L36"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_metastore_catalogmetadata_get_all",
+      "label": ".get_all()",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L30"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_metastore_catalogmetadata_init",
+      "label": ".__init__()",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L25"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_metastore_catalogmetadata_items",
+      "label": ".items()",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L33"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_metastore_catalogquery_add_keyword",
+      "label": ".add_keyword()",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L59"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_metastore_catalogquery_filter",
+      "label": ".filter()",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L55"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_metastore_catalogquery_init",
+      "label": ".__init__()",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L50"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_metastore_catalogquery_iter",
+      "label": ".__iter__()",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L63"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_metastore_catalogsession_get",
+      "label": ".get()",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L83"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_metastore_catalogsession_init",
+      "label": ".__init__()",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L78"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_metastore_catalogsession_query",
+      "label": ".query()",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L89"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_metastore_metastore",
+      "label": "metastore()",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L97"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_metastore_test_atomic_update_and_delete_preserve_foreign_avus_and_payload",
+      "label": "test_atomic_update_and_delete_preserve_foreign_avus_and_payload()",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L156"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_metastore_test_encoder_enforces_utf8_avu_boundaries",
+      "label": "test_encoder_enforces_utf8_avu_boundaries()",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L252"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_metastore_test_encoder_rejects_values_that_cannot_roundtrip",
+      "label": "test_encoder_rejects_values_that_cannot_roundtrip()",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L247"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_metastore_test_mutation_requires_one_match_and_preserves_uuid",
+      "label": "test_mutation_requires_one_match_and_preserves_uuid()",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L179"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_metastore_test_path_rejects_unsafe_or_noncanonical_identifiers",
+      "label": "test_path_rejects_unsafe_or_noncanonical_identifiers()",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L216"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_metastore_test_publish_search_scope_and_typed_metadata",
+      "label": "test_publish_search_scope_and_typed_metadata()",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L109"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_metastore_test_read_only_rejects_all_mutation_before_catalog_access",
+      "label": "test_read_only_rejects_all_mutation_before_catalog_access()",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L197"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_metastore_test_record_rejects_malformed_or_ambiguous_publication",
+      "label": "test_record_rejects_malformed_or_ambiguous_publication()",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L221"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_metastore_test_search_preserves_predicates_lists_and_numeric_equality",
+      "label": "test_search_preserves_predicates_lists_and_numeric_equality()",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L129"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_metastore_test_search_scans_marker_when_genquery_cannot_escape_term",
+      "label": "test_search_scans_marker_when_genquery_cannot_escape_term()",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L147"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_metastore_upload",
+      "label": "upload()",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L101"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_test_cache_corruption_and_remote_identity_change",
+      "label": "test_cache_corruption_and_remote_identity_change()",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L106"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_test_corrupt_receipt_is_rebuilt",
+      "label": "test_corrupt_receipt_is_rebuilt()",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L122"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_test_failed_download_never_publishes_cache",
+      "label": "test_failed_download_never_publishes_cache()",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L133"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_test_failed_metadata_publication_removes_only_new_object",
+      "label": "test_failed_metadata_publication_removes_only_new_object()",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L143"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_test_invalid_metadata_and_serialization_do_not_upload",
+      "label": "test_invalid_metadata_and_serialization_do_not_upload()",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L170"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_test_live_irods_round_trip",
+      "label": "test_live_irods_round_trip()",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L208"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_test_payload_update_rejected_before_metadata_changes",
+      "label": "test_payload_update_rejected_before_metadata_changes()",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L179"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_test_publish_search_and_verified_read_through_cache",
+      "label": "test_publish_search_and_verified_read_through_cache()",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L78"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_test_readonly_and_managed_replication_are_explicit",
+      "label": "test_readonly_and_managed_replication_are_explicit()",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L188"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_test_uncertain_upload_failure_does_not_delete_another_object",
+      "label": "test_uncertain_upload_failure_does_not_delete_another_object()",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L154"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_transport",
+      "label": "transport()",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L27"
     },
     {
       "_callable": true,
@@ -127635,6 +131124,54 @@
     {
       "_origin": "ast",
       "file_type": "code",
+      "id": "openghg_objectstore_irods",
+      "label": "_irods.py",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_metastore",
+      "label": "_irods_metastore.py",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_metastore_py_any",
+      "label": "Any",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_py_any",
+      "label": "Any",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_py_dataset",
+      "label": "Dataset",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_objectstore_irods_py_path",
+      "label": "Path",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "_origin": "ast",
+      "file_type": "code",
       "id": "openghg_objectstore_legacy_datasource",
       "label": "_legacy_datasource.py",
       "source_file": "openghg/objectstore/_legacy_datasource.py",
@@ -131075,6 +134612,54 @@
     {
       "_origin": "ast",
       "file_type": "code",
+      "id": "tests_objectstore_test_irods",
+      "label": "test_irods.py",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_metastore",
+      "label": "test_irods_metastore.py",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_metastore_py_fixture",
+      "label": "fixture",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_metastore_py_parametrize",
+      "label": "parametrize",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_py_fixture",
+      "label": "fixture",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_py_parametrize",
+      "label": "parametrize",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "_origin": "ast",
+      "file_type": "code",
       "id": "tests_objectstore_test_local_object_store",
       "label": "test_local_object_store.py",
       "source_file": "tests/objectstore/test_local_object_store.py",
@@ -132891,18 +136476,18 @@
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_analyse_modelled_obs_rationale_236",
+      "id": "openghg_analyse_modelled_obs_rationale_230",
       "label": "# TODO: could check if resampling is necessary",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L236"
+      "source_location": "L230"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_analyse_modelled_obs_rationale_237",
+      "id": "openghg_analyse_modelled_obs_rationale_231",
       "label": "# TODO: we might also want to change how we resample, depending on whether…",
       "source_file": "openghg/analyse/_modelled_obs.py",
-      "source_location": "L237"
+      "source_location": "L231"
     },
     {
       "_origin": "ast",
@@ -134275,18 +137860,18 @@
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_objectstore_init_rationale_78",
+      "id": "openghg_objectstore_init_rationale_80",
       "label": "Lazily import object store helpers on first access.",
       "source_file": "openghg/objectstore/__init__.py",
-      "source_location": "L78"
+      "source_location": "L80"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_objectstore_init_rationale_90",
+      "id": "openghg_objectstore_init_rationale_92",
       "label": "Return the lazy public API for interactive introspection.",
       "source_file": "openghg/objectstore/__init__.py",
-      "source_location": "L90"
+      "source_location": "L92"
     },
     {
       "_origin": "ast",
@@ -134295,6 +137880,246 @@
       "label": "Check the integrity of object stores. Args: raise_error: if True, raise…",
       "source_file": "openghg/objectstore/_integrity.py",
       "source_location": "L15"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_metastore_rationale_1",
+      "label": "Experimental iRODS catalog metadata for immutable OpenGHG snapshots. The…",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_metastore_rationale_110",
+      "label": "Read one published snapshot's authoritative metadata. Args: uuid: Canonical…",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L110"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_metastore_rationale_150",
+      "label": "Search published records with the existing metastore semantics. Args:…",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L150"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_metastore_rationale_210",
+      "label": "Replace managed AVUs atomically while preserving unrelated metadata.",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L210"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_metastore_rationale_231",
+      "label": "Publish metadata for an uploaded, previously unpublished snapshot. Args:…",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L231"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_metastore_rationale_25",
+      "label": "Encode JSON metadata with lowercase keys and deterministic AVU values. Args:…",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L25"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_metastore_rationale_254",
+      "label": "Update exactly one record using TinyDB's existing merge semantics. Args: where:…",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L254"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_metastore_rationale_279",
+      "label": "Unpublish matching snapshots without deleting their payloads. Args: metadata:…",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L279"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_metastore_rationale_306",
+      "label": "Leave the borrowed iRODS session open.",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L306"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_metastore_rationale_72",
+      "label": "Store metadata on direct child data objects in an existing collection. Args:…",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L72"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_metastore_rationale_94",
+      "label": "Return the logical snapshot path after validating a canonical UUID. Args: uuid:…",
+      "source_file": "openghg/objectstore/_irods_metastore.py",
+      "source_location": "L94"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_rationale_1",
+      "label": "Experimental catalog-backed storage of immutable NetCDF snapshots. The supplied…",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_rationale_159",
+      "label": "Return a copy of the receipt, fetching and verifying data if needed.",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L159"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_rationale_164",
+      "label": "Load the complete verified NetCDF snapshot into memory.",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L164"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_rationale_169",
+      "label": "Reject mutation: publish another snapshot using the store's create method.",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L169"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_rationale_173",
+      "label": "Reject independent saves; the store publishes payload and metadata together.",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L173"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_rationale_177",
+      "label": "Move the remote snapshot to iRODS trash; retain existing local caches.",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L177"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_rationale_182",
+      "label": "Experimental ObjectStore using the iRODS catalog and data objects. Args:…",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L182"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_rationale_238",
+      "label": "Search authoritative catalog metadata without downloading payloads.",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L238"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_rationale_242",
+      "label": "Return catalog references matching search; dataset bytes remain remote.",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L242"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_rationale_246",
+      "label": "Return UUIDs matching catalog metadata.",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L246"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_rationale_250",
+      "label": "Publish a new immutable snapshot, returning its UUID. Metadata must be JSON-…",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L250"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_rationale_31",
+      "label": "Hash local bytes using an iRODS SHA-256 or legacy MD5 checksum format.",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L31"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_rationale_316",
+      "label": "Update catalog metadata; reject payload updates before any mutation.",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L316"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_rationale_332",
+      "label": "Move a published object and its AVUs to trash; do not delete local caches.",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L332"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_rationale_338",
+      "label": "Ask iRODS for a replica on an existing server-managed storage resource. This is…",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L338"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_rationale_47",
+      "label": "Read catalog identity and select a good, checksummed physical replica.",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L47"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_rationale_69",
+      "label": "Catalog reference whose payload is downloaded only on explicit access. Obtain…",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L69"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_rationale_84",
+      "label": "Read catalog metadata without transferring dataset bytes.",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L84"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_objectstore_irods_rationale_88",
+      "label": "Return a verified cached snapshot, downloading it when necessary. Every call…",
+      "source_file": "openghg/objectstore/_irods.py",
+      "source_location": "L88"
     },
     {
       "_origin": "ast",
@@ -140940,17 +144765,9 @@
       "_origin": "ast",
       "file_type": "rationale",
       "id": "tests_analyse_test_modelled_obs_alignment_rationale_54",
-      "label": "Irregular footprint times should not be dropped by xarray's exact coordinate…",
+      "label": "Irregular footprint times should use the containing left-labelled flux…",
       "source_file": "tests/analyse/test_modelled_obs_alignment.py",
       "source_location": "L54"
-    },
-    {
-      "_origin": "ast",
-      "file_type": "rationale",
-      "id": "tests_analyse_test_modelled_obs_alignment_rationale_63",
-      "label": "Probe the old behaviour: only footprint times already on the generated grid…",
-      "source_file": "tests/analyse/test_modelled_obs_alignment.py",
-      "source_location": "L63"
     },
     {
       "_origin": "ast",
@@ -141084,7 +144901,7 @@
       "_origin": "ast",
       "file_type": "rationale",
       "id": "tests_analyse_test_modelled_obs_rationale_339",
-      "label": "High-frequency flux should be forward-filled to irregular fp_time_resolved…",
+      "label": "Each resolved lag should use its containing flux interval at irregular times.",
       "source_file": "tests/analyse/test_modelled_obs.py",
       "source_location": "L339"
     },
@@ -142463,6 +146280,46 @@
       "label": "Check that the metastore can be modified by a second metastore instance even if…",
       "source_file": "tests/objectstore/test_file_locks.py",
       "source_location": "L65"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "tests_objectstore_test_irods_metastore_rationale_1",
+      "label": "Catalog behavior using real client AVU/query types and no iRODS server.",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "tests_objectstore_test_irods_metastore_rationale_102",
+      "label": "Simulate an existing payload, then publish its catalog record.",
+      "source_file": "tests/objectstore/test_irods_metastore.py",
+      "source_location": "L102"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "tests_objectstore_test_irods_rationale_1",
+      "label": "Transport failure checks and an opt-in real iRODS round trip.",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "tests_objectstore_test_irods_rationale_209",
+      "label": "Run only against a caller-supplied disposable collection, using real APIs.",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L209"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "tests_objectstore_test_irods_rationale_28",
+      "label": "Use real serialization and cache files, with an in-memory remote transport.",
+      "source_file": "tests/objectstore/test_irods.py",
+      "source_location": "L28"
     },
     {
       "_origin": "ast",
