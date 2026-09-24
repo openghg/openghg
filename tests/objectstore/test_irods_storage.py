@@ -38,9 +38,9 @@ def checksum(payload):
 @pytest.fixture
 def remote(tmp_path):
     """Use real cache files and client AVUs with an in-memory transport."""
-    collections, payloads, ids, avus = set(), {}, {}, {}
+    collections, payloads, ids, avus, replicas = set(), {}, {}, {}, {}
     state = SimpleNamespace(active=0, opened=0, closed=0, downloads=0, corrupt=False, changed=False)
-    session = Mock(host="example.invalid", port=1247)
+    session = Mock(host="example.invalid", port=1247, numThreads=4)
 
     @contextmanager
     def factory():
@@ -52,33 +52,75 @@ def remote(tmp_path):
             state.closed += 1
             state.active -= 1
 
+    @contextmanager
+    def clone():
+        cloned = Mock(numThreads=session.numThreads)
+
+        def replicate(*args, **kwargs):
+            assert cloned.numThreads == -1
+            return session.data_objects.replicate(*args, **kwargs)
+
+        cloned.data_objects.replicate.side_effect = replicate
+        with factory():
+            yield cloned
+
+    session.clone.side_effect = clone
+
     def get_object(path, local_path=None, **options):
         assert state.active
         if path not in payloads:
             raise DataObjectDoesNotExist()
         payload = payloads[path]
         if local_path is not None:
+            assert any(str(r.number) == options["replNum"] for r in get_object(path).replicas)
             state.downloads += 1
             Path(local_path).write_bytes(b"bad" if state.corrupt else payload)
             if state.changed:
                 ids[path] += 1
         replica = SimpleNamespace(
-            number=0, status="1", resource_name="demoResc", checksum=checksum(payload), size=len(payload)
+            number=0,
+            status="1",
+            resource_name="demoResc",
+            resc_hier="demoResc",
+            checksum=checksum(payload),
+            size=len(payload),
         )
-        return SimpleNamespace(id=ids[path], path=path, size=len(payload), replicas=[replica])
+        return SimpleNamespace(
+            id=ids[path], path=path, size=len(payload), replicas=[replica, *replicas.get(path, [])]
+        )
 
     def put_object(local_path, path, **options):
         assert state.active
         assert options["forceFlag"] is True
         payloads[path] = Path(local_path).read_bytes()
         ids.setdefault(path, len(ids) + 1)
+        for replica in replicas.get(path, []):
+            replica.status = "0"
+
+    def replicate_object(path, **options):
+        assert state.active
+        obj = get_object(path)
+        destination = options["destRescName"]
+        matches = [r for r in replicas.get(path, []) if destination in r.resc_hier.split(";")]
+        if matches:
+            replica = matches[0]
+        else:
+            replica = SimpleNamespace(
+                number=max(r.number for r in obj.replicas) + 1,
+                resource_name=destination,
+                resc_hier=destination,
+            )
+            replicas.setdefault(path, []).append(replica)
+        replica.status = "1"
+        replica.checksum = checksum(payloads[path])
+        replica.size = len(payloads[path])
 
     def open_object(path, mode, **options):
         assert state.active
         assert mode == "r"
-        assert options["replNum"] == "0"
         if path not in payloads:
             raise DataObjectDoesNotExist()
+        assert any(str(r.number) == options["replNum"] for r in get_object(path).replicas)
         state.downloads += 1
         payload = b"bad" if state.corrupt else payloads[path]
         if state.changed:
@@ -140,6 +182,7 @@ def remote(tmp_path):
     session.data_objects.get.side_effect = get_object
     session.data_objects.put.side_effect = put_object
     session.data_objects.open.side_effect = open_object
+    session.data_objects.replicate.side_effect = replicate_object
     session.data_objects.exists.side_effect = lambda path: path in payloads
     session.data_objects.unlink.side_effect = lambda path, **options: payloads.pop(path)
     session.collections.get.side_effect = get_collection
@@ -157,6 +200,7 @@ def remote(tmp_path):
         avus=avus,
         payloads=payloads,
         ids=ids,
+        replicas=replicas,
         cache=tmp_path / "cache",
     )
 
@@ -247,6 +291,7 @@ def test_default_reads_do_not_create_local_files(remote, monkeypatch):
     assert store["a"] == b"verified"
     assert store["a"] == b"verified"
     assert remote.state.downloads == 2
+    remote.session.data_objects.replicate.assert_not_called()
     assert not remote.cache.exists()
     for operation in (store.local_path, store.provenance):
         with pytest.raises(ValueError, match="caching is disabled"):
@@ -255,6 +300,212 @@ def test_default_reads_do_not_create_local_files(remote, monkeypatch):
     with pytest.raises(KeyError):
         store["a"]
     assert remote.state.opened == remote.state.closed
+
+
+@pytest.mark.parametrize("cached", [False, True])
+def test_strict_resource_reads_use_selected_replica_and_cache_receipt(remote, cached):
+    collection = remote.root + "/v1"
+    IRODSZarrMapping(remote.factory, collection)["a"] = b"verified"
+    path = collection + "/a"
+    remote.replicas[path] = [
+        SimpleNamespace(
+            number=3,
+            status="1",
+            resource_name="mirrorResc",
+            resc_hier="localTier;mirrorResc",
+            checksum=checksum(b"verified"),
+            size=8,
+        )
+    ]
+    store = IRODSZarrMapping(
+        remote.factory,
+        collection,
+        remote.cache if cached else None,
+        read_only=True,
+        read_resource="localTier",
+    )
+    assert store["a"] == b"verified"
+    if cached:
+        downloads = [call for call in remote.session.data_objects.get.call_args_list if len(call.args) > 1]
+        assert downloads[-1].kwargs["replNum"] == "3"
+        receipt = store.provenance("a")
+        assert receipt["source"]["resource"] == "mirrorResc"
+        assert receipt["source"]["replica_number"] == 3
+        assert store["a"] == b"verified"
+        assert remote.state.downloads == 1
+    else:
+        assert remote.session.data_objects.open.call_args.kwargs["replNum"] == "3"
+        assert not remote.cache.exists()
+    remote.session.data_objects.replicate.assert_not_called()
+
+
+@pytest.mark.parametrize("cached", [False, True])
+@pytest.mark.parametrize("existing", [False, True])
+def test_missing_or_stale_resource_fails_without_opt_in_and_can_fill_on_read(remote, cached, existing):
+    collection = remote.root + "/v1"
+    IRODSZarrMapping(remote.factory, collection)["a"] = b"verified"
+    path = collection + "/a"
+    if existing:
+        remote.replicas[path] = [
+            SimpleNamespace(
+                number=1,
+                status="0",
+                resource_name="mirrorResc",
+                resc_hier="mirrorResc",
+                checksum=checksum(b"obsolete"),
+                size=8,
+            )
+        ]
+    strict = IRODSZarrMapping(
+        remote.factory,
+        collection,
+        remote.cache if cached else None,
+        read_only=True,
+        read_resource="mirrorResc",
+    )
+    with pytest.raises(ObjectStoreError, match="no good replica.*mirrorResc"):
+        strict["a"]
+    assert remote.state.downloads == 0
+    remote.session.data_objects.replicate.assert_not_called()
+    mirror = IRODSZarrMapping(
+        remote.factory,
+        collection,
+        remote.cache if cached else None,
+        read_only=True,
+        read_resource="mirrorResc",
+        replicate_on_read=True,
+    )
+    original_id = remote.ids[path]
+    assert mirror["a"] == b"verified"
+    assert mirror["a"] == b"verified"
+    assert remote.ids[path] == original_id
+    remote.session.data_objects.replicate.assert_called_once_with(
+        path,
+        destRescName="mirrorResc",
+        updateRepl="",
+        verifyChksum="",
+    )
+    assert remote.replicas[path][0].status == "1"
+    assert remote.replicas[path][0].checksum == checksum(b"verified")
+    transfer = (
+        [call for call in remote.session.data_objects.get.call_args_list if len(call.args) > 1][-1]
+        if cached
+        else remote.session.data_objects.open.call_args
+    )
+    assert transfer.kwargs["replNum"] == "1"
+    assert remote.cache.exists() is cached
+    assert remote.session.numThreads == 4
+    assert remote.state.opened == remote.state.closed
+
+
+@pytest.mark.parametrize("cached", [False, True])
+def test_demand_replication_denial_does_not_fall_back_to_source_or_cache(remote, cached):
+    collection = remote.root + "/v1"
+    IRODSZarrMapping(remote.factory, collection)["a"] = b"verified"
+    mirror = IRODSZarrMapping(
+        remote.factory,
+        collection,
+        remote.cache if cached else None,
+        read_only=True,
+        read_resource="mirrorResc",
+        replicate_on_read=True,
+    )
+    assert mirror["a"] == b"verified"
+    downloads = remote.state.downloads
+    remote.replicas[collection + "/a"][0].status = "0"
+    remote.session.data_objects.replicate.side_effect = PermissionError("server denied replication")
+    with pytest.raises(PermissionError, match="server denied"):
+        mirror["a"]
+    assert remote.state.downloads == downloads
+
+
+@pytest.mark.parametrize("cached", [False, True])
+@pytest.mark.parametrize("code,error", [(-121000, PermissionError), (-999999, ObjectStoreError)])
+def test_unmapped_replication_errors_cannot_become_zarr_fill_values(remote, cached, code, error):
+    collection = remote.root + "/v1"
+    source = IRODSKVStore(IRODSZarrMapping(remote.factory, collection))
+    zarr.array([7.0, 8.0], store=source, chunks=1, fill_value=-999.0)
+    mirror = IRODSKVStore(
+        IRODSZarrMapping(
+            remote.factory,
+            collection,
+            remote.cache if cached else None,
+            read_only=True,
+            read_resource="mirrorResc",
+            replicate_on_read=True,
+        )
+    )
+    array = zarr.open_array(mirror, mode="r")
+    downloads = remote.state.downloads
+    remote.session.data_objects.replicate.side_effect = KeyError(code)
+    with pytest.raises(error, match=str(code)) as raised:
+        array[:]
+    assert isinstance(raised.value.__cause__, KeyError)
+    assert raised.value.__cause__.args == (code,)
+    assert remote.state.downloads == downloads
+    assert remote.state.opened == remote.state.closed
+
+
+@pytest.mark.parametrize("args", [("missing setting",), (0,), (42,), (-121000, "context")])
+def test_replication_preserves_nonserver_key_errors(remote, args):
+    collection = remote.root + "/v1"
+    IRODSZarrMapping(remote.factory, collection)["a"] = b"verified"
+    mirror = IRODSZarrMapping(
+        remote.factory,
+        collection,
+        read_resource="mirrorResc",
+        replicate_on_read=True,
+    )
+    error = KeyError(*args)
+    remote.session.data_objects.replicate.side_effect = error
+    with pytest.raises(KeyError) as raised:
+        mirror["a"]
+    assert raised.value is error
+
+
+@pytest.mark.parametrize("failure", ["identity", "stale", "checksum"])
+def test_failed_replication_verification_prevents_read(remote, failure):
+    collection = remote.root + "/v1"
+    IRODSZarrMapping(remote.factory, collection)["a"] = b"verified"
+    path = collection + "/a"
+    replicate = remote.session.data_objects.replicate.side_effect
+
+    def broken_replication(*args, **kwargs):
+        replicate(*args, **kwargs)
+        if failure == "identity":
+            remote.ids[path] += 1
+        elif failure == "stale":
+            remote.replicas[path][0].status = "0"
+        else:
+            remote.replicas[path][0].checksum = checksum(b"incorrect")
+
+    remote.session.data_objects.replicate.side_effect = broken_replication
+    mirror = IRODSZarrMapping(
+        remote.factory,
+        collection,
+        read_resource="mirrorResc",
+        replicate_on_read=True,
+    )
+    with pytest.raises(ObjectStoreError):
+        mirror["a"]
+    assert remote.state.downloads == 0
+
+
+@pytest.mark.parametrize(
+    "options",
+    [
+        {"read_resource": ""},
+        {"read_resource": "   "},
+        {"read_resource": 1},
+        {"replicate_on_read": True},
+        {"replicate_on_read": "false"},
+    ],
+)
+def test_invalid_mirror_options_fail_before_remote_access(remote, options):
+    opened = remote.state.opened
+    with pytest.raises(ValueError):
+        IRODSZarrMapping(remote.factory, remote.root, **options)
+    assert remote.state.opened == opened
 
 
 @pytest.mark.parametrize("cached", [False, True])

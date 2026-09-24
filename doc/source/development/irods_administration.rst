@@ -132,7 +132,12 @@ the hostname or IP address used for that endpoint. Do not disable verification
 to fix a mismatch. Opening the port does not grant iRODS access. The current
 OpenGHG transport uses one transfer stream, so its tested operations do not
 need a separate parallel-transfer port range. Laptop routing still needs an
-end-to-end check in your deployment.
+end-to-end check in your deployment. This client-only tunnel does not establish
+a shared mirror resource server; see :doc:`irods_mirroring` for the additional
+server-to-server connectivity and trust requirements. Explicit replica sync
+uses a read-only OpenGHG handle without the root writer lock, but its account
+still needs native ``modify_object`` permission; the ordinary reader role
+cannot populate missing replicas.
 
 As each intended user, verify that search returns a known dataset and loading a
 small selection succeeds. Verify a reader cannot write using a separate

@@ -21,7 +21,8 @@ from openghg.objectstore._irods_storage import (
     IRODSKVStore,
     IRODSZarrMapping,
     SessionFactory,
-    _snapshot,
+    _ensure_replica,
+    _validate_read_options,
     read_document,
     validate_collection,
     validate_ordinary_collection,
@@ -150,6 +151,8 @@ class IRODSDatasource(Datasource):
             self._owner.cache_dir,
             read_only=not writable,
             resource=self._owner.resource,
+            read_resource=self._owner.read_resource if path not in self._staging else None,
+            replicate_on_read=self._owner.replicate_on_read if path not in self._staging else False,
             write_guard=guard,
         )
 
@@ -347,6 +350,10 @@ class IRODSObjectStore(ObjectStore[IRODSDatasource, xr.Dataset]):
             (the default) reads into memory without a persistent data cache.
         mode: Read-only (``r``) or read/write (``rw``) access.
         resource: Optional registered iRODS resource for new payload objects.
+        read_resource: Optional registered resource required for payload reads;
+            coordinating resources match replicas in their hierarchy.
+        replicate_on_read: Explicitly create or refresh missing read-resource
+            replicas, including in read-only mode, subject to server permissions.
         data_type: OpenGHG data type, or empty for store-level documents.
         session_factory: Context-manager factory that opens authenticated sessions.
         skip_keys: Metadata keys excluded from normalization.
@@ -367,6 +374,8 @@ class IRODSObjectStore(ObjectStore[IRODSDatasource, xr.Dataset]):
         mode: Literal["r", "rw"] = "r",
         resource: str | None = None,
         *,
+        read_resource: str | None = None,
+        replicate_on_read: bool = False,
         data_type: str = "surface",
         session_factory: SessionFactory | None = None,
         skip_keys: list | None = None,
@@ -374,6 +383,7 @@ class IRODSObjectStore(ObjectStore[IRODSDatasource, xr.Dataset]):
     ) -> None:
         if mode not in ("r", "rw"):
             raise ValueError("mode must be 'r' or 'rw'.")
+        _validate_read_options(read_resource, replicate_on_read)
         if session_factory is None:
             if session is None:
                 raise ValueError("Provide a session or a session_factory.")
@@ -390,6 +400,8 @@ class IRODSObjectStore(ObjectStore[IRODSDatasource, xr.Dataset]):
         self.cache_dir = Path(cache_dir).expanduser().resolve() if cache_dir is not None else None
         self.mode = mode
         self.resource = resource
+        self.read_resource = read_resource
+        self.replicate_on_read = replicate_on_read
         self._connection: Any = None
         self._depth = 0
         self._context_thread: int | None = None
@@ -551,36 +563,20 @@ class IRODSObjectStore(ObjectStore[IRODSDatasource, xr.Dataset]):
         self.metastore.publish(uuid, None, snapshot["datasource"], snapshot["versions"], snapshot["revision"])
 
     def replicate(self, uuid: str, resource: str) -> None:
-        """Replicate every Zarr object to a registered resource under its existing data ID."""
-        from irods import keywords as kw
+        """Replicate a pinned publication while preserving each object's data ID.
 
-        self._require_write()
-        if not isinstance(resource, str) or not resource.strip():
-            raise ValueError("A registered destination resource is required.")
+        This changes no logical data and acquires no writer lock. Read-only
+        handles may replicate when native iRODS permissions allow it. Concurrent
+        publications are not included; repeat to populate their new generations.
+        """
+        _validate_read_options(resource, True)
         datasource = self.get_datasource(uuid)
         with self._sessions() as session:
             for version in datasource._store.versions:
                 mapping = datasource.mapping(version)
                 for key in mapping:
                     path = mapping.collection + "/" + key
-                    before = _snapshot(session, path)
-                    session.data_objects.replicate(
-                        path,
-                        **{kw.DEST_RESC_NAME_KW: resource, kw.UPDATE_REPL_KW: "", kw.VERIFY_CHKSUM_KW: ""},
-                    )
-                    after = _snapshot(session, path)
-                    identity_keys = ("data_id", "logical_path", "checksum", "size")
-                    if any(before[k] != after[k] for k in identity_keys):
-                        raise ObjectStoreError("Replica creation changed the source identity or content.")
-                    obj = session.data_objects.get(path)
-                    if not any(
-                        str(r.status) == "1"
-                        and resource in r.resc_hier.split(";")
-                        and r.checksum == before["checksum"]
-                        and int(r.size) == before["size"]
-                        for r in obj.replicas
-                    ):
-                        raise ObjectStoreError("The destination has no verified good replica.")
+                    _ensure_replica(session, path, resource)
 
 
 def irods_object_store(
@@ -593,6 +589,8 @@ def irods_object_store(
     environment_file: str | None = None,
     cache_dir: str | Path | None = None,
     resource: str | None = None,
+    read_resource: str | None = None,
+    replicate_on_read: bool = False,
     **session_options: Any,
 ) -> IRODSObjectStore:
     """Configured factory using a native iRODS environment and optional credentials.
@@ -603,6 +601,8 @@ def irods_object_store(
     retained only in memory and never written into dataset state or cache receipts.
     Persistent data caching is disabled unless ``cache_dir`` is supplied; use a
     private directory with sufficient space and inodes when opting in.
+    ``read_resource`` strictly selects native replicas. ``replicate_on_read``
+    optionally fills that resource on demand, subject to iRODS permissions.
     """
     import os
 
@@ -623,6 +623,8 @@ def irods_object_store(
         cache_dir,
         mode,
         resource,
+        read_resource=read_resource,
+        replicate_on_read=replicate_on_read,
         data_type=data_type,
         session_factory=sessions,
         skip_keys=skip_keys,

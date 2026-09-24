@@ -15,7 +15,8 @@ establish production readiness or compatibility with every scientific data type.
 See :doc:`objectstore_backends` for the generic factory contract and
 :doc:`irods_publication` for snapshot, conflict, and retention guarantees.
 Operators creating a shared collection and assigning named readers and writers
-should follow :doc:`irods_administration`.
+should follow :doc:`irods_administration`. For registered replicas on a second
+server shared by multiple readers, see :doc:`irods_mirroring`.
 
 Prepare a service and configure a store
 =======================================
@@ -174,8 +175,8 @@ or checking a scientific data-type specification.
            print("Collection:", collection)
            print("UUID:", uuid)
 
-A writable store must be entered with ``with`` before any mutations. The
-constructor defaults to ``mode="r"``. The example borrows its supplied session:
+A writable store must be entered with ``with`` before changing datasource
+content, publications, or store documents. The constructor defaults to ``mode="r"``. The example borrows its supplied session:
 keep that session open while using its datasources. Closing the store releases
 its writer lock but does not close a borrowed session.
 
@@ -257,19 +258,22 @@ managed replication:
 
 .. code-block:: python
 
-   from openghg.objectstore import get_bucket, locking_object_store
+   from openghg.objectstore import get_bucket, open_object_store
 
-   with locking_object_store(get_bucket("irods"), "surface", mode="rw") as store:
+   with open_object_store(get_bucket("irods"), "surface", mode="r") as store:
        store.replicate(record["uuid"], resource="another_registered_resource")
 
-Replication covers every Zarr object in every version of that datasource. Each
-object retains its own data ID, and the backend checks destination replica
-status, size, and checksum. Replicas describe placement of one object, while
-OpenGHG versions describe dataset revisions. Making a laptop a managed iRODS
-resource would require a reachable server and an operational design for its
-intermittent connectivity. The implemented laptop workflow reads from the
-remote store, with optional verified caching and no offline discovery or
-offline fallback.
+Replication pins the datasource publication and covers every Zarr object in
+each of its versions. It uses no root writer lock, so publication can continue
+during the transfer. Native iRODS ``modify_object`` permission is still required
+although the OpenGHG handle is read-only. Each object retains its own data ID,
+and the backend checks destination replica status, size, and checksum. Replicas
+describe placement of one object, while OpenGHG versions describe dataset revisions. A shared server mirror requires
+a trusted, reachable iRODS consumer server. Use ``read_resource`` to require that resource for reads and explicitly enable
+``replicate_on_read`` to populate it on demand with suitable credentials.
+See :doc:`irods_mirroring` for configuration, replica coverage checks, and the
+network and permission requirements. Catalogue access remains online; no
+offline discovery or fallback is implemented.
 
 Persistence, writer locks, and failure recovery
 ===============================================

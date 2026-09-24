@@ -195,13 +195,31 @@ def _digest(payload: Path | bytes, checksum: str) -> str:
     )
 
 
-def _snapshot(session: Any, path: str) -> dict[str, Any]:
+def _validate_read_options(read_resource: str | None, replicate_on_read: bool) -> None:
+    if read_resource is not None and (not isinstance(read_resource, str) or not read_resource.strip()):
+        raise ValueError("read_resource must name a registered iRODS resource.")
+    if not isinstance(replicate_on_read, bool):
+        raise ValueError("replicate_on_read must be a boolean.")
+    if replicate_on_read and read_resource is None:
+        raise ValueError("replicate_on_read requires read_resource.")
+
+
+def _on_resource(replica: Any, resource: str) -> bool:
+    return resource == replica.resource_name or resource in replica.resc_hier.split(";")
+
+
+def _snapshot(session: Any, path: str, resource: str | None = None) -> dict[str, Any]:
+    """Select a checksum-consistent good replica, strictly on resource if given."""
     obj = session.data_objects.get(path)
     replicas = [r for r in obj.replicas if str(r.status) == "1"]
     if not replicas or any(not r.checksum for r in replicas):
         raise ObjectStoreError("The object needs a good replica with a registered checksum.")
     if len({(r.checksum, int(r.size)) for r in replicas}) != 1:
         raise ObjectStoreError("Good replicas disagree about checksum or size; repair the remote object.")
+    if resource is not None:
+        replicas = [r for r in replicas if _on_resource(r, resource)]
+        if not replicas:
+            raise ObjectStoreError(f"The object has no good replica on requested resource {resource!r}.")
     replica = min(replicas, key=lambda r: int(r.number))
     return {
         "host": session.host,
@@ -216,6 +234,44 @@ def _snapshot(session: Any, path: str) -> dict[str, Any]:
     }
 
 
+def _ensure_replica(session: Any, path: str, resource: str) -> dict[str, Any]:
+    """Create or refresh a destination replica and verify its unchanged identity.
+
+    A good destination is reused. Native iRODS permissions govern replication;
+    no logical content or publication is changed, and no client cache is used.
+    """
+    from irods import keywords as kw
+
+    _validate_read_options(resource, True)
+    before = _snapshot(session, path)
+    obj = session.data_objects.get(path)
+    if not any(str(r.status) == "1" and _on_resource(r, resource) for r in obj.replicas):
+        # PRC reads numThreads from its session. A clone avoids changing a
+        # shared reader session; -1 keeps the transfer on control connections.
+        with session.clone() as replica_session:
+            replica_session.numThreads = -1
+            try:
+                replica_session.data_objects.replicate(
+                    path,
+                    **{kw.DEST_RESC_NAME_KW: resource, kw.UPDATE_REPL_KW: "", kw.VERIFY_CHKSUM_KW: ""},
+                )
+            except KeyError as exc:
+                # PRC can lack newer server error codes. Zarr interprets a
+                # KeyError as an absent chunk, which would hide this failure.
+                if len(exc.args) != 1 or not isinstance(exc.args[0], int) or exc.args[0] >= 0:
+                    raise
+                code = exc.args[0]
+                if code == -121000:  # SYS_USER_NO_PERMISSION in iRODS 5.
+                    raise PermissionError(f"iRODS replication denied by the server ({code}).") from exc
+                raise ObjectStoreError(
+                    f"iRODS replication failed with unmapped server error {code}."
+                ) from exc
+    after = _snapshot(session, path, resource)
+    if any(before[k] != after[k] for k in ("data_id", "logical_path", "checksum", "size")):
+        raise ObjectStoreError("Replica creation changed the source identity or content.")
+    return after
+
+
 class IRODSZarrMapping(MutableMapping[str, bytes]):
     """Store each Zarr key as an iRODS object with checksum-verified reads.
 
@@ -223,6 +279,10 @@ class IRODSZarrMapping(MutableMapping[str, bytes]):
     persistent cache. Reads check the live catalog even on cache hits. Cached
     objects and receipts are immutable per catalog identity; deleting remote
     data does not evict cached bytes. Cache entries are not iRODS replicas.
+    ``read_resource`` strictly selects a named registered resource, including
+    replicas beneath a named coordinating resource.
+    ``replicate_on_read`` explicitly permits native replica creation or refresh
+    there, including for read-only mappings, subject to server permissions.
     """
 
     def __init__(
@@ -233,13 +293,18 @@ class IRODSZarrMapping(MutableMapping[str, bytes]):
         *,
         read_only: bool = False,
         resource: str | None = None,
+        read_resource: str | None = None,
+        replicate_on_read: bool = False,
         write_guard: Callable[[], None] | None = None,
     ) -> None:
+        _validate_read_options(read_resource, replicate_on_read)
         self.session_factory = session_factory
         self.collection = validate_collection(collection)
         self.cache_dir = Path(cache_dir).expanduser() if cache_dir is not None else None
         self.read_only = read_only
         self.resource = resource
+        self.read_resource = read_resource
+        self.replicate_on_read = replicate_on_read
         self.write_guard = write_guard
 
     def _path(self, key: str) -> str:
@@ -252,6 +317,12 @@ class IRODSZarrMapping(MutableMapping[str, bytes]):
         if self.write_guard is not None:
             self.write_guard()
 
+    def _read_snapshot(self, session: Any, path: str) -> dict[str, Any]:
+        if self.replicate_on_read:
+            assert self.read_resource is not None
+            return _ensure_replica(session, path, self.read_resource)
+        return _snapshot(session, path, self.read_resource)
+
     def local_path(self, key: str) -> Path:
         """Return a verified cached file; raise ValueError if caching is disabled."""
         from irods import keywords as kw
@@ -262,7 +333,7 @@ class IRODSZarrMapping(MutableMapping[str, bytes]):
         path = self._path(key)
         with self.session_factory() as session:
             try:
-                identity = _snapshot(session, path)
+                identity = self._read_snapshot(session, path)
             except DataObjectDoesNotExist as exc:
                 raise KeyError(key) from exc
             digest = hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()
@@ -294,7 +365,7 @@ class IRODSZarrMapping(MutableMapping[str, bytes]):
                         or _digest(staged, identity["checksum"]) != identity["checksum"]
                     ):
                         raise ObjectStoreError("Downloaded bytes do not match the catalog checksum and size.")
-                    if _snapshot(session, path) != identity:
+                    if _snapshot(session, path, self.read_resource) != identity:
                         raise ObjectStoreError("Remote object changed during download; retry the read.")
                     provenance = {
                         "schema_version": 1,
@@ -321,7 +392,7 @@ class IRODSZarrMapping(MutableMapping[str, bytes]):
         path = self._path(key)
         with self.session_factory() as session:
             try:
-                identity = _snapshot(session, path)
+                identity = self._read_snapshot(session, path)
                 with session.data_objects.open(
                     path, "r", **{kw.REPL_NUM_KW: str(identity["replica_number"])}
                 ) as stream:
@@ -333,7 +404,7 @@ class IRODSZarrMapping(MutableMapping[str, bytes]):
                 or _digest(payload, identity["checksum"]) != identity["checksum"]
             ):
                 raise ObjectStoreError("Downloaded bytes do not match the catalog checksum and size.")
-            if _snapshot(session, path) != identity:
+            if _snapshot(session, path, self.read_resource) != identity:
                 raise ObjectStoreError("Remote object changed during download; retry the read.")
             return payload
 
