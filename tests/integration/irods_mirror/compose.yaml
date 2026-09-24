@@ -1,0 +1,99 @@
+# No host ports are published. The client runs on the private Compose network.
+x-server: &server
+  build:
+    context: ../../..
+    dockerfile: tests/integration/irods_mirror/Dockerfile
+    target: server
+  platform: linux/amd64
+  shm_size: 128mb
+  stop_grace_period: 30s
+
+services:
+  initialize:
+    <<: *server
+    command: [initialize]
+    volumes:
+      - secrets:/lab-secrets
+
+  catalog:
+    image: postgres:16.15-bookworm
+    environment:
+      POSTGRES_USER: irods
+      POSTGRES_DB: ICAT
+      POSTGRES_PASSWORD_FILE: /lab-secrets/database-password
+    depends_on:
+      initialize:
+        condition: service_completed_successfully
+    volumes:
+      - secrets:/lab-secrets:ro
+      - catalog:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U irods -d ICAT]
+      interval: 2s
+      timeout: 3s
+      retries: 60
+
+  provider:
+    <<: *server
+    hostname: provider
+    command: [provider]
+    depends_on:
+      catalog:
+        condition: service_healthy
+    volumes:
+      - secrets:/lab-secrets:ro
+      - provider-state:/var/lib/irods
+      - provider-config:/etc/irods
+    healthcheck:
+      test: [CMD, runuser, -u, irods, --, ils]
+      start_period: 30s
+      interval: 3s
+      timeout: 10s
+      retries: 60
+
+  consumer:
+    <<: *server
+    hostname: consumer
+    command: [consumer]
+    depends_on:
+      provider:
+        condition: service_healthy
+    volumes:
+      - secrets:/lab-secrets:ro
+      - consumer-state:/var/lib/irods
+      - consumer-config:/etc/irods
+    healthcheck:
+      test: [CMD, runuser, -u, irods, --, ils]
+      start_period: 30s
+      interval: 3s
+      timeout: 10s
+      retries: 60
+
+  client:
+    build:
+      context: ../../..
+      dockerfile: tests/integration/irods_mirror/Dockerfile
+      target: client
+    platform: linux/amd64
+    profiles: [test]
+    depends_on:
+      consumer:
+        condition: service_healthy
+    volumes:
+      - secrets:/lab-secrets:ro
+    environment:
+      IRODS_ENVIRONMENT_FILE: /run/irods-client/environment.json
+      OPENGHG_IRODS_MIRROR_ENVIRONMENT_FILE: /run/irods-client/consumer-environment.json
+      OPENGHG_IRODS_TEST_COLLECTION: /mirrorZone/home/rods
+      OPENGHG_IRODS_SOURCE_RESOURCE: originResc
+      OPENGHG_IRODS_MIRROR_RESOURCE: mirrorResc
+      OPENGHG_IRODS_MIRROR_REQUIRE_DISTINCT_HOSTS: "1"
+      OPENGHG_IRODS_ADMIN_TESTS: "1"
+
+volumes:
+  secrets:
+  catalog:
+  provider-state:
+  provider-config:
+  consumer-state:
+  consumer-config:

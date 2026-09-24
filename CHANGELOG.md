@@ -26,6 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added online iRODS resource mirrors with strict resource-selected reads, opt-in replication on demand, replica coverage/synchronisation commands, and a reproducible two-server integration lab. Native replicas preserve catalogue object identities; no offline catalogue or automatic eviction is provided.
+
 - Added a configurable iRODS ObjectStore with catalog-backed metadata and store documents, the existing datasource version/overlap behaviour over Zarr objects, lazy checksum-verified reads, a shared writer lock, and managed-resource replication. Persistent client data caching and provenance receipts require an explicit `cache_dir`; downloaded data stays in memory by default. The optional backend supports standardisation, search, retrieval, and DataManager through the configured factory.
 - Added iRODS shared-store administration commands for named accounts, reader/writer groups, inherited permissions, and access inspection, with opt-in tests using distinct authenticated users.
 - Added per-store ObjectStore factory configuration, backend options, and environment-based credential references. Backend factories can provide store documents and datasource persistence while existing local stores retain their defaults.

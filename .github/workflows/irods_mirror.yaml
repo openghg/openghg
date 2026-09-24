@@ -1,0 +1,34 @@
+name: iRODS two-server mirror
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/irods_mirror.yaml"
+      - "openghg/objectstore/_irods*.py"
+      - "openghg/objectstore/irods_mirror.py"
+      - "tests/objectstore/test_irods*.py"
+      - "tests/integration/irods_mirror/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      COMPOSE_PROJECT_NAME: openghg-mirror-lab
+      COMPOSE_FILE: tests/integration/irods_mirror/compose.yaml
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build and test a provider with a separate mirror consumer
+        run: docker compose run --build --rm client
+      - name: Show service state on failure
+        if: failure()
+        run: |
+          docker compose ps -a
+          docker compose logs --no-color provider consumer initialize
+      - name: Remove the disposable zone and its credentials
+        if: always()
+        run: docker compose down --volumes --remove-orphans

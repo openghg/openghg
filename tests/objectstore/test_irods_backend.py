@@ -67,6 +67,141 @@ def test_factory_reads_without_cache_by_default(backend, remote, monkeypatch):
     assert not remote.cache.exists()
 
 
+def test_factory_mirror_reads_after_context_exit_without_changing_publication(backend, remote, monkeypatch):
+    connection_options = []
+
+    def session(**kwargs):
+        connection_options.append(kwargs)
+        return remote.factory()
+
+    monkeypatch.setattr("irods.session.iRODSSession", session)
+    source = irods_object_store(bucket=remote.root, data_type="surface", mode="rw")
+    with source:
+        uuid = source.create({"species": "ch4"}, dataset(), period="3600s")
+    before = deepcopy(remote.payloads), deepcopy(remote.avus), dict(remote.ids)
+    remote.session.collections.create.reset_mock()
+    mirror = irods_object_store(
+        bucket=remote.root,
+        data_type="surface",
+        read_resource="mirrorResc",
+        replicate_on_read=True,
+    )
+    with mirror:
+        datasource = mirror.get_datasource(uuid)
+        lazy = datasource.get_data()
+    assert not mirror._locked
+    xr.testing.assert_equal(lazy.load(), dataset())
+    assert remote.session.data_objects.replicate.call_count > 0
+    assert (remote.payloads, remote.avus, remote.ids) == before
+    assert not remote.cache.exists()
+    remote.session.collections.create.assert_not_called()
+    assert all(
+        "read_resource" not in options and "replicate_on_read" not in options
+        for options in connection_options
+    )
+    assert remote.state.opened == remote.state.closed
+
+
+def test_explicit_replication_reuses_good_targets_without_a_writer_lock(backend, remote):
+    with backend:
+        uuid = backend.create({"species": "ch4"}, dataset(), period="3600s")
+    reader = IRODSObjectStore(None, remote.root, mode="r", session_factory=remote.factory)
+    before = deepcopy(remote.avus), dict(remote.ids)
+    remote.session.collections.create.reset_mock()
+    with reader:
+        reader.replicate(uuid, "mirrorResc")
+        count = remote.session.data_objects.replicate.call_count
+        assert count == len(remote.payloads)
+    reader.replicate(uuid, "mirrorResc")
+    assert remote.session.data_objects.replicate.call_count == count
+    remote.session.collections.create.assert_not_called()
+    assert (remote.avus, remote.ids) == before
+    assert remote.session.numThreads == 4
+
+
+def test_replication_pins_payloads_while_a_writer_publishes_new_data(backend, remote):
+    from openghg.objectstore.irods_mirror import sync_replicas
+
+    original = dataset()
+    replacement = original.assign(mf=original.mf * 10)
+    with backend:
+        uuid = backend.create({"species": "ch4"}, original, period="3600s")
+    reader = IRODSObjectStore(
+        None, remote.root, mode="r", read_resource="mirrorResc", session_factory=remote.factory
+    )
+    pinned = reader.get_datasource(uuid)
+    published_paths = set(remote.payloads)
+    replicate = remote.session.data_objects.replicate.side_effect
+    updated = False
+
+    def replicate_with_concurrent_update(path, **options):
+        nonlocal updated
+        assert not reader._locked
+        if not updated:
+            updated = True
+            with backend:
+                backend.update(uuid, data=replacement, if_exists="new", new_version=False)
+        return replicate(path, **options)
+
+    remote.session.data_objects.replicate.side_effect = replicate_with_concurrent_update
+    with reader:
+        report = sync_replicas(reader, "mirrorResc", [uuid])
+    assert updated
+    assert set(remote.replicas) == published_paths
+    assert not report["complete"]
+    assert report["datasources"][0]["revision"] != pinned.revision
+    assert report["datasources"][0]["missing_objects"] > 0
+    xr.testing.assert_equal(pinned.get_data().load(), original)
+    with reader:
+        assert sync_replicas(reader, "mirrorResc", [uuid], verify=True)["complete"]
+    xr.testing.assert_equal(reader.get_datasource(uuid).get_data().load(), replacement)
+
+
+def test_mirror_writer_does_not_replicate_unpublished_generations(backend, remote):
+    store = IRODSObjectStore(
+        None,
+        remote.root,
+        mode="rw",
+        resource="demoResc",
+        read_resource="mirrorResc",
+        replicate_on_read=True,
+        session_factory=remote.factory,
+    )
+    with store:
+        uuid = store.create({"species": "ch4"}, dataset(), period="3600s")
+        remote.session.data_objects.replicate.assert_not_called()
+        assert all(
+            call.kwargs["destRescName"] == "demoResc"
+            for call in remote.session.data_objects.put.call_args_list
+        )
+        published = set(remote.payloads)
+        datasource = store.get_datasource(uuid)
+        datasource.add(dataset("2020-01-02"), if_exists="combine", new_version=False)
+        assert all(call.args[0] in published for call in remote.session.data_objects.replicate.call_args_list)
+        datasource.save()
+    xr.testing.assert_equal(
+        datasource.get_data().load(),
+        xr.concat([dataset(), dataset("2020-01-02")], dim="time"),
+    )
+
+
+@pytest.mark.parametrize(
+    "options",
+    [
+        {"read_resource": ""},
+        {"read_resource": "   "},
+        {"read_resource": 1},
+        {"replicate_on_read": True},
+        {"replicate_on_read": "false"},
+    ],
+)
+def test_backend_rejects_invalid_mirror_options_before_connecting(remote, options):
+    opened = remote.state.opened
+    with pytest.raises(ValueError):
+        IRODSObjectStore(None, remote.root, session_factory=remote.factory, **options)
+    assert remote.state.opened == opened
+
+
 def test_context_reentry_catalog_state_and_deferred_lazy_reads(backend, remote):
     original = dataset()
     with backend:
