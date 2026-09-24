@@ -37,7 +37,7 @@ echo "Added support for new data format" > newsfragments/5678.feature
 
 ## Building the Changelog
 
-To generate the changelog (usually done at release time):
+The **Prepare release** GitHub Actions workflow assembles the changelog. To do this manually:
 
 ```bash
 towncrier build --version=X.Y.Z --draft  # preview

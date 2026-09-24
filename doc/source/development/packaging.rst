@@ -33,50 +33,20 @@ not to cause breaking changes in the public API.
 Creating a release
 ------------------
 
-The creation of the packages required by PyPI and conda is handled in the GitHub actions workflow files under ``.github/workflows/workflow.yaml``.
-The package build and release workflow will only be triggered by a tagged commit.
-Before we get to this step we need to make sure everything is set up to do a release. Ensure all issues in the release milestone are completed.
+Ensure ``devel`` is working and all issues in the release milestone are complete. In GitHub Actions, run **Prepare release** with the next version number (for example, ``0.20.0``). This creates a ``release/v0.20.0`` branch from ``devel``, runs Towncrier, and opens a preparation PR back into ``devel``. The workflow dispatches the OpenGHG, conda, and documentation checks because PRs created by ``GITHUB_TOKEN`` do not trigger those checks automatically.
+
+Review the generated release entry and merge the preparation PR after its checks pass. The current ``Unreleased`` section contains notes written before Towncrier was introduced. For the first release using this workflow, move those notes into the new release section and leave ``Unreleased`` empty. Update its comparison link to the new version. Add future changes as news fragments rather than editing ``CHANGELOG.md`` in feature PRs.
+
+To preview or assemble release notes manually from a checkout of ``devel``, run:
 
 .. code-block:: bash
 
-    git checkout devel
-    git pull
+   towncrier build --version=0.20.0 --draft
+   towncrier build --version=0.20.0 --yes
 
-Make sure to have a fully working devel branch.
+The build adds a new release entry to ``CHANGELOG.md`` and removes the consumed fragments. If preparing manually, commit both changes before opening the PR. The release workflow checks for a matching Towncrier entry, no pending fragments, and an empty ``Unreleased`` section before publishing from a version tag.
 
-Using towncrier to generate the changelog
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-OpenGHG uses `towncrier <https://towncrier.readthedocs.io/>`_ to manage the changelog. This tool collects "news fragments" from the ``newsfragments/`` directory and builds the changelog automatically.
-
-To build the changelog for a new release (e.g., version 0.20.0):
-
-.. code-block:: bash
-
-    towncrier build --version=0.20.0 --yes
-
-This will:
-
-1. Collect all news fragments from ``newsfragments/``
-2. Add a new release section to ``CHANGELOG.md``
-3. Remove the processed news fragments
-
-You can preview what the changelog will look like without making changes:
-
-.. code-block:: bash
-
-    towncrier build --version=0.20.0 --draft
-
-After running ``towncrier build``, review the generated changelog entry and commit the changes.
-
-Existing Unreleased notes
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-The current ``Unreleased`` section contains notes written before Towncrier was introduced. For the next release, review those notes and move the released changes into the new release section after building it. Update the ``Unreleased`` comparison link to the new version. Add future changes as news fragments rather than editing ``CHANGELOG.md`` in pull requests.
-
-Now create a PR to merge ``devel`` into ``master`` with name of PR as "Release ``Version``".
-
-Upon PR approval the changes from "devel" can be merged into "master".
+After the preparation PR merges, open a PR from ``devel`` into ``master`` named "Release ``Version``". Merge it after approval.
 
 Tagging a new release
 ---------------------

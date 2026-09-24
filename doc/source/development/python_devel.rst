@@ -449,7 +449,7 @@ The news fragment should contain a brief description of your change. It will aut
 Building the changelog
 ----------------------
 
-During the release process, maintainers will run:
+The **Prepare release** GitHub Actions workflow runs Towncrier. To preview or assemble notes manually, run:
 
 .. code-block:: bash
 
