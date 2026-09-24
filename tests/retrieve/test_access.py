@@ -3,6 +3,7 @@ import datetime
 import numpy as np
 import pandas as pd
 import pytest
+import xarray as xr
 from helpers import call_function_packager
 from openghg.dataobjects import ObsData
 from openghg.retrieve import (
@@ -13,8 +14,9 @@ from openghg.retrieve import (
     get_obs_surface,
     search,
 )
+from openghg.retrieve._access import _sanitise_negative_uncertainties
 from openghg.types import SearchError
-from openghg.util import compress, compress_str, hash_bytes
+from openghg.util import compress, compress_str
 from pandas import Timedelta, Timestamp
 
 # a = [
@@ -265,9 +267,9 @@ def test_convert_units_get_obs():
     )
 
     sliced_co2_data = timeslice_data.data
-    assert "1e-9" in sliced_co2_data["mf"].attrs["units"]
+    assert "1e-09" in sliced_co2_data["mf"].attrs["units"]
     assert "parts_per_billion" in sliced_co2_data["mf"].attrs["units_definition"]
-    np.testing.assert_allclose(sliced_co2_data["mf"].values[-1], 409929.99, rtol=1e-6)
+    np.testing.assert_allclose(sliced_co2_data["mf"].values[-1], 409929.99, rtol=1e-06)
     assert sliced_co2_data.time[0] == Timestamp("2017-02-18T06:36:30")
     assert sliced_co2_data.time[-1] == Timestamp("2018-02-18T15:42:30")
 
@@ -291,6 +293,7 @@ def test_timeslice_slices_correctly_exclusive():
 
 @pytest.mark.xfail(reason="Mark this for removal. Our cloud functions will need an overhaul.")
 def test_get_obs_surface_cloud(mocker, monkeypatch):
+    """Cloud observation payload metadata need only describe compression."""
     monkeypatch.setenv("OPENGHG_HUB", "1")
 
     n_days = 100
@@ -306,15 +309,13 @@ def test_get_obs_surface_cloud(mocker, monkeypatch):
 
     for_transfer = mock_obs.to_data()
 
-    sha1_hash = hash_bytes(data=for_transfer["data"])
-
     to_return = {
         "found": True,
         "data": compress(data=for_transfer["data"]),
         "metadata": compress_str(s=for_transfer["metadata"]),
         "file_metadata": {
-            "data": {"sha1_hash": sha1_hash, "compression_type": "gzip"},
-            "metadata": {"sha1_hash": False, "compression_type": "bz2"},
+            "data": {"compression_type": "gzip"},
+            "metadata": {"compression_type": "bz2"},
         },
     }
 
@@ -340,7 +341,7 @@ def test_get_obs_column():
     assert obscolumn.time[0] == Timestamp("2017-03-18T15:32:54")
     assert np.isclose(obscolumn["mf"][0], 1238.2743)
     assert obscolumn.attrs["species"] == "CH4"
-    assert "1e-9" in obscolumn["mf"].attrs["units"]
+    assert "1e-09" in obscolumn["mf"].attrs["units"]
 
 
 def test_unit_conversion_get_obs_column():
@@ -351,8 +352,8 @@ def test_unit_conversion_get_obs_column():
 
     obs_column_data = column_data.data
 
-    assert "1e-6" in obs_column_data["mf"].attrs["units"]
-    assert "1e-6" in obs_column_data["mf_repeatability"].attrs["units"]
+    assert "1e-06" in obs_column_data["mf"].attrs["units"]
+    assert "1e-06" in obs_column_data["mf_repeatability"].attrs["units"]
     assert obs_column_data["mf"].values[0] == pytest.approx(1.2382743, rel=3e-8)
 
 
@@ -506,3 +507,51 @@ def test_get_obs_convert_calibration_scale():
     assert "CSIRO-94" == result.data["mf_variability"].attrs["calibration_scale"]
     assert "calibration_scale" not in result.data["inlet"].attrs
     assert "CSIRO-94" in result.metadata["calibration_scale"]
+
+
+def test_sanitise_negative_uncertainties_converts_negative_to_nan():
+    """Test that negative values in repeatability/variability variables are replaced with NaN."""
+    times = pd.date_range("2020-01-01", periods=3, freq="h")
+    ds = xr.Dataset(
+        {
+            "ch4": ("time", [1.8e-6, 1.9e-6, 2.0e-6]),
+            "ch4_repeatability": ("time", [-9.99e-9, 1.5e-9, 2.0e-9]),
+            "ch4_variability": ("time", [-9.99e-9, -9.99e-9, -9.99e-9]),
+            "quality_flag": ("time", [np.nan, np.nan, np.nan]),
+        },
+        coords={"time": times},
+    )
+    surface_keywords: dict = {}
+
+    result = _sanitise_negative_uncertainties(ds, surface_keywords)
+
+    # Negative repeatability value replaced with NaN; positive values kept
+    assert np.isnan(result["ch4_repeatability"].values[0])
+    assert not np.isnan(result["ch4_repeatability"].values[1])
+    assert not np.isnan(result["ch4_repeatability"].values[2])
+
+    # ch4_variability was entirely negative so it should be dropped
+    assert "ch4_variability" not in result.data_vars
+    assert "quality_flag" in result.data_vars
+
+    # The main species variable should be unchanged
+    np.testing.assert_array_equal(result["ch4"].values, ds["ch4"].values)
+
+
+def test_sanitise_negative_uncertainties_no_negative_values():
+    """Test that non-negative uncertainty values are left unchanged."""
+    times = pd.date_range("2020-01-01", periods=3, freq="h")
+    ds = xr.Dataset(
+        {
+            "ch4": ("time", [1.8e-6, 1.9e-6, 2.0e-6]),
+            "ch4_repeatability": ("time", [1.0e-9, 1.5e-9, 2.0e-9]),
+        },
+        coords={"time": times},
+    )
+    surface_keywords: dict = {}
+
+    result = _sanitise_negative_uncertainties(ds, surface_keywords)
+
+    # All values should be unchanged (no negatives to replace)
+    np.testing.assert_array_equal(result["ch4_repeatability"].values, ds["ch4_repeatability"].values)
+    assert "ch4_repeatability" in result.data_vars

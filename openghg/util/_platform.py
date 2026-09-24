@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 from typing import overload
 import logging
-from openghg.util._site import get_site_info
+from pathlib import Path
+
 from openghg.util._metadata_util import not_set_metadata_values
-from openghg.types import pathType, MetadataFormatError
+from openghg.types import MetadataFormatError
 
 logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -102,7 +105,7 @@ def format_platform(platform: str | None, data_type: str | None = None) -> str |
         raise MetadataFormatError(msg)
 
 
-def get_platform_from_info(site: str, site_filepath: pathType | None = None) -> str | None:
+def get_platform_from_info(site: str, site_filepath: str | Path | None = None) -> str | None:
     """Find the platform for a site, if present.
 
     This will access the "site_info.json" file from openghg_defs dependency to
@@ -113,6 +116,8 @@ def get_platform_from_info(site: str, site_filepath: pathType | None = None) -> 
     Returns:
         str | None: platform name from site_info.json if present
     """
+
+    from openghg.util._site import get_site_info
 
     site_data = get_site_info(site_filepath=site_filepath)
 

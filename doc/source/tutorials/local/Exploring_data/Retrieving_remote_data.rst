@@ -2,8 +2,9 @@ Retrieving data from remote archives
 ====================================
 
 This tutorial covers the retrieval of data from the
-`ICOS Carbon Portal <https://www.icos-cp.eu/observations/carbon-portal>`__ [#f1]_
-and the `CEDA archives <https://data.ceda.ac.uk/badc>`__ [#f2]_.
+`ICOS Carbon Portal <https://www.icos-cp.eu/observations/carbon-portal>`__ [#f1]_,
+`CEDA archives <https://data.ceda.ac.uk/badc>`__ [#f2]_
+and `Copernicus Climate Data Store <https://cds.climate.copernicus.eu>`__.
 
 Using the tutorial object store
 -------------------------------
@@ -326,7 +327,115 @@ arguments.
     In [7]: hfd_data_ceda
 
 
-3. Cleanup
+3. Retrieving meteorological data from Copernicus
+-------------------------------------------------
+
+To retrieve meteorological data from the Copernicus Climate Data Store (CDS)
+for the position of a selected site, you can use the ``retrieve_site_met`` function from ``openghg.retrieve.met``.
+
+Accessing the CDS
+~~~~~~~~~~~~~~~~~
+
+To download data using this functionality, user access to the CDS is required.
+See the
+`CDS documentation <https://cds.climate.copernicus.eu/how-to-api>`__
+for details of how to gain access to this service through the Application Programme Interface (API).
+
+Once this has been setup, access from openghg to the CDS can be checked using the ``check_cds_access`` function. If this is
+working as expected this should produce the following output:
+
+.. ipython::
+    :verbatim:
+
+    In [1]: from openghg.retrieve.met import check_cds_access
+
+    In [2]: check_cds_access()
+
+.. parsed-literal::
+    (instructions: Follow the instructions here https://cds.climate.copernicus.eu/how-to-api)
+          1. Register/log-in to Copernicus
+          2. from your profile, copy the url and key
+          3. copy them into a file on /user/home/ab12345/.cdsapi
+          4. ensure the cdsapi library is installed 
+    your client loaded successfully!
+
+Downloading and storing the data
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``retrieve_site_met`` function expects to be supplied with a known site code and the relevant network.
+Details of known site codes and details can be found within the
+`openghg_defs repository <https://github.com/openghg/openghg_defs/blob/main/openghg_defs/data/site_info.json>`__
+This function will use the site code and the network to find the site and inlet heights. These inlets can then be used to
+select the appropriate pressure levels (i.e. above and below the pressure height) from within the meteorological data.
+
+For example, for TAC with height 64m and inlets (['54magl', '100magl', '185magl']), which correspond to pressure levels
+[967.9, 984.7, 978.7], this will extract ['950', '975', '1000']. Note that all the relevant pressure levels for all inlets
+will be selected and downloaded.
+
+.. ipython::
+    :verbatim:
+
+    In [3]: from openghg.retrieve.met._ecmwf import retrieve_site_met
+    
+    In [4]: local_save_path = None  # UPDATE to select a location to save locally which isn't the default $HOME/met_data
+
+    In [5]: retrieve_site_met(site="mhd", network="agage", years="2023", local_save_path=local_save_path)
+
+You can download specific months by also passing a 2-digit string or list of 2-digit strings
+i.e. ``month="09"`` or ``month=["10","11"]``
+
+Retrieving the data from the object store
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Once the data has been downloaded to an object store, this can be retrieved using:
+
+.. ipython::
+    :verbatim:
+
+    In [6]: from openghg.retrieve import search_met
+
+    In [7]: met_results = search_met(site="TAC")
+    In [8]: met_results.results
+
+
+.. ipython::
+    :verbatim:
+
+    In [9]: met_data = met_results.retrieve()
+    In [10]: met_data.data
+
+.. raw:: html
+   :file: images/Dataset_met_data.html
+
+
+Plotting
+~~~~~~~~
+
+To plot the data you can use the ``openghg.plotting.plot_met_timeseries`` function with your search results.
+For this you can define the date range and the variables to plot. The parameter ``inlet_height`` determines what gets plotted.
+If ``inlet=None`` or is left empty, the extracted pressure levels get plotted without modification.
+
+.. ipython::
+    :verbatim:
+
+    In [11]: from openghg.plotting import plot_met_timeseries
+
+    In [12]: plot_met_timeseries(met_data, start_date="2023-01-15", end_date="2023-01-30")
+
+.. figure:: images/met_variables_mhd_1.png
+
+To select a specific inlet using the ``inlet`` keyword will plot only that height (for a valid inlet height).
+
+.. ipython::
+    :verbatim:
+
+    In [13]: plot_met_timeseries(met_data, start_date="2023-01-15", end_date="2023-01-30", inlet="10magl")
+
+A value of ``inlet="all"``, can also be supplied and for this the meteorology gets interpolated linearly in height to each inlet.
+
+.. figure:: images/met_variables_mhd_10m_2.png
+
+4. Cleanup
 ----------
 
 If you're finished with the data in this tutorial you can cleanup the
@@ -335,12 +444,12 @@ tutorial object store using the ``clear_tutorial_store`` function.
 .. ipython::
     :verbatim:
 
-    In [8]: from openghg.tutorial import clear_tutorial_store
+    In [1]: from openghg.tutorial import clear_tutorial_store
 
 .. ipython::
     :verbatim:
 
-    In [9]: clear_tutorial_store()
+    In [2]: clear_tutorial_store()
     INFO:openghg.tutorial:Tutorial store at /home/gareth/openghg_store/tutorial_store cleared.
 
 

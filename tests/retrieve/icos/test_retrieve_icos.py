@@ -201,17 +201,33 @@ def test_retrieved_prevents_storing_twice(mock_retrieve_remote, caplog):
 
 
 @pytest.mark.icos
-def test_force_allows_storing_twice(mock_retrieve_remote, caplog):
-    """Test if retrieving the same data twice does *not* issue a warning if
-    `force=True` is passed to `retrieve_atmospheric` (and hence propegated down
-    to `ObsSurface.store_data`).
-    """
+def test_force_does_not_bypass_overlap_policy(mock_retrieve_remote, caplog):
+    """Deprecated force warns and does not change overlap handling."""
     clear_test_stores()
 
     retrieve_atmospheric(site="tac", store="user", update_mismatch="metadata")
-    assert "Skipping data that overlaps existing data" not in caplog.text
+    caplog.clear()
+    with pytest.warns(DeprecationWarning, match=r"force.*deprecated.*if_exists") as caught_warnings:
+        retrieve_atmospheric(site="tac", store="user", force=True, update_mismatch="metadata")
 
-    retrieve_atmospheric(site="tac", store="user", force=True, update_mismatch="metadata")
+    assert len(caught_warnings) == 1
+    assert "Skipping data that overlaps existing data" in caplog.text
+
+
+@pytest.mark.icos
+def test_if_exists_new_stores_retrieved_data_as_new_version(mock_retrieve_remote, caplog):
+    """Retrieved data can be explicitly stored as a new version."""
+    clear_test_stores()
+
+    retrieve_atmospheric(site="tac", store="user", update_mismatch="metadata")
+    caplog.clear()
+    retrieve_atmospheric(
+        site="tac",
+        store="user",
+        if_exists="new",
+        update_mismatch="metadata",
+    )
+
     assert "Skipping data that overlaps existing data" not in caplog.text
 
 

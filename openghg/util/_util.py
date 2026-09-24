@@ -83,7 +83,7 @@ def site_code_finder(site_name: str, site_filepath: pathType | None = None) -> s
     inverted = _create_site_lookup_dict(site_filepath=site_filepath)
 
     # rapidfuzz 3.9.0 seemed to stop giving type details - ignoring for now.
-    matches = process.extract(query=site_name, choices=inverted.keys())  # type:ignore
+    matches = process.extract(query=site_name, choices=inverted.keys())  # type: ignore
 
     highest_score = matches[0][1]
 
@@ -117,7 +117,7 @@ def find_matching_site(site_name: str, possible_sites: dict) -> str:
     site_list = possible_sites.keys()
 
     # rapidfuzz 3.9.0 seemed to stop giving type details - ignoring for now.
-    matches = process.extract(site_name, site_list)  # type:ignore
+    matches = process.extract(site_name, site_list)  # type: ignore
 
     scores = [s for m, s, _ in matches]
 

@@ -102,6 +102,32 @@ provided is v6.0, annual, global and for methane.
 
 *Note: this can take a few minutes to complete.*
 
+If an EDGAR NetCDF dataset is already available in memory, pass it through the
+``data`` argument instead of supplying ``datapath``. The dataset should be the
+raw EDGAR input expected by the parser, before the regional selection and unit
+conversion are applied.
+
+.. code:: python
+
+   import xarray as xr
+   from openghg.transform import transform_flux_data
+
+   with xr.open_dataset("path/to/edgar_file.nc") as dataset:
+       edgar_data = dataset.load()
+
+   transform_flux_data(
+       data=edgar_data,
+       database="edgar",
+       date=2014,
+       domain="EUROPE",
+       species="ch4",
+       source="anthro",
+   )
+
+The transformed result is added to the object store and can be read back with
+the normal retrieval functions, for example ``get_flux(species="ch4",
+domain="EUROPE", source="anthro")``.
+
 We can then check the data has been added to the object store.
 
 .. code:: python

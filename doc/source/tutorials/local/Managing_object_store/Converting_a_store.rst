@@ -36,7 +36,7 @@ store is ``/home/gareth/openghg_store_zarr``. We're now ready perform the conver
 
 .. code-block:: python
 
-    from openghg.store.storage import convert_store
+    from openghg.storage import convert_store
 
     old_store = "/home/gareth/openghg_store"
     new_store = "openghg_store_zarr"
@@ -66,7 +66,7 @@ To do this we can pass a chunks dictionary and the name of the data type that wa
 .. code-block:: python
 
 
-    from openghg.store.storage import convert_store
+    from openghg.storage import convert_store
 
     old_store = "/home/gareth/openghg_store"
     new_store = "openghg_store_zarr"

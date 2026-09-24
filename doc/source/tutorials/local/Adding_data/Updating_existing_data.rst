@@ -7,42 +7,95 @@ OpenGHG categorises data based on the supplied necessary keywords and stores the
 When adding data to the object store, two checks will be made against currently stored data:
 
 1. Whether data has the same set of distinct keywords.
-2. Whether the time range for the data being added overlaps with the current time range for that data.
+2. Whether any time-coordinate values in the data being added match values
+   already stored for that data.
 
-If the data exists but the time range does not overlap, this data will be added, grouped with the previous data and associated with the same keywords.
+By default, this is an exact check for matching time-coordinate values rather
+than a check that the start and end date ranges intersect.
 
-By default, if data exists and the time range *does* overlap with existing data, the data will not be added and this will produce a ``DataOverlapError``.
+If the data exists but there are no matching time-coordinate values, the new data
+will be added, grouped with the previous data and associated with the same
+keywords when using the default ``if_exists="auto"`` policy.
+
+By default, if data exists and matching time-coordinate values are found, the
+data will not be added and this will produce a ``DataOverlapError``.
 
 Updating data
 -------------
 
-To add updated data to the object store which does overlap on time with current data, when using the ``standarise_*`` functions the user can specify what action to perform in this case using the ``if_exists`` input. This provides the options:
+To add updated data to the object store, when using the ``standardise_*``
+functions the user can specify what action to perform using the ``if_exists``
+input. This provides the options:
 
-1. "auto" - combine with previous data if no overlapping data points, raise ``DataOverlap`` error otherwise (default).
-2. "new" - store the newly added data (only)
-3. *"combine" - combine the new and previous data and prefer the new data in the case where the time range overlaps. - to be implemented.*
+1. ``"auto"`` - add to the current data if there are no matching
+   time-coordinate values; raise ``DataOverlapError`` otherwise (default).
+2. ``"new"`` - make the latest version contain only the newly added data.
+3. ``"combine"`` - combine the new and previous data and prefer the new data where
+   time-coordinate values match.
 
-By default, using the "new" option will also create a new version of the data. In this way, the previous data will be retained (saved) but the new data will become the details which are accessed by default.
+``if_exists`` determines the contents of the resulting latest version;
+``save_current`` determines whether that result is written to a new version or
+into the current latest version.
+
+These choices are deliberate versioning behaviour, not a special case of how
+files are passed in. When a list of filepaths is successfully concatenated by
+the parser, the ``if_exists`` policy is applied once to the combined dataset.
+Calling the same function repeatedly in a Python loop applies the policy once
+per call. Both approaches use the same policy, but the resulting version history
+can differ depending on how the parser groups the inputs. For a growing time
+series, use ``if_exists="auto"`` for files without matching time-coordinate
+values or ``if_exists="combine"`` when new files should be merged with current
+data.
 
 Managing versions
 -----------------
 
-If data files are large or there will be many updates needed, it may not be desirable to save the currently stored data and it may be prefered to delete this rather than retain this as a version. Whether to retain or overwrite the current data can set using the `save_current` input.
+If data files are large or there will be many updates needed, it may not be
+desirable to save the currently stored data and it may be preferred to delete
+this rather than retain it as a version. Whether to retain or overwrite the
+current data can be set using the ``save_current`` input.
 
-1. "auto"
+When a matching datasource already exists, the update behaviour is:
 
-    a. if data does not overlap, retain current data and version. 
-    b. if data does overlap and ``if_exists="auto"``, raise ``DataOverlap`` error.
-    c. if data does overlap and ``if_exists="new"``, save current data and create a new version.
+.. list-table::
+   :header-rows: 1
 
-2. "yes" (/"y") - Save the current data and create a new version for the new data.
-3. "no" (/"n") - Do not save the current data and replace with the new data.
+   * - ``if_exists``
+     - ``save_current="auto"``
+     - ``save_current="y"``
+     - ``save_current="n"``
+   * - ``"auto"``
+     - Append points with new time-coordinate values in place.
+     - Copy current data to a new version, then append points with new
+       time-coordinate values.
+     - Append points with new time-coordinate values in place.
+   * - ``"new"``
+     - Create a new version containing only new data.
+     - Create a new version containing only new data.
+     - Replace the current latest version with new data.
+   * - ``"combine"``
+     - Create a new version containing old and new data, preferring new data at
+       matching times.
+     - Create a new version containing old and new data, preferring new data at
+       matching times.
+     - Update the current latest version in place, preferring new data at
+       matching times.
+
+For every ``if_exists="auto"`` case, matching time-coordinate values still raise
+``DataOverlapError``. Repeated calls with ``if_exists="combine"`` and
+``save_current="auto"`` create a new version on each update after the first; use
+``save_current="n"`` to combine in place.
 
 
-Replacing "identical" data
---------------------------
+Repeating input data
+--------------------
 
-One check OpenGHG will make will be whether or not an exact copy of this file has been added previously. In this case this will not check within the object store explicitly, and the data will not be added. For the rare cases where this may not be the desired behaviour, the `force` flag using `True` or `False`can be used to bypass this check and attempt to add the data to the object store in the usual way. 
+OpenGHG does not identify repeated input files separately from their data. Repeating an
+input therefore follows the same ``if_exists`` update policy as any other update. With
+the default ``if_exists="auto"``, matching time-coordinate values raise a
+``DataOverlapError``. Use ``if_exists="new"`` to replace the latest data with
+the repeated input, or ``if_exists="combine"`` to combine it with the current
+data.
 
 Example workflow
 ----------------
@@ -63,7 +116,7 @@ affect your use of OpenGHG outside of this tutorial.
 .. code:: ipython3
 
     from openghg.tutorial import use_tutorial_store
-    
+
     use_tutorial_store()
 
 Since this workflow relies on using an empty object store, we also recommend
@@ -80,7 +133,7 @@ have been run using this store.
 ^^^^^^^^^^^^^^^^^^^^^^
 
 We can grab some example data to demonstrate this workflow, in this case from the Macehead site in Ireland.
-This data includes may different species so we will focus on just $CF_6$ for this tutorial.
+This data includes many different species so we will focus on just ``CF_4`` for this tutorial.
 
 .. code:: ipython3
 
@@ -144,7 +197,7 @@ The start and end dates cover the year of 2010: 2010-01-01 - 2010-12-31.
 ^^^^^^^^^^^^^^^^^^^
 
 We can now download and add data for the next year (2011). The times for this data should
-not overlap with the data in our datasource.
+not match any time-coordinate values in our datasource.
 
 .. code:: ipython3
 
@@ -197,7 +250,7 @@ This has combined the details from both files that were added to the object stor
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If we wanted to use the same flags but add new data only, we can do this using the input flag:
- 
+
 * ``if_exists="new"``
 
 By default this will also create a new version, retaining the original data as a previous
@@ -249,7 +302,7 @@ Selected output:
     ...
     }
 
-Examining the metadata we should not see this only includes the new data from 2012 and latest_version has increased by 1.
+Examining the metadata we should now see this includes only the new data from 2012 and latest_version has increased by 1.
 
 4. Replacing existing data with new data
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -258,7 +311,7 @@ If we wanted to update the data but did *not* want to retain the current latest 
 of the data we can do this using the flags:
 
 * ``if_exists="new"``
-* ``save_current=False``
+* ``save_current="n"``
 
 We can test this by downloading data for the same site from 2013.
 
@@ -280,7 +333,7 @@ We can test this by downloading data for the same site from 2013.
                         site=site,
                         network=network,
                         if_exists="new",
-                        save_current=False)
+                        save_current="n")
 
 Searching should return one datasource as before:
 
@@ -310,15 +363,13 @@ Selected output:
 This now contains new data only from 2013 but the version has not changed
 (indicating the previous version data has not been retained).
 
-5. Replacing "identical" data
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+5. Repeating input data
+^^^^^^^^^^^^^^^^^^^^^^^
 
-There may be circumstances (e.g. data corruption, testing) where it is necessary to
-replace "identical" data (i.e. the same original input file with the same details).
+There may be circumstances (e.g. data corruption or testing) where it is necessary to
+replace data using the same original input file. Choose the update explicitly with:
 
-This can be done using the flag:
-
-* ``force=True``
+* ``if_exists="new"``
 
 .. code:: ipython3
 
@@ -326,7 +377,7 @@ This can be done using the flag:
                         source_format=source_format,
                         site=site,
                         network=network,
-                        force=True)
+                        if_exists="new")
 
 .. code:: ipython3
 
@@ -345,12 +396,13 @@ Selected output:
     ...
     }
 
-By default this will create a new version as shown above.
+By default, ``if_exists="new"`` creates a new version as shown above.
 
-To avoid this pass both the ``force`` and ``save_current`` flag instead:
+To replace the latest version without retaining the current version, also pass
+``save_current="n"``:
 
-* ``force=True``
-* ``save_current=False``
+* ``if_exists="new"``
+* ``save_current="n"``
 
 .. code:: ipython3
 
@@ -358,8 +410,8 @@ To avoid this pass both the ``force`` and ``save_current`` flag instead:
                         source_format=source_format,
                         site=site,
                         network=network,
-                        force=True,
-                        save_current=False)
+                        if_exists="new",
+                        save_current="n")
 
 .. code:: ipython3
 

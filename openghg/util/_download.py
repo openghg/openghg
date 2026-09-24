@@ -83,7 +83,7 @@ def download_data(url: str, filepath: str | Path | None = None, timeout: int = 1
 
     # mypy error ignored
     # rich and requests libraries not quite aligning but urllib3.response.HTTPResponse should be very similiar to BinaryIO object expected.
-    with wrap_file(r.raw, total=file_size, description=desc) as r_raw:  # type:ignore
+    with wrap_file(r.raw, total=file_size, description=desc) as r_raw:  # type: ignore
         with io.BytesIO() as buf:
             shutil.copyfileobj(r_raw, buf)
 

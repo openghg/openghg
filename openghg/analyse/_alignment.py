@@ -8,7 +8,6 @@ from numpy.typing import ArrayLike
 
 from openghg.types import ReindexMethod, XrDataLike
 
-
 logger = logging.getLogger("openghg.analyse")
 logger.setLevel(logging.INFO)  # Have to set level for logger as well as handler
 

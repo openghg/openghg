@@ -1,5 +1,11 @@
 # This holds store metadata for now
-from openghg.store.base import BaseStore
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, cast
+
+if TYPE_CHECKING:
+    from openghg.store.base import BaseStore
 
 
 def data_class_info() -> dict:
@@ -21,6 +27,7 @@ def data_class_info() -> dict:
         },
         "eulerian_model": {"_root": "EulerianModel", "_uuid": "63ff2365-3ba2-452a-a53d-110140805d06"},
         "flux_timeseries": {"_root": "FluxTimeseries", "_uuid": "099b597b-0598-4efa-87dd-472dfe027f5d8"},
+        "site_met": {"_root": "SiteMet", "_uuid": "dbb725a1-4102-4804-b732-9e2159fe04f1"},
     }
 
 
@@ -33,11 +40,16 @@ def get_data_class(data_type: str) -> type[BaseStore]:
 
     Returns:
         Data class, one of `ObsSurface`, `ObsColumn`, `Flux`, `EulerianModel`,
-    `Footprints`, `BoundaryConditions`, `FluxTimeseries`.
+    `Footprints`, `BoundaryConditions`, `FluxTimeseries`, `SiteMet`.
     """
+    from openghg.store.spec import get_data_type_class
+
     try:
-        data_class = BaseStore._registry[data_type]
-    except KeyError:
-        raise ValueError(f"No data class for data type {data_type}.")
-    else:
-        return data_class
+        return cast("type[BaseStore]", get_data_type_class(data_type))
+    except ValueError as exc:
+        from openghg.store.base import BaseStore
+
+        try:
+            return BaseStore._registry[data_type]
+        except KeyError:
+            raise ValueError(f"No data class for data type {data_type}.") from exc

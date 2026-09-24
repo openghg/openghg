@@ -24,7 +24,7 @@ from openghg.objectstore import get_datasource, open_object_store
 from openghg.retrieve import get_obs_surface, search_surface
 from openghg.standardise import standardise_from_binary_data, standardise_surface
 from openghg.store import ObsSurface
-from openghg.types import MetadataAndData, StandardiseError
+from openghg.types import DataOverlapError, MetadataAndData, StandardiseError
 from openghg.util import create_daterange_str, clean_string
 from pandas import Timestamp
 
@@ -84,8 +84,7 @@ def test_metadata_tac_crds(min_uuids_fixture, hourly_uuids_fixture, bucket):
             species = result["species"]
             datasource = objstore.retrieve(uuid=result["uuid"])[0]
 
-            assert metadata_checker_obssurface(datasource.metadata(), species=species)
-
+            assert metadata_checker_obssurface(datasource.metadata, species=species)
 
             with datasource.get_data(version="latest") as data:
                 assert attributes_checker_obssurface(data.attrs, species=species)
@@ -501,39 +500,6 @@ def test_read_noaa_metastorepack(bucket):
         ch4_data["ch4_variability"][0] == pytest.approx(1.668772e-09)
 
 
-@pytest.mark.xfail(reason="Deleting datasources will be handled by ObjectStore objects - links to issue #727")
-def test_delete_Datasource(bucket):  # TODO: revive/move this test when `ObjectStore` class created
-    data_filepath = get_surface_datapath(
-        filename="DECC-picarro_TAC_20130131_co2-185m-20220928.nc", source_format="OPENGHG"
-    )
-
-    standardise_surface(
-        store="user",
-        filepath=data_filepath,
-        source_format="OPENGHG",
-        site="tac",
-        network="DECC",
-        instrument="picarro",
-        sampling_period="1h",
-        update_mismatch="attributes",
-        if_exists="new",
-        sort_files=True,
-    )
-
-    with open_object_store(data_type="surface", bucket=bucket) as objstore:
-        uuid = objstore.uuids[0]
-        datasource = objstore.get_datasource(uuid=uuid)
-        data_keys = datasource.data_keys()
-        key = data_keys[0]
-
-        assert exists(bucket=bucket, key=key)
-
-        objstore.delete(uuid)
-
-        assert uuid not in objstore.uuids
-        assert not exists(bucket=bucket, key=key)
-
-
 def test_add_new_data_correct_datasource():
     clear_test_stores()
 
@@ -831,7 +797,9 @@ def test_obs_schema(species, obs_variable):
     # TODO: Could also add checks for dims and dtypes?
 
 
-def test_check_obssurface_same_file_skips():
+def test_obssurface_same_data_raises_on_overlap():
+    """Repeated surface files raise under the default overlap policy."""
+    clear_test_stores()
     filepath = get_surface_datapath(filename="bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
 
     results = standardise_surface(
@@ -840,58 +808,8 @@ def test_check_obssurface_same_file_skips():
 
     assert results
 
-    results = standardise_surface(
-        store="user", filepath=filepath, source_format="CRDS", site="bsd", network="DECC"
-    )
-
-    assert not results[0]
-
-
-def test_check_obssurface_multi_file_same_skip():
-    """
-    BUGFIX: Previously only the last file in the filepath list was saved
-    as a hash. This is to check that when multiple files are passed to
-    standardise_surface, check that the first file
-    """
-
-    clear_test_stores()
-
-    filepaths = [
-        get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220929.nc", source_format="openghg"),
-        get_surface_datapath("DECC-picarro_TAC_20130131_co2-185m-20220928.nc", source_format="openghg"),
-    ]
-
-    results = standardise_surface(
-        store="user",
-        filepath=filepaths,
-        source_format="OPENGHG",
-        site="tac",
-        network="DECC",
-        instrument="picarro",
-        sampling_period="1h",
-        if_exists="new",
-        update_mismatch="metadata",
-    )
-
-    assert results
-
-    filepath_repeat = get_surface_datapath(
-        "DECC-picarro_TAC_20130131_co2-185m-20220929.nc", source_format="openghg"
-    )
-
-    results = standardise_surface(
-        store="user",
-        filepath=filepath_repeat,
-        source_format="OPENGHG",
-        site="tac",
-        network="DECC",
-        instrument="picarro",
-        sampling_period="1h",
-        if_exists="new",
-        update_mismatch="metadata",
-    )
-
-    assert not results[0]
+    with pytest.raises(DataOverlapError):
+        standardise_surface(store="user", filepath=filepath, source_format="CRDS", site="bsd", network="DECC")
 
 
 def test_gcwerks_fp_not_a_tuple_raises():
@@ -1152,7 +1070,7 @@ def test_sync_surface_metadata_store_level(
 
     for res in standardised_data:
         datasource = get_datasource(bucket=bucket, uuid=res["uuid"], data_type="surface")
-        assert metadata_checker_obssurface(datasource.metadata(), species=res["species"])
+        assert metadata_checker_obssurface(datasource.metadata, species=res["species"])
 
         with datasource.get_data(version="latest") as data:
             assert attributes_checker_obssurface(data.attrs, species=res["species"])

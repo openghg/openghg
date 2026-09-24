@@ -27,6 +27,7 @@ multDataTypes = Union[
 def _get_generic(
     combine_multiple_inlets: bool = False,
     ambig_check_params: list | None = None,
+    version: str = "latest",
     **kwargs: Any,
 ) -> _BaseData:
     """Perform a search and create a dataclass object with the results if any are found.
@@ -36,6 +37,7 @@ def _get_generic(
         combine_multiple_inlets: if multiple results are found, combine them and elevate inlet
             to a data variable.
         ambig_check_params: Parameters to check and print if result is ambiguous.
+        version: Version of data to retrieve. Default = "latest".
         kwargs: Additional search terms
 
     Returns:
@@ -52,7 +54,7 @@ def _get_generic(
         raise SearchError(err_msg)
 
     # TODO: UPDATE THIS - just use retrieve when retrieve_all is removed.
-    retrieved_data = results.retrieve_all()
+    retrieved_data = results.retrieve_all(version=version)
 
     if retrieved_data is None:
         err_msg = f"Unable to retrieve results for {keyword_string}"
@@ -88,6 +90,39 @@ def _get_generic(
     return result
 
 
+def _sanitise_negative_uncertainties(data: Any, surface_keywords: dict) -> Any:
+    """Set negative uncertainty values to NaN and drop uncertainty variables that are entirely NaN.
+
+    Negative values in repeatability/variability variables are fill-value flags
+    (e.g. -9.99) used in flask and other measurement data.  This function
+    replaces them with NaN and then removes repeatability/variability variables
+    whose values are all NaN after that replacement.
+
+    Args:
+        data: xarray Dataset with observation data.
+        surface_keywords: Keyword arguments used to retrieve the data (used in log messages).
+
+    Returns:
+        xarray Dataset with negative uncertainty values replaced by NaN and
+        entirely-NaN variables removed.
+    """
+    uncertainty_data_vars = [
+        dv for dv in data.data_vars if str(dv).endswith("repeatability") or str(dv).endswith("variability")
+    ]
+    for dv in uncertainty_data_vars:
+        cond = data[dv] >= 0.0
+        data[dv] = data[dv].where(cond)
+
+    vars_to_delete = [var for var in uncertainty_data_vars if data[var].isnull().all().values.item()]
+    if vars_to_delete:
+        logger.info(
+            f"{vars_to_delete} contain only NaN values for obs. in {surface_keywords}. They are thus deleted."
+        )
+        data = data.drop_vars(vars_to_delete)
+
+    return data
+
+
 def get_obs_surface(
     site: str,
     species: str,
@@ -104,6 +139,7 @@ def get_obs_surface(
     keep_variables: list | None = None,
     target_units: dict | None = None,
     is_dequantified: bool = True,
+    version: str = "latest",
     **kwargs: Any,
 ) -> ObsData | None:
     """This is the equivalent of the get_obs function from the ACRG repository.
@@ -134,6 +170,7 @@ def get_obs_surface(
             "mf_variability": "ppm"
         }
         is_dequantified: To dequantify the dataset after getting assigned with pint units. By default it will dequantify the data upon return. To keep the quantification applied supply `False`.
+        version: Version of data to retrieve. Default = "latest".
         kwargs: Additional search terms
 
     Returns:
@@ -179,6 +216,7 @@ def get_obs_surface(
     retrieved_data = _get_generic(
         combine_multiple_inlets=isinstance(inlet, slice),  # if range passed for inlet, try to combine
         ambig_check_params=["inlet", "network", "instrument"],
+        version=version,
         **surface_keywords,  # type: ignore
     )
 
@@ -202,6 +240,10 @@ def get_obs_surface(
         if "inlet_height" in data.data_vars and "inlet" not in data.data_vars:
             data["inlet"] = data["inlet_height"]
 
+    # Set negative uncertainty values to NaN and drop variables that are entirely NaN.
+    # This handles fill values (e.g. -9.99) used in flask and other data.
+    data = _sanitise_negative_uncertainties(data, surface_keywords)
+
     if average is not None:
         # TODO: if https://github.com/dask/dask/issues/11693#issuecomment-2610235428 is resolved
         # then it may be possible to avoid calling `.compute()`
@@ -209,16 +251,6 @@ def get_obs_surface(
         # which makes resampling extremely slow with Dask >= 2024.8.0
         logger.info("Loading obs data into memory for resampling.")
         data = data.compute()
-
-        var_to_delete = []
-        for var in data:
-            if data[var].isnull().all():
-                var_to_delete.append(var)
-        if var_to_delete:
-            logger.info(
-                f"{var_to_delete} contain only nan for obs. in {surface_keywords}. They are thus deleted."
-            )
-            data = data.drop_vars(var_to_delete)
 
         data = surface_obs_resampler(
             data, averaging_period=average, species=species, drop_na=(not keep_missing)
@@ -262,6 +294,7 @@ def get_obs_column(
     average: str | None = None,
     target_units: dict | None = None,
     is_dequantified: bool = True,
+    version: str = "latest",
     **kwargs: Any,
 ) -> ObsColumnData:
     """Extract available column data from the object store using keywords.
@@ -289,6 +322,7 @@ def get_obs_column(
             "mf_variability": "ppm"
         }
         is_dequantified: To dequantify the dataset after getting assigned with pint units. By default it will dequantify the data upon return. To keep the quantification applied supply `False`.
+        version: Version of data to retrieve. Default = "latest".
         kwargs: Additional search terms
     Returns:
         ObsColumnData: ObsColumnData object
@@ -305,8 +339,12 @@ def get_obs_column(
         start_date=start_date,
         end_date=end_date,
         data_type="column",
+        version=version,
         **kwargs,
     )
+    # check if data set is empty
+    if obs_data.data.sizes["time"] == 0:
+        raise SearchError("Dataset is empty for obs. Please check the supplied args.")
 
     if return_mf:
         if max_level > max(obs_data.data.lev.values) + 1:
@@ -339,7 +377,8 @@ def get_obs_column(
         )
         obs_data.data["mf_repeatability"] = obs_data.data[f"x{species}_uncertainty"]
 
-        obs_data.data["mf"].attrs["units"] = obs_data.data[f"x{species}"].attrs["units"]
+        for var in ["mf", "mf_prior_factor", "mf_prior_upper_level_factor", "mf_repeatability"]:
+            obs_data.data[var].attrs["units"] = obs_data.data[f"x{species}"].attrs["units"]
         # rt17603: 06/04/2018 Added drop variables to ensure lev and id dimensions are also dropped, Causing problems in footprints_data_merge() function
         drop_data_vars = [
             f"x{species}",
@@ -406,6 +445,7 @@ def get_flux(
     time_resolution: str | None = None,
     target_units: dict | None = None,
     is_dequantified: bool = True,
+    version: str = "latest",
     **kwargs: Any,
 ) -> FluxData:
     """The flux function reads in all flux files for the domain and species as an xarray Dataset.
@@ -426,6 +466,7 @@ def get_flux(
             "mf_variability": "ppm"
         }
         is_dequantified: To dequantify the dataset after getting assigned with pint units. By default it will dequantify the data upon return. To keep the quantification applied supply `False`.
+        version: Version of data to retrieve. Default = "latest".
         kwargs: Additional search terms
     Returns:
         FluxData: FluxData object
@@ -441,6 +482,7 @@ def get_flux(
         start_date=start_date,
         end_date=end_date,
         data_type="flux",
+        version=version,
         **kwargs,
     )
 
@@ -465,6 +507,7 @@ def get_bc(
     end_date: str | Timestamp | None = None,
     target_units: dict | None = None,
     is_dequantified: bool = True,
+    version: str = "latest",
     **kwargs: Any,
 ) -> BoundaryConditionsData:
     """Get boundary conditions for a given species, domain and bc_input name.
@@ -484,6 +527,7 @@ def get_bc(
             "mf_variability": "ppm"
         }
         is_dequantified: To dequantify the dataset after getting assigned with pint units. By default it will dequantify the data upon return. To keep the quantification applied supply `False`.
+        version: Version of data to retrieve. Default = "latest".
     Returns:
         BoundaryConditionsData: BoundaryConditionsData object
     """
@@ -494,6 +538,7 @@ def get_bc(
         start_date=start_date,
         end_date=end_date,
         data_type="boundary_conditions",
+        version=version,
         **kwargs,
     )
 
@@ -514,6 +559,7 @@ def get_footprint(
     species: str | None = None,
     target_units: dict | None = None,
     is_dequantified: bool = True,
+    version: str = "latest",
     **kwargs: Any,
 ) -> FootprintData:
     """Get footprints from one site.
@@ -543,6 +589,7 @@ def get_footprint(
             "mf_variability": "ppm"
         }
         is_dequantified: To dequantify the dataset after getting assigned with pint units. By default it will dequantify the data upon return. To keep the quantification applied supply `False`.
+        version: Version of data to retrieve. Default = "latest".
         kwargs: Additional search terms
     Returns:
         FootprintData: FootprintData dataclass
@@ -570,6 +617,7 @@ def get_footprint(
         end_date=end_date,
         species=species,
         data_type="footprints",
+        version=version,
         **kwargs,
     )
 
@@ -622,7 +670,7 @@ def get_footprint(
 
 #     direction = "2to1" if to_scale == converter["scale1"] else "1to2"
 
-#     # flake8: noqa: F841
+#     # ruff: noqa: F841
 #     # scale_convert file has variable X in equations, so let's create it
 #     X = 1.0
 #     scale_factor = evaluate(converter[direction])

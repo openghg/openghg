@@ -1,21 +1,30 @@
-"""Generic search functions that can be used to find data in
-the object store.
+"""Generic search functions that can be used to find data in the object store."""
 
-"""
+from __future__ import annotations
 
 import logging
-import pandas as pd
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
 import warnings
-from openghg.objectstore import open_object_store
-from openghg.store.spec import define_data_types
-from openghg.objectstore import get_readable_buckets
-from openghg.types import ObjectStoreError
-from openghg.dataobjects import SearchResults
-from ._search_helpers import process_search_kwargs, define_list_search
+
+if TYPE_CHECKING:
+    from openghg.dataobjects import SearchResults
 
 logger = logging.getLogger("openghg.retrieve")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
+
+
+def get_readable_buckets() -> dict[str, str]:
+    """Return readable object store buckets without importing objectstore at module import time."""
+    from openghg.objectstore import get_readable_buckets as _get_readable_buckets
+
+    return cast(dict[str, str], _get_readable_buckets())
+
+
+def open_object_store(*args: Any, **kwargs: Any) -> Any:
+    """Open an object store without importing objectstore at module import time."""
+    from openghg.objectstore import open_object_store as _open_object_store
+
+    return _open_object_store(*args, **kwargs)
 
 
 def search_bc(
@@ -141,12 +150,21 @@ def search_flux(
     if end_date is not None:
         end_date = str(end_date)
 
+    # The clean_string function previously removed '.' characters which impacted
+    # database_version. This optionality is included to ensure both database_version
+    # with and without any "." characters are searched by default.
+    options_database_version = [database_version]
+    if database_version is not None:
+        if "." in database_version:
+            database_version_previous = database_version.replace(".", "")
+            options_database_version.append(database_version_previous)
+
     return search(
         species=species,
         source=source,
         domain=domain,
         database=database,
-        database_version=database_version,
+        database_version=options_database_version,
         model=model,
         start_date=start_date,
         end_date=end_date,
@@ -408,6 +426,21 @@ def search_column(
     )
 
 
+def search_site_met(
+    site: str | None = None,
+    network: str | None = None,
+    met_source: str | None = None,
+    **kwargs: Any,
+) -> SearchResults:
+    return search(
+        site=site,
+        network=network,
+        met_source=met_source,
+        data_type="site_met",
+        **kwargs,
+    )
+
+
 def search(**kwargs: Any) -> SearchResults:
     """Search for observations data. Any keyword arguments may be passed to the
     the function and these keywords will be used to search the metadata associated
@@ -440,6 +473,12 @@ def search(**kwargs: Any) -> SearchResults:
     Returns:
         SearchResults or None: SearchResults object is results found, otherwise None
     """
+    import pandas as pd
+    from pandas import Timedelta as pd_Timedelta
+
+    from openghg.dataobjects import SearchResults
+    from openghg.store.spec import define_data_types
+    from openghg.types import ObjectStoreError
     from openghg.util import (
         clean_string,
         dates_overlap,
@@ -449,7 +488,11 @@ def search(**kwargs: Any) -> SearchResults:
         timestamp_now,
         timestamp_tzaware,
     )
-    from pandas import Timedelta as pd_Timedelta
+    from openghg.retrieve._search_helpers import (
+        convert_to_slice,
+        define_list_search,
+        process_search_kwargs,
+    )
     from openghg.util import handle_direct_store_path
 
     # Select and format the search terms
@@ -459,6 +502,9 @@ def search(**kwargs: Any) -> SearchResults:
     for k, v in kwargs.items():
         if k.lower() in {"inlet", "height", "inlet_height_magl", "station_height_masl"}:
             v = format_inlet(v)
+            # Convert all inlet searches to slice so this completes a value search
+            rel_tolerance = 1e-6
+            v = convert_to_slice(v, rel_tolerance)
         elif isinstance(v, (list, tuple)):
             v = [clean_string(value) for value in v if value is not None]
             if not v:  # Check empty list

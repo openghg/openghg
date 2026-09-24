@@ -9,8 +9,6 @@ Surface observations
 
 .. autofunction:: openghg.standardise.surface.parse_beaco2n
 
-
-
 .. autofunction:: openghg.standardise.surface.parse_crds
 
 .. autofunction:: openghg.standardise.surface.parse_eurocom
@@ -28,6 +26,8 @@ Column data
 ^^^^^^^^^^^
 
 .. autofunction:: openghg.standardise.column.parse_openghg
+
+.. autofunction:: openghg.standardise.column.parse_tccon
 
 
 Emissions / flux

@@ -1,12 +1,13 @@
 from pathlib import Path
 from typing import cast
 from collections.abc import MutableMapping
+import xarray as xr
 
-from openghg.util import open_time_nc_fn
+from openghg.util import open_time_nc_fn, preprocess_nc_data
 
 
 def parse_openghg(
-    filepath: str | Path | list[str] | list[Path],
+    filepath: str | Path | list[str] | list[Path] | None = None,
     satellite: str | None = None,
     domain: str | None = None,
     selection: str | None = None,
@@ -16,6 +17,7 @@ def parse_openghg(
     instrument: str | None = None,
     platform: str = "satellite",
     chunks: dict | None = None,
+    data: xr.Dataset | None = None,
     **kwargs: str,
 ) -> dict:
     """
@@ -32,7 +34,10 @@ def parse_openghg(
     will attempt to extract this from the data file.
 
     Args:
-        filepath: Path of observation file
+        filepath: Path of observation file. Specify either ``filepath`` or
+            ``data``.
+        data: In-memory observation dataset. Scalar ``time`` coordinates are
+            expanded before parsing. Specify either ``filepath`` or ``data``.
         satellite: Name of satellite (if relevant)
         domain: For satellite only. If data has been selected on an area include the
             identifier name for domain covered. This can map to previously defined domains
@@ -53,16 +58,28 @@ def parse_openghg(
             for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
             See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
             To disable chunking pass in an empty dictionary.
+        data_owner: Name of data owner.
+        data_owner_email: Email address for data owner.
         kwargs: Any additional attributes to be associated with the data.
+
     Returns:
         Dict : Dictionary of source_name : data, metadata, attributes
+
+    Raises:
+        ValueError: If no input is supplied or required metadata or coordinates
+            are missing.
     """
     from openghg.standardise.meta import define_species_label
     from openghg.util import clean_string
 
-    xr_open_fn, filepath = open_time_nc_fn(filepath)
-
-    data = xr_open_fn(filepath).chunk(chunks if chunks is not None else {})
+    if data is None:
+        if filepath is None:
+            raise ValueError("Please specify either `filepath` or `data`.")
+        xr_open_fn, filepath = open_time_nc_fn(filepath)
+        data = xr_open_fn(filepath)
+    else:
+        data = preprocess_nc_data(data, check_coords="time")
+    data = data.chunk(chunks if chunks is not None else {})
 
     # TODO: Remove this once ragged arrays from xarray is handled
     if "exposure_id" in data:
@@ -76,6 +93,7 @@ def parse_openghg(
         metadata_required = metadata_default_satellite_column()
         metadata_required.remove("selection")
         platform = "satellite"
+
     elif site is not None or platform == "site":
         metadata_required = metadata_default_site_column()
         platform = "site"
@@ -106,6 +124,14 @@ def parse_openghg(
     metadata = {}
     key_translation = satellite_attribute_translation()
     # Populate metadata with values from attributes if inputs have not been passed
+    if "contact" in attributes and satellite == "oco2":
+        data_owner, data_owner_email = attributes.pop("contact").split(":", 1)
+
+        key_translation.pop("data_owner")
+        key_translation.pop("data_owner_email")
+        metadata["data_owner"] = data_owner
+        metadata["data_owner_email"] = data_owner_email
+
     for key, value in metadata_initial.items():
         if key in metadata_required:
             # Extract equivalent key from passed file if present using translation

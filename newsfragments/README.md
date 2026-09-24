@@ -7,7 +7,7 @@ The files are organized by type (the file extension) and reference an issue or P
 ## Fragment Types
 
 - `feature` - for new features (maps to "Added" in CHANGELOG)
-- `update` - for updates/changes (maps to "Updated" in CHANGELOG)  
+- `update` - for updates/changes (maps to "Updated" in CHANGELOG)
 - `bugfix` - for bug fixes (maps to "Fixed" in CHANGELOG)
 - `doc` - for documentation changes
 - `removal` - for removed features
@@ -31,7 +31,7 @@ echo "Fixed that bug that was causing crashes!" > newsfragments/1234.bugfix
 
 When you add a new feature from PR 5678:
 
-```bash  
+```bash
 echo "Added support for new data format" > newsfragments/5678.feature
 ```
 
@@ -40,7 +40,8 @@ echo "Added support for new data format" > newsfragments/5678.feature
 To generate the changelog (usually done at release time):
 
 ```bash
-towncrier build --version=X.Y.Z
+towncrier build --version=X.Y.Z --draft  # preview
+towncrier build --version=X.Y.Z --yes    # write and consume fragments
 ```
 
 This will collect all the fragments and add them to the CHANGELOG.md file.

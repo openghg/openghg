@@ -16,6 +16,7 @@ from openghg.util import (
     daterange_overlap,
     find_daterange_gaps,
     find_duplicate_timestamps,
+    has_monthly_period,
     in_daterange,
     parse_period,
     relative_time_offset,
@@ -28,7 +29,7 @@ from openghg.util import (
     dates_in_range,
 )
 from pandas import DateOffset, Timedelta, Timestamp
-from xarray import Dataset
+from xarray import DataArray, Dataset
 
 
 def test_create_daterange():
@@ -476,6 +477,31 @@ def test_infer_frequency(start, end, periods, expected_freq):
     freq = infer_frequency(timestamps)
 
     assert freq == expected_freq
+
+
+def test_has_monthly_period_single_time_point():
+    time = DataArray(pd.date_range("2001-01-01", periods=1, freq="MS"), dims=["time"])
+
+    assert has_monthly_period(time) is False
+
+
+def test_has_monthly_period_monthly_data():
+    time = DataArray(pd.date_range("2001-01-01", periods=12, freq="MS"), dims=["time"])
+
+    assert has_monthly_period(time) is True
+
+
+def test_has_monthly_period_missing_month():
+    monthly = pd.date_range("2001-01-01", periods=12, freq="MS")
+    time = DataArray(monthly.delete(5), dims=["time"])
+
+    assert has_monthly_period(time) is False
+
+
+def test_has_monthly_period_weekly_data():
+    time = DataArray(pd.date_range("2001-01-01", periods=12, freq="7D"), dims=["time"])
+
+    assert has_monthly_period(time) is False
 
 
 def test_in_daterange():

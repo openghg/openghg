@@ -1,14 +1,23 @@
 import numpy as np
 import pytest
 from helpers import get_bc_datapath, clear_test_store
+from openghg.dataobjects import data_manager
 from openghg.retrieve import search
 from openghg.standardise import standardise_bc, standardise_from_binary_data
 from openghg.store import BoundaryConditions
-from openghg.util import hash_bytes
-from xarray import open_dataset
+from openghg.transform import transform_bc_data
+from xarray import concat, open_dataset
+
+
+@pytest.fixture(autouse=True)
+def clear_store():
+    """Start each boundary-condition test with an empty writable store."""
+    clear_test_store("user")
 
 
 def test_read_data_monthly(mocker):
+    """Monthly boundary-condition binary data is stored with expected metadata."""
+
     class FakeUUID:
         """A class that mocks `uuid.uuid4`.
 
@@ -40,8 +49,6 @@ def test_read_data_monthly(mocker):
     test_datapath = get_bc_datapath("ch4_EUROPE_201208.nc")
 
     binary_data = test_datapath.read_bytes()
-    sha1_hash = hash_bytes(data=binary_data)
-
     metadata = {
         "species": "ch4",
         "bc_input": "MOZART",
@@ -51,7 +58,7 @@ def test_read_data_monthly(mocker):
 
     filename = test_datapath.name
 
-    file_metadata = {"sha1_hash": sha1_hash, "filename": filename, "compressed": False}
+    file_metadata = {"filename": filename, "compressed": False}
 
     proc_results = standardise_from_binary_data(
         data_type="boundary_conditions",
@@ -75,6 +82,7 @@ def test_read_data_monthly(mocker):
 
 
 def test_read_file_monthly():
+    """A monthly boundary-condition file is standardised and retrieved unchanged."""
     test_datapath = get_bc_datapath("ch4_EUROPE_201208.nc")
 
     proc_results = standardise_bc(
@@ -84,7 +92,6 @@ def test_read_file_monthly():
         bc_input="MOZART",
         domain="EUROPE",
         period="monthly",
-        force=True,
     )
 
     assert len(proc_results) == 1
@@ -126,6 +133,103 @@ def test_read_file_monthly():
     }
 
     assert expected_metadata.items() <= bc_data.metadata.items()
+
+
+def test_restandardise_boundary_conditions_after_datasource_deletion():
+    """Deleted multi-file boundary-condition data can be recreated in full."""
+    clear_test_store("user")
+    test_datapaths = [
+        get_bc_datapath("ch4_EUROPE_201208.nc"),
+        get_bc_datapath("ch4_EUROPE_201209.nc"),
+    ]
+    standardise_kwargs = {
+        "store": "user",
+        "filepath": test_datapaths,
+        "species": "ch4",
+        "bc_input": "MOZART",
+        "domain": "EUROPE",
+        "period": "monthly",
+        "concat_nc_files": False,
+    }
+
+    initial_results = standardise_bc(**standardise_kwargs)
+    data_manager(
+        data_type="boundary_conditions",
+        store="user",
+        species="ch4",
+        bc_input="mozart",
+        domain="europe",
+    ).delete_datasource(initial_results[0]["uuid"])
+
+    repeated_results = standardise_bc(**standardise_kwargs)
+
+    assert repeated_results and repeated_results[0].get("new") is True
+
+    recreated_data = search(
+        species="ch4",
+        bc_input="MOZART",
+        domain="europe",
+        data_type="boundary_conditions",
+        store="user",
+    ).retrieve_all()
+    with open_dataset(test_datapaths[0]) as august_data, open_dataset(test_datapaths[1]) as september_data:
+        original_data = concat([august_data, september_data], dim="time").load()
+
+    assert original_data.time.equals(recreated_data.data.time)
+    for data_var in ["vmr_n", "vmr_e", "vmr_s", "vmr_w"]:
+        assert original_data[data_var].equals(recreated_data.data[data_var])
+
+
+def test_looped_combine_with_ignored_force_retains_all_boundary_condition_files():
+    """Ignored force warns while looped combine retains every source month."""
+    test_datapaths = [
+        get_bc_datapath("ch4_EUROPE_201208.nc"),
+        get_bc_datapath("ch4_EUROPE_201209.nc"),
+    ]
+    standardise_kwargs = {
+        "store": "user",
+        "species": "ch4",
+        "bc_input": "MOZART",
+        "domain": "EUROPE",
+        "period": "monthly",
+    }
+
+    standardise_bc(filepath=test_datapaths, **standardise_kwargs)
+    with pytest.warns(DeprecationWarning, match=r"force.*deprecated.*if_exists") as caught_warnings:
+        standardise_bc(
+            filepath=test_datapaths,
+            concat_nc_files=False,
+            force=True,
+            if_exists="combine",
+            **standardise_kwargs,
+        )
+    assert sum("force argument is deprecated" in str(warning.message) for warning in caught_warnings) == 1
+
+    retrieved_data = search(
+        species="ch4",
+        bc_input="MOZART",
+        domain="europe",
+        data_type="boundary_conditions",
+        store="user",
+    ).retrieve_all()
+    with open_dataset(test_datapaths[0]) as august_data, open_dataset(test_datapaths[1]) as september_data:
+        expected_data = concat([august_data, september_data], dim="time").load()
+
+    assert expected_data.time.equals(retrieved_data.data.time)
+    for data_var in ["vmr_n", "vmr_e", "vmr_s", "vmr_w"]:
+        assert expected_data[data_var].equals(retrieved_data.data[data_var])
+
+    expected_metadata = {
+        "species": "ch4",
+        "bc_input": "mozart",
+        "domain": "europe",
+        "data_type": "boundary_conditions",
+        "time_period": "1 month",
+        "start_date": "2012-08-01 00:00:00+00:00",
+        "end_date": "2012-09-30 23:59:59+00:00",
+    }
+    for key, value in expected_metadata.items():
+        assert retrieved_data.metadata[key] == value
 
 
 def test_read_file_yearly():
@@ -318,3 +422,31 @@ def test_info_metadata():
 
     assert "project" in metadata
     assert "tag" in metadata
+
+
+def test_transform_cams_n2o_bc():
+    "Test CAMS parser for transform_boundary_conditions"
+    bc_input = "cams_test"
+    cams_version = "v22r1"
+    domain = "europe"
+    species = "n2o"
+    period = "daily"
+    filename = "cams73_v22r1_n2o_test_202201.nc"
+    data_path = get_bc_datapath(filename=filename)
+
+    results = transform_bc_data(
+        datapath=data_path,
+        database="CAMS",
+        species=species,
+        bc_input=bc_input,
+        period=period,
+        cams_version=cams_version,
+        domain=domain,
+        source_format="cams",
+        store="user",
+    )
+
+    expected_metadata = {"species": species, "domain": domain, "bc_input": bc_input}
+
+    for k, v in expected_metadata.items():
+        assert results[0][k].lower() == v.lower()

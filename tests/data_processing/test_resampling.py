@@ -11,7 +11,6 @@ from openghg.data_processing._resampling import (
     surface_obs_resampler,
 )
 
-
 rng = np.random.default_rng(seed=196883)
 
 
@@ -41,7 +40,6 @@ def mhd_ds():
     integration_flag = binary_randoms(n)
     status_flag = binary_randoms(n)
     str_status_flag = np.asarray(["NO"[int(i)] for i in status_flag], dtype="<U1")
-
 
     ds = xr.Dataset(
         data_vars={
@@ -160,7 +158,9 @@ def test_surface_obs_resampling_with_repeatability(mhd_ds):
     xr.testing.assert_allclose(result.ch4_repeatability, expected_repeatability)
 
     expected_others = mean_resample(mhd_ds.drop_vars("ch4_repeatability"), averaging_period="4h")
-    xr.testing.assert_allclose(result.drop_vars(["ch4_repeatability", "ch4_variability", "status_flag"]), expected_others)
+    xr.testing.assert_allclose(
+        result.drop_vars(["ch4_repeatability", "ch4_variability", "status_flag"]), expected_others
+    )
 
     assert result.ch4.attrs == mhd_ds.ch4.attrs
     assert result.ch4_repeatability.attrs == mhd_ds.ch4_repeatability.attrs

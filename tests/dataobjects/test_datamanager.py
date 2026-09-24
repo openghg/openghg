@@ -132,7 +132,7 @@ def test_delete_footprint_data(footprint_read):
         uuid = objstore.uuids[0]
         ds = objstore.get_datasource(uuid=uuid)
 
-    key = ds.key()
+    key = ds.key
     datasource_path = key_to_local_filepath(key=key)
 
     assert datasource_path[0].exists()
@@ -140,7 +140,7 @@ def test_delete_footprint_data(footprint_read):
     # Assert there are files in the zarr store
     assert ds._store
 
-    zarr_store_path = ds._store.store_path("v1")
+    zarr_store_path = ds._stores_path / "v1"
 
     assert zarr_store_path.exists()
 
@@ -363,12 +363,12 @@ def test_delete_data():
 
         d = objstore.get_datasource(uuid=uid)
 
-    key = d.key()
+    key = d.key
 
     assert d._data_keys
     assert d._store
 
-    zarr_store_path = d._store.store_path(version="v1")
+    zarr_store_path = d._stores_path / "v1"
 
     res.delete_datasource(uuid=uid)
 

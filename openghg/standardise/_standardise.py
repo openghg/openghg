@@ -1,10 +1,40 @@
+"""Standardise supported data products and store them in OpenGHG.
+
+The public functions in this module accept either file input through
+``filepath`` or an in-memory :class:`xarray.Dataset` through ``data``. Exactly
+one input form must be supplied. Data is parsed using the selected
+``source_format``, validated for its OpenGHG data type, and assigned to a
+matching datasource in the selected object store.
+
+The ``if_exists`` and ``save_current`` arguments control different parts of
+an update. ``if_exists`` determines the contents of the resulting latest
+version when a matching datasource already exists:
+
+* ``"auto"`` appends non-overlapping data but raises ``DataOverlapError`` if
+  any timestamps overlap;
+* ``"new"`` makes the supplied data the complete contents of the latest
+  version, without retaining existing data in that version; and
+* ``"combine"`` combines existing and supplied data, replacing existing
+  values at overlapping timestamps with the supplied values.
+
+``save_current`` determines whether the update creates a version while
+preserving the previously current data. ``"y"`` and ``"yes"`` always create
+a version; ``"n"`` and ``"no"`` update the current version without preserving
+it. With ``"auto"``, ``if_exists="auto"`` updates the current version in place,
+whereas ``if_exists="new"`` or ``if_exists="combine"`` creates a version. The
+deprecated ``overwrite=True`` option selects ``if_exists="new"`` when
+``if_exists`` has not been set explicitly.
+"""
+
 from pathlib import Path
 from typing import Any
+import xarray as xr
 from pandas import Timedelta
 import warnings
 
 from openghg.objectstore import get_writable_bucket
 from openghg.util import sort_by_filenames
+from openghg.util._deprecation import _warn_if_force_ignored
 from openghg.types import multiPathType
 from numcodecs import Blosc
 import logging
@@ -14,7 +44,8 @@ logger = logging.getLogger("openghg.standardise")
 
 def standardise(
     data_type: str,
-    filepath: str | Path | list[str] | list[Path],
+    filepath: str | Path | list[str] | list[Path] | None = None,
+    data: xr.Dataset | None = None,
     store: str | None = None,
     **kwargs: Any,
 ) -> list[dict]:
@@ -22,14 +53,30 @@ def standardise(
 
     Args:
         data_type: type of data to standardise
-        filepath: path to file(s) to standardise
+        filepath: Path to file(s) to standardise. Exactly one of ``filepath``
+            and ``data`` must be supplied.
+        data: In-memory dataset in the format expected by the selected parser.
+            Exactly one of ``filepath`` and ``data`` must be supplied. The
+            caller retains ownership of the dataset.
         store: Name of object store to write to, required if user has access to more than one
-        writable store
-        **kwargs: data type specific arguments, see specific implementations below.
+            writable store.
+        **kwargs: Data-type-specific arguments. See the module documentation
+            for ``if_exists`` and ``save_current`` behavior.
+
     Returns:
-        dict: Dictionary of result data.
+        list[dict]: Details of the datasource UUIDs data was assigned to.
+
+    Raises:
+        ValueError: If neither or both of ``filepath`` and ``data`` are supplied.
     """
-    from openghg.store import get_data_class
+    from openghg.store._meta import get_data_class
+
+    filepath_missing = filepath is None or (
+        isinstance(filepath, (list, tuple)) and all(f is None for f in filepath)
+    )
+
+    if (filepath_missing and data is None) or (not filepath_missing and data is not None):
+        raise ValueError("Please specify exactly one of `filepath` or `data`.")
 
     dclass = get_data_class(data_type)
     bucket = get_writable_bucket(name=store)
@@ -52,8 +99,7 @@ def standardise(
         pass
 
     with dclass(bucket=bucket) as dc:
-        result = dc.read_file(filepath=filepath, **kwargs)
-
+        result = dc.standardise_and_store(data=data, filepath=filepath, **kwargs)
     return result
 
 
@@ -61,7 +107,8 @@ def standardise_surface(
     source_format: str,
     network: str,
     site: str,
-    filepath: multiPathType,
+    data: xr.Dataset | None = None,
+    filepath: multiPathType | None = None,
     precision_filepath: str | Path | list[str] | list[Path] | None = None,
     inlet: str | None = None,
     height: str | None = None,
@@ -142,7 +189,8 @@ def standardise_surface(
              - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
              - "n" / "no" - Allow current data to updated / deleted
         overwrite: Deprecated. This will use options for if_exists="new".
-        force: Force adding of data even if this is identical to data stored.
+        force: Deprecated and ignored. Use ``if_exists`` to control overlap
+            handling. Passing ``True`` emits a deprecation warning.
         compression: Enable compression in the store
         compressor: A custom compressor to use. If None, this will default to
             `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
@@ -159,25 +207,33 @@ def standardise_surface(
             - None - check all file extensions and set to True is all are ".nc" or ".nc4"
             - True - attempt to open concatenated if all files are recognised as netcdf files.
             - False - open and standardise each file individually.
+
+    Warns:
+        DeprecationWarning: If ``force`` is ``True``.
+
     Returns:
         dict: Dictionary of result data
     """
     from openghg.standardise.surface import check_gcwerks_input
     from openghg.util import check_filepath
 
-    if source_format.lower() == "gcwerks":
-        filepath, precision_filepath = check_gcwerks_input(filepath, precision_filepath)
-    else:
-        filepath = check_filepath(filepath, source_format)
+    _warn_if_force_ignored(force)
 
-    if sort_files:
-        # Don't sort filepaths for gcwerks because this needs to map in order to precision_filepaths
-        if source_format.lower() != "gcwerks":
-            filepath = sort_by_filenames(filepath=filepath)
+    if filepath is not None:
+        if source_format.lower() == "gcwerks":
+            filepath, precision_filepath = check_gcwerks_input(filepath, precision_filepath)
+        else:
+            filepath = check_filepath(filepath, source_format)
+
+        if sort_files:
+            # Don't sort filepaths for gcwerks because this needs to map in order to precision_filepaths
+            if source_format.lower() != "gcwerks":
+                filepath = sort_by_filenames(filepath=filepath)
 
     return standardise(
         store=store,
         data_type="surface",
+        data=data,
         filepath=filepath,
         precision_filepath=precision_filepath,
         source_format=source_format,
@@ -200,7 +256,6 @@ def standardise_surface(
         update_mismatch=update_mismatch,
         if_exists=if_exists,
         save_current=save_current,
-        force=force,
         compression=compression,
         compressor=compressor,
         filters=filters,
@@ -211,8 +266,8 @@ def standardise_surface(
 
 
 def standardise_column(
-    filepath: str | Path | list[str] | list[Path],
-    species: str,
+    filepath: str | Path | list[str] | list[Path] | None = None,
+    species: str | None = None,
     platform: str = "satellite",
     obs_region: str | None = None,
     site: str | None = None,
@@ -235,11 +290,16 @@ def standardise_column(
     chunks: dict | None = None,
     info_metadata: dict | None = None,
     concat_nc_files: bool | None = None,
+    data: xr.Dataset | None = None,
 ) -> list[dict]:
     """Read column observation file
 
     Args:
-        filepath: Path to the input observation file.
+        filepath: Path to the input observation file. Exactly one of ``filepath``
+            and ``data`` must be supplied.
+        data: In-memory column-observation dataset in the format expected by
+            ``source_format``. Exactly one of ``filepath`` and ``data`` must
+            be supplied. The caller retains ownership of the dataset.
         species: Species name or synonym (e.g., "ch4").
         platform: Type of platform (default is "satellite"). Can be one of:
             - "satellite"
@@ -257,17 +317,13 @@ def standardise_column(
         tag: Special tagged values to add to the Datasource. This will be added to any
             current values if the tag key already exists in a list.
         store: The name of the store to write the processed data to.
-        if_exists: Determines behavior if data already exists in the store.
-            Can be one of:
-            - "auto" (default): Checks for overlap and decides whether to add or raise an error.
-            - "new": Only includes new data, ignoring existing data.
-            - "combine": Replaces and inserts new data into the existing timeseries.
-        save_current: Decides whether to save the current version of the data:
-            - "auto" (default): Automatically saves based on `if_exists` behavior.
-            - "yes" or "y": Save current data as a separate version.
-            - "no" or "n": Allow updates or deletion of current data.
+        if_exists: Existing-data handling (``"auto"``, ``"new"``, or ``"combine"``);
+            see the module documentation.
+        save_current: Version preservation (``"auto"``, ``"y"``/``"yes"``, or
+            ``"n"``/``"no"``); see the module documentation.
         overwrite: Deprecated. Replaced by `if_exists="new"`.
-        force: Forces the addition of data even if it's identical to the existing data.
+        force: Deprecated and ignored. Use ``if_exists`` to control overlap
+            handling. Passing ``True`` emits a deprecation warning.
         compression: Enables or disables compression during data storage (default is True).
         compressor: Custom compression method. Defaults to `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.)`.
@@ -283,14 +339,21 @@ def standardise_column(
             - None - check all file extensions and set to True is all are ".nc" or ".nc4"
             - True - attempt to open concatenated if all files are recognised as netcdf files.
             - False - open and standardise each file individually.
+
+    Warns:
+        DeprecationWarning: If ``force`` is ``True``.
+
     Returns:
-        dict: Dictionary containing confirmation of standardisation process.
+        Details of the datasource UUIDs for the processed data.
     """
+
+    _warn_if_force_ignored(force)
 
     return standardise(
         store=store,
         data_type="column",
         filepath=filepath,
+        data=data,
         species=species,
         platform=platform,
         obs_region=obs_region,
@@ -305,7 +368,6 @@ def standardise_column(
         overwrite=overwrite,
         if_exists=if_exists,
         save_current=save_current,
-        force=force,
         compression=compression,
         compressor=compressor,
         filters=filters,
@@ -317,10 +379,10 @@ def standardise_column(
 
 
 def standardise_bc(
-    filepath: str | Path | list[str] | list[Path],
-    species: str,
-    bc_input: str,
-    domain: str,
+    filepath: str | Path | list[str] | list[Path] | None = None,
+    species: str | None = None,
+    bc_input: str | None = None,
+    domain: str | None = None,
     source_format: str = "openghg",
     period: str | tuple | None = None,
     continuous: bool = True,
@@ -336,11 +398,16 @@ def standardise_bc(
     chunks: dict | None = None,
     info_metadata: dict | None = None,
     concat_nc_files: bool | None = None,
+    data: xr.Dataset | None = None,
 ) -> list[dict]:
     """Standardise boundary condition data and store it in the object store.
 
     Args:
-        filepath: Path of boundary conditions file
+        filepath: Path of boundary conditions file. Exactly one of ``filepath``
+            and ``data`` must be supplied.
+        data: In-memory boundary-condition dataset in the format expected by
+            ``source_format``. Exactly one of ``filepath`` and ``data`` must
+            be supplied. The caller retains ownership of the dataset.
         species: Species name
         bc_input: Input used to create boundary conditions. For example:
             - a model name such as "MOZART" or "CAMS"
@@ -352,18 +419,13 @@ def standardise_bc(
         tag: Special tagged values to add to the Datasource. This will be added to any
             current values if the tag key already exists in a list.
         store: Name of store to write to
-        if_exists: What to do if existing data is present.
-            - "auto" - checks new and current data for timeseries overlap
-                - adds data if no overlap
-                - raises DataOverlapError if there is an overlap
-            - "new" - just include new data and ignore previous
-            - "combine" - replace and insert new data into current timeseries
-        save_current: Whether to save data in current form and create a new version.
-             - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
-             - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
-             - "n" / "no" - Allow current data to updated / deleted
+        if_exists: Existing-data handling (``"auto"``, ``"new"``, or ``"combine"``);
+            see the module documentation.
+        save_current: Version preservation (``"auto"``, ``"y"``/``"yes"``, or
+            ``"n"``/``"no"``); see the module documentation.
         overwrite: Deprecated. This will use options for if_exists="new".
-        force: Force adding of data even if this is identical to data stored.
+        force: Deprecated and ignored. Use ``if_exists`` to control overlap
+            handling. Passing ``True`` emits a deprecation warning.
         compression: Enable compression in the store
         compressor: A custom compressor to use. If None, this will default to
             `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
@@ -379,14 +441,21 @@ def standardise_bc(
             - None - check all file extensions and set to True is all are ".nc" or ".nc4"
             - True - attempt to open concatenated if all files are recognised as netcdf files.
             - False - open and standardise each file individually.
+
+    Warns:
+        DeprecationWarning: If ``force`` is ``True``.
+
     Returns:
-        dict: Dictionary containing confirmation of standardisation process.
+        Details of the datasource UUIDs for the processed data.
     """
+
+    _warn_if_force_ignored(force)
 
     return standardise(
         store=store,
         data_type="boundary_conditions",
         filepath=filepath,
+        data=data,
         species=species,
         bc_input=bc_input,
         domain=domain,
@@ -397,7 +466,6 @@ def standardise_bc(
         overwrite=overwrite,
         if_exists=if_exists,
         save_current=save_current,
-        force=force,
         compression=compression,
         compressor=compressor,
         filters=filters,
@@ -408,9 +476,9 @@ def standardise_bc(
 
 
 def standardise_footprint(
-    filepath: str | Path | list[str] | list[Path],
-    model: str,
-    domain: str,
+    filepath: str | Path | list[str] | list[Path] | None = None,
+    model: str | None = None,
+    domain: str | None = None,
     site: str | None = None,
     satellite: str | None = None,
     obs_region: str | None = None,
@@ -432,7 +500,7 @@ def standardise_footprint(
     overwrite: bool = False,
     force: bool = False,
     high_spatial_resolution: bool = False,
-    time_resolved: bool = False,
+    time_resolved: bool | None = None,
     high_time_resolution: bool = False,
     short_lifetime: bool = False,
     sort: bool = False,
@@ -443,12 +511,18 @@ def standardise_footprint(
     info_metadata: dict | None = None,
     sort_files: bool = False,
     concat_nc_files: bool | None = None,
+    inner_domain: str | None = None,
+    data: xr.Dataset | None = None,
 ) -> list[dict]:
     """Reads footprint data files and returns the UUIDs of the Datasources
     the processed data has been assigned to
 
     Args:
-        filepath: Path(s) of file to standardise
+        filepath: Path(s) of file to standardise. Exactly one of ``filepath``
+            and ``data`` must be supplied.
+        data: In-memory footprint dataset in the format expected by
+            ``source_format``. Exactly one of ``filepath`` and ``data`` must
+            be supplied. The caller retains ownership of the dataset.
         model: Model used to create footprint (e.g. NAME or FLEXPART)
         domain: Domain of footprints
         site: Site name
@@ -469,25 +543,23 @@ def standardise_footprint(
         continuous: Whether time stamps have to be continuous.
         retrieve_met: Whether to also download meterological data for this footprints area
         high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.
-        time_resolved: Indicate footprints are high time resolution (include H_back dimension)
-            Note this will be set to True automatically for Carbon Dioxide data.
+        time_resolved: Indicate whether footprints are time resolved (include an
+            H_back dimension). For CO2, the default (None) selects time-resolved
+            footprints for backwards compatibility. Set this explicitly to False
+            to add an integrated footprint.
         short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
             Note this will be set to True if species has an associated lifetime.
         high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.
         tag: Special tagged values to add to the Datasource. This will be added to any
             current values if the tag key already exists in a list.
         store: Name of store to write to
-        if_exists: What to do if existing data is present.
-            - "auto" - checks new and current data for timeseries overlap
-                - adds data if no overlap
-                - raises DataOverlapError if there is an overlap
-            - "new" - just include new data and ignore previous
-            - "combine" - replace and insert new data into current timeseries
-        save_current: Whether to save data in current form and create a new version.
-             - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
-             - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
-             - "n" / "no" - Allow current data to updated / deleted        overwrite: Deprecated. This will use options for if_exists="new".
-        force: Force adding of data even if this is identical to data stored.
+        if_exists: Existing-data handling (``"auto"``, ``"new"``, or ``"combine"``);
+            see the module documentation.
+        save_current: Version preservation (``"auto"``, ``"y"``/``"yes"``, or
+            ``"n"``/``"no"``); see the module documentation.
+        overwrite: Deprecated. This will use options for if_exists="new".
+        force: Deprecated and ignored. Use ``if_exists`` to control overlap
+            handling. Passing ``True`` emits a deprecation warning.
         sort: Sort data in by time
         drop_duplicates: Drop duplicate timestamps, keeping the first value
         compression: Enable compression in the store
@@ -502,10 +574,17 @@ def standardise_footprint(
             - None - check all file extensions and set to True is all are ".nc" or ".nc4"
             - True - attempt to open concatenated if all files are recognised as netcdf files.
             - False - open and standardise each file individually.
+        inner_domain: For nested domains, specify the inner part of the domain (e.g. "6km").
+            When both ``domain`` and ``inner_domain`` are provided, they are combined as ``"{domain}{inner_domain}"`` (e.g. "EUROPE6km") to form the full domain identifier used for the footprint metadata. However it is written as {domain}-{inner_domain} in the metadata.
+
+    Warns:
+        DeprecationWarning: If ``force`` or ``high_time_resolution`` is ``True``.
+
     Returns:
-        dict / None: Dictionary containing confirmation of standardisation process. None
-        if file already processed.
+        Details of the datasource UUIDs for the processed data.
     """
+    _warn_if_force_ignored(force)
+
     if high_time_resolution:
         warnings.warn(
             "This argument is deprecated and will be replaced in future versions with time_resolved.",
@@ -518,13 +597,14 @@ def standardise_footprint(
     elif isinstance(filepath, Path):
         filepath = [filepath]
 
-    if sort_files:
+    if sort_files and filepath is not None:
         filepath = sort_by_filenames(filepath=filepath)
 
     return standardise(
         store=store,
         data_type="footprints",
         filepath=filepath,
+        data=data,
         site=site,
         domain=domain,
         model=model,
@@ -548,7 +628,6 @@ def standardise_footprint(
         overwrite=overwrite,
         if_exists=if_exists,
         save_current=save_current,
-        force=force,
         compression=compression,
         compressor=compressor,
         filters=filters,
@@ -556,14 +635,15 @@ def standardise_footprint(
         drop_duplicates=drop_duplicates,
         info_metadata=info_metadata,
         concat_nc_files=concat_nc_files,
+        inner_domain=inner_domain,
     )
 
 
 def standardise_flux(
-    filepath: str | Path | list[str] | list[Path],
-    species: str,
-    source: str,
-    domain: str,
+    filepath: str | Path | list[str] | list[Path] | None = None,
+    species: str | None = None,
+    source: str | None = None,
+    domain: str | None = None,
     database: str | None = None,
     source_format: str = "openghg",
     database_version: str | None = None,
@@ -584,11 +664,16 @@ def standardise_flux(
     filters: Any | None = None,
     info_metadata: dict | None = None,
     concat_nc_files: bool | None = None,
+    data: xr.Dataset | None = None,
 ) -> list[dict]:
     """Process flux / emissions data
 
     Args:
-        filepath: Path of flux / emissions file
+        filepath: Path of flux / emissions file. Exactly one of ``filepath``
+            and ``data`` must be supplied.
+        data: In-memory flux dataset in the format expected by ``source_format``.
+            Exactly one of ``filepath`` and ``data`` must be supplied. The
+            caller retains ownership of the dataset.
         species: Species name
         source: Flux / Emissions source
         domain: Flux / Emissions domain
@@ -606,18 +691,13 @@ def standardise_flux(
         tag: Special tagged values to add to the Datasource. This will be added to any
             current values if the tag key already exists in a list.
         store: Name of store to write to
-        if_exists: What to do if existing data is present.
-            - "auto" - checks new and current data for timeseries overlap
-                - adds data if no overlap
-                - raises DataOverlapError if there is an overlap
-            - "new" - just include new data and ignore previous
-            - "combine" - replace and insert new data into current timeseries
-        save_current: Whether to save data in current form and create a new version.
-             - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
-             - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
-             - "n" / "no" - Allow current data to updated / deleted
+        if_exists: Existing-data handling (``"auto"``, ``"new"``, or ``"combine"``);
+            see the module documentation.
+        save_current: Version preservation (``"auto"``, ``"y"``/``"yes"``, or
+            ``"n"``/``"no"``); see the module documentation.
         overwrite: Deprecated. This will use options for if_exists="new".
-        force: Force adding of data even if this is identical to data stored.
+        force: Deprecated and ignored. Use ``if_exists`` to control overlap
+            handling. Passing ``True`` emits a deprecation warning.
         compression: Enable compression in the store
         compressor: A custom compressor to use. If None, this will default to
             `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
@@ -629,9 +709,15 @@ def standardise_flux(
             - None - check all file extensions and set to True is all are ".nc" or ".nc4"
             - True - attempt to open concatenated if all files are recognised as netcdf files.
             - False - open and standardise each file individually.
-    returns:
-        dict: Dictionary of Datasource UUIDs data assigned to
+
+    Warns:
+        DeprecationWarning: If ``force`` or ``high_time_resolution`` is ``True``.
+
+    Returns:
+        Details of the datasource UUIDs for the processed data.
     """
+
+    _warn_if_force_ignored(force)
 
     if high_time_resolution:
         warnings.warn(
@@ -644,6 +730,7 @@ def standardise_flux(
         data_type="flux",
         store=store,
         filepath=filepath,
+        data=data,
         source_format=source_format,
         species=species,
         source=source,
@@ -659,7 +746,6 @@ def standardise_flux(
         overwrite=overwrite,
         if_exists=if_exists,
         save_current=save_current,
-        force=force,
         compression=compression,
         compressor=compressor,
         filters=filters,
@@ -669,9 +755,9 @@ def standardise_flux(
 
 
 def standardise_eulerian(
-    filepath: str | Path | list[str] | list[Path],
-    model: str,
-    species: str,
+    filepath: str | Path | list[str] | list[Path] | None = None,
+    model: str | None = None,
+    species: str | None = None,
     source_format: str = "openghg",
     start_date: str | None = None,
     end_date: str | None = None,
@@ -688,11 +774,16 @@ def standardise_eulerian(
     chunks: dict | None = None,
     info_metadata: dict | None = None,
     concat_nc_files: bool | None = None,
+    data: xr.Dataset | None = None,
 ) -> list[dict]:
     """Read Eulerian model output
 
     Args:
-        filepath: Path of Eulerian model species output
+        filepath: Path of Eulerian model species output. Exactly one of
+            ``filepath`` and ``data`` must be supplied.
+        data: In-memory Eulerian-model dataset in the format expected by
+            ``source_format``. Exactly one of ``filepath`` and ``data`` must
+            be supplied. The caller retains ownership of the dataset.
         model: Eulerian model name
         species: Species name
         source_format: Data format, for example openghg (internal format)
@@ -701,20 +792,15 @@ def standardise_eulerian(
         setup: Additional setup details for run
         tag: Special tagged values to add to the Datasource. This will be added to any
             current values if the tag key already exists in a list.
-        if_exists: What to do if existing data is present.
-            - "auto" - checks new and current data for timeseries overlap
-                - adds data if no overlap
-                - raises DataOverlapError if there is an overlap
-            - "new" - just include new data and ignore previous
-            - "combine" - replace and insert new data into current timeseries
-        save_current: Whether to save data in current form and create a new version.
-            - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
-            - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
-            - "n" / "no" - Allow current data to updated / deleted
+        if_exists: Existing-data handling (``"auto"``, ``"new"``, or ``"combine"``);
+            see the module documentation.
+        save_current: Version preservation (``"auto"``, ``"y"``/``"yes"``, or
+            ``"n"``/``"no"``); see the module documentation.
         overwrite: Deprecated. This will use options for if_exists="new".
         store: Name of object store to write to, required if user has access to more than one
         writable store
-        force: Force adding of data even if this is identical to data stored.
+        force: Deprecated and ignored. Use ``if_exists`` to control overlap
+            handling. Passing ``True`` emits a deprecation warning.
         compression: Enable compression in the store
         compressor: A custom compressor to use. If None, this will default to
             `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
@@ -730,13 +816,24 @@ def standardise_eulerian(
             - None - check all file extensions and set to True is all are ".nc" or ".nc4"
             - True - attempt to open concatenated if all files are recognised as netcdf files.
             - False - open and standardise each file individually.
+
+    Warns:
+        DeprecationWarning: If ``force`` is ``True``.
+
     Returns:
-        dict: Dictionary of result data
+        Details of the datasource UUIDs for the processed data.
+
+    Raises:
+        ValueError: If exactly one of ``filepath`` and ``data`` is not
+            supplied.
     """
+    _warn_if_force_ignored(force)
+
     return standardise(
         store=store,
         data_type="eulerian_model",
         filepath=filepath,
+        data=data,
         source_format=source_format,
         model=model,
         species=species,
@@ -746,7 +843,6 @@ def standardise_eulerian(
         tag=tag,
         overwrite=overwrite,
         if_exists=if_exists,
-        force=force,
         save_current=save_current,
         compression=compression,
         compressor=compressor,
@@ -780,13 +876,13 @@ def standardise_from_binary_data(
     returns:
         Dictionary of result data.
     """
-    from openghg.store import get_data_class
+    from openghg.store._meta import get_data_class
 
     dclass = get_data_class(data_type)
     bucket = get_writable_bucket(name=store)
 
     with dclass(bucket) as dc:
-        result = dc.read_data(
+        result = dc.read_raw_data(
             binary_data=binary_data, metadata=metadata, file_metadata=file_metadata, **kwargs
         )
     return result
@@ -850,7 +946,8 @@ def standardise_flux_timeseries(
             - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
             - "n" / "no" - Allow current data to updated / deleted
         overwrite: Deprecated. This will use options for if_exists="new".
-        force: Force adding of data even if this is identical to data stored.
+        force: Deprecated and ignored. Use ``if_exists`` to control overlap
+            handling. Passing ``True`` emits a deprecation warning.
         compressor: A custom compressor to use. If None, this will default to
             `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
@@ -861,9 +958,15 @@ def standardise_flux_timeseries(
             - None - check all file extensions and set to True is all are ".nc" or ".nc4"
             - True - attempt to open concatenated if all files are recognised as netcdf files.
             - False - open and standardise each file individually.
+
+    Warns:
+        DeprecationWarning: If ``force`` is ``True``.
+
     Returns:
         dict: Dictionary of datasource UUIDs data assigned to
     """
+
+    _warn_if_force_ignored(force)
 
     if domain is not None:
         logger.warning(
@@ -887,11 +990,71 @@ def standardise_flux_timeseries(
         overwrite=overwrite,
         if_exists=if_exists,
         save_current=save_current,
-        force=force,
         compressor=compressor,
         filters=filters,
         period=period,
         continuous=continuous,
         info_metadata=info_metadata,
         concat_nc_files=concat_nc_files,
+    )
+
+
+def standardise_site_met(
+    filepath: str | Path | None = None,
+    site: str | None = None,
+    network: str | None = None,
+    met_source: str | None = None,
+    source_format: str = "ecmwf",
+    if_exists: str = "auto",
+    save_current: str = "auto",
+    store: str | None = None,
+    force: bool = False,
+    chunks: dict | None = None,
+    compressor: Any | None = None,
+    data: xr.Dataset | None = None,
+) -> list[dict]:
+    """Standardise site meteorology data and store it in the object store.
+
+    Args:
+        filepath: Path to the site meteorology data. Exactly one of ``filepath``
+            and ``data`` must be supplied.
+        data: In-memory site-meteorology dataset in the format expected by
+            ``source_format``. Exactly one of ``filepath`` and ``data`` must
+            be supplied. The caller retains ownership of the dataset.
+        site: Site code or name.
+        network: Measurement network name.
+        met_source: Source of the meteorology data.
+        source_format: Input data format.
+        if_exists: Existing-data handling (``"auto"``, ``"new"``, or ``"combine"``);
+            see the module documentation.
+        save_current: Version preservation (``"auto"``, ``"y"``/``"yes"``, or
+            ``"n"``/``"no"``); see the module documentation.
+        store: Name of the object store to write to.
+        force: Deprecated and ignored. Use ``if_exists`` to control overlap
+            handling. Passing ``True`` emits a deprecation warning.
+        chunks: Chunking schema to use when storing the data.
+        compressor: Custom compressor to use when storing the data.
+
+    Warns:
+        DeprecationWarning: If ``force`` is ``True``.
+
+    Returns:
+        Details of the datasource UUIDs for the processed data.
+    """
+
+    _warn_if_force_ignored(force)
+
+    return standardise(
+        data_type="site_met",
+        filepath=filepath,
+        data=data,
+        site=site,
+        network=network,
+        met_source=met_source,
+        source_format=source_format,
+        if_exists=if_exists,
+        store=store,
+        save_current=save_current,
+        chunks=chunks,
+        compressor=compressor,
     )

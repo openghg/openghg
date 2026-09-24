@@ -6,7 +6,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 from types import TracebackType
-from typing import Any, TypeVar
+from typing import Any, TypeVar, cast
 from collections.abc import MutableSequence, Sequence, Callable
 import warnings
 
@@ -17,17 +17,19 @@ from xarray import Dataset
 from openghg.objectstore import get_object_from_json, exists, set_object_from_json
 from openghg.objectstore import locking_object_store
 from openghg.store._data_schema import DataSchema
-from openghg.store.storage import ChunkingSchema, chunk_size_in_megabytes
+from openghg.storage import ChunkingSchema, chunk_size_in_megabytes
 from openghg.types import (
     DatasourceLookupError,
     StandardiseError,
     ValidationError,
     MetadataAndData,
 )
-from openghg.util import timestamp_now, to_lowercase, hash_file, normalise_to_filepath_list
+from openghg.util._deprecation import _warn_if_force_ignored
+from openghg.util._strings import to_lowercase
+from openghg.util._time import timestamp_now
+from openghg.util._util import normalise_to_filepath_list
 
 from .._metakeys_config import get_metakeys
-
 
 T = TypeVar("T", bound="BaseStore")
 
@@ -43,34 +45,44 @@ class BaseStore:
     _data_type = ""
     _root = "root"
     _uuid = "root_uuid"
+    _metakey: str = ""
 
     def __init__(self, bucket: str) -> None:
         # from openghg.objectstore import get_object_from_json, exists
 
         self._creation_datetime = str(timestamp_now())
         self._stored = False
-        # Hashes of previously uploaded files
-        self._file_hashes: dict[str, str] = {}
-        # Hashes of previously stored data from other data platforms
-        self._retrieved_hashes: dict[str, dict] = {}
-        # Where we'll store this object's metastore
-        self._metakey = ""
 
         if exists(bucket=bucket, key=self.key()):
             data = get_object_from_json(bucket=bucket, key=self.key())
             # Update myself
             self.__dict__.update(data)
+            self.__dict__.pop("_file_hashes", None)
+            self.__dict__.pop("_retrieved_hashes", None)
 
         # self._metastore = DataClassMetaStore(bucket=bucket, data_type=self._data_type)
         self._objectstore = locking_object_store(bucket=bucket, data_type=self._data_type)
         self._bucket = bucket
-        self._datasource_uuids = self._objectstore.get_uuids()
+        self._datasource_uuids = cast(list[str], self._objectstore.get_uuids())
 
     def __init_subclass__(cls) -> None:
         if cls._data_type == "":
             raise ClassDefinitionError(
                 f"Subclass {cls.__name__} of `BaseStore` must set the `_data_type` attribute."
             )
+
+        try:
+            from openghg.store.spec import get_data_type_class_target
+
+            builtin_module, builtin_class = get_data_type_class_target(cls._data_type)
+        except ValueError:
+            pass
+        else:
+            if (cls.__module__, cls.__name__) != (builtin_module, builtin_class):
+                raise ClassDefinitionError(
+                    f"Subclass {cls.__name__} uses reserved built-in `_data_type` {cls._data_type}. Please set a unique data type."
+                )
+
         if cls._data_type in BaseStore._registry:
             raise ClassDefinitionError(
                 f"Subclass {BaseStore._registry[cls._data_type]} already uses `_data_type` {cls._data_type}. Please set a unique data type."
@@ -106,20 +118,28 @@ class BaseStore:
         set_object_from_json(bucket=self._bucket, key=self.key(), data=self.to_data())
 
     def to_data(self) -> dict:
+        """Return serialisable store state without runtime or legacy hash fields."""
         # We don't need to store the metadata store, it has its own location
         # QUESTION - Is this cleaner than the previous specifying
-        DO_NOT_STORE = ["_objectstore", "_bucket", "_datasource_uuids"]
+        DO_NOT_STORE = [
+            "_objectstore",
+            "_bucket",
+            "_datasource_uuids",
+            "_file_hashes",
+            "_retrieved_hashes",
+        ]
         return {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
 
-    def read_data(
+    def read_raw_data(
         self, binary_data: bytes, metadata: dict, file_metadata: dict, *args: Any, **kwargs: Any
     ) -> list[dict] | None:
         raise NotImplementedError
 
-    def _standardise_from_file(
+    def _standardise_and_store(
         self,
-        filepath: Path | list[Path],
         fn_input_parameters: dict,
+        data: xr.Dataset | None = None,
+        filepath: Path | list[Path] | None = None,
         source_format: str | None = None,
         parser_fn: Callable | None = None,
         update_mismatch: str = "never",
@@ -183,16 +203,19 @@ class BaseStore:
             logger.exception(msg)
             raise ValueError(msg)
 
-        fn_input_parameters["filepath"] = filepath
+        if data is None:
+            fn_input_parameters["filepath"] = filepath
+        else:
+            fn_input_parameters["data"] = data
 
         # Define parameters to pass to the parser function and remaining keys
         parser_input_parameters, additional_input_parameters = split_function_inputs(
-            fn_input_parameters, parser_fn
+            parameters=fn_input_parameters, fn=parser_fn
         )
 
         # Call appropriate standardisation function with input parameters
         try:
-            data: list[MetadataAndData] = parser_fn(**parser_input_parameters)
+            parsed_data: list[MetadataAndData] = parser_fn(**parser_input_parameters)
         except (TypeError, ValueError) as err:
             msg = f"Error during standardisation of file(s): {filepath}. Error: {err}"
             logger.exception(msg)
@@ -202,18 +225,18 @@ class BaseStore:
         # - currently checking the first MetadataAndData object returned only
         # - if an empty dictionary has been passed we shouldn't allow chunks to be updated ("empty dictionary should disable chunking")
         if chunks != {}:
-            chunks = self._check_chunks_datasource(data[0], fn_input_parameters, chunks=chunks)
+            chunks = self._check_chunks_datasource(parsed_data[0], fn_input_parameters, chunks=chunks)
 
         # Current workflow: if any datasource fails validation, whole filepath fails
-        self._validate_datasources(data, fn_input_parameters, filepath=filepath)
+        self._validate_datasources(parsed_data, fn_input_parameters, filepath=filepath)
 
-        # Ensure the data is chunked
+        # Ensure the parsed_data is chunked
         if chunks:
             logger.info(f"Rechunking with chunks={chunks}")
-            for datasource in data:
+            for datasource in parsed_data:
                 datasource.data = datasource.data.chunk(chunks)
 
-        self.align_metadata_attributes(data=data, update_mismatch=update_mismatch)
+        self.align_metadata_attributes(data=parsed_data, update_mismatch=update_mismatch)
 
         # Check to ensure no required keys are being passed through info_metadata dict
         # before adding details
@@ -222,37 +245,46 @@ class BaseStore:
             info_metadata = {}
 
         # Mop up and add additional keys to metadata which weren't passed to the parser
-        data = self.update_metadata(data, additional_input_parameters, additional_metadata=info_metadata)
+        updated_data = self.update_metadata(
+            parsed_data, additional_input_parameters, additional_metadata=info_metadata
+        )
 
         # Create Datasources, save them to the object store and get their UUIDs
         datasource_uuids = self.assign_data(
-            data=data,
+            data=updated_data,
             if_exists=if_exists,
             new_version=new_version,
             compressor=compressor,
             filters=filters,
         )
 
-        for x in datasource_uuids:
-            if isinstance(filepath, list) and len(filepath) == 1:
-                filepath = filepath[0]
-
-            if isinstance(filepath, Path):
-                x.update({"file": filepath.name})
-                logger.info(f"Completed processing: {filepath.name}.")
-            elif isinstance(filepath, list):
-                filepath_str = ", ".join([fp.name for fp in filepath])
-                x.update({"files": filepath_str})
-                logger.info(f"Completed processing files: {filepath_str}.")
+        filepaths: list[Path] | Path | None = None
+        if filepath is not None:
+            filepaths = normalise_to_filepath_list(filepath)
+        else:
+            filepaths = []
+        if not filepaths:
+            logger.info("Filepath not provided, cannot log completed processing of files.")
+        else:
+            for x in datasource_uuids:
+                if len(filepaths) == 1:
+                    fp = filepaths[0]
+                    x.update({"file": fp.name})
+                    logger.info(f"Completed processing: {fp.name}.")
+                else:
+                    filepath_str = ", ".join(fp.name for fp in filepaths)
+                    x.update({"files": filepath_str})
+                    logger.info(f"Completed processing files: {filepath_str}.")
 
         return datasource_uuids
 
-    def read_file(
+    def standardise_and_store(
         self,
-        filepath: str | Path | list[str] | list[Path],
         source_format: str,
         if_exists: str = "auto",
         save_current: str = "auto",
+        filepath: str | Path | list[str] | list[Path] | None = None,
+        data: xr.Dataset | None = None,
         overwrite: bool = False,
         force: bool = False,
         compressor: Any | None = None,
@@ -283,7 +315,8 @@ class BaseStore:
                 - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
                 - "n" / "no" - Allow current data to updated / deleted
             overwrite: Deprecated. This will use options for if_exists="new".
-            force: Force adding of data even if this is identical to data stored.
+            force: Deprecated and ignored. Use ``if_exists`` to control overlap
+                handling. Passing ``True`` emits a deprecation warning.
             compressor: A custom compressor to use. If None, this will default to
                 `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
@@ -309,9 +342,15 @@ class BaseStore:
             **kwargs: Specific keywords associated with the data type. See
                 the openghg.standardise.standardise_* functions for details
                 of what keywords are expected for this.
+
+        Warns:
+            DeprecationWarning: If ``force`` is ``True``.
+
         Returns:
             list[dict]: Details of the datasource uuids for the processed files.
         """
+
+        _warn_if_force_ignored(force)
 
         from openghg.store.spec import check_parser
         from openghg.util import (
@@ -329,10 +368,6 @@ class BaseStore:
             )
             if_exists = "new"
 
-        # Making sure new version will be created by default if force keyword is included.
-        if force and if_exists == "auto":
-            if_exists = "new"
-
         new_version = check_if_need_new_version(if_exists, save_current)
 
         # Format input parameters (specific to data_type)
@@ -340,96 +375,101 @@ class BaseStore:
 
         fn_input_parameters["source_format"] = source_format
 
+        if data is not None:
+            try:
+                results = self._standardise_and_store(
+                    data=data,
+                    fn_input_parameters=fn_input_parameters,
+                    source_format=source_format,
+                    update_mismatch=update_mismatch,
+                    if_exists=if_exists,
+                    new_version=new_version,
+                    compressor=compressor,
+                    filters=filters,
+                    chunks=chunks,
+                    info_metadata=info_metadata,
+                )
+            except StandardiseError as err:
+                logger.error(f"Unable to standardise dataset. Error: {err}")
+                return [{}]
+            return results
+
         # Make sure filepaths contains Path objects
-        filepaths = normalise_to_filepath_list(filepath)
+        if filepath is not None:
+            filepaths = normalise_to_filepath_list(filepath)
 
-        # Check hashes of previous files (included after any filepath(s) formatting)
-        _, unseen_hashes = self.check_hashes(filepaths=filepaths, force=force)
-
-        if not unseen_hashes:
-            return [{}]
-
-        filepaths = list(unseen_hashes.values())
-
-        if not filepaths:
-            return [{}]
-
-        # Check if filepaths are all netcdf files
-        file_extensions = [fp.suffix for fp in filepaths]
-        nc_extensions = [".nc", ".nc4"]
-        if all([ext in nc_extensions for ext in file_extensions]):
-            if concat_nc_files is None:
-                concat_nc_files = True
-        else:
-            if concat_nc_files is True:
-                logger.warning(
-                    f"Do not recognise all input files as netcdf files (extension: {nc_extensions}). Files will be opened and processed individually rather than concatenated."
-                )
-            concat_nc_files = False
-
-        # Check if the files should be opened as one concatenated dataset (specific to netcdf files)
-        if concat_nc_files:
-            try:
-                results = self._standardise_from_file(
-                    filepath=filepaths,
-                    fn_input_parameters=fn_input_parameters,
-                    source_format=source_format,
-                    update_mismatch=update_mismatch,
-                    if_exists=if_exists,
-                    new_version=new_version,
-                    compressor=compressor,
-                    filters=filters,
-                    chunks=chunks,
-                    info_metadata=info_metadata,
-                )
-            except StandardiseError:
-                logger.warning(
-                    "Unable to standardise files by using xarray concatenation. Will attempt to standardise each file individually."
-                )
+            # Check if filepaths are all netcdf files
+            file_extensions = [fp.suffix for fp in filepaths]
+            nc_extensions = [".nc", ".nc4"]
+            if all([ext in nc_extensions for ext in file_extensions]):
+                if concat_nc_files is None:
+                    concat_nc_files = True
             else:
-                self.store_hashes(unseen_hashes)
-                return results
+                if concat_nc_files is True:
+                    logger.warning(
+                        f"Do not recognise all input files as netcdf files (extension: {nc_extensions}). Files will be opened and processed individually rather than concatenated."
+                    )
+                concat_nc_files = False
 
-        # If not, loop over multiple filepaths when present
-        loop_params = self.define_loop_params()
+            # Check if the files should be opened as one concatenated dataset (specific to netcdf files)
+            if concat_nc_files:
+                try:
+                    results = self._standardise_and_store(
+                        filepath=filepaths,
+                        fn_input_parameters=fn_input_parameters,
+                        source_format=source_format,
+                        update_mismatch=update_mismatch,
+                        if_exists=if_exists,
+                        new_version=new_version,
+                        compressor=compressor,
+                        filters=filters,
+                        chunks=chunks,
+                        info_metadata=info_metadata,
+                    )
+                except StandardiseError:
+                    logger.warning(
+                        "Unable to standardise files by using xarray concatenation. Will attempt to standardise each file individually."
+                    )
+                else:
+                    return results
 
-        results = []
+            # If not, loop over multiple filepaths when present
+            loop_params = self.define_loop_params()
 
-        for i, fp in enumerate(filepaths):
+            results = []
 
-            # fn_input_parameters["filepath"] = fp
-            if loop_params:
-                for key1, key2 in loop_params.items():
-                    if fn_input_parameters.get(key2) is not None:
-                        fn_input_parameters[key1] = fn_input_parameters[key2][i]
+            for i, fp in enumerate(filepaths):
+                # fn_input_parameters["filepath"] = fp
+                if loop_params:
+                    for key1, key2 in loop_params.items():
+                        if fn_input_parameters.get(key2) is not None:
+                            fn_input_parameters[key1] = fn_input_parameters[key2][i]
 
-            try:
-                datasource_uuids = self._standardise_from_file(
-                    filepath=fp,
-                    fn_input_parameters=fn_input_parameters,
-                    source_format=source_format,
-                    update_mismatch=update_mismatch,
-                    if_exists=if_exists,
-                    new_version=new_version,
-                    compressor=compressor,
-                    filters=filters,
-                    chunks=chunks,
-                    info_metadata=info_metadata,
-                )
-            except ValidationError as err:
-                msg = f"Unable to validate and store data from file: {Path(fp).name}. Error: {err}"
-                logger.error(msg)
-                validated = False
-                break
-            else:
-                validated = True
+                try:
+                    datasource_uuids = self._standardise_and_store(
+                        filepath=fp,
+                        fn_input_parameters=fn_input_parameters,
+                        source_format=source_format,
+                        update_mismatch=update_mismatch,
+                        if_exists=if_exists,
+                        new_version=new_version,
+                        compressor=compressor,
+                        filters=filters,
+                        chunks=chunks,
+                        info_metadata=info_metadata,
+                    )
+                except ValidationError as err:
+                    msg = f"Unable to validate and store data from file: {Path(fp).name}. Error: {err}"
+                    logger.error(msg)
+                    validated = False
+                    break
+                else:
+                    validated = True
 
-            if not validated:
-                continue
+                if not validated:
+                    continue
 
-            results.extend(datasource_uuids)
-
-        self.store_hashes(unseen_hashes)
+                results.extend(datasource_uuids)
 
         return results
 
@@ -509,6 +549,8 @@ class BaseStore:
         """
         validate_params = self.find_data_schema_inputs()
 
+        if filepath is not None:
+            filepaths = normalise_to_filepath_list(filepath)
         # Current workflow: if any datasource fails validation, whole filepath fails
         for datasource in data:
             validate_kwargs = self.create_schema_kwargs(validate_params, fn_input_parameters, datasource)
@@ -516,10 +558,10 @@ class BaseStore:
             try:
                 self.validate_data(datasource.data, **validate_kwargs)
             except ValidationError as err:
-                if isinstance(filepath, list):
-                    msg = f"Unable to validate and store data from grouped files: {', '.join([fp.name for fp in filepath])}. Error: {err}"
-                elif isinstance(filepath, Path):
-                    msg = f"Unable to validate and store data from file: {filepath.name}. Error: {err}"
+                if isinstance(filepaths, list):
+                    msg = f"Unable to validate and store data from grouped files: {', '.join([fp.name for fp in filepaths])}. Error: {err}"
+                elif isinstance(filepaths, Path):
+                    msg = f"Unable to validate and store data from file: {filepaths.name}. Error: {err}"
                 else:
                     msg = f"Unable to validate and store supplied data. Error: {err}"
                 logger.error(msg)
@@ -548,7 +590,7 @@ class BaseStore:
         """
         Extract the expected inputs for the schema method.
         """
-        from openghg.util import get_parameters
+        from openghg.util._registry import get_parameters
 
         fn = self.schema
         inputs = get_parameters(fn)
@@ -559,7 +601,7 @@ class BaseStore:
         """
         Extract the expected inputs for the chunking_schema method.
         """
-        from openghg.util import get_parameters
+        from openghg.util._registry import get_parameters
 
         fn = self.chunking_schema
         inputs = get_parameters(fn)
@@ -675,69 +717,6 @@ class BaseStore:
             chunks["time"] = new_chunk_size
 
         return chunks
-
-    def store_hashes(self, hashes: dict[str, Path]) -> None:
-        """Store the hashes of files we've seen before
-
-        Args:
-            hahes: Dictionary of hashes
-        Returns:
-            None
-        """
-        name_only = {k: v.name for k, v in hashes.items()}
-        self._file_hashes.update(name_only)
-
-    def check_hashes(
-        self, filepaths: str | Path | list[str] | list[Path], force: bool
-    ) -> tuple[dict[str, Path], dict[str, Path]]:
-        """Check the hashes of the files passed against the hashes of previously
-        uploaded files. Two dictionaries are returned, one containing the hashes
-        of files we've seen before and one containing the hashes of files we haven't.
-
-        A warning is logged if we've seen any of the files before
-
-        Args:
-            filepaths: List of filepaths
-            force: If force is True then we will expect to process all the filepaths, not just the
-            unseen ones
-        Returns:
-            tuple: seen files, unseen files
-        """
-        if isinstance(filepaths, str):
-            filepaths = [Path(filepaths)]
-        elif isinstance(filepaths, Path):
-            filepaths = [filepaths]
-        elif isinstance(filepaths, list):
-            filepaths = [Path(filepath) for filepath in filepaths]
-
-        unseen: dict[str, Path] = {}
-        seen: dict[str, Path] = {}
-
-        for filepath in filepaths:
-            file_hash = hash_file(filepath=filepath)
-            if file_hash in self._file_hashes:
-                seen[file_hash] = filepath
-            else:
-                unseen[file_hash] = filepath
-
-        if force:
-            unseen = {**seen, **unseen}
-
-        if seen:
-            logger.warning("Skipping previously standardised files, see log for list.")
-            seen_files_msg = "\n".join([str(v) for v in seen.values()])
-            logger.debug(f"We've seen the following files before:\n{seen_files_msg}")
-
-            if unseen:
-                logger.info(f"Processing {len(unseen)} files of {len(filepaths)}.")
-
-        if unseen:
-            to_process = "\n".join([str(v) for v in unseen.values()])
-            logger.debug(f"Processing the following files:\n{to_process}")
-        else:
-            logger.info("No new files to process.")
-
-        return seen, unseen
 
     def add_metakeys(self, force: bool = False) -> dict:
         """
@@ -1287,12 +1266,3 @@ class BaseStore:
         raise NotImplementedError("Ranking is being reworked and will be reactivated in a future release.")
         rank_dict: dict = self._rank_data.to_dict()
         return rank_dict
-
-    def clear_datasources(self) -> None:
-        """Remove all Datasources from the object
-
-        Returns:
-            None
-        """
-        self._datasource_uuids.clear()
-        self._file_hashes.clear()

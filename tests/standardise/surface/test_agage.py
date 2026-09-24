@@ -2,7 +2,8 @@ import logging
 
 import pandas as pd
 import pytest
-from helpers import check_cf_compliance, get_surface_datapath, parsed_surface_metachecker
+import xarray as xr
+from helpers import check_cf_compliance, get_surface_datapath
 from openghg.standardise.surface import parse_agage
 
 mpl_logger = logging.getLogger("matplotlib")
@@ -11,7 +12,7 @@ mpl_logger.setLevel(logging.WARNING)
 
 @pytest.fixture(scope="session")
 def thd_data():
-    thd_path = get_surface_datapath(filename="agage_thd_cfc-11_20240703-test.nc", source_format="GC_nc")
+    thd_path = get_surface_datapath(filename="agage-private_thd_cfc-11_20260113-test.nc", source_format="GC_nc")
 
     gas_data = parse_agage(
         filepath=thd_path,
@@ -49,7 +50,7 @@ def test_read_file_capegrim(cgo_data):
 
 
 def test_read_file_thd():
-    thd_path = get_surface_datapath(filename="agage_thd_cfc-11_20240703-test.nc", source_format="GC_nc")
+    thd_path = get_surface_datapath(filename="agage-private_thd_cfc-11_20260113-test.nc", source_format="GC_nc")
 
     gas_data = parse_agage(
         filepath=thd_path,
@@ -66,10 +67,10 @@ def test_read_file_thd():
     meas_data = gas_data["cfc11_15m"]["data"]
 
     assert meas_data.time[0] == pd.Timestamp("1995-09-30T17:22:00")
-    assert meas_data.time[-1] == pd.Timestamp("1995-11-13T21:38:00")
+    assert meas_data.time[-1] == pd.Timestamp("2025-12-31T23:18:00")
 
     assert meas_data["cfc11"][0].values.item() == 267.0292663574219
-    assert meas_data["cfc11"][-1].values.item() == 266.9176025390625
+    assert meas_data["cfc11"][-1].values.item() == 211.28778076171875
 
 
 @pytest.mark.xfail(reason="broken link to cf conventions")
@@ -81,7 +82,7 @@ def test_gc_thd_cf_compliance(thd_data):
 
 
 def test_read_invalid_instrument_raises():
-    thd_path = get_surface_datapath(filename="agage_thd_cfc-11_20240703-test.nc", source_format="GC_nc")
+    thd_path = get_surface_datapath(filename="agage-private_thd_cfc-11_20260113-test.nc", source_format="GC_nc")
 
     with pytest.raises(ValueError):
         parse_agage(
@@ -91,11 +92,27 @@ def test_read_invalid_instrument_raises():
             network="agage",
         )
 
+
+@pytest.mark.parametrize(
+    "species_attr", [pytest.param(None, id="missing"), pytest.param(123, id="non-string")]
+)
+def test_missing_species_attribute_raises(species_attr):
+    attrs = {"instrument_type": "gcmd", "instrument": "gcmd"}
+    if species_attr is not None:
+        attrs["species"] = species_attr
+    dataset = xr.Dataset(attrs=attrs)
+
+    with pytest.raises(ValueError, match="No 'species' attribute found"):
+        parse_agage(data=dataset, site="THD", network="agage")
+
+
 def test_read_variabilities():
     """
     Check that if an AGAGE file has a mf_variability variable, it is read in
     """
-    cgo_path = get_surface_datapath(filename='agage_cgo_cfc-11_20250704-test-variabilities.nc', source_format="GC_nc")
+    cgo_path = get_surface_datapath(
+        filename="agage_cgo_cfc-11_20250704-test-variabilities.nc", source_format="GC_nc"
+    )
 
     data = parse_agage(
         filepath=cgo_path,
@@ -104,13 +121,11 @@ def test_read_variabilities():
         network="agage",
     )
 
-    assert "cfc11_variability" in data['cfc11_70m']['data'].variables
-
-
+    assert "cfc11_variability" in data["cfc11_70m"]["data"].variables
 
 
 def test_expected_metadata_thd_cfc11():
-    cfc11_path = get_surface_datapath(filename="agage_thd_cfc-11_20240703-test.nc", source_format="GC_nc")
+    cfc11_path = get_surface_datapath(filename="agage-private_thd_cfc-11_20260113-test.nc", source_format="GC_nc")
 
     data = parse_agage(filepath=cfc11_path, site="THD", network="agage", instrument="gcmd")
 

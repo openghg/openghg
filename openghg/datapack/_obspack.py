@@ -683,7 +683,6 @@ class ObsPack:
         )
         if data_grouped_repeats:
             for data_group in data_grouped_repeats:
-
                 example_data = data_group[0]
                 example_metadata = example_data.metadata
                 obs_type = example_data.obs_type
@@ -695,7 +694,7 @@ class ObsPack:
                         name_components = name_components[obs_type]
                     except KeyError:
                         raise ValueError(
-                            f"If name_components is specified as a dict this should use the obs_type values for the keys. Currently: {list(name_components.keys())}"  # type:ignore
+                            f"If name_components is specified as a dict this should use the obs_type values for the keys. Currently: {list(name_components.keys())}"  # type: ignore
                         )
 
                 metakeys = _find_additional_metakeys(

@@ -12,8 +12,8 @@ dependencies:
   # Development and build tools
   - conda-build
   - git
-  - flake8
   - pre-commit
+  - ruff==0.16.2
   - mypy==1.7.1
   - tox>=4.24
 

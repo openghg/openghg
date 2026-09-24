@@ -9,7 +9,6 @@ from pathlib import Path
 import pytest
 from helpers import clear_test_stores, get_info_datapath, temporary_store_paths
 
-
 tmp_store_paths = temporary_store_paths()
 
 from openghg.store import get_metakey_defaults
@@ -26,6 +25,21 @@ def mock_configuration_paths() -> dict:
         "user_id": "test-id-123",
         "config_version": "2",
     }
+
+
+@pytest.fixture(scope="session")
+def default_test_store() -> str:
+    """Return the default writable object store for tests.
+
+    Test data fixtures should populate the ``user`` store and return this value
+    to consumers. Tests should pass the returned name to retrieval functions so
+    that they do not accidentally search the readable ``group`` or ``shared``
+    stores. Use another named store only when that distinction is under test.
+
+    Returns:
+        The writable store name, ``"user"``.
+    """
+    return "user"
 
 
 @pytest.fixture(scope="session", autouse=True)

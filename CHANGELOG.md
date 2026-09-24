@@ -5,13 +5,89 @@ All notable changes to OpenGHG will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-<!-- towncrier release notes start -->
+## [Unreleased](https://github.com/openghg/openghg/compare/0.19.0...HEAD)
 
-## [Unreleased](https://github.com/openghg/openghg/compare/0.16.0...HEAD)
+### Fixed
+
+- Added column `max_level` consistency validation to `ModelScenario` and preserved `max_level` metadata when standardising ACRG and PARIS column footprints, preventing observations and footprints with different vertical extents from being combined. [PR #1718](https://github.com/openghg/openghg/pull/1718)
+- Ensured explicitly integrated CO2 site and satellite footprints are standardised and modelled through the integrated-footprint pathway, while preserving the time-resolved default for CO2 footprints. [PR #1698](https://github.com/openghg/openghg/pull/1698)
+- Added a dimension dtype checker for H_back dimension to "timedelta64[ns]". Bug occured for dimension "resolution" and dtype "resolution".[PR #1671](https://github.com/openghg/openghg/pull/1671)
+- Added config-driven metadata key handling for transformed flux and boundary condition data: removed hard-coded required-key lookups.[PR #1686](https://github.com/openghg/openghg/pull/1686)
+
+### Updated
+
+- Removed file and retrieved-data hashing from standardisation. Repeated inputs now follow the normal `if_exists` overlap policy, and data can be standardised again after its datasource is deleted. The deprecated `force` argument remains accepted but is ignored; passing `force=True` emits a `DeprecationWarning`, and callers should use `if_exists` to choose update behaviour. [Issue #1676](https://github.com/openghg/openghg/issues/1676)
+- Updated the standardisation of AGAGE format data so that rows containing nans are no longer dropped. [PR #1634](https://github.com/openghg/openghg/pull/1634)
+- Updated copilot instructions and added repo graph using graphify.[PR #1684](https://github.com/openghg/openghg/pull/1684)
 
 ### Added
 
+- Added reproducible Graphify regeneration, CI freshness checking, and a focused navigation
+  skill for cross-module impact analysis. [Issue #1695](https://github.com/openghg/openghg/issues/1695)
+- Added a lazy `fp_x_flux_time_resolved_numba` analysis operator that preserves source and spatial dimensions, supports single-source and regular coarse-frequency flux, and includes optional atomic ppm Zarr persistence and worker warm-up helpers.
+- Added support for passing in-memory `xarray.Dataset` objects to supported standardisation and transformation parsers, including object-store retrieval and forward `ModelScenario` coverage.
+- Added a tutorial for adding CO2 satellite data, including how integrated footprints differ from time-resolved footprints in OpenGHG. [PR #1698](https://github.com/openghg/openghg/pull/1698)
+- Added ability to save output of plot_comparison using save_path and ability to pass additional figure modifications.[PR #1672](https://github.com/openghg/openghg/pull/1672)
+- Added more tests and explanation in the tutorial regarding if_exists behaviour.[PR #1693](https://github.com/openghg/openghg/pull/1693)
+
+<!-- towncrier release notes start -->
+
+## [0.19.0] - 2026-06-11
+
+### Fixed
+
+- Converted negative surface observation uncertainty values to NaN before optional averaging. [PR #1544](https://github.com/openghg/openghg/pull/1544)
+- Updated the value of `atol` and removed `rtol` from `check_coord_alignment` to process 6km file. [PR #1588](https://github.com/openghg/openghg/pull/1588)
+- Fixed EDGAR parsing for monthly sectoral files by normalising `latitude`/`longitude` coordinates to `lat`/`lon` and raising a clear error when the EDGAR version cannot be inferred from the filename. [PR #1187](https://github.com/openghg/openghg/pull/1187)
+- Updated CAMS boundary-condition transforms to support CO2 vertical coordinates via `height_above_reference_ellipsoid`, pass through the requested domain during interpolation, and correctly parse CAMS filenames with input-observation suffixes such as `surface_inst`. [PR #1601](https://github.com/openghg/openghg/pull/1601)
+- Fixed unit parsing ambiguities by keeping the Pint registry case-sensitive for SI abbreviations and adding explicit case-variant aliases for coordinate and time units (e.g. `Degrees_North`, `Hours`). [PR #1599](https://github.com/openghg/openghg/pull/1599)
+- Fixed `convert_to_slice` to use `abs(input)` when computing the relative tolerance range, ensuring that negative inlet values (eg. for sites below sea level) are correctly matched during data retrieval. [PR #1605](https://github.com/openghg/openghg/pull/1605)
+- Fixed "xarray fails to decode time" by using pandas datetime conversion and storing as np.datetime64[ns].[PR #1608](https://github.com/openghg/openghg/pull/1608)
+- Clarified datasource update/versioning behavior for `if_exists`, `save_current`, and overlap handling, including fixes for copied-version metadata and non-overlapping combine updates. [PR #1614](https://github.com/openghg/openghg/pull/1614)
+- Fixed handling of irregular fp time reindexing and missing "calibration_scale", also added the ability to detect "mf_mod_high_res"  for plot_comparison.[PR #1611](https://github.com/openghg/openghg/pull/1611)
+- Fixed object store search and retrieve results to include datasource-managed metadata without mutating datasource records, while keeping raw metastore descriptor metadata authoritative. [PR #1652](https://github.com/openghg/openghg/pull/1652)
+
+### Updated
+
+- Refactored `Datasource` to use `VersionedZarrStore` directly, removed `LocalZarrStore` and `openghg.store.storage`, and moved storage utilities into `openghg.storage`. [PR #1618](https://github.com/openghg/openghg/pull/1618)
+- Updated dependency versions: `black` (26.5.1), `mypy` (2.1.0), `pre-commit` (4.6.0), `filelock` (3.29.0), `h5netcdf` (1.8.1), `msgpack-types` (0.7.0), `rapidfuzz` (3.14.5), `nbsphinx` (0.9.8), `sphinxcontrib-bibtex` (2.7.0), `types-paramiko`, `types-requests` (2.33.0.20260518). Also added a change in dependabot.yml to group all major package version changes into one PR. [PR #1636](https://github.com/openghg/openghg/pull/1636)
+
+### Added
+
+- Option to set location of openghg log via an environment variable `OPENGHG_LOG_PATH`. [PR #1607](https://github.com/openghg/openghg/pull/1607)
+- Added the ability to standardise GEMINI data using standardise_column.[PR #1501](https://github.com/openghg/openghg/pull/1501)
+
+## [0.18.0] - 2026-02-18
+
+### Added
+
+- Added feature to allow meteorological data in relation to a site to be retrieved from the Copernicus Climate Data Store (CDS) and stored in an object store (data_type="site_met"). [PR #1421](https://github.com/openghg/openghg/pull/1421)
+- Implemented `update` method for Zarr storage, which will be used by `Datasource` to allow updating existing data in the object store. Also added methods for aligning a dataset to data stored by Zarr. [PR #1532](https://github.com/openghg/openghg/pull/1532)
+- Added `version` parameter to all `get_*` retrieve functions (`get_obs_surface`, `get_obs_column`, `get_flux`, `get_bc`, `get_footprint`) to enable retrieval of specific data versions instead of always defaulting to the latest version. [PR #1549](https://github.com/openghg/openghg/pull/1549)
+- Implemented `if_exists = "combine"` option for adding data to `Datasource`. This option will now be available when standardising data, so data can be updated. [PR #1548](https://github.com/openghg/openghg/pull/1548)
+- Added the ability to standardise and retrieve 6km footprint data with ability to pass `inner_domain`. [PR #1580](https://github.com/openghg/openghg/pull/1580)
+- Progress towards [PR #1447](https://github.com/openghg/openghg/pull/1447)
+- Adds search methods to create Sparql queries to search the ICOS Carbon Portal and returns results as Pandas dataframes. [PR #1447](https://github.com/openghg/openghg/pull/1447)
+- Adds methods for directly downloading ICOS text files for ATC time series and ATC flask time series as well as downloading netCDT time series. [PR #1447](https://github.com/openghg/openghg/pull/1447)
+
+### Updated
+- `BaseStore.clear_datasources` method is removed because this was incomplete and the functionality should be covered by the `DataManager` class instead. [PR #1533](https://github.com/openghg/openghg/pull/1533)
+- Tidied `Datasource` by moving date range methods to `util` and reorganising methods. [PR #1545](https://github.com/openghg/openghg/pull/1545)
+- Updated `clean_string` function to retain "." characters by default [PR #1546](https://github.com/openghg/openghg/issues/1546)
+- Search for "inlet" (and other related keys) is updated to always look for a slice even when single values are specified. This is to make sure the numerical value, rather than the string equivalent of the value, is matched and for this reason the default tolerance for the slice is set to be small (1e-6 relative to the value itself). This allows a search of e.g. inlet="10m" to be matched to stored metadata={"inlet": "10.0m", ...}. [PR #1558](https://github.com/openghg/openghg/pull/1558)
+- Updated pip installation, build and publishing steps to use uv. Added dynamic versioning ability using tags. [PR #1498](https://github.com/openghg/openghg/pull/1498)
+
+### Fixed
+- Fixed `ValueError` when searching for footprints with special inlet keywords like "column" (for satellite data) or "multiple" (for aggregated data). The `convert_to_slice` function now passes through these special keywords unchanged instead of attempting to extract float values.
+- Updated the version of black formatter in pre-commit-config.yaml as well ran the formatter on the repo. [PR #1567](https://github.com/openghg/openghg/pull/1567)
+- Units in attributes of variables of cams bc data in transform function.[PR #1535](https://github.com/openghg/openghg/pull/1535)
+
+## [0.17.0] - 2025-11-15
+
+### Added
+- Added transform function for boundary conditions along with parser to standardise CAMS N2O and CH4 boundary conditions.[PR #1496](https://github.com/openghg/openghg/pull/1496)
 - Added new submodule `openghg.storage` with classes for storing xr.Datasets. These classes will be used to reimplement `LocalZarrStore`. [PR #1391](https://github.com/openghg/openghg/pull/1391)
+- Check for negative uncertainty values (these are converted to NaN). [PR #1480](https://github.com/openghg/openghg/pull/1480)
 
 ### Updated
 
@@ -19,14 +95,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Allow a data_type to be specified when defining the required attributes. This is a placeholder at the moment as only "surface" details are included but this allows required attributes to specified and checked for other data_types as well. [PR #1443](https://github.com/openghg/openghg/pull/1443)
 - Removed pinning of `icoscp` from 0.17.0 and adding details of how to use the new authentication method to the tutorials. Note this also required explicit inclusion of `numpy>=2.0` otherwise this get downgraded to `numpy<2.0` based on `icoscp` current stated requirements. [PR #1447](https://github.com/openghg/openghg/pull/1447)
 - Added `chunking_schema` for `Flux` data type to make sure the chunks created a < maximum size accepted by Codec (Codec does not support buffers of > 2147483647 bytes). [PR #1434](https://github.com/openghg/openghg/pull/1434)
+- Added version pins for key dependencies (numpy, pandas, xarray, scipy, matplotlib, netcdf4, h5netcdf, tinydb, toml, rich, msgpack) to enable better management through dependabot. Upper bounds use `<=` with latest stable versions rather than `<` with next major version. Also added explicit pin for h5py < 3.15 to resolve Python 3.10 test failures. [PR #1493](https://github.com/openghg/openghg/pull/1493)
+- Refactored `parse_agage` function to integrate instrument metadata validation and species label definition logic within the get_dataset implementation in agage.py. [PR #1510](https://github.com/openghg/openghg/pull/1510)
+- Updated `parse_openghg` for column data to recognise "data_owner" and "data_owner_email" from the file. [PR #1519](https://github.com/openghg/openghg/pull/1519)
+- Refactored `LocalZarrStore` to use new `VersionedZarrStore` class from `openghg.storage` submodule. [PR #1468](https://github.com/openghg/openghg/pull/1468)
 
-## Fixed
+### Fixed
 
 - Bug causing regrid_uniform_cc to fail for data arrays with time dimension. [PR #1482](https://github.com/openghg/openghg/pull/1482)
 - Typo that caused chunking to be skipped in most cases. [PR #1467](https://github.com/openghg/openghg/pull/1467)
 - Bug causing error due to resampling non-numeric data. [PR #1478](https://github.com/openghg/openghg/pull/1478)
 - Fixed bug in `merge_and_extend_dict` to make sure repeated values in `left` and `right` produce unique values in output and to ensure `left` and `right` are not modified in place. [PR #1477](https://github.com/openghg/openghg/pull/1477)
-
+- Fixed retrieve_all() function where the value to fetch latest version was overridden in the loop. [PR #1522](https://github.com/openghg/openghg/pull/1522)
 
 ## [0.16.0] - 2025-08-29
 
@@ -55,6 +135,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Typo in variability calculation causing the wrong values to be filled. [PR #1424](https://github.com/openghg/openghg/pull/1424)
 - Issue with importlib.resources.files and editable installs. [PR #1429](https://github.com/opengh/openghg/pull/1429)
 - Added minimum version of `xarray` of 2025.04.0 due to changes put in within PR #1417 (use of `AlignmentError` from `xarray` package) and `flox` dependency. [PR #1440](https://github.com/openghg/openghg/pull/1440)
+- Added section on standardising column satellite data in the tutorials. Added references to missing standardise_column and parse_tccon api in doc. [PR#1516](https://github.com/openghg/openghg/pull/1516)
 
 ## [0.15.0] - 2025-07-02
 

@@ -49,38 +49,30 @@ Using towncrier to generate the changelog
 
 OpenGHG uses `towncrier <https://towncrier.readthedocs.io/>`_ to manage the changelog. This tool collects "news fragments" from the ``newsfragments/`` directory and builds the changelog automatically.
 
-To build the changelog for a new release (e.g., version 0.17.0):
+To build the changelog for a new release (e.g., version 0.20.0):
 
 .. code-block:: bash
 
-    towncrier build --version=0.17.0
+    towncrier build --version=0.20.0 --yes
 
 This will:
 
 1. Collect all news fragments from ``newsfragments/``
-2. Add a new release section to ``CHANGELOG.md`` 
+2. Add a new release section to ``CHANGELOG.md``
 3. Remove the processed news fragments
 
 You can preview what the changelog will look like without making changes:
 
 .. code-block:: bash
 
-    towncrier build --version=0.17.0 --draft
+    towncrier build --version=0.20.0 --draft
 
 After running ``towncrier build``, review the generated changelog entry and commit the changes.
 
-Manual changelog updates (legacy)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Existing Unreleased notes
+~~~~~~~~~~~~~~~~~~~~~~~~
 
-If needed, you can still manually update the changelog by editing the "Unreleased" section of the ``CHANGELOG.md`` with the "{release number} - {date of release}".
-Ensure all the changes are included in the file. If not update it accordingly.
-
-Also add "Unreleased" section at the top of ``CHANGELOG.md`` along with the link to the latest diff as shown below:
-
-.. code-block:: bash
-
-   [Unreleased](https://github.com/openghg/openghg/compare/0.8.0...HEAD)
-   [0.8.0] - 2024-03-19
+The current ``Unreleased`` section contains notes written before Towncrier was introduced. For the next release, review those notes and move the released changes into the new release section after building it. Update the ``Unreleased`` comparison link to the new version. Add future changes as news fragments rather than editing ``CHANGELOG.md`` in pull requests.
 
 Now create a PR to merge ``devel`` into ``master`` with name of PR as "Release ``Version``".
 

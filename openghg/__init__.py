@@ -1,22 +1,11 @@
-import logging
+import logging as _logging
 import sys as _sys
-from pathlib import Path as _Path
+from importlib import import_module as _import_module
+from importlib.metadata import PackageNotFoundError, version as _version
+from typing import Any
 
-from rich.logging import RichHandler as _RichHandler
-from . import (
-    analyse,
-    dataobjects,
-    objectstore,
-    datapack,
-    retrieve,
-    plotting,
-    standardise,
-    store,
-    types,
-    tutorial,
-    util,
-)
-from ._version import get_versions  # type: ignore
+if _sys.version_info < (3, 10):
+    raise ImportError("openghg requires Python >= 3.10")
 
 __all__ = [
     "analyse",
@@ -30,41 +19,44 @@ __all__ = [
     "types",
     "tutorial",
     "util",
+    "enable_pint_xarray",
 ]
 
-if _sys.version_info < (3, 10):
-    raise ImportError("openghg requires Python >= 3.10")
+_SUBMODULES = frozenset(name for name in __all__ if name != "enable_pint_xarray")
 
-v = get_versions()
 
-__version__ = v.get("version")
-__branch__ = v.get("branch")
-__repository__ = v.get("repository")
-__revisionid__ = v.get("full-revisionid")
+def enable_pint_xarray() -> None:
+    """Import pint_xarray to register the xarray ``.pint`` accessor."""
+    from openghg.util._units import enable_pint_xarray as _enable_pint_xarray
 
-del v, get_versions
+    _enable_pint_xarray()
 
-# Start module level logging
-logger = logging.getLogger("openghg")
-logger.setLevel(logging.DEBUG)
-logging.captureWarnings(capture=True)
 
-logfile_path = str(_Path.home().joinpath("openghg.log"))
+def __getattr__(name: str) -> Any:
+    """Lazily import top-level OpenGHG subpackages."""
+    if name in _SUBMODULES:
+        module = _import_module(f"{__name__}.{name}")
+        globals()[name] = module
+        return module
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
-# Create file handler for log file - set to DEBUG (maximum detail)
-fileHandler = logging.FileHandler(logfile_path)  # May want to update this to user area
-fileFormatter = logging.Formatter(
-    "%(asctime)s:%(levelname)s:%(name)s:%(message)s", datefmt="%Y-%m-%dT%H:%M:%S%z"
-)
-fileHandler.setFormatter(fileFormatter)
-fileHandler.setLevel(logging.DEBUG)
-logger.addHandler(fileHandler)
 
-# Create console handler - set to WARNING (lower level)
-consoleHandler = _RichHandler()
-consoleFormatter = logging.Formatter("%(levelname)s:%(name)s:%(message)s", datefmt="%Y-%m-%dT%H:%M:%S%z")
-consoleHandler.setFormatter(consoleFormatter)
-consoleHandler.setLevel(logging.INFO)
-logger.addHandler(consoleHandler)
+def __dir__() -> list[str]:
+    """Return the lazy public API for interactive introspection."""
+    return sorted([*__all__, "__version__", "__branch__", "__repository__", "__revisionid__", "logger"])
 
-del logfile_path
+
+try:
+    __version__ = _version("openghg")
+except PackageNotFoundError:
+    # Fallback version if package metadata is not available
+    __version__ = "unknown"
+
+# These attributes are no longer available with the new versioning approach
+# Set to None for backward compatibility
+__branch__ = None
+__repository__ = None
+__revisionid__ = None
+
+logger = _logging.getLogger("openghg")
+logger.addHandler(_logging.NullHandler())

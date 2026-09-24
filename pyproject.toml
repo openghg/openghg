@@ -1,13 +1,10 @@
 [build-system]
-requires = [
-    "setuptools>=77.0.3",
-    "wheel"
-]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling", "uv-dynamic-versioning"]
+build-backend = "hatchling.build"
 
 [project]
 name = "openghg"
-version = "0.16.0"
+dynamic = ["version"]
 description = "OpenGHG: A platform for greenhouse​ gas data analysis"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -25,55 +22,192 @@ maintainers = [
 ]
 
 dependencies = [
-"addict",
-"cf_xarray",
-"dask < 2025.9",
-"filelock",
-"flox",
-"h5netcdf",
-"icoscp",
-"ipywidgets",
-"matplotlib",
-"msgpack",
-"nbformat",
-"numcodecs < 0.16",
-"nc-time-axis",
-"netcdf4",
-"numexpr",
-"numpy >= 2.0",
-"openghg_defs",
-"openpyxl",
-"pandas >= 2.0",
-"pint",
-"pint_xarray",
-"plotly",
-"pyvis",
-"rapidfuzz",
-"requests >= 2.25",
-"rich",
-"scipy",
-"tinydb",
-"toml",
-"urllib3 >= 1.26.3",
-"xarray >= 2025.04.0",
-"zarr==2.18.3",
-"openghg-calscales"
+    "addict<=2.4.0",
+    "cdsapi>=0.7.7",
+    "cf-xarray<=0.10.6",
+    "dask<2026.9",
+    "filelock<=3.32.6",
+    "flox<=0.10.4",
+    "h5netcdf>=1.0.0, <=1.8.1",
+    "h5py<3.17",
+    "icoscp<=0.2.3",
+    "ipykernel>=6.29.5",
+    "ipywidgets<=8.1.9",
+    "kaleido>=1.3.0",
+    "matplotlib<=3.10.9",
+    "msgpack<=1.2.2",
+    "msgpack-types<=0.8.0",
+    "nbformat<=5.11.1",
+    "nc-time-axis<=1.4.1",
+    "netcdf4>=1.6.0, <=1.7.2",
+    "networkx<=3.4.2",
+    "numcodecs<0.16",
+    "numexpr<=2.14.1",
+    "numpy>=2.0, <=2.3.3",
+    "openghg-calscales<=0.1.3",
+    "openghg-defs>=0.0.10",
+    "openpyxl<=3.1.5",
+    "pandas>=2.0, <=2.3.3",
+    "pint<=0.24.4",
+    "pint-xarray<=0.5.1",
+    "plotly<=7.0.0",
+    "pre-commit>=4.6.0",
+    "pytest>=7.0.0",
+    "pytest-mock>=3.15.1",
+    "pyvis<=0.3.2",
+    "rapidfuzz<=3.14.5",
+    "requests<=2.34.2",
+    "rich<=15.0.0",
+    "scipy<=1.15.3",
+    "sympy<=1.14.0",
+    "tinydb<=4.9.0",
+    "toml<=0.10.2",
+    "urllib3>=1.26.3",
+    "xarray>=2025.4.0, <=2025.9.1",
+    "zarr==2.18.3",
 ]
-
 classifiers = [
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
-        "Programming Language :: Python :: 3.12",
-        "Operating System :: POSIX :: Linux",
-        "Operating System :: MacOS"]
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS"]
+[project.optional-dependencies]
+    fp-x-flux = [
+        # Prevent resolvers backtracking to old Numba/llvmlite releases.
+        # This mirrors the lower bound used by openghg_inversions.
+        "numba>=0.59",
+    ]
+    dev = [
+        "cfchecker",
+        "mypy==2.3.1",
+        "pre-commit<=4.6.2",
+        "pytest<=7.0.0",
+        "pytest-cov<=7.1.0",
+        "pytest-mock<=3.15.1",
+        "pytest-timeout>=2.4.0,<3.0.0",
+        "pytest-tornasync<=0.6.0.post2",
+        "requests-mock<=1.12.1",
+        "ruff==0.16.7",
+        "tox<=4.61.4",
+        "towncrier>=24.8",
+        "types-paramiko<=5.0.0.20260724",
+        "types-pyyaml<=6.0.12.20260906",
+        "types-requests<=2.33.0.20260906",
+        "types-toml<=0.10.8.20260518",
+        "types-urllib3",
+    ]
+    doc = [
+        "sphinx",
+        "Jinja2",
+        "notebook",
+        "sphinxcontrib-programoutput",
+        "sphinx-togglebutton",
+        "sphinx_rtd_theme<3.2.0",
+        "sphinx-autodoc-typehints",
+        "myst-parser<=4.0.1",
+        "sphinx-copybutton<=0.5.2",
+        "sphinxcontrib-bibtex<=2.7.0",
+        "sphinxcontrib-mermaid<=2.1.1",
+        "sphinx-autobuild<=2024.10.3",
+        "nbsphinx<=0.9.8",
+        "ipython<=8.39.0",
+        "jupyter_client<=8.10.0",
+        "jupyter_core<=5.9.1",
+        "jupyter-sphinx",
+        "nbconvert<=7.17.1",
+        "docutils<=0.23",
+        "sphinx-issues<=6.0.0",
+        "pydata-sphinx-theme<=0.19.0"
+    ]
 
-[tool.setuptools.packages.find]
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["linux-64", "osx-64", "osx-arm64"]
+
+[tool.pixi.dependencies]
+# Use the oldest CI Python version for the reproducible Pixi development environment.
+python = "3.10.*"
+pip = "*"
+
+# Keep the fragile compiled scientific and HDF5/NetCDF stack on conda-forge.
+# These entries override matching PyPI dependencies from this project.
+cf_xarray = "<=0.10.6"
+cftime = "*"
+filelock = "<=3.29.0"
+flox = "<=0.10.4"
+hdf5 = "*"
+h5netcdf = ">=1.0.0,<=1.8.1"
+h5py = "<3.15"
+libnetcdf = "*"
+matplotlib = ">=3.5,<=3.10.7"
+msgpack-python = ">=1.0,<=1.1.1"
+nc-time-axis = "<=1.4.1"
+netcdf4 = ">=1.6.0,<=1.7.2"
+numcodecs = "<0.16"
+numexpr = "<=2.14.1"
+numpy = ">=2.0,<=2.3.3"
+pandas = ">=2.0,<=2.3.3"
+rapidfuzz = "<=3.14.5"
+scipy = ">=1.10,<=1.15.3"
+urllib3 = ">=1.26.3,<1.27"
+xarray = ">=2025.4.0,<=2025.9.1"
+zarr = "==2.18.3"
+
+[tool.pixi.pypi-dependencies]
+openghg = { path = ".", editable = true }
+
+[tool.pixi.environments]
+default = { features = [], solve-group = "default" }
+dev = { features = ["pixi-dev"], solve-group = "default" }
+
+[tool.pixi.feature.pixi-dev.dependencies]
+mypy = "==2.1.0"
+numba = ">=0.59"
+pre-commit = "<=4.6.0"
+pytest = "<=7.0.0"
+pytest-cov = "<=7.0.0"
+pytest-mock = "<=3.15.1"
+pytest-timeout = ">=2.4.0,<3.0.0"
+pytest-tornasync = "<=0.6.0.post2"
+types-paramiko = "<=4.0.0.20260518"
+types-pyyaml = "<=6.0.12.20250915"
+types-requests = "<=2.33.0.20260518"
+types-toml = "<=0.10.8.20240310"
+types-urllib3 = "*"
+
+[tool.pixi.feature.pixi-dev.pypi-dependencies]
+cfchecker = { git = "https://github.com/openghg/cf-checker", rev = "master" }
+msgpack-types = "<=0.7.0"
+requests-mock = "<=1.12.1"
+ruff = "==0.16.2"
+
+[tool.pixi.feature.pixi-dev.tasks]
+test = "pytest"
+test-storage = "pytest tests/storage/test_store.py tests/store/test_obssurface.py::test_read_CRDS tests/store/test_footprints.py::test_read_footprint_high_spatial_resolution"
+lint = "ruff format --check openghg && ruff check openghg"
+typecheck = "mypy openghg"
+
+[tool.uv.sources]
+cfchecker = { git = "https://github.com/openghg/cf-checker", rev = "master" }
+
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
+
+[tool.hatch.build.targets.sdist]
 include = ["openghg*", "recipes*"]
 
+[tool.hatch.build.targets.wheel]
+include = ["openghg*", "recipes*"]
 [project.urls]
 Documentation = "https://www.openghg.org"
 Code = "https://github.com/openghg/openghg"
 Issue-Tracker = "https://github.com/openghg/openghg/issues"
+
+[tool.uv-dynamic-versioning]
+pattern = "default-unprefixed"
+fallback-version = "0.0.0"
 
 [project.scripts]
 openghg = "openghg.util:cli"
@@ -89,8 +223,17 @@ versionfile_build = "openghg/_version.py"
 tag_prefix = ""
 parentdir_prefix_version = "openghg-"
 
-[tool.black]
+[tool.ruff]
 line-length = 110
+target-version = "py310"
+
+[tool.ruff.lint]
+preview = true
+select = ["E", "F", "W"]
+ignore = ["E203", "E501", "W291", "E701"]
+
+[tool.ruff.lint.per-file-ignores]
+"**/__init__.py" = ["F401", "E402", "F822"]
 
 [tool.pytest.ini_options]
 pythonpath = [
@@ -107,7 +250,8 @@ package = "openghg"
 filename = "CHANGELOG.md"
 directory = "newsfragments"
 start_string = "<!-- towncrier release notes start -->\n"
-title_format = "## [{version}] - {{date}}"
+title_format = "## [{version}] - {project_date}"
+issue_format = "[#{issue}](https://github.com/openghg/openghg/issues/{issue})"
 
 [[tool.towncrier.type]]
 directory = "feature"
@@ -115,7 +259,7 @@ name = "Added"
 showcontent = true
 
 [[tool.towncrier.type]]
-directory = "update" 
+directory = "update"
 name = "Updated"
 showcontent = true
 
@@ -138,4 +282,3 @@ showcontent = true
 directory = "misc"
 name = "Miscellaneous"
 showcontent = true
-

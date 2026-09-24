@@ -86,6 +86,7 @@ def infer_date_range(
         else:
             start_date = timestamp_tzaware(timestamp)
 
+        date_match = ""
         if filepath is not None:
             filename = Path(filepath).stem
             filename_identifiers = filename.split("_")
@@ -179,6 +180,10 @@ def infer_date_range(
         # Create time offset, using inferred offset
         start_date = timestamp_tzaware(time[0].values)
         if time_value is not None:
+            if time_unit is None:
+                raise ValueError(
+                    f"Unable to infer a time unit for period value {time_value}. Please supply a valid period."
+                )
             time_delta = DateOffset(**{time_unit: time_value})
             end_date = timestamp_tzaware(time[-1].values) + time_delta - Timedelta(seconds=1)
         else:

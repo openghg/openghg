@@ -60,7 +60,7 @@ class EulerianModel(BaseStore):
         return params
 
     @staticmethod
-    def schema() -> DataSchema:  # type:ignore[override]
+    def schema() -> DataSchema:  # type: ignore[override]
         """
         Define schema for Eulerian model Dataset.
 

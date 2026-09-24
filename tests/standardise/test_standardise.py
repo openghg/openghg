@@ -1,4 +1,5 @@
 import pytest
+import xarray as xr
 from helpers import (
     get_flux_datapath,
     get_footprint_datapath,
@@ -19,8 +20,14 @@ from openghg.standardise import (
 )
 from openghg.dataobjects import FootprintData
 from openghg.types import AttrMismatchError, ObjectStoreError, StandardiseError
-from openghg.util import compress, find_domain
+from openghg.util import find_domain
 import numpy as np
+
+
+@pytest.fixture(autouse=True)
+def clear_stores():
+    """Start each standardisation test with empty writable stores."""
+    clear_test_stores()
 
 
 def test_standardise_to_read_only_store():
@@ -39,6 +46,7 @@ def test_standardise_to_read_only_store():
 
 
 def test_standardise_obs_two_writable_stores(reset_mock_user_config):
+    """Observation data is written only to the explicitly selected store."""
 
     clear_test_stores()
     hfd_path = get_surface_datapath(filename="hfd.picarro.1minute.100m.min.dat", source_format="CRDS")
@@ -49,7 +57,6 @@ def test_standardise_obs_two_writable_stores(reset_mock_user_config):
         instrument="picarro",
         network="DECC",
         source_format="CRDS",
-        force=True,
         store="user",
     )
 
@@ -106,13 +113,65 @@ def test_standardise_obs_openghg():
         instrument="picarro",
         source_format="openghg",
         sampling_period="1h",
-        force=True,
         store="user",
         update_mismatch="metadata",
     )
 
     results = filt(results, file="DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc")
     assert "co2" == results[0].get("species")
+
+
+def test_standardise_obs_openghg_dataset():
+    """
+    Direct dataset standardisation test.
+    Based on reported Issue #477 where ValueError is raised when synchronising the metadata and attributes.
+     - "inlet" and "inlet_height_magl" attribute within netcdf file was a float; "inlet" within metadata is converted to a string with "m" ("185m")
+     - "inlet_height_magl" in metadata was just being set to "inlet" from metadata ("185m")
+     - sync_surface_metadata was trying to compare the two values of 185.0 and "185m" but "185m" could not be converted to a float - ValueError
+    """
+    clear_test_store("user")
+    filepath = get_surface_datapath(
+        filename="DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc", source_format="OPENGHG"
+    )
+    dataset = xr.open_dataset(filepath)
+    results = standardise_surface(
+        data=dataset,
+        site="TAC",
+        network="DECC",
+        inlet=185,
+        instrument="picarro",
+        source_format="openghg",
+        sampling_period="1h",
+        store="user",
+        update_mismatch="metadata",
+        tag=["direct_dataset"],
+    )
+
+    results = filt(results)
+    assert "co2" == results[0].get("species")
+
+    retrieved_data = get_obs_surface(site="TAC", species="co2", source_format="openghg", network="decc")
+
+    tag = retrieved_data.metadata["tag"]
+
+    assert "direct_dataset" in tag
+
+
+def test_standardise_surface_no_filepath_dataset_error():
+    """
+    Test to verify ValueError is raised when standardise_surface supplied without values for filepath and datset arguments.
+    """
+    with pytest.raises(ValueError, match="Please specify exactly one of `filepath` or `data`."):
+        standardise_surface(
+            site="TAC",
+            network="DECC",
+            inlet=185,
+            instrument="picarro",
+            source_format="openghg",
+            sampling_period="1h",
+            store="user",
+            update_mismatch="metadata",
+        )
 
 
 def test_standardise_obs_metadata_mismatch(reset_mock_user_config):
@@ -259,7 +318,6 @@ def test_local_obs_metadata_mismatch_fail():
             source_format="openghg",
             sampling_period="1h",
             update_mismatch="never",
-            force=True,
             store="user",
         )
 
@@ -290,7 +348,6 @@ def test_standardise_column():
         species=species,
         obs_region=obs_region,
         selection=selection,
-        force=True,
         store="user",
     )
 
@@ -300,6 +357,36 @@ def test_standardise_column():
 
     assert data.metadata["obs_region"] == "brazil"
     assert data.metadata["selection"] == "land"
+
+
+def test_standardise_oco2_satellite_column():
+    """
+    Tests standardise column function and associated metadata keys
+    for OCO2 satellite column data.
+    """
+    oco2_datapath = get_column_datapath(filename="oco2-spectrometer_oco2_20150131-336_co2-column.nc")
+
+    oco2_datapath_attrs = xr.open_dataset(oco2_datapath).attrs
+
+    results = standardise_column(
+        filepath=oco2_datapath,
+        species="co2",
+        platform="satellite",
+        obs_region="china",
+        satellite="oco2",
+        network="oco2",
+        instrument="oco2-spectrometer",
+        store="user",
+        tag="test_oco2_dataset",
+    )
+
+    assert "co2" == results[0].get("species")
+
+    data = get_obs_column(species="co2", max_level=3, satellite="oco2")
+
+    assert data.metadata["obs_region"] == "china"
+    assert data.metadata["data_owner"] in oco2_datapath_attrs.get("contact", "").lower()
+    assert data.metadata["data_owner_email"] in oco2_datapath_attrs.get("contact", "").lower()
 
 
 def test_standardise_tccon_obs():
@@ -321,7 +408,6 @@ def test_standardise_tccon_obs():
         species=species,
         pressure_weights_method=pressure_weights_method,
         source_format="tccon",
-        force=True,
         store="user",
     )
 
@@ -356,7 +442,6 @@ def test_standardise_footprint():
         network=network,
         height=height,
         domain=domain,
-        force=True,
         high_spatial_resolution=True,
         overwrite=True,
         store="user",
@@ -404,7 +489,6 @@ def test_standardise_footprint_flexpart(source_format):
         model=model,
         met_model=met_model,
         source_format=source_format,
-        force=True,
         if_exists="new",
         store="user",
     )
@@ -435,20 +519,20 @@ def test_standardise_align_footprint():
         network=network,
         height=height,
         domain=domain,
-        force=True,
         overwrite=True,
         store="user",
     )
 
     data = get_footprint(site=site, network=network, height=height, domain=domain, model=model)
 
-    true_lats, true_lons = find_domain(domain=domain)
+    true_lats, true_lons = find_domain(domain=domain)[:2]
 
     assert np.array_equal(data.data.lat.values, true_lats)
     assert np.array_equal(data.data.lon.values, true_lons)
 
 
 def test_standardise_footprints_chunk(caplog):
+    """Footprint standardisation preserves the requested time chunks."""
     datapath = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
 
     site = "TAC"
@@ -464,7 +548,6 @@ def test_standardise_footprints_chunk(caplog):
         network=network,
         height=height,
         domain=domain,
-        force=True,
         store="user",
         chunks={"time": 2},
     )
@@ -479,6 +562,7 @@ def test_standardise_footprints_chunk(caplog):
 
 
 def test_standardise_flux():
+    """Flux standardisation returns the expected identifying metadata."""
     test_datapath = get_flux_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
 
     proc_results = standardise_flux(
@@ -487,7 +571,6 @@ def test_standardise_flux():
         source="gpp-cardamom",
         domain="europe",
         time_resolved=False,
-        force=True,
         store="user",
     )
 
@@ -535,7 +618,6 @@ def test_standardise_non_standard_flux_domain():
         source="gpp-cardamom",
         domain=domain,
         high_time_resolution=False,
-        force=True,
         store="user",
     )
 
@@ -563,7 +645,6 @@ def test_standardise_incomplete_flux():
             source="gpp-cardamom",
             domain="EUROPE",
             high_time_resolution=False,
-            force=True,
             store="user",
         )
 
@@ -727,7 +808,6 @@ def test_standardise_footprints_satellite_raises_error():
             period="1S",
             domain=domain,
             selection="LAND",
-            force=True,
             store="user",
             continuous=False,
         )
@@ -767,6 +847,50 @@ def test_standardise_footprint_satellite(caplog):
     assert data.metadata["obs_region"] == obs_region.lower()
     assert data.metadata["selection"] == "land"
     assert data.metadata["domain"] == domain.lower()
+
+
+@pytest.mark.parametrize(
+    "site,satellite,obs_region",
+    [
+        ("oco2_china", None, None),
+        (None, "oco2", "china"),
+    ],
+)
+def test_standardise_integrated_co2_footprint_for_site_or_satellite(site, satellite, obs_region):
+    """An explicit integrated CO2 footprint uses the integrated storage schema."""
+    clear_test_store("user")
+    datapath = get_footprint_datapath("oco2-CHINA_20220401_b0_001-column_NAME_UMG_EASTASIA_co2_202204.nc")
+
+    standardise_footprint(
+        filepath=datapath,
+        source_format="paris",
+        site=site,
+        satellite=satellite,
+        obs_region=obs_region,
+        model="name",
+        domain="eastasia",
+        inlet="column",
+        species="co2",
+        time_resolved=False,
+        continuous=False,
+        store="user",
+    )
+
+    if site is not None:
+        data = get_footprint(site=site, domain="eastasia", model="name", store="user")
+    else:
+        data = get_footprint(
+            satellite=satellite,
+            obs_region=obs_region,
+            domain="eastasia",
+            model="name",
+            store="user",
+        )
+
+    assert data.metadata["time_resolved"] == "false"
+    assert "fp" in data.data
+    assert "fp_time_resolved" not in data.data
+    assert "fp_residual" not in data.data
 
 
 def test_icos_corso_l1_flask_data():
@@ -961,3 +1085,214 @@ def test_icos_corso_l2_deltao2():
     assert "ICOS_CORSO" in results[0]["source_format"]
     assert "2" in results[0]["data_level"]
     assert "surface-flask" in results[0]["platform"]
+
+
+def test_standardise_agage_using_filepath():
+    """
+    Test standardisation of AGAGE data using file path input.
+    """
+    thd_path = get_surface_datapath(
+        filename="agage-private_thd_cfc-11_20260113-test.nc", source_format="GC_nc"
+    )
+
+    results = standardise_surface(
+        filepath=thd_path,
+        site="thd",
+        instrument="gcmd",
+        network="AGAGE-PRIVATE",
+        source_format="AGAGE",
+        sampling_period="1s",
+        store="user",
+    )
+
+    assert "cfc11" == results[0].get("species")
+
+    retrieved_data = get_obs_surface(
+        site="thd", species="cfc11", source_format="AGAGE", network="AGAGE-PRIVATE"
+    )
+
+    assert retrieved_data is not None
+    assert retrieved_data.metadata["instrument"] == "gcmd"
+    assert retrieved_data.metadata["network"] == "agage-private"
+    assert retrieved_data.metadata["source_format"] == "AGAGE"
+    assert retrieved_data.metadata["site"] == "thd"
+
+
+def test_standardise_agage_using_dataset():
+    """
+    Test standardisation of AGAGE data using dataset input.
+    """
+    thd_dataset = xr.open_dataset(
+        get_surface_datapath(filename="agage-private_thd_cfc-11_20260113-test.nc", source_format="GC_nc")
+    )
+
+    results = standardise_surface(
+        data=thd_dataset,
+        site="thd",
+        instrument="gcmd",
+        network="AGAGE-PRIVATE",
+        source_format="AGAGE",
+        sampling_period="1s",
+        store="user",
+    )
+
+    assert "cfc11" == results[0].get("species")
+
+    retrieved_data = get_obs_surface(
+        site="thd", species="cfc11", source_format="AGAGE", network="AGAGE-PRIVATE"
+    )
+
+    assert retrieved_data is not None
+    assert retrieved_data.metadata["instrument"] == "gcmd"
+    assert retrieved_data.metadata["network"] == "agage-private"
+    assert retrieved_data.metadata["source_format"] == "AGAGE"
+    assert retrieved_data.metadata["site"] == "thd"
+
+
+def test_standardise_co2_games_using_filepath():
+    """
+    Test standardisation of CO2-GAMES data using file path input.
+    """
+    clear_test_stores()
+    co2_games_data = get_surface_datapath(
+        filename="co2_bsd_tower-insitu_160_allvalid-108magl.nc", source_format="co2_games"
+    )
+
+    results = standardise_surface(
+        filepath=co2_games_data,
+        site="bsd",
+        network="CO2_GAMES",
+        source_format="CO2_GAMES",
+        sampling_period="1h",
+        store="user",
+    )
+
+    assert "co2" == results[0].get("species")
+
+    retrieved_data = get_obs_surface(
+        site="bsd", species="co2", source_format="CO2_GAMES", dataset_source="PTEN"
+    )
+
+    assert retrieved_data is not None
+    assert retrieved_data.metadata["instrument"] == "surface-insitu"
+    assert retrieved_data.metadata["network"] == "co2_games"
+    assert retrieved_data.metadata["dataset_source"] == "PTEN"
+
+
+def test_standardise_co2_games_using_dataset():
+    """
+    Test standardisation of CO2-GAMES data using dataset input.
+    """
+    clear_test_stores()
+    co2_games_data = xr.open_dataset(
+        get_surface_datapath(
+            filename="co2_bsd_tower-insitu_160_allvalid-108magl.nc", source_format="co2_games"
+        )
+    )
+
+    results = standardise_surface(
+        data=co2_games_data,
+        site="bsd",
+        network="CO2_GAMES",
+        source_format="CO2_GAMES",
+        sampling_period="1h",
+        store="user",
+    )
+
+    assert "co2" == results[0].get("species")
+
+    retrieved_data = get_obs_surface(
+        site="bsd", species="co2", source_format="CO2_GAMES", dataset_source="PTEN"
+    )
+
+    assert retrieved_data is not None
+    assert retrieved_data.metadata["instrument"] == "surface-insitu"
+    assert retrieved_data.metadata["network"] == "co2_games"
+    assert retrieved_data.metadata["dataset_source"] == "PTEN"
+
+
+def test_standardise_6km_footprints(tmp_path):
+    """Test a synthetic PARIS 6 km footprint retains inner-domain metadata on retrieval."""
+    site = "IMP"
+    model = "NAME"
+    network = "UKV"
+    height = "26magl"
+    domain = "EUROPE"
+    inner_domain = "6km"
+    source_format = "paris"
+    store = "user"
+    latitude, longitude = find_domain(f"{domain}-{inner_domain}")[:2]
+    filepath = tmp_path / "IMP-26magl_NAME_UKV_EUROPE-6km_co2_202301.nc"
+    shape = (2, latitude.size, longitude.size)
+    footprint = xr.Dataset(
+        data_vars={
+            "srr": (("time", "latitude", "longitude"), np.ones(shape, dtype=np.float32)),
+            "srr_time_resolved": (
+                ("time", "latitude", "longitude", "resolution"),
+                np.ones((*shape, 1), dtype=np.float32),
+            ),
+            "srr_residual": (("time", "latitude", "longitude"), np.zeros(shape, dtype=np.float32)),
+        },
+        coords={
+            "time": np.array(["2023-01-01T00:00", "2023-01-01T01:00"], dtype="datetime64[ns]"),
+            "latitude": latitude,
+            "longitude": longitude,
+            "resolution": np.array([1.0], dtype=np.float32),
+        },
+        attrs={"lpdm_native_output_unit": "ppm s"},
+    )
+    footprint.to_netcdf(filepath)
+    results = standardise_footprint(
+        filepath=filepath,
+        site=site,
+        model=model,
+        network=network,
+        height=height,
+        domain=domain,
+        species="co2",
+        inner_domain=inner_domain,
+        source_format=source_format,
+        store=store,
+        chunks={"time": 200, "lat": 200, "lon": 200},
+    )
+
+    assert results[0].get("species") == "co2"
+    assert "europe-6km" in results[0].get("domain")
+
+    retrieved_data = get_footprint(
+        site=site, model=model, network=network, height=height, domain="EUROPE-6KM", store=store
+    )
+
+    assert retrieved_data is not None
+    assert retrieved_data.metadata["model"] == "name"
+    assert retrieved_data.metadata["network"] == "ukv"
+    assert retrieved_data.metadata["site"] == "imp"
+    assert retrieved_data.metadata["height"] == "26m"
+    assert retrieved_data.metadata["domain"] == "europe-6km"
+    assert retrieved_data.metadata["inner_domain"] == "6km"
+
+
+def test_negative_inlet_standardisation():
+    """Test standardisation of data with negative inlet value and associated metadata keys."""
+
+    datapath = get_surface_datapath("cmn_hfc143a_negative_inlet.nc", source_format="openghg")
+    results = standardise_surface(
+        filepath=datapath,
+        source_format="openghg",
+        network="agage-private",
+        site="CMN",
+        instrument="multiple",
+        inlet="-20m",
+        calibration_scale="SIO-07",
+        store="user",
+        if_exists="new",
+        update_mismatch="from_definition",
+        chunks={"time": 600},
+    )
+
+    metadata = get_obs_surface(
+        site="cmn", species="hfc143a", inlet="-20m", network="agage-private", store="user"
+    ).metadata
+
+    assert "hfc143a" in results[0]["species"]
+    metadata["inlet"] == "-20m"

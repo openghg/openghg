@@ -1,8 +1,45 @@
+from abc import ABC, abstractmethod
 from collections import UserDict, UserList
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Iterator
+from contextlib import contextmanager
 from copy import deepcopy
-from typing import Generic, Protocol, runtime_checkable, TypeVar
+from typing import Any, Generic, Protocol, runtime_checkable, TypeVar
 from collections.abc import Mapping
+
+
+class Versioning(ABC):
+    """Interface for versioning."""
+
+    @property
+    @abstractmethod
+    def versions(self) -> list[str]: ...
+
+    @property
+    @abstractmethod
+    def current_version(self) -> str: ...
+
+    @abstractmethod
+    def checkout_version(self, v: str) -> None: ...
+
+    @abstractmethod
+    def create_version(self, v: str, checkout: bool = False, copy_current: bool = False) -> None: ...
+
+    @abstractmethod
+    def delete_version(self, v: str) -> None: ...
+
+    @contextmanager
+    def remember_current_version(self) -> Iterator[None]:
+        """Context manager to remember current version and restore it once context is exited."""
+        try:
+            current_version = self.current_version
+        except VersionError:
+            current_version = None
+
+        try:
+            yield
+        finally:
+            if current_version is not None and current_version in self.versions:
+                self.checkout_version(current_version)
 
 
 @runtime_checkable
@@ -20,7 +57,7 @@ class VersionError(Exception): ...
 T = TypeVar("T")  # underlying class type
 
 
-class SimpleVersioning(Generic[T]):
+class SimpleVersioning(Versioning, Generic[T]):
     """Work with versions of an object.
 
     This can be used to create a "versioned" subclass of the class T in some circumstances, by
@@ -74,6 +111,7 @@ class SimpleVersioning(Generic[T]):
         self,
         factory: Callable[[str], T],
         versions: Iterable[str] | None = None,
+        **kwargs: Any,
     ) -> None:
         """Create SimpleVersioning object.
 
@@ -81,21 +119,25 @@ class SimpleVersioning(Generic[T]):
             factory: factory function to create the versioned objects given a
             version string.
             versions: initial list of versions.
-            super_init: if True, pass kwargs to `super().__init__`, which might
-              be helpful, since this class is intended to be used with multiple
-              inheritence.
-            **kwargs: arguments to pass via `super().__init__`; these are ignored if
-              if `super_init` is False.
+            **kwargs: arguments to pass via `super().__init__`; if no kwargs are passed
+              `super().__init__()` is called, but `TypeError`s are suppressed.
 
         """
         self.factory = factory
 
-        if versions is None:
-            self._versions = {}
-            self._current_version: str | None = None
-        else:
+        if versions:
             self._versions = {v: factory(v) for v in versions}
-            self._current_version = self.versions[-1]  # version added last
+            self._current_version: str | None = self.versions[-1]  # version added last
+            self.checkout_version(self._current_version)
+        else:
+            self._versions = {}
+            self._current_version = None
+
+        try:
+            super().__init__(**kwargs)
+        except Exception as e:
+            if kwargs:
+                raise e
 
     @property
     def versions(self) -> list[str]:
@@ -115,7 +157,12 @@ class SimpleVersioning(Generic[T]):
 
     @_current.setter
     def _current(self, value: T) -> None:
-        self._versions[self.current_version] = value
+        try:
+            self._versions[self.current_version] = value
+        except VersionError as e:
+            # ignore assigning None without version checked out
+            if value is not None:
+                raise e
 
     def checkout_version(self, v: str) -> None:
         """Checkout specified version.
@@ -206,6 +253,10 @@ class SimpleVersioning(Generic[T]):
 
         if v == self._current_version:
             self._current_version = None
+
+    def delete_all_versions(self) -> None:
+        for version in self.versions:
+            self.delete_version(version)
 
 
 def next_version(v: str) -> str:

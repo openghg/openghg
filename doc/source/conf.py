@@ -1,5 +1,5 @@
 # type: ignore
-# flake8: noqa
+# ruff: noqa
 # Configuration file for the Sphinx documentation builder.
 #
 # This file only contains a selection of the most common options. For a full
@@ -228,7 +228,6 @@ def setup(app):
         from sphinx.util.inspect import safe_getattr
 
         class AutoAutoSummary(Autosummary):
-
             option_spec = {
                 "methods": directives.unchanged,
                 "attributes": directives.unchanged,
@@ -254,7 +253,7 @@ def setup(app):
             def run(self):
                 clazz = self.arguments[0]
                 try:
-                    (module_name, class_name) = clazz.rsplit(".", 1)
+                    module_name, class_name = clazz.rsplit(".", 1)
                     m = __import__(module_name, globals(), locals(), [class_name])
                     c = getattr(m, class_name)
                     if "methods" in self.options:
