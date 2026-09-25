@@ -4,8 +4,8 @@ from importlib import import_module as _import_module
 from importlib.metadata import PackageNotFoundError, version as _version
 from typing import Any
 
-if _sys.version_info < (3, 10):
-    raise ImportError("openghg requires Python >= 3.10")
+if _sys.version_info < (3, 11):
+    raise ImportError("openghg requires Python >= 3.11")
 
 __all__ = [
     "analyse",
