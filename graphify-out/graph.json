@@ -474,6 +474,18 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "openghg_storage_zarr_copy_copy_zarr_store",
+      "source_file": "openghg/storage/_zarr_copy.py",
+      "source_location": "L48",
+      "target": "openghg_storage_zarr_compat_copy_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "openghg_storage_zarr_store_versionedzarrstore_copy_to_version",
       "source_file": "openghg/storage/_zarr_store.py",
       "source_location": "L437",
@@ -3106,6 +3118,54 @@
       "source_file": "tests/storage/test_zarr_compat.py",
       "source_location": "L45",
       "target": "openghg_storage_zarr_compat_clear_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_storage_test_zarr_copy_stores",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L41",
+      "target": "openghg_storage_zarr_compat_make_memory_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_storage_test_zarr_copy_stores",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L42",
+      "target": "openghg_storage_zarr_compat_make_local_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_storage_test_zarr_copy_test_copy_conflict_policies",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L80",
+      "target": "openghg_storage_zarr_compat_zarr_has_async_store_api",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_storage_test_zarr_copy_test_copy_conflict_policies",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L87",
+      "target": "openghg_storage_zarr_copy_copy_zarr_store",
       "weight": 1.0
     },
     {
@@ -10536,6 +10596,28 @@
       "source_file": "openghg/storage/_zarr_compat.py",
       "source_location": "L21",
       "target": "openghg_storage_zarr_compat_zarr_major_version",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_storage_zarr_copy_copy_zarr_store",
+      "source_file": "openghg/storage/_zarr_copy.py",
+      "source_location": "L45",
+      "target": "openghg_storage_zarr_compat_zarr_has_async_store_api",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_storage_zarr_copy_copy_zarr_store",
+      "source_file": "openghg/storage/_zarr_copy.py",
+      "source_location": "L59",
+      "target": "openghg_storage_zarr_copy_copy_async",
       "weight": 1.0
     },
     {
@@ -19981,6 +20063,204 @@
       "confidence": "EXTRACTED",
       "context": "call",
       "relation": "calls",
+      "source": "tests_storage_test_zarr_copy_read_keys",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L27",
+      "target": "openghg_storage_zarr_compat_zarr_has_async_store_api",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_storage_test_zarr_copy_read_keys",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L33",
+      "target": "openghg_storage_zarr_compat_iter_store_keys",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_storage_test_zarr_copy_test_copy_conflict_policies",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L75",
+      "target": "tests_storage_test_zarr_copy_write_keys",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_storage_test_zarr_copy_test_copy_conflict_policies",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L88",
+      "target": "tests_storage_test_zarr_copy_read_keys",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_storage_test_zarr_copy_test_copy_empty_store_and_invalid_policy",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L101",
+      "target": "openghg_storage_zarr_copy_copy_zarr_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_storage_test_zarr_copy_test_copy_empty_store_and_invalid_policy",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L104",
+      "target": "tests_storage_test_zarr_copy_read_keys",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_storage_test_zarr_copy_test_copy_from_running_event_loop",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L109",
+      "target": "tests_storage_test_zarr_copy_write_keys",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_storage_test_zarr_copy_test_copy_from_running_event_loop",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L112",
+      "target": "openghg_storage_zarr_copy_copy_zarr_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_storage_test_zarr_copy_test_copy_from_running_event_loop",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L115",
+      "target": "tests_storage_test_zarr_copy_read_keys",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_storage_test_zarr_copy_test_copy_prefixes_respect_path_boundaries",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L64",
+      "target": "tests_storage_test_zarr_copy_write_keys",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_storage_test_zarr_copy_test_copy_prefixes_respect_path_boundaries",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L67",
+      "target": "openghg_storage_zarr_copy_copy_zarr_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_storage_test_zarr_copy_test_copy_prefixes_respect_path_boundaries",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L68",
+      "target": "tests_storage_test_zarr_copy_read_keys",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_storage_test_zarr_copy_test_copy_preserves_encoded_bytes",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L55",
+      "target": "tests_storage_test_zarr_copy_write_keys",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_storage_test_zarr_copy_test_copy_preserves_encoded_bytes",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L57",
+      "target": "openghg_storage_zarr_copy_copy_zarr_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_storage_test_zarr_copy_test_copy_preserves_encoded_bytes",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L58",
+      "target": "tests_storage_test_zarr_copy_read_keys",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_storage_test_zarr_copy_test_copy_v2_delegates",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L119",
+      "target": "openghg_storage_zarr_compat_zarr_has_async_store_api",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_storage_test_zarr_copy_test_copy_v2_delegates",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L130",
+      "target": "openghg_storage_zarr_copy_copy_zarr_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_storage_test_zarr_copy_write_keys",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L16",
+      "target": "openghg_storage_zarr_compat_zarr_has_async_store_api",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
       "source": "tests_store_test_base_test_legacy_hash_state_is_discarded",
       "source_file": "tests/store/test_base.py",
       "source_location": "L21",
@@ -25001,6 +25281,28 @@
       "source_file": "tests/storage/test_zarr_compat.py",
       "source_location": "L31",
       "target": "tests_storage_test_zarr_compat_py_parametrize",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "decorator",
+      "relation": "references",
+      "source": "tests_storage_test_zarr_copy_stores",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L38",
+      "target": "tests_storage_test_zarr_copy_py_fixture",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "decorator",
+      "relation": "references",
+      "source": "tests_storage_test_zarr_copy_test_copy_conflict_policies",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L71",
+      "target": "tests_storage_test_zarr_copy_py_parametrize",
       "weight": 1.0
     },
     {
@@ -32323,6 +32625,17 @@
       "confidence": "EXTRACTED",
       "context": "import",
       "relation": "imports",
+      "source": "openghg_storage_zarr_copy",
+      "source_file": "openghg/storage/_zarr_copy.py",
+      "source_location": "L7",
+      "target": "openghg_storage_zarr_compat_zarr_has_async_store_api",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
       "source": "openghg_storage_zarr_store",
       "source_file": "openghg/storage/_zarr_store.py",
       "source_location": "L12",
@@ -39495,6 +39808,94 @@
       "confidence": "EXTRACTED",
       "context": "import",
       "relation": "imports",
+      "source": "tests_storage_test_zarr_copy",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L1",
+      "target": "asyncio",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_storage_test_zarr_copy",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L12",
+      "target": "openghg_storage_zarr_copy_copy_zarr_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_storage_test_zarr_copy",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L2",
+      "target": "zlib",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_storage_test_zarr_copy",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L4",
+      "target": "pytest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_storage_test_zarr_copy",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L6",
+      "target": "openghg_storage_zarr_compat_iter_store_keys",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_storage_test_zarr_copy",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L6",
+      "target": "openghg_storage_zarr_compat_make_local_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_storage_test_zarr_copy",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L6",
+      "target": "openghg_storage_zarr_compat_make_memory_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_storage_test_zarr_copy",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L6",
+      "target": "openghg_storage_zarr_compat_zarr_has_async_store_api",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
       "source": "tests_store_test_base",
       "source_file": "tests/store/test_base.py",
       "source_location": "L1",
@@ -45435,6 +45836,28 @@
       "confidence": "EXTRACTED",
       "context": "import",
       "relation": "imports_from",
+      "source": "openghg_storage_zarr_copy",
+      "source_file": "openghg/storage/_zarr_copy.py",
+      "source_location": "L5",
+      "target": "typing",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "openghg_storage_zarr_copy",
+      "source_file": "openghg/storage/_zarr_copy.py",
+      "source_location": "L7",
+      "target": "openghg_storage_zarr_compat",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
       "source": "openghg_storage_zarr_store",
       "source_file": "openghg/storage/_zarr_store.py",
       "source_location": "L1",
@@ -50080,6 +50503,28 @@
       "source": "tests_storage_test_zarr_compat",
       "source_file": "tests/storage/test_zarr_compat.py",
       "source_location": "L9",
+      "target": "openghg_storage_zarr_compat",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_storage_test_zarr_copy",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L12",
+      "target": "openghg_storage_zarr_copy",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_storage_test_zarr_copy",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L6",
       "target": "openghg_storage_zarr_compat",
       "weight": 1.0
     },
@@ -56296,6 +56741,28 @@
       "source_file": "openghg/storage/_zarr_compat.py",
       "source_location": "L56",
       "target": "openghg_storage_zarr_compat_py_zarrstorelike",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "parameter_type",
+      "relation": "references",
+      "source": "openghg_storage_zarr_copy_copy_async",
+      "source_file": "openghg/storage/_zarr_copy.py",
+      "source_location": "L62",
+      "target": "openghg_storage_zarr_copy_py_zarrstorelike",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "parameter_type",
+      "relation": "references",
+      "source": "openghg_storage_zarr_copy_copy_zarr_store",
+      "source_file": "openghg/storage/_zarr_copy.py",
+      "source_location": "L10",
+      "target": "openghg_storage_zarr_copy_py_zarrstorelike",
       "weight": 1.0
     },
     {
@@ -64628,6 +65095,26 @@
       "source_file": "openghg/storage/_zarr_compat.py",
       "source_location": "L85",
       "target": "openghg_storage_zarr_compat_store_byte_size",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "openghg_storage_zarr_copy",
+      "source_file": "openghg/storage/_zarr_copy.py",
+      "source_location": "L10",
+      "target": "openghg_storage_zarr_copy_copy_zarr_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "openghg_storage_zarr_copy",
+      "source_file": "openghg/storage/_zarr_copy.py",
+      "source_location": "L62",
+      "target": "openghg_storage_zarr_copy_copy_async",
       "weight": 1.0
     },
     {
@@ -74098,6 +74585,96 @@
       "source_file": "tests/storage/test_zarr_compat.py",
       "source_location": "L58",
       "target": "tests_storage_test_zarr_compat_test_runtime_detection",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_storage_test_zarr_copy",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L107",
+      "target": "tests_storage_test_zarr_copy_test_copy_from_running_event_loop",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_storage_test_zarr_copy",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L118",
+      "target": "tests_storage_test_zarr_copy_test_copy_v2_delegates",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_storage_test_zarr_copy",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L15",
+      "target": "tests_storage_test_zarr_copy_write_keys",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_storage_test_zarr_copy",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L26",
+      "target": "tests_storage_test_zarr_copy_read_keys",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_storage_test_zarr_copy",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L39",
+      "target": "tests_storage_test_zarr_copy_stores",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_storage_test_zarr_copy",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L45",
+      "target": "tests_storage_test_zarr_copy_test_copy_preserves_encoded_bytes",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_storage_test_zarr_copy",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L62",
+      "target": "tests_storage_test_zarr_copy_test_copy_prefixes_respect_path_boundaries",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_storage_test_zarr_copy",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L73",
+      "target": "tests_storage_test_zarr_copy_test_copy_conflict_policies",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_storage_test_zarr_copy",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L99",
+      "target": "tests_storage_test_zarr_copy_test_copy_empty_store_and_invalid_policy",
       "weight": 1.0
     },
     {
@@ -88058,6 +88635,26 @@
       "source_file": "openghg/storage/_zarr_compat.py",
       "source_location": "L86",
       "target": "openghg_storage_zarr_compat_store_byte_size",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_storage_zarr_copy_rationale_1",
+      "source_file": "openghg/storage/_zarr_copy.py",
+      "source_location": "L1",
+      "target": "openghg_storage_zarr_copy",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_storage_zarr_copy_rationale_19",
+      "source_file": "openghg/storage/_zarr_copy.py",
+      "source_location": "L19",
+      "target": "openghg_storage_zarr_copy_copy_zarr_store",
       "weight": 1.0
     },
     {
@@ -115257,6 +115854,24 @@
       "_callable": true,
       "_origin": "ast",
       "file_type": "code",
+      "id": "openghg_storage_zarr_copy_copy_async",
+      "label": "_copy_async()",
+      "source_file": "openghg/storage/_zarr_copy.py",
+      "source_location": "L62"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_storage_zarr_copy_copy_zarr_store",
+      "label": "copy_zarr_store()",
+      "source_file": "openghg/storage/_zarr_copy.py",
+      "source_location": "L10"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
       "id": "openghg_storage_zarr_store_get_versioned_zarr_directory_store",
       "label": "get_versioned_zarr_directory_store()",
       "source_file": "openghg/storage/_zarr_store.py",
@@ -124356,6 +124971,87 @@
       "_callable": true,
       "_origin": "ast",
       "file_type": "code",
+      "id": "tests_storage_test_zarr_copy_read_keys",
+      "label": "read_keys()",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L26"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_storage_test_zarr_copy_stores",
+      "label": "stores()",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L39"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_storage_test_zarr_copy_test_copy_conflict_policies",
+      "label": "test_copy_conflict_policies()",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L73"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_storage_test_zarr_copy_test_copy_empty_store_and_invalid_policy",
+      "label": "test_copy_empty_store_and_invalid_policy()",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L99"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_storage_test_zarr_copy_test_copy_from_running_event_loop",
+      "label": "test_copy_from_running_event_loop()",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L107"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_storage_test_zarr_copy_test_copy_prefixes_respect_path_boundaries",
+      "label": "test_copy_prefixes_respect_path_boundaries()",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L62"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_storage_test_zarr_copy_test_copy_preserves_encoded_bytes",
+      "label": "test_copy_preserves_encoded_bytes()",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L45"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_storage_test_zarr_copy_test_copy_v2_delegates",
+      "label": "test_copy_v2_delegates()",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L118"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_storage_test_zarr_copy_write_keys",
+      "label": "write_keys()",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L15"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
       "id": "tests_store_test_base_test_default_metakey_is_class_attribute",
       "label": "test_default_metakey_is_class_attribute()",
       "source_file": "tests/store/test_base.py",
@@ -130248,6 +130944,22 @@
     {
       "_origin": "ast",
       "file_type": "code",
+      "id": "openghg_storage_zarr_copy",
+      "label": "_zarr_copy.py",
+      "source_file": "openghg/storage/_zarr_copy.py",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "openghg_storage_zarr_copy_py_zarrstorelike",
+      "label": "ZarrStoreLike",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "_origin": "ast",
+      "file_type": "code",
       "id": "openghg_storage_zarr_store",
       "label": "_zarr_store.py",
       "source_file": "openghg/storage/_zarr_store.py",
@@ -132994,6 +133706,30 @@
       "file_type": "code",
       "id": "tests_storage_test_zarr_compat_py_path",
       "label": "Path",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_storage_test_zarr_copy",
+      "label": "test_zarr_copy.py",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_storage_test_zarr_copy_py_fixture",
+      "label": "fixture",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_storage_test_zarr_copy_py_parametrize",
+      "label": "parametrize",
       "source_file": "",
       "source_location": ""
     },
@@ -138364,6 +139100,22 @@
       "label": "Sum stored bytes at or below a prefix, including metadata and encoded chunks.…",
       "source_file": "openghg/storage/_zarr_compat.py",
       "source_location": "L86"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_storage_zarr_copy_rationale_1",
+      "label": "Copy encoded Zarr keys without decoding arrays or rewriting metadata.",
+      "source_file": "openghg/storage/_zarr_copy.py",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_storage_zarr_copy_rationale_19",
+      "label": "Copy raw store keys, preserving encoded chunks and metadata exactly. Args:…",
+      "source_file": "openghg/storage/_zarr_copy.py",
+      "source_location": "L19"
     },
     {
       "_origin": "ast",
