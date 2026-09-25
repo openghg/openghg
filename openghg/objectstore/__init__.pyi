@@ -8,6 +8,7 @@ from ._integrity import integrity_check as integrity_check
 from ._irods import IRODSObjectStore as IRODSObjectStore
 from ._irods_metastore import PublicationConflictError as PublicationConflictError
 from ._legacy_datasource import Datasource as Datasource
+from ._datasource_edit import DatasourceEdit as DatasourceEdit
 from ._local_store import delete_object as delete_object
 from ._local_store import delete_objects as delete_objects
 from ._local_store import exists as exists

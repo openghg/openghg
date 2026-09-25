@@ -1,6 +1,7 @@
 from __future__ import annotations
 from collections import defaultdict
 from collections.abc import Callable, MutableMapping
+from copy import deepcopy
 from dataclasses import dataclass
 from functools import wraps
 from pathlib import Path
@@ -16,6 +17,8 @@ from openghg.types import DataOverlapError, ObjectStoreError, ZarrStoreError
 from ._datasource import AbstractDatasource, DatasourceFactory
 
 if TYPE_CHECKING:
+    from ._datasource_edit import DatasourceEdit
+    from ._payload_edit import PayloadEdit
     from openghg.storage._zarr_store import VersionedZarrStore
     from pandas import Timestamp
     import xarray as xr
@@ -38,6 +41,20 @@ def _requires_write(method: WriteMethodT) -> WriteMethodT:
     def wrapped(self: Any, *args: Any, **kwargs: Any) -> Any:
         if self._mode == "r":
             raise PermissionError("Cannot modify a read-only datasource")
+        guard = getattr(self, "_edit_context_guard", None)
+        if guard is not None:
+            guard()
+        return method(self, *args, **kwargs)
+
+    return cast(WriteMethodT, wrapped)
+
+
+def _requires_legacy_mutation(method: WriteMethodT) -> WriteMethodT:
+    """Keep legacy mutation methods from changing immutable publications."""
+
+    @wraps(method)
+    def wrapped(self: Any, *args: Any, **kwargs: Any) -> Any:
+        self._check_legacy_mutation()
         return method(self, *args, **kwargs)
 
     return cast(WriteMethodT, wrapped)
@@ -99,6 +116,10 @@ class Datasource(AbstractDatasource[XrDataset]):
             "_status",
             "_start_date",
             "_end_date",
+            "_active_edit",
+            "_loaded_state",
+            "_edit_context_guard",
+            "_edit_failed",
         }
     )
 
@@ -116,6 +137,15 @@ class Datasource(AbstractDatasource[XrDataset]):
         # Hold information regarding the versions of the data
         self._latest_version: str = ""
         self._timestamps: dict[str, str] = {}
+        self._active_edit: DatasourceEdit | None = None
+        self._loaded_state: dict | None = None
+        self._edit_context_guard: Callable[[], None] | None = None
+        self._edit_failed = False
+        self._versioning_policy = "legacy"
+        self._next_version = 1
+        self._commits: dict[str, dict] = {}
+        if not hasattr(self, "_version_paths"):
+            self._version_paths: dict[str, str] = {}
 
         if mode not in ("r", "rw"):
             raise ValueError("Invalid mode. Please select r or rw.")
@@ -129,10 +159,28 @@ class Datasource(AbstractDatasource[XrDataset]):
     def _create_store(self) -> VersionedZarrStore[Any]:
         """Open versioned payload storage; subclasses may supply another Zarr store."""
         from openghg.storage import get_versioned_zarr_directory_store
+        from openghg.storage._zarr_compat import make_local_store
+        from openghg.storage._zarr_store import VersionedZarrStore
 
         self._root_store_key = f"data/{self.uuid}/zarr"
         self._stores_path = Path(self._bucket, self._root_store_key).expanduser().resolve()
-        return get_versioned_zarr_directory_store(path=self._stores_path)
+        options = {}
+        if hasattr(self, "_store"):
+            options = {
+                "append_dim": self._store.append_dim,
+                "index_options": deepcopy(self._store.index_options),
+                "compressor": self._store.compressor,
+                "filters": self._store.filters,
+                "encoding": deepcopy(self._store.encoding),
+                **self._store.to_zarr_kwargs,
+            }
+        if self._versioning_policy == "immutable":
+            return VersionedZarrStore(
+                factory=lambda version: make_local_store(self._stores_path / self._version_paths[version]),
+                versions=self._data_keys,
+                **options,
+            )
+        return get_versioned_zarr_directory_store(path=self._stores_path, **options)
 
     @classmethod
     def _read_state(cls, bucket: str, uuid: str) -> dict:
@@ -143,10 +191,168 @@ class Datasource(AbstractDatasource[XrDataset]):
         return get_object_from_json(bucket=bucket, key=key)
 
     def _write_state(self, state: dict) -> None:
-        """Persist datasource state without the fields in `_runtime_state_keys`."""
-        from openghg.objectstore import set_object_from_json
+        """Atomically replace local datasource state; publication supplies its lock."""
+        import json
+        import os
+        from uuid import uuid4
 
-        set_object_from_json(bucket=self._bucket, key=self.key, data=state)
+        path = Path(self._bucket, self.key + "._data")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        contents = json.dumps(state)
+        temporary = path.with_name(f".{path.name}-{uuid4().hex}")
+        descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o666)
+        try:
+            with os.fdopen(descriptor, "w", encoding="utf-8") as f:
+                if path.exists():
+                    os.fchmod(f.fileno(), path.stat().st_mode & 0o777)
+                f.write(contents)
+                f.flush()
+                os.fsync(f.fileno())
+            temporary.replace(path)
+        finally:
+            temporary.unlink(missing_ok=True)
+
+    def _current_persisted_state(self) -> dict | None:
+        """Read local publication state, including when this datasource is new."""
+        if not exists(bucket=self._bucket, key=self.key):
+            return None
+        return self._read_state(bucket=self._bucket, uuid=self.uuid)
+
+    def _check_legacy_mutation(self) -> None:
+        """Reject legacy writes after opt-in, including through stale handles."""
+        if self._mode == "r":
+            raise PermissionError("Cannot modify a read-only datasource")
+        if self._edit_context_guard is not None:
+            self._edit_context_guard()
+        if self._edit_failed:
+            raise ObjectStoreError("Publication failed; reload this datasource before writing again.")
+        state = self._current_persisted_state()
+        if (
+            self._versioning_policy == "immutable"
+            or (state is not None and state.get("_versioning_policy") == "immutable")
+            or self._active_edit is not None
+        ):
+            raise ObjectStoreError("Saved versions are immutable; use begin_edit() and an explicit commit.")
+
+    def _edit_state(self) -> dict:
+        """Copy serializable datasource state without sharing mutable metadata."""
+        state = deepcopy({k: v for k, v in self.__dict__.items() if k not in self._runtime_state_keys})
+        if "versions" in state["_metadata"]:
+            state["_metadata"]["versions"] = deepcopy(state["_metadata"]["versions"])
+        return state
+
+    def _begin_payload_edit(self, base: str | None) -> PayloadEdit:
+        """Allocate one stable local generation, copying the selected base once."""
+        from uuid import uuid4
+
+        from openghg.storage._zarr_compat import clear_store, make_local_store
+        from openghg.storage._zarr_copy import copy_zarr_store
+        from openghg.storage._zarr_store import ZarrStore
+        from ._payload_edit import PayloadEdit
+
+        expected = deepcopy(self._loaded_state)
+        context_guard = self._edit_context_guard
+
+        def check_current() -> None:
+            if self._mode == "r":
+                raise PermissionError("Cannot modify a read-only datasource")
+            if context_guard is not None:
+                context_guard()
+            if self._edit_failed:
+                raise ObjectStoreError("Publication failed; reload this datasource before writing again.")
+            if self._current_persisted_state() != expected:
+                raise ObjectStoreError("Datasource changed; reload before starting or committing an edit.")
+
+        check_current()
+        if base is not None and base not in self._data_keys:
+            raise ZarrStoreError(f"Invalid version: {base}")
+        reference = ".generations/" + str(uuid4())
+        destination = make_local_store(self._stores_path / reference)
+
+        def discard() -> None:
+            import errno
+
+            clear_store(destination)
+            try:
+                (self._stores_path / ".generations").rmdir()
+            except OSError as exc:
+                if exc.errno not in (errno.ENOENT, errno.ENOTEMPTY):
+                    raise
+
+        payload = PayloadEdit(
+            ZarrStore(
+                destination,
+                append_dim=self._store.append_dim,
+                index_options=deepcopy(self._store.index_options),
+                compressor=self._store.compressor,
+                filters=self._store.filters,
+                encoding=deepcopy(self._store.encoding),
+                **self._store.to_zarr_kwargs,
+            ),
+            reference,
+            check_current=check_current,
+            abort=discard,
+        )
+        try:
+            if base is not None:
+                source = make_local_store(self._stores_path / self._version_paths.get(base, base))
+                copy_zarr_store(source, destination)
+        except BaseException:
+            payload.abort()
+            raise
+        return payload
+
+    def _publish_edit(self, payload: PayloadEdit, state: dict, version: str) -> None:
+        """Publish a completed generation under a per-datasource state lock.
+
+        Direct edits serialize here. Concurrent legacy mutations must use the
+        ObjectStore manager's catalog lock; their payload writes are not staged.
+        """
+        from filelock import FileLock
+        from openghg.objectstore import get_object_lock_path
+
+        candidate = deepcopy(state)
+        paths = {v: self._version_paths.get(v, v) for v in self._data_keys}
+        paths[version] = payload.reference
+        candidate["_version_paths"] = paths
+        with FileLock(str(get_object_lock_path(self._bucket, self.key))):
+            payload.check_current()
+            if version in self._data_keys:
+                raise ObjectStoreError(f"Saved version {version} already exists.")
+            payload.mark_publishing()
+            try:
+                self._write_state(candidate)
+            except BaseException:
+                self._edit_failed = True
+                raise
+        self.__dict__.update(candidate)
+        self._data_keys = defaultdict(list, self._data_keys)
+        self._loaded_state = deepcopy(candidate)
+        self._store = self._create_store()
+        self._start_date = self._end_date = None
+        self.update_daterange()
+
+    @_requires_write
+    def begin_edit(self, base: str | None = "latest") -> DatasourceEdit:
+        """Start an unpublished working copy of a saved version.
+
+        Args:
+            base: Saved version to copy, ``"latest"`` for the newest saved
+                version, or None for an empty working dataset. With no saved
+                versions, ``"latest"`` also starts empty.
+
+        Returns:
+            An editor whose explicit ``commit`` publishes one new version.
+            Exiting the editor's context without committing discards its changes.
+
+        The first successful commit opts this datasource into immutable saved
+        versions. Subsequent changes must use this API; legacy writes and plain
+        ``save`` cannot publish edits. See :doc:`/development/datasource_versioning` for
+        manager ownership and working-preview lifetime.
+        """
+        from ._datasource_edit import DatasourceEdit
+
+        return DatasourceEdit(self, base)
 
     def _delete_state(self) -> None:
         """Remove persisted datasource state."""
@@ -192,19 +398,26 @@ class Datasource(AbstractDatasource[XrDataset]):
         ds.__dict__.update(stored_data)
         ds._mode = mode
         ds._data_keys = defaultdict(list, ds._data_keys)
+        ds._loaded_state = deepcopy(stored_data)
+        ds._store = ds._create_store()
+        ds._start_date = ds._end_date = None
+        ds.update_daterange()
 
         return ds
 
+    @_requires_legacy_mutation
     def save(self) -> None:
         """Persist datasource state through the backend's `_write_state` hook.
 
         Subclasses with additional runtime fields must extend `_runtime_state_keys`
         so that sessions and other non-persistent objects are excluded.
         """
-        internal_metadata = {k: v for k, v in self.__dict__.items() if k not in self._runtime_state_keys}
+        internal_metadata = self._edit_state()
         self._write_state(internal_metadata)
+        self._loaded_state = deepcopy(internal_metadata)
 
     @_requires_write
+    @_requires_legacy_mutation
     def add(self, data: xr.Dataset, **kwargs) -> None:
         if (period := kwargs.pop("period", None)) is not None:
             self._metadata["period"] = period
@@ -212,16 +425,33 @@ class Datasource(AbstractDatasource[XrDataset]):
         self.add_data(metadata={}, data=data, data_type=self._data_type, **kwargs)
 
     def get_data(self, version: str = "latest") -> xr.Dataset:
-        """Get the version of the dataset stored in the zarr store.
+        """Read a saved version as a lazy Xarray dataset.
 
         Args:
-            version: Version string, e.g. v1, v2
+            version: Published version label, such as ``"v1"``, or ``"latest"``.
         Returns:
-            None
+            Dataset backed by the selected saved payload. Immutable versions
+            stay pinned across later commits; reading one does not change an
+            editor's base. Closing the dataset does not close its datasource or
+            manager. Remote backends may require a session factory for reads
+            after the manager context exits.
+        Raises:
+            ZarrStoreError: If the requested version is not published.
         """
         if version == "latest":
             version = self._latest_version
+        version = version.lower()
+        if version not in self._data_keys:
+            raise ZarrStoreError(f"Invalid version: {version}")
 
+        if self._versioning_policy == "immutable":
+            from openghg.storage._zarr_store import ZarrStore
+
+            return ZarrStore(
+                self._store._versions[version],
+                append_dim=self._store.append_dim,
+                **self._store.to_zarr_kwargs,
+            ).get()
         self._checkout_version(version)
         return self._store.get()
 
@@ -231,6 +461,7 @@ class Datasource(AbstractDatasource[XrDataset]):
         self._delete_state()
 
     @_requires_write
+    @_requires_legacy_mutation
     def update_attributes(
         self,
         version: str = "latest",
@@ -299,9 +530,12 @@ class Datasource(AbstractDatasource[XrDataset]):
         exc_val: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> None:
+        if self._active_edit is not None:
+            self._active_edit.abort()
+            return
         if exc_type is not None:
             logger.error(msg=f"{exc_type}, {exc_tb}")
-        else:
+        elif self._mode != "r" and self._versioning_policy != "immutable":
             self.save()
 
     # properties
@@ -328,6 +562,8 @@ class Datasource(AbstractDatasource[XrDataset]):
     @property
     def metadata(self) -> dict:
         """Metadata of this Datasource."""
+        if self._versioning_policy == "immutable":
+            return deepcopy(self._metadata)
         return self._metadata
 
     @property
@@ -360,6 +596,7 @@ class Datasource(AbstractDatasource[XrDataset]):
 
     # Methods related storing, getting, deleting data
     @_requires_write
+    @_requires_legacy_mutation
     def add_data(
         self,
         metadata: dict,
@@ -414,6 +651,7 @@ class Datasource(AbstractDatasource[XrDataset]):
             raise NotImplementedError()
 
     @_requires_write
+    @_requires_legacy_mutation
     def add_timed_data(
         self,
         data: xr.Dataset,
@@ -519,9 +757,7 @@ class Datasource(AbstractDatasource[XrDataset]):
                 raise ValueError("Cannot update empty Zarr store.")
             self._ensure_store_version(version_str, copy_current=True)
             self._store.upsert(data)
-            date_keys = [
-                get_representative_daterange_str(self.get_data(version=version_str), period=self.period)
-            ]
+            date_keys = [get_representative_daterange_str(self._store.get(), period=self.period)]
 
         self._data_type = data_type
         self.add_metadata_key(key="data_type", value=data_type)
@@ -549,6 +785,7 @@ class Datasource(AbstractDatasource[XrDataset]):
         self._last_updated = timestamp_str_now
 
     @_requires_write
+    @_requires_legacy_mutation
     def delete_all_data(self) -> None:
         """Delete datasource entirely.
 
@@ -567,6 +804,7 @@ class Datasource(AbstractDatasource[XrDataset]):
         self._timestamps.clear()
 
     @_requires_write
+    @_requires_legacy_mutation
     def delete_version(self, version: str) -> None:
         """Delete a specific version of data.
 
@@ -592,6 +830,7 @@ class Datasource(AbstractDatasource[XrDataset]):
         self._metadata["versions"] = self._data_keys
 
     # Metadata methods
+    @_requires_legacy_mutation
     def add_metadata_key(self, key: str, value: str) -> None:
         """Add a label to the metadata dictionary with the key value pair
         This will overwrite any previous entry stored at that key.
@@ -605,6 +844,7 @@ class Datasource(AbstractDatasource[XrDataset]):
         value = str(value)
         self._metadata[key.lower()] = value.lower()
 
+    @_requires_legacy_mutation
     def add_metadata(
         self, metadata: dict, skip_keys: list | None = None, extend_keys: list | None = None
     ) -> None:
@@ -663,12 +903,11 @@ class Datasource(AbstractDatasource[XrDataset]):
         if version == "latest":
             version = self._latest_version
 
-        try:
-            keys = self._data_keys[version]
-        except KeyError:
+        if version not in self._data_keys:
             raise KeyError(f"Invalid version, valid versions {list(self._data_keys.keys())}")
+        keys = self._data_keys[version]
 
-        return keys
+        return list(keys) if self._versioning_policy == "immutable" else keys
 
     def all_data_keys(self) -> dict:
         """Return a summary of the versions of data stored for
@@ -677,7 +916,7 @@ class Datasource(AbstractDatasource[XrDataset]):
         Returns:
             dict: Dictionary of versions
         """
-        return self._data_keys
+        return deepcopy(self._data_keys) if self._versioning_policy == "immutable" else self._data_keys
 
     def update_daterange(self) -> None:
         """Update the dates stored by this Datasource

@@ -5,12 +5,14 @@ from __future__ import annotations
 from collections import defaultdict
 from collections.abc import Iterator
 from contextlib import contextmanager, nullcontext
+from copy import deepcopy
 import hashlib
 import json
 import threading
 from pathlib import Path
 from typing import Any, Literal
 from uuid import uuid4
+from weakref import WeakSet
 
 from typing_extensions import Self
 import xarray as xr
@@ -28,8 +30,10 @@ from openghg.objectstore._irods_storage import (
     write_document,
 )
 from openghg.objectstore._legacy_datasource import Datasource
+from openghg.objectstore._payload_edit import PayloadEdit
 from openghg.objectstore._objectstore import ObjectStore, make_metadata_updater_fn
-from openghg.storage._zarr_store import VersionedZarrStore
+from openghg.storage._zarr_copy import copy_zarr_store
+from openghg.storage._zarr_store import VersionedZarrStore, ZarrStore
 from openghg.types import ObjectStoreError
 
 
@@ -132,6 +136,9 @@ class IRODSDatasource(Datasource):
         return self._revision
 
     def _check_current(self) -> None:
+        guard = getattr(self, "_edit_context_guard", None)
+        if guard is not None:
+            guard()
         self._owner._require_write()
         if self._failed:
             raise ObjectStoreError("A datasource mutation failed; reload before retrying.")
@@ -139,9 +146,81 @@ class IRODSDatasource(Datasource):
         if (current["revision"] if current else None) != self._revision:
             raise PublicationConflictError(f"iRODS datasource {self._uuid} changed; reload before retrying.")
 
+    def _current_persisted_state(self) -> dict | None:
+        """Read policy and state from the authoritative catalog publication."""
+        current = self._owner.metastore.publication(self._uuid)
+        return current["datasource"] if current is not None else None
+
+    def _begin_payload_edit(self, base: str | None) -> PayloadEdit:
+        """Copy a saved generation once into an unpublished working generation."""
+        self._check_current()
+        token = self._owner._context_token
+        path = self._new_generation()
+        mapping = IRODSKVStore(self._mapping(path, writable=True))
+
+        def check_current() -> None:
+            if token is not self._owner._context_token:
+                raise ObjectStoreError("The datasource editor's writer context has closed.")
+            self._check_current()
+
+        def abort() -> None:
+            mapping.rmdir()
+            self._staging.discard(path)
+
+        store = self._store
+        staged = ZarrStore(
+            mapping,
+            append_dim=store.append_dim,
+            index_options=deepcopy(store.index_options),
+            compressor=store.compressor,
+            filters=store.filters,
+            encoding=deepcopy(store.encoding),
+            **store.to_zarr_kwargs,
+        )
+        payload = PayloadEdit(staged, path, check_current=check_current, abort=abort)
+        try:
+            if base is not None:
+                copy_zarr_store(self._store._versions[base], mapping)
+        except BaseException:
+            payload.abort()
+            raise
+        self._owner._editing_datasources.add(self)
+        return payload
+
+    def _publish_edit(self, payload: PayloadEdit, state: dict, version: str) -> None:
+        """Publish one completed generation and adopt its state only on success."""
+        payload.check_current()
+        if version in self._data_keys:
+            raise ObjectStoreError(f"Saved version {version} already exists.")
+        candidate = deepcopy(state)
+        old_paths = self._version_paths
+        old_versions = dict(self._store._versions)
+        self._version_paths = {**old_paths, version: payload.reference}
+        payload.mark_publishing()
+        try:
+            self._write_state(candidate)
+        except BaseException:
+            self._version_paths = old_paths
+            self._store._versions = old_versions
+            self._failed = True
+            raise
+        self.__dict__.update(candidate)
+        self._data_keys = defaultdict(list, self._data_keys)
+        self._loaded_state = deepcopy(candidate)
+        self._store.checkout_version(version)
+        self._start_date = self._end_date = None
+        self.update_daterange()
+
     def _mapping(self, path: str, writable: bool = False) -> IRODSZarrMapping:
+        token = self._owner._context_token
+
         def guard() -> None:
+            context_guard = getattr(self, "_edit_context_guard", None)
+            if context_guard is not None:
+                context_guard()
             self._owner._require_write(_worker=True)
+            if token is not self._owner._context_token:
+                raise ObjectStoreError("The datasource editor's writer context has closed.")
             if path not in self._staging or self._failed:
                 raise PermissionError("Published iRODS generations are immutable.")
 
@@ -197,6 +276,7 @@ class IRODSDatasource(Datasource):
         return cls(uuid, owner, publication)
 
     def add(self, data: xr.Dataset, **kwargs: Any) -> None:
+        self._check_legacy_mutation()
         self._check_current()
         try:
             super().add(data, **kwargs)
@@ -218,6 +298,7 @@ class IRODSDatasource(Datasource):
         compressor: Any | None = None,
         filters: Any | None = None,
     ) -> None:
+        self._check_legacy_mutation()
         self._check_current()
         try:
             super().add_data(
@@ -248,6 +329,7 @@ class IRODSDatasource(Datasource):
         compressor: Any | None = None,
         filters: Any | None = None,
     ) -> None:
+        self._check_legacy_mutation()
         self._check_current()
         try:
             if not new_version and self._latest_version:
@@ -268,6 +350,7 @@ class IRODSDatasource(Datasource):
         to_delete: str | list[str] | None = None,
     ) -> bool:
         """Stage an attribute edit; save publishes it without changing pinned readers."""
+        self._check_legacy_mutation()
         self._check_current()
         if not (to_update or to_delete) or (not update_global and data_vars is None):
             return False
@@ -298,6 +381,7 @@ class IRODSDatasource(Datasource):
 
     def delete_version(self, version: str) -> None:
         """Unlink one version on save; its generations remain available to readers."""
+        self._check_legacy_mutation()
         self._check_current()
         if version == "latest":
             raise ValueError("Specific version required for deletion.")
@@ -328,12 +412,14 @@ class IRODSDatasource(Datasource):
 
     def delete_all_data(self) -> None:
         """Unlink every version on save without reclaiming immutable generations."""
+        self._check_legacy_mutation()
         self._check_current()
         for version in list(self._data_keys):
             self.delete_version(version)
 
     def delete(self) -> None:
         """Publish a tombstone while preserving already loaded readers."""
+        self._check_legacy_mutation()
         self._check_current()
         self._owner.delete(self._uuid, expected_revision=self._revision)
 
@@ -395,6 +481,8 @@ class IRODSObjectStore(ObjectStore[IRODSDatasource, xr.Dataset]):
         self._depth = 0
         self._context_thread: int | None = None
         self._context_guard = threading.RLock()
+        self._context_token: object | None = None
+        self._editing_datasources: WeakSet[IRODSDatasource] = WeakSet()
         self._locked = False
         self.lock_path = collection + "/.openghg-write-lock"
         with self._sessions() as connection:
@@ -447,6 +535,7 @@ class IRODSObjectStore(ObjectStore[IRODSDatasource, xr.Dataset]):
                 self._locked = True
             self._depth = 1
             self._context_thread = threading.get_ident()
+            self._context_token = object()
             return self
         except BaseException:
             connection = self._connection
@@ -468,6 +557,17 @@ class IRODSObjectStore(ObjectStore[IRODSDatasource, xr.Dataset]):
             self._depth -= 1
             self._context_guard.release()
             return
+        try:
+            for datasource in list(self._editing_datasources):
+                edit = getattr(datasource, "_active_edit", None)
+                if edit is not None:
+                    edit.abort()
+            self._editing_datasources.clear()
+        finally:
+            self._context_token = None
+            self._close_connection()
+
+    def _close_connection(self) -> None:
         try:
             if self._locked:
                 self._sessions.active.collections.remove(self.lock_path, recurse=False, force=True)
@@ -525,6 +625,7 @@ class IRODSObjectStore(ObjectStore[IRODSDatasource, xr.Dataset]):
 
         self._require_write()
         datasource = self.get_datasource(uuid)
+        datasource._check_legacy_mutation()
         if expected_revision is not None and datasource.revision != expected_revision:
             raise PublicationConflictError(f"iRODS datasource {uuid} changed; reload before retrying.")
         if (metadata and "uuid" in metadata) or (
@@ -550,6 +651,7 @@ class IRODSObjectStore(ObjectStore[IRODSDatasource, xr.Dataset]):
             raise ObjectStoreError(f"No published iRODS datasource with UUID {uuid}")
         if expected_revision is not None and snapshot["revision"] != expected_revision:
             raise PublicationConflictError(f"iRODS datasource {uuid} changed; reload before retrying.")
+        self.get_datasource(uuid)._check_legacy_mutation()
         self.metastore.publish(uuid, None, snapshot["datasource"], snapshot["versions"], snapshot["revision"])
 
     def replicate(self, uuid: str, resource: str) -> None:
