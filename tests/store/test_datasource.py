@@ -727,7 +727,7 @@ def test_bytes_stored(data, bucket, datasource):
 def test_datasource_persistence_hooks_reuse_versioning(tmp_path, datasets_with_gaps):
     """A different persistence layer uses the same update planner without local files."""
     from copy import deepcopy
-    import zarr
+    from openghg.storage._zarr_compat import make_memory_store
     from openghg.storage._zarr_store import VersionedZarrStore
 
     states = {}
@@ -741,7 +741,7 @@ def test_datasource_persistence_hooks_reuse_versioning(tmp_path, datasets_with_g
             versions = stores.setdefault(self.uuid, {})
 
             def factory(version):
-                return versions.setdefault(version, zarr.MemoryStore())
+                return versions.setdefault(version, make_memory_store())
 
             return VersionedZarrStore(factory=factory, versions=list(versions))
 

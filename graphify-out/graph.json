@@ -248,7 +248,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_documents_read_be4100",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L63",
+      "source_location": "L64",
       "target": "openghg_objectstore_irods_storage_read_document",
       "weight": 1.0
     },
@@ -260,7 +260,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_documents_write",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L81",
+      "source_location": "L82",
       "target": "openghg_objectstore_irods_metastore_publicationconflicterror",
       "weight": 1.0
     },
@@ -272,7 +272,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_documents_write",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L83",
+      "source_location": "L84",
       "target": "openghg_objectstore_irods_storage_write_document",
       "weight": 1.0
     },
@@ -284,7 +284,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsdatasource_check_current",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L139",
+      "source_location": "L140",
       "target": "openghg_objectstore_irods_metastore_publicationconflicterror",
       "weight": 1.0
     },
@@ -296,7 +296,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsobjectstore_delete",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L550",
+      "source_location": "L552",
       "target": "openghg_objectstore_irods_metastore_publicationconflicterror",
       "weight": 1.0
     },
@@ -308,7 +308,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsobjectstore_init",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L386",
+      "source_location": "L387",
       "target": "openghg_objectstore_irods_storage_validate_collection",
       "weight": 1.0
     },
@@ -320,7 +320,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsobjectstore_init",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L400",
+      "source_location": "L401",
       "target": "openghg_objectstore_irods_storage_validate_ordinary_collection",
       "weight": 1.0
     },
@@ -332,7 +332,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsobjectstore_init",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L401",
+      "source_location": "L402",
       "target": "openghg_objectstore_irods_metastore_irodsmetastore",
       "weight": 1.0
     },
@@ -344,7 +344,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsobjectstore_init",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L407",
+      "source_location": "L408",
       "target": "openghg_objectstore_objectstore_make_metadata_updater_fn",
       "weight": 1.0
     },
@@ -356,7 +356,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsobjectstore_init",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L415",
+      "source_location": "L416",
       "target": "openghg_objectstore_datasource_datasourcefactory",
       "weight": 1.0
     },
@@ -368,7 +368,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsobjectstore_replicate",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L566",
+      "source_location": "L568",
       "target": "openghg_objectstore_irods_storage_snapshot",
       "weight": 1.0
     },
@@ -380,7 +380,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsobjectstore_update",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L527",
+      "source_location": "L529",
       "target": "openghg_objectstore_irods_metastore_publicationconflicterror",
       "weight": 1.0
     },
@@ -392,7 +392,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsobjectstore_update",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L536",
+      "source_location": "L538",
       "target": "openghg_objectstore_objectstore_memory_metastore",
       "weight": 1.0
     },
@@ -8030,7 +8030,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_documents_read",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L73",
+      "source_location": "L74",
       "target": "openghg_objectstore_irods_documents_read_be4100",
       "weight": 1.0
     },
@@ -8041,7 +8041,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_documents_read_be4100",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L63",
+      "source_location": "L64",
       "target": "openghg_objectstore_irods_documents_key",
       "weight": 1.0
     },
@@ -8052,7 +8052,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_documents_write",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L79",
+      "source_location": "L80",
       "target": "openghg_objectstore_irods_documents_read_be4100",
       "weight": 1.0
     },
@@ -8063,7 +8063,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_documents_write",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L86",
+      "source_location": "L87",
       "target": "openghg_objectstore_irods_documents_key",
       "weight": 1.0
     },
@@ -8074,7 +8074,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irods_object_store",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L620",
+      "source_location": "L622",
       "target": "openghg_objectstore_irods_irodsobjectstore",
       "weight": 1.0
     },
@@ -8085,7 +8085,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsdatasource_add",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L199",
+      "source_location": "L200",
       "target": "openghg_objectstore_irods_irodsdatasource_check_current",
       "weight": 1.0
     },
@@ -8096,7 +8096,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsdatasource_add_data",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L220",
+      "source_location": "L221",
       "target": "openghg_objectstore_irods_irodsdatasource_check_current",
       "weight": 1.0
     },
@@ -8107,7 +8107,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsdatasource_add_timed_data",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L250",
+      "source_location": "L251",
       "target": "openghg_objectstore_irods_irodsdatasource_check_current",
       "weight": 1.0
     },
@@ -8118,7 +8118,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsdatasource_add_timed_data",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L253",
+      "source_location": "L254",
       "target": "openghg_objectstore_irods_irodsdatasource_stage_version",
       "weight": 1.0
     },
@@ -8129,7 +8129,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsdatasource_create_store",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L170",
+      "source_location": "L171",
       "target": "openghg_storage_zarr_store_versionedzarrstore",
       "weight": 1.0
     },
@@ -8140,7 +8140,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsdatasource_delete",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L336",
+      "source_location": "L337",
       "target": "openghg_objectstore_irods_irodsdatasource_check_current",
       "weight": 1.0
     },
@@ -8151,7 +8151,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsdatasource_delete_all_data",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L330",
+      "source_location": "L331",
       "target": "openghg_objectstore_irods_irodsdatasource_check_current",
       "weight": 1.0
     },
@@ -8162,7 +8162,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsdatasource_delete_all_data",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L332",
+      "source_location": "L333",
       "target": "openghg_objectstore_irods_irodsdatasource_delete_version",
       "weight": 1.0
     },
@@ -8173,7 +8173,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsdatasource_delete_version",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L300",
+      "source_location": "L301",
       "target": "openghg_objectstore_irods_irodsdatasource_check_current",
       "weight": 1.0
     },
@@ -8184,7 +8184,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsdatasource_init",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L121",
+      "source_location": "L122",
       "target": "openghg_objectstore_irods_irodsobjectstore_init",
       "weight": 1.0
     },
@@ -8195,7 +8195,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsdatasource_mapping",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L188",
+      "source_location": "L189",
       "target": "openghg_objectstore_irods_irodsdatasource_mapping_6f83d4",
       "weight": 1.0
     },
@@ -8206,7 +8206,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsdatasource_mapping_6f83d4",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L147",
+      "source_location": "L148",
       "target": "openghg_objectstore_irods_storage_irodszarrmapping",
       "weight": 1.0
     },
@@ -8217,7 +8217,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsdatasource_stage_version",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L178",
+      "source_location": "L179",
       "target": "openghg_objectstore_irods_irodsdatasource_new_generation",
       "weight": 1.0
     },
@@ -8228,7 +8228,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsdatasource_stage_version",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L179",
+      "source_location": "L180",
       "target": "openghg_objectstore_irods_irodsdatasource_mapping_6f83d4",
       "weight": 1.0
     },
@@ -8239,7 +8239,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsdatasource_stage_version",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L179",
+      "source_location": "L180",
       "target": "openghg_objectstore_irods_storage_irodskvstore",
       "weight": 1.0
     },
@@ -8250,7 +8250,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsdatasource_update_attributes",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L270",
+      "source_location": "L271",
       "target": "openghg_objectstore_irods_irodsdatasource_check_current",
       "weight": 1.0
     },
@@ -8261,7 +8261,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsdatasource_update_attributes",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L274",
+      "source_location": "L275",
       "target": "openghg_objectstore_irods_irodsdatasource_stage_version",
       "weight": 1.0
     },
@@ -8272,7 +8272,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsdatasource_write_state",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L281",
+      "source_location": "L282",
       "target": "openghg_objectstore_irods_irodsdatasource_check_current",
       "weight": 1.0
     },
@@ -8283,7 +8283,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsdatasource_write_state",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L296",
+      "source_location": "L297",
       "target": "openghg_objectstore_irods_irodsdatasource_mapping_6f83d4",
       "weight": 1.0
     },
@@ -8294,7 +8294,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsdatasource_write_state",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L296",
+      "source_location": "L297",
       "target": "openghg_objectstore_irods_storage_irodskvstore",
       "weight": 1.0
     },
@@ -8305,7 +8305,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsobjectstore_create",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L496",
+      "source_location": "L498",
       "target": "openghg_objectstore_irods_irodsobjectstore_require_write",
       "weight": 1.0
     },
@@ -8316,7 +8316,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsobjectstore_delete",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L545",
+      "source_location": "L547",
       "target": "openghg_objectstore_irods_irodsobjectstore_require_write",
       "weight": 1.0
     },
@@ -8327,7 +8327,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsobjectstore_init",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L385",
+      "source_location": "L386",
       "target": "openghg_objectstore_irods_sessions",
       "weight": 1.0
     },
@@ -8338,7 +8338,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsobjectstore_init",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L390",
+      "source_location": "L391",
       "target": "openghg_objectstore_irods_py_path",
       "weight": 1.0
     },
@@ -8349,7 +8349,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsobjectstore_init",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L417",
+      "source_location": "L418",
       "target": "openghg_objectstore_irods_documents",
       "weight": 1.0
     },
@@ -8360,7 +8360,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsobjectstore_replicate",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L557",
+      "source_location": "L559",
       "target": "openghg_objectstore_irods_irodsobjectstore_require_write",
       "weight": 1.0
     },
@@ -8371,7 +8371,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsobjectstore_update",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L524",
+      "source_location": "L526",
       "target": "openghg_objectstore_irods_irodsobjectstore_require_write",
       "weight": 1.0
     },
@@ -19679,7 +19679,7 @@
       "relation": "calls",
       "source": "tests_objectstore_test_irods_backend_test_borrowed_session_is_not_closed",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L211",
+      "source_location": "L254",
       "target": "openghg_objectstore_irods_irodsobjectstore",
       "weight": 1.0
     },
@@ -19690,7 +19690,7 @@
       "relation": "calls",
       "source": "tests_objectstore_test_irods_backend_test_context_reentry_catalog_state_and_deferred_lazy_reads",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L71",
+      "source_location": "L73",
       "target": "tests_objectstore_test_irods_backend_dataset",
       "weight": 1.0
     },
@@ -19701,7 +19701,7 @@
       "relation": "calls",
       "source": "tests_objectstore_test_irods_backend_test_context_reentry_catalog_state_and_deferred_lazy_reads",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L75",
+      "source_location": "L77",
       "target": "openghg_objectstore_irods_storage_read_document",
       "weight": 1.0
     },
@@ -19710,62 +19710,7 @@
       "confidence": "EXTRACTED",
       "context": "call",
       "relation": "calls",
-      "source": "tests_objectstore_test_irods_backend_test_escaped_writable_datasource_cannot_mutate_without_lock",
-      "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L173",
-      "target": "tests_objectstore_test_irods_backend_dataset",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "context": "call",
-      "relation": "calls",
-      "source": "tests_objectstore_test_irods_backend_test_exclusive_lock_nested_context_and_exception_cleanup",
-      "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L150",
-      "target": "openghg_objectstore_irods_irodsobjectstore",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "context": "call",
-      "relation": "calls",
-      "source": "tests_objectstore_test_irods_backend_test_factory_reads_without_cache_by_default",
-      "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L57",
-      "target": "tests_objectstore_test_irods_backend_dataset",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "context": "call",
-      "relation": "calls",
-      "source": "tests_objectstore_test_irods_backend_test_factory_reads_without_cache_by_default",
-      "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L59",
-      "target": "openghg_objectstore_irods_irods_object_store",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "context": "call",
-      "relation": "calls",
-      "source": "tests_objectstore_test_irods_backend_test_failed_datasource_state_write_does_not_publish_a_searchable_record",
-      "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L250",
-      "target": "tests_objectstore_test_irods_backend_dataset",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "context": "call",
-      "relation": "calls",
-      "source": "tests_objectstore_test_irods_backend_test_native_readonly_access_does_not_change_remote_state",
+      "source": "tests_objectstore_test_irods_backend_test_dataset_close_does_not_close_writer_or_sibling_reader",
       "source_file": "tests/objectstore/test_irods_backend.py",
       "source_location": "L125",
       "target": "tests_objectstore_test_irods_backend_dataset",
@@ -19776,9 +19721,86 @@
       "confidence": "EXTRACTED",
       "context": "call",
       "relation": "calls",
+      "source": "tests_objectstore_test_irods_backend_test_escaped_writable_datasource_cannot_mutate_without_lock",
+      "source_file": "tests/objectstore/test_irods_backend.py",
+      "source_location": "L216",
+      "target": "tests_objectstore_test_irods_backend_dataset",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_backend_test_exclusive_lock_nested_context_and_exception_cleanup",
+      "source_file": "tests/objectstore/test_irods_backend.py",
+      "source_location": "L193",
+      "target": "openghg_objectstore_irods_irodsobjectstore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_backend_test_factory_reads_without_cache_by_default",
+      "source_file": "tests/objectstore/test_irods_backend.py",
+      "source_location": "L59",
+      "target": "tests_objectstore_test_irods_backend_dataset",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_backend_test_factory_reads_without_cache_by_default",
+      "source_file": "tests/objectstore/test_irods_backend.py",
+      "source_location": "L61",
+      "target": "openghg_objectstore_irods_irods_object_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_backend_test_failed_datasource_state_write_does_not_publish_a_searchable_record",
+      "source_file": "tests/objectstore/test_irods_backend.py",
+      "source_location": "L293",
+      "target": "tests_objectstore_test_irods_backend_dataset",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_backend_test_inflight_lazy_read_owns_session_when_writer_context_closes",
+      "source_file": "tests/objectstore/test_irods_backend.py",
+      "source_location": "L99",
+      "target": "tests_objectstore_test_irods_backend_dataset",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
       "source": "tests_objectstore_test_irods_backend_test_native_readonly_access_does_not_change_remote_state",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L126",
+      "source_location": "L168",
+      "target": "tests_objectstore_test_irods_backend_dataset",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_objectstore_test_irods_backend_test_native_readonly_access_does_not_change_remote_state",
+      "source_file": "tests/objectstore/test_irods_backend.py",
+      "source_location": "L169",
       "target": "openghg_objectstore_irods_irodsobjectstore",
       "weight": 1.0
     },
@@ -19789,7 +19811,7 @@
       "relation": "calls",
       "source": "tests_objectstore_test_irods_backend_test_version_overlap_attribute_edit_and_delete_parity",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L96",
+      "source_location": "L139",
       "target": "tests_objectstore_test_irods_backend_dataset",
       "weight": 1.0
     },
@@ -24002,6 +24024,17 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_test_datasource_persistence_hooks_reuse_versioning",
       "source_file": "tests/store/test_datasource.py",
+      "source_location": "L744",
+      "target": "openghg_storage_zarr_compat_make_memory_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_store_test_datasource_test_datasource_persistence_hooks_reuse_versioning",
+      "source_file": "tests/store/test_datasource.py",
       "source_location": "L746",
       "target": "openghg_storage_zarr_store_versionedzarrstore",
       "weight": 1.0
@@ -27478,7 +27511,7 @@
       "relation": "references",
       "source": "tests_objectstore_test_irods_backend_backend",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L21",
+      "source_location": "L23",
       "target": "tests_objectstore_test_irods_backend_py_fixture",
       "weight": 1.0
     },
@@ -27489,7 +27522,7 @@
       "relation": "references",
       "source": "tests_objectstore_test_irods_backend_test_escaped_writable_datasource_cannot_mutate_without_lock",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L170",
+      "source_location": "L213",
       "target": "tests_objectstore_test_irods_backend_py_parametrize",
       "weight": 1.0
     },
@@ -31284,7 +31317,7 @@
       "relation": "references",
       "source": "openghg_objectstore_irods_documents_read",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L72",
+      "source_location": "L73",
       "target": "openghg_objectstore_irods_py_any",
       "weight": 1.0
     },
@@ -31295,7 +31328,7 @@
       "relation": "references",
       "source": "openghg_objectstore_irods_documents_read_be4100",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L61",
+      "source_location": "L62",
       "target": "openghg_objectstore_irods_py_any",
       "weight": 1.0
     },
@@ -31306,7 +31339,7 @@
       "relation": "references",
       "source": "openghg_objectstore_irods_documents_write",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L77",
+      "source_location": "L78",
       "target": "openghg_objectstore_irods_py_any",
       "weight": 1.0
     },
@@ -31317,7 +31350,7 @@
       "relation": "references",
       "source": "openghg_objectstore_irods_irodsdatasource_create_store",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L162",
+      "source_location": "L163",
       "target": "openghg_objectstore_irods_storage_irodskvstore",
       "weight": 1.0
     },
@@ -31328,7 +31361,7 @@
       "relation": "references",
       "source": "openghg_objectstore_irods_irodsdatasource_init",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L113",
+      "source_location": "L114",
       "target": "openghg_objectstore_irods_py_any",
       "weight": 1.0
     },
@@ -31339,7 +31372,7 @@
       "relation": "references",
       "source": "openghg_objectstore_irods_irodsobjectstore_create",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L494",
+      "source_location": "L496",
       "target": "openghg_objectstore_irods_py_any",
       "weight": 1.0
     },
@@ -31350,7 +31383,7 @@
       "relation": "references",
       "source": "openghg_objectstore_irods_irodsobjectstore_update",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L510",
+      "source_location": "L512",
       "target": "openghg_objectstore_irods_py_any",
       "weight": 1.0
     },
@@ -31460,7 +31493,7 @@
       "relation": "references",
       "source": "openghg_objectstore_irods_sessions_call",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L44",
+      "source_location": "L45",
       "target": "openghg_objectstore_irods_py_any",
       "weight": 1.0
     },
@@ -34122,7 +34155,7 @@
       "relation": "imports",
       "source": "openghg_objectstore_irods",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L522",
+      "source_location": "L524",
       "target": "openghg_objectstore_objectstore_memory_metastore",
       "weight": 1.0
     },
@@ -42163,73 +42196,7 @@
       "relation": "imports",
       "source": "tests_objectstore_test_irods_backend",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L14",
-      "target": "tests_objectstore_test_irods_storage_remote",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_objectstore_test_irods_backend",
-      "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L16",
-      "target": "openghg_objectstore_irods_irods_object_store",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_objectstore_test_irods_backend",
-      "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L16",
-      "target": "openghg_objectstore_irods_irodsobjectstore",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_objectstore_test_irods_backend",
-      "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L17",
-      "target": "openghg_objectstore_irods_storage_read_document",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_objectstore_test_irods_backend",
-      "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L6",
-      "target": "numpy",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_objectstore_test_irods_backend",
-      "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L7",
-      "target": "pandas",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_objectstore_test_irods_backend",
-      "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L8",
+      "source_location": "L10",
       "target": "pytest",
       "weight": 1.0
     },
@@ -42240,8 +42207,74 @@
       "relation": "imports",
       "source": "tests_objectstore_test_irods_backend",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L9",
+      "source_location": "L11",
       "target": "xarray",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_objectstore_test_irods_backend",
+      "source_file": "tests/objectstore/test_irods_backend.py",
+      "source_location": "L16",
+      "target": "tests_objectstore_test_irods_storage_remote",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_objectstore_test_irods_backend",
+      "source_file": "tests/objectstore/test_irods_backend.py",
+      "source_location": "L18",
+      "target": "openghg_objectstore_irods_irods_object_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_objectstore_test_irods_backend",
+      "source_file": "tests/objectstore/test_irods_backend.py",
+      "source_location": "L18",
+      "target": "openghg_objectstore_irods_irodsobjectstore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_objectstore_test_irods_backend",
+      "source_file": "tests/objectstore/test_irods_backend.py",
+      "source_location": "L19",
+      "target": "openghg_objectstore_irods_storage_read_document",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_objectstore_test_irods_backend",
+      "source_file": "tests/objectstore/test_irods_backend.py",
+      "source_location": "L8",
+      "target": "numpy",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_objectstore_test_irods_backend",
+      "source_file": "tests/objectstore/test_irods_backend.py",
+      "source_location": "L9",
+      "target": "pandas",
       "weight": 1.0
     },
     {
@@ -45762,6 +45795,17 @@
       "source_file": "tests/store/test_datasource.py",
       "source_location": "L7",
       "target": "tests_helpers_helpers_get_surface_datapath",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_store_test_datasource",
+      "source_file": "tests/store/test_datasource.py",
+      "source_location": "L730",
+      "target": "openghg_storage_zarr_compat_make_memory_store",
       "weight": 1.0
     },
     {
@@ -55847,7 +55891,7 @@
       "relation": "imports_from",
       "source": "tests_objectstore_test_irods_backend",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L12",
+      "source_location": "L14",
       "target": "irods_exception",
       "weight": 1.0
     },
@@ -55858,7 +55902,7 @@
       "relation": "imports_from",
       "source": "tests_objectstore_test_irods_backend",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L14",
+      "source_location": "L16",
       "target": "test_irods_storage",
       "weight": 1.0
     },
@@ -55869,7 +55913,7 @@
       "relation": "imports_from",
       "source": "tests_objectstore_test_irods_backend",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L16",
+      "source_location": "L18",
       "target": "openghg_objectstore_irods",
       "weight": 1.0
     },
@@ -55880,7 +55924,7 @@
       "relation": "imports_from",
       "source": "tests_objectstore_test_irods_backend",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L17",
+      "source_location": "L19",
       "target": "openghg_objectstore_irods_storage",
       "weight": 1.0
     },
@@ -55891,7 +55935,7 @@
       "relation": "imports_from",
       "source": "tests_objectstore_test_irods_backend",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L18",
+      "source_location": "L20",
       "target": "openghg_types",
       "weight": 1.0
     },
@@ -55914,7 +55958,29 @@
       "source": "tests_objectstore_test_irods_backend",
       "source_file": "tests/objectstore/test_irods_backend.py",
       "source_location": "L4",
+      "target": "concurrent_futures",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods_backend",
+      "source_file": "tests/objectstore/test_irods_backend.py",
+      "source_location": "L5",
       "target": "copy",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_objectstore_test_irods_backend",
+      "source_file": "tests/objectstore/test_irods_backend.py",
+      "source_location": "L6",
+      "target": "threading",
       "weight": 1.0
     },
     {
@@ -61017,7 +61083,7 @@
       "relation": "references",
       "source": "openghg_objectstore_irods_documents_init",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L53",
+      "source_location": "L54",
       "target": "openghg_objectstore_irods_irodsobjectstore",
       "weight": 1.0
     },
@@ -61028,7 +61094,7 @@
       "relation": "references",
       "source": "openghg_objectstore_irods_irods_object_store",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L586",
+      "source_location": "L588",
       "target": "openghg_objectstore_irods_py_any",
       "weight": 1.0
     },
@@ -61039,7 +61105,7 @@
       "relation": "references",
       "source": "openghg_objectstore_irods_irods_object_store",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L586",
+      "source_location": "L588",
       "target": "openghg_objectstore_irods_py_path",
       "weight": 1.0
     },
@@ -61050,7 +61116,7 @@
       "relation": "references",
       "source": "openghg_objectstore_irods_irodsdatasource_add",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L198",
+      "source_location": "L199",
       "target": "openghg_objectstore_irods_py_any",
       "weight": 1.0
     },
@@ -61061,7 +61127,7 @@
       "relation": "references",
       "source": "openghg_objectstore_irods_irodsdatasource_add",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L198",
+      "source_location": "L199",
       "target": "openghg_objectstore_irods_py_dataset",
       "weight": 1.0
     },
@@ -61072,7 +61138,7 @@
       "relation": "references",
       "source": "openghg_objectstore_irods_irodsdatasource_add_data",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L206",
+      "source_location": "L207",
       "target": "openghg_objectstore_irods_py_any",
       "weight": 1.0
     },
@@ -61083,7 +61149,7 @@
       "relation": "references",
       "source": "openghg_objectstore_irods_irodsdatasource_add_data",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L206",
+      "source_location": "L207",
       "target": "openghg_objectstore_irods_py_dataset",
       "weight": 1.0
     },
@@ -61094,7 +61160,7 @@
       "relation": "references",
       "source": "openghg_objectstore_irods_irodsdatasource_add_timed_data",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L239",
+      "source_location": "L240",
       "target": "openghg_objectstore_irods_py_any",
       "weight": 1.0
     },
@@ -61105,7 +61171,7 @@
       "relation": "references",
       "source": "openghg_objectstore_irods_irodsdatasource_add_timed_data",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L239",
+      "source_location": "L240",
       "target": "openghg_objectstore_irods_py_dataset",
       "weight": 1.0
     },
@@ -61116,7 +61182,7 @@
       "relation": "references",
       "source": "openghg_objectstore_irods_irodsdatasource_init",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L113",
+      "source_location": "L114",
       "target": "openghg_objectstore_irods_irodsobjectstore",
       "weight": 1.0
     },
@@ -61127,7 +61193,7 @@
       "relation": "references",
       "source": "openghg_objectstore_irods_irodsdatasource_load",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L191",
+      "source_location": "L192",
       "target": "openghg_objectstore_irods_irodsobjectstore",
       "weight": 1.0
     },
@@ -61138,7 +61204,7 @@
       "relation": "references",
       "source": "openghg_objectstore_irods_irodsdatasource_load",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L191",
+      "source_location": "L192",
       "target": "openghg_objectstore_irods_py_any",
       "weight": 1.0
     },
@@ -61149,7 +61215,7 @@
       "relation": "references",
       "source": "openghg_objectstore_irods_irodsobjectstore_create",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L494",
+      "source_location": "L496",
       "target": "openghg_objectstore_irods_py_dataset",
       "weight": 1.0
     },
@@ -61160,7 +61226,7 @@
       "relation": "references",
       "source": "openghg_objectstore_irods_irodsobjectstore_init",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L362",
+      "source_location": "L363",
       "target": "openghg_objectstore_irods_py_any",
       "weight": 1.0
     },
@@ -61171,7 +61237,7 @@
       "relation": "references",
       "source": "openghg_objectstore_irods_irodsobjectstore_init",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L362",
+      "source_location": "L363",
       "target": "openghg_objectstore_irods_py_path",
       "weight": 1.0
     },
@@ -61182,7 +61248,7 @@
       "relation": "references",
       "source": "openghg_objectstore_irods_irodsobjectstore_init",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L362",
+      "source_location": "L363",
       "target": "openghg_objectstore_irods_py_sessionfactory",
       "weight": 1.0
     },
@@ -61193,7 +61259,7 @@
       "relation": "references",
       "source": "openghg_objectstore_irods_irodsobjectstore_update",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L510",
+      "source_location": "L512",
       "target": "openghg_objectstore_irods_py_dataset",
       "weight": 1.0
     },
@@ -67331,7 +67397,7 @@
       "relation": "references",
       "source": "openghg_objectstore_irods_irods_object_store",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L586",
+      "source_location": "L588",
       "target": "openghg_objectstore_irods_irodsobjectstore",
       "weight": 1.0
     },
@@ -67342,7 +67408,7 @@
       "relation": "references",
       "source": "openghg_objectstore_irods_irodsdatasource_create_store",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L162",
+      "source_location": "L163",
       "target": "openghg_storage_zarr_store_versionedzarrstore",
       "weight": 1.0
     },
@@ -67353,7 +67419,7 @@
       "relation": "references",
       "source": "openghg_objectstore_irods_irodsdatasource_load",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L191",
+      "source_location": "L192",
       "target": "openghg_objectstore_irods_py_self",
       "weight": 1.0
     },
@@ -67364,7 +67430,7 @@
       "relation": "references",
       "source": "openghg_objectstore_irods_irodsdatasource_mapping",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L184",
+      "source_location": "L185",
       "target": "openghg_objectstore_irods_storage_irodszarrmapping",
       "weight": 1.0
     },
@@ -67375,7 +67441,7 @@
       "relation": "references",
       "source": "openghg_objectstore_irods_irodsdatasource_mapping_6f83d4",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L141",
+      "source_location": "L142",
       "target": "openghg_objectstore_irods_storage_irodszarrmapping",
       "weight": 1.0
     },
@@ -67386,7 +67452,7 @@
       "relation": "references",
       "source": "openghg_objectstore_irods_irodsobjectstore_enter",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L420",
+      "source_location": "L421",
       "target": "openghg_objectstore_irods_py_self",
       "weight": 1.0
     },
@@ -69146,7 +69212,7 @@
       "relation": "imports_from",
       "source": "tests_objectstore_test_irods_backend",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L238",
+      "source_location": "L281",
       "target": "openghg_objectstore_irods_metastore",
       "weight": 1.0
     },
@@ -70407,7 +70473,7 @@
       "relation": "contains",
       "source": "openghg_objectstore_irods",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L340",
+      "source_location": "L341",
       "target": "openghg_objectstore_irods_irodsobjectstore",
       "weight": 1.0
     },
@@ -70427,7 +70493,7 @@
       "relation": "contains",
       "source": "openghg_objectstore_irods",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L52",
+      "source_location": "L53",
       "target": "openghg_objectstore_irods_documents",
       "weight": 1.0
     },
@@ -70437,7 +70503,7 @@
       "relation": "contains",
       "source": "openghg_objectstore_irods",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L586",
+      "source_location": "L588",
       "target": "openghg_objectstore_irods_irods_object_store",
       "weight": 1.0
     },
@@ -70447,7 +70513,7 @@
       "relation": "contains",
       "source": "openghg_objectstore_irods",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L96",
+      "source_location": "L97",
       "target": "openghg_objectstore_irods_irodsdatasource",
       "weight": 1.0
     },
@@ -79737,7 +79803,27 @@
       "relation": "contains",
       "source": "tests_objectstore_test_irods_backend",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L123",
+      "source_location": "L124",
+      "target": "tests_objectstore_test_irods_backend_test_dataset_close_does_not_close_writer_or_sibling_reader",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods_backend",
+      "source_file": "tests/objectstore/test_irods_backend.py",
+      "source_location": "L138",
+      "target": "tests_objectstore_test_irods_backend_test_version_overlap_attribute_edit_and_delete_parity",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods_backend",
+      "source_file": "tests/objectstore/test_irods_backend.py",
+      "source_location": "L166",
       "target": "tests_objectstore_test_irods_backend_test_native_readonly_access_does_not_change_remote_state",
       "weight": 1.0
     },
@@ -79747,7 +79833,7 @@
       "relation": "contains",
       "source": "tests_objectstore_test_irods_backend",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L149",
+      "source_location": "L192",
       "target": "tests_objectstore_test_irods_backend_test_exclusive_lock_nested_context_and_exception_cleanup",
       "weight": 1.0
     },
@@ -79757,7 +79843,7 @@
       "relation": "contains",
       "source": "tests_objectstore_test_irods_backend",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L171",
+      "source_location": "L214",
       "target": "tests_objectstore_test_irods_backend_test_escaped_writable_datasource_cannot_mutate_without_lock",
       "weight": 1.0
     },
@@ -79767,7 +79853,7 @@
       "relation": "contains",
       "source": "tests_objectstore_test_irods_backend",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L189",
+      "source_location": "L232",
       "target": "tests_objectstore_test_irods_backend_test_failed_lock_release_closes_connection_and_disallows_writes",
       "weight": 1.0
     },
@@ -79777,27 +79863,7 @@
       "relation": "contains",
       "source": "tests_objectstore_test_irods_backend",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L209",
-      "target": "tests_objectstore_test_irods_backend_test_borrowed_session_is_not_closed",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "relation": "contains",
-      "source": "tests_objectstore_test_irods_backend",
-      "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L217",
-      "target": "tests_objectstore_test_irods_backend_test_session_cleanup_failure_discards_context_before_deferred_reads",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "relation": "contains",
-      "source": "tests_objectstore_test_irods_backend",
-      "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L22",
+      "source_location": "L24",
       "target": "tests_objectstore_test_irods_backend_backend",
       "weight": 1.0
     },
@@ -79807,7 +79873,27 @@
       "relation": "contains",
       "source": "tests_objectstore_test_irods_backend",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L237",
+      "source_location": "L252",
+      "target": "tests_objectstore_test_irods_backend_test_borrowed_session_is_not_closed",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods_backend",
+      "source_file": "tests/objectstore/test_irods_backend.py",
+      "source_location": "L260",
+      "target": "tests_objectstore_test_irods_backend_test_session_cleanup_failure_discards_context_before_deferred_reads",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_objectstore_test_irods_backend",
+      "source_file": "tests/objectstore/test_irods_backend.py",
+      "source_location": "L280",
       "target": "tests_objectstore_test_irods_backend_test_failed_datasource_state_write_does_not_publish_a_searchable_record",
       "weight": 1.0
     },
@@ -79817,7 +79903,7 @@
       "relation": "contains",
       "source": "tests_objectstore_test_irods_backend",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L48",
+      "source_location": "L50",
       "target": "tests_objectstore_test_irods_backend_dataset",
       "weight": 1.0
     },
@@ -79827,7 +79913,7 @@
       "relation": "contains",
       "source": "tests_objectstore_test_irods_backend",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L56",
+      "source_location": "L58",
       "target": "tests_objectstore_test_irods_backend_test_factory_reads_without_cache_by_default",
       "weight": 1.0
     },
@@ -79837,7 +79923,7 @@
       "relation": "contains",
       "source": "tests_objectstore_test_irods_backend",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L70",
+      "source_location": "L72",
       "target": "tests_objectstore_test_irods_backend_test_context_reentry_catalog_state_and_deferred_lazy_reads",
       "weight": 1.0
     },
@@ -79847,8 +79933,8 @@
       "relation": "contains",
       "source": "tests_objectstore_test_irods_backend",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L95",
-      "target": "tests_objectstore_test_irods_backend_test_version_overlap_attribute_edit_and_delete_parity",
+      "source_location": "L97",
+      "target": "tests_objectstore_test_irods_backend_test_inflight_lazy_read_owns_session_when_writer_context_closes",
       "weight": 1.0
     },
     {
@@ -87797,7 +87883,7 @@
       "relation": "inherits",
       "source": "openghg_objectstore_irods_irodsdatasource",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L96",
+      "source_location": "L97",
       "target": "openghg_objectstore_legacy_datasource_datasource",
       "weight": 1.0
     },
@@ -89617,7 +89703,7 @@
       "relation": "method",
       "source": "openghg_objectstore_irods_documents",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L53",
+      "source_location": "L54",
       "target": "openghg_objectstore_irods_documents_init",
       "weight": 1.0
     },
@@ -89627,7 +89713,7 @@
       "relation": "method",
       "source": "openghg_objectstore_irods_documents",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L58",
+      "source_location": "L59",
       "target": "openghg_objectstore_irods_documents_key",
       "weight": 1.0
     },
@@ -89637,7 +89723,7 @@
       "relation": "method",
       "source": "openghg_objectstore_irods_documents",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L61",
+      "source_location": "L62",
       "target": "openghg_objectstore_irods_documents_read_be4100",
       "weight": 1.0
     },
@@ -89647,7 +89733,7 @@
       "relation": "method",
       "source": "openghg_objectstore_irods_documents",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L72",
+      "source_location": "L73",
       "target": "openghg_objectstore_irods_documents_read",
       "weight": 1.0
     },
@@ -89657,7 +89743,7 @@
       "relation": "method",
       "source": "openghg_objectstore_irods_documents",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L77",
+      "source_location": "L78",
       "target": "openghg_objectstore_irods_documents_write",
       "weight": 1.0
     },
@@ -89667,7 +89753,7 @@
       "relation": "method",
       "source": "openghg_objectstore_irods_irodsdatasource",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L113",
+      "source_location": "L114",
       "target": "openghg_objectstore_irods_irodsdatasource_init",
       "weight": 1.0
     },
@@ -89677,7 +89763,7 @@
       "relation": "method",
       "source": "openghg_objectstore_irods_irodsdatasource",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L129",
+      "source_location": "L130",
       "target": "openghg_objectstore_irods_irodsdatasource_revision",
       "weight": 1.0
     },
@@ -89687,7 +89773,7 @@
       "relation": "method",
       "source": "openghg_objectstore_irods_irodsdatasource",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L133",
+      "source_location": "L134",
       "target": "openghg_objectstore_irods_irodsdatasource_check_current",
       "weight": 1.0
     },
@@ -89697,7 +89783,7 @@
       "relation": "method",
       "source": "openghg_objectstore_irods_irodsdatasource",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L141",
+      "source_location": "L142",
       "target": "openghg_objectstore_irods_irodsdatasource_mapping_6f83d4",
       "weight": 1.0
     },
@@ -89707,7 +89793,7 @@
       "relation": "method",
       "source": "openghg_objectstore_irods_irodsdatasource",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L156",
+      "source_location": "L157",
       "target": "openghg_objectstore_irods_irodsdatasource_new_generation",
       "weight": 1.0
     },
@@ -89717,7 +89803,7 @@
       "relation": "method",
       "source": "openghg_objectstore_irods_irodsdatasource",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L162",
+      "source_location": "L163",
       "target": "openghg_objectstore_irods_irodsdatasource_create_store",
       "weight": 1.0
     },
@@ -89727,7 +89813,7 @@
       "relation": "method",
       "source": "openghg_objectstore_irods_irodsdatasource",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L172",
+      "source_location": "L173",
       "target": "openghg_objectstore_irods_irodsdatasource_stage_version",
       "weight": 1.0
     },
@@ -89737,7 +89823,7 @@
       "relation": "method",
       "source": "openghg_objectstore_irods_irodsdatasource",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L184",
+      "source_location": "L185",
       "target": "openghg_objectstore_irods_irodsdatasource_mapping",
       "weight": 1.0
     },
@@ -89747,7 +89833,7 @@
       "relation": "method",
       "source": "openghg_objectstore_irods_irodsdatasource",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L191",
+      "source_location": "L192",
       "target": "openghg_objectstore_irods_irodsdatasource_load",
       "weight": 1.0
     },
@@ -89757,7 +89843,7 @@
       "relation": "method",
       "source": "openghg_objectstore_irods_irodsdatasource",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L198",
+      "source_location": "L199",
       "target": "openghg_objectstore_irods_irodsdatasource_add",
       "weight": 1.0
     },
@@ -89767,7 +89853,7 @@
       "relation": "method",
       "source": "openghg_objectstore_irods_irodsdatasource",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L206",
+      "source_location": "L207",
       "target": "openghg_objectstore_irods_irodsdatasource_add_data",
       "weight": 1.0
     },
@@ -89777,7 +89863,7 @@
       "relation": "method",
       "source": "openghg_objectstore_irods_irodsdatasource",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L239",
+      "source_location": "L240",
       "target": "openghg_objectstore_irods_irodsdatasource_add_timed_data",
       "weight": 1.0
     },
@@ -89787,7 +89873,7 @@
       "relation": "method",
       "source": "openghg_objectstore_irods_irodsdatasource",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L261",
+      "source_location": "L262",
       "target": "openghg_objectstore_irods_irodsdatasource_update_attributes",
       "weight": 1.0
     },
@@ -89797,7 +89883,7 @@
       "relation": "method",
       "source": "openghg_objectstore_irods_irodsdatasource",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L280",
+      "source_location": "L281",
       "target": "openghg_objectstore_irods_irodsdatasource_write_state",
       "weight": 1.0
     },
@@ -89807,7 +89893,7 @@
       "relation": "method",
       "source": "openghg_objectstore_irods_irodsdatasource",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L298",
+      "source_location": "L299",
       "target": "openghg_objectstore_irods_irodsdatasource_delete_version",
       "weight": 1.0
     },
@@ -89817,7 +89903,7 @@
       "relation": "method",
       "source": "openghg_objectstore_irods_irodsdatasource",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L328",
+      "source_location": "L329",
       "target": "openghg_objectstore_irods_irodsdatasource_delete_all_data",
       "weight": 1.0
     },
@@ -89827,7 +89913,7 @@
       "relation": "method",
       "source": "openghg_objectstore_irods_irodsdatasource",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L334",
+      "source_location": "L335",
       "target": "openghg_objectstore_irods_irodsdatasource_delete",
       "weight": 1.0
     },
@@ -89837,7 +89923,7 @@
       "relation": "method",
       "source": "openghg_objectstore_irods_irodsobjectstore",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L362",
+      "source_location": "L363",
       "target": "openghg_objectstore_irods_irodsobjectstore_init",
       "weight": 1.0
     },
@@ -89847,7 +89933,7 @@
       "relation": "method",
       "source": "openghg_objectstore_irods_irodsobjectstore",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L420",
+      "source_location": "L421",
       "target": "openghg_objectstore_irods_irodsobjectstore_enter",
       "weight": 1.0
     },
@@ -89857,7 +89943,7 @@
       "relation": "method",
       "source": "openghg_objectstore_irods_irodsobjectstore",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L459",
+      "source_location": "L461",
       "target": "openghg_objectstore_irods_irodsobjectstore_close",
       "weight": 1.0
     },
@@ -89867,7 +89953,7 @@
       "relation": "method",
       "source": "openghg_objectstore_irods_irodsobjectstore",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L486",
+      "source_location": "L488",
       "target": "openghg_objectstore_irods_irodsobjectstore_require_write",
       "weight": 1.0
     },
@@ -89877,7 +89963,7 @@
       "relation": "method",
       "source": "openghg_objectstore_irods_irodsobjectstore",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L494",
+      "source_location": "L496",
       "target": "openghg_objectstore_irods_irodsobjectstore_create",
       "weight": 1.0
     },
@@ -89887,7 +89973,7 @@
       "relation": "method",
       "source": "openghg_objectstore_irods_irodsobjectstore",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L510",
+      "source_location": "L512",
       "target": "openghg_objectstore_irods_irodsobjectstore_update",
       "weight": 1.0
     },
@@ -89897,7 +89983,7 @@
       "relation": "method",
       "source": "openghg_objectstore_irods_irodsobjectstore",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L543",
+      "source_location": "L545",
       "target": "openghg_objectstore_irods_irodsobjectstore_delete",
       "weight": 1.0
     },
@@ -89907,7 +89993,7 @@
       "relation": "method",
       "source": "openghg_objectstore_irods_irodsobjectstore",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L553",
+      "source_location": "L555",
       "target": "openghg_objectstore_irods_irodsobjectstore_replicate",
       "weight": 1.0
     },
@@ -90047,7 +90133,7 @@
       "relation": "method",
       "source": "openghg_objectstore_irods_sessions",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L44",
+      "source_location": "L45",
       "target": "openghg_objectstore_irods_sessions_call",
       "weight": 1.0
     },
@@ -95395,9 +95481,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_objectstore_irods_rationale_130",
+      "source": "openghg_objectstore_irods_rationale_131",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L130",
+      "source_location": "L131",
       "target": "openghg_objectstore_irods_irodsdatasource_revision",
       "weight": 1.0
     },
@@ -95405,9 +95491,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_objectstore_irods_rationale_185",
+      "source": "openghg_objectstore_irods_rationale_186",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L185",
+      "source_location": "L186",
       "target": "openghg_objectstore_irods_irodsdatasource_mapping",
       "weight": 1.0
     },
@@ -95415,9 +95501,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_objectstore_irods_rationale_192",
+      "source": "openghg_objectstore_irods_rationale_193",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L192",
+      "source_location": "L193",
       "target": "openghg_objectstore_irods_irodsdatasource_load",
       "weight": 1.0
     },
@@ -95425,9 +95511,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_objectstore_irods_rationale_269",
+      "source": "openghg_objectstore_irods_rationale_270",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L269",
+      "source_location": "L270",
       "target": "openghg_objectstore_irods_irodsdatasource_update_attributes",
       "weight": 1.0
     },
@@ -95435,9 +95521,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_objectstore_irods_rationale_299",
+      "source": "openghg_objectstore_irods_rationale_300",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L299",
+      "source_location": "L300",
       "target": "openghg_objectstore_irods_irodsdatasource_delete_version",
       "weight": 1.0
     },
@@ -95445,9 +95531,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_objectstore_irods_rationale_329",
+      "source": "openghg_objectstore_irods_rationale_330",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L329",
+      "source_location": "L330",
       "target": "openghg_objectstore_irods_irodsdatasource_delete_all_data",
       "weight": 1.0
     },
@@ -95455,9 +95541,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_objectstore_irods_rationale_335",
+      "source": "openghg_objectstore_irods_rationale_336",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L335",
+      "source_location": "L336",
       "target": "openghg_objectstore_irods_irodsdatasource_delete",
       "weight": 1.0
     },
@@ -95465,9 +95551,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_objectstore_irods_rationale_341",
+      "source": "openghg_objectstore_irods_rationale_342",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L341",
+      "source_location": "L342",
       "target": "openghg_objectstore_irods_irodsobjectstore",
       "weight": 1.0
     },
@@ -95485,9 +95571,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_objectstore_irods_rationale_460",
+      "source": "openghg_objectstore_irods_rationale_462",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L460",
+      "source_location": "L462",
       "target": "openghg_objectstore_irods_irodsobjectstore_close",
       "weight": 1.0
     },
@@ -95495,9 +95581,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_objectstore_irods_rationale_495",
+      "source": "openghg_objectstore_irods_rationale_497",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L495",
+      "source_location": "L497",
       "target": "openghg_objectstore_irods_irodsobjectstore_create",
       "weight": 1.0
     },
@@ -95505,9 +95591,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_objectstore_irods_rationale_521",
+      "source": "openghg_objectstore_irods_rationale_523",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L521",
+      "source_location": "L523",
       "target": "openghg_objectstore_irods_irodsobjectstore_update",
       "weight": 1.0
     },
@@ -95515,9 +95601,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_objectstore_irods_rationale_544",
+      "source": "openghg_objectstore_irods_rationale_546",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L544",
+      "source_location": "L546",
       "target": "openghg_objectstore_irods_irodsobjectstore_delete",
       "weight": 1.0
     },
@@ -95525,9 +95611,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_objectstore_irods_rationale_554",
+      "source": "openghg_objectstore_irods_rationale_556",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L554",
+      "source_location": "L556",
       "target": "openghg_objectstore_irods_irodsobjectstore_replicate",
       "weight": 1.0
     },
@@ -95535,9 +95621,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_objectstore_irods_rationale_598",
+      "source": "openghg_objectstore_irods_rationale_600",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L598",
+      "source_location": "L600",
       "target": "openghg_objectstore_irods_irods_object_store",
       "weight": 1.0
     },
@@ -95545,9 +95631,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_objectstore_irods_rationale_97",
+      "source": "openghg_objectstore_irods_rationale_98",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L97",
+      "source_location": "L98",
       "target": "openghg_objectstore_irods_irodsdatasource",
       "weight": 1.0
     },
@@ -106275,9 +106361,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_objectstore_test_irods_backend_rationale_23",
+      "source": "tests_objectstore_test_irods_backend_rationale_25",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L23",
+      "source_location": "L25",
       "target": "tests_objectstore_test_irods_backend_backend",
       "weight": 1.0
     },
@@ -111849,7 +111935,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irods_object_store",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L612",
+      "source_location": "L614",
       "target": "importerror",
       "weight": 1.0
     },
@@ -111861,7 +111947,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsdatasource_check_current",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L136",
+      "source_location": "L137",
       "target": "openghg_types_errors_objectstoreerror",
       "weight": 1.0
     },
@@ -111873,7 +111959,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsdatasource_init",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L126",
+      "source_location": "L127",
       "target": "defaultdict",
       "weight": 1.0
     },
@@ -111885,7 +111971,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsdatasource_load",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L195",
+      "source_location": "L196",
       "target": "openghg_types_errors_objectstoreerror",
       "weight": 1.0
     },
@@ -111897,7 +111983,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsobjectstore_close",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L464",
+      "source_location": "L466",
       "target": "openghg_types_errors_objectstoreerror",
       "weight": 1.0
     },
@@ -111909,7 +111995,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsobjectstore_create",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L500",
+      "source_location": "L502",
       "target": "openghg_types_errors_objectstoreerror",
       "weight": 1.0
     },
@@ -111921,7 +112007,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsobjectstore_delete",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L548",
+      "source_location": "L550",
       "target": "openghg_types_errors_objectstoreerror",
       "weight": 1.0
     },
@@ -111933,7 +112019,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsobjectstore_enter",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L424",
+      "source_location": "L425",
       "target": "openghg_types_errors_objectstoreerror",
       "weight": 1.0
     },
@@ -111945,7 +112031,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsobjectstore_replicate",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L574",
+      "source_location": "L576",
       "target": "openghg_types_errors_objectstoreerror",
       "weight": 1.0
     },
@@ -111957,7 +112043,7 @@
       "relation": "calls",
       "source": "openghg_objectstore_irods_irodsobjectstore_require_write",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L490",
+      "source_location": "L492",
       "target": "openghg_types_errors_objectstoreerror",
       "weight": 1.0
     },
@@ -120834,7 +120920,7 @@
       "relation": "uses",
       "source": "openghg_objectstore_irods_documents",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L81",
+      "source_location": "L82",
       "target": "openghg_objectstore_irods_metastore_publicationconflicterror",
       "weight": 0.8
     },
@@ -120845,7 +120931,7 @@
       "relation": "uses",
       "source": "openghg_objectstore_irods_irodsdatasource",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L139",
+      "source_location": "L140",
       "target": "openghg_objectstore_irods_metastore_publicationconflicterror",
       "weight": 0.8
     },
@@ -120856,7 +120942,7 @@
       "relation": "uses",
       "source": "openghg_objectstore_irods_irodsdatasource",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L141",
+      "source_location": "L142",
       "target": "openghg_objectstore_irods_storage_irodszarrmapping",
       "weight": 0.8
     },
@@ -120867,7 +120953,7 @@
       "relation": "uses",
       "source": "openghg_objectstore_irods_irodsdatasource",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L162",
+      "source_location": "L163",
       "target": "openghg_objectstore_irods_storage_irodskvstore",
       "weight": 0.8
     },
@@ -120878,7 +120964,7 @@
       "relation": "uses",
       "source": "openghg_objectstore_irods_irodsdatasource",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L162",
+      "source_location": "L163",
       "target": "openghg_storage_zarr_store_versionedzarrstore",
       "weight": 0.8
     },
@@ -120889,7 +120975,7 @@
       "relation": "uses",
       "source": "openghg_objectstore_irods_irodsdatasource",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L96",
+      "source_location": "L97",
       "target": "openghg_objectstore_legacy_datasource_datasource",
       "weight": 0.8
     },
@@ -120900,7 +120986,7 @@
       "relation": "uses",
       "source": "openghg_objectstore_irods_irodsobjectstore",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L340",
+      "source_location": "L341",
       "target": "openghg_objectstore_objectstore_objectstore",
       "weight": 0.8
     },
@@ -120911,7 +120997,7 @@
       "relation": "uses",
       "source": "openghg_objectstore_irods_irodsobjectstore",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L401",
+      "source_location": "L402",
       "target": "openghg_objectstore_irods_metastore_irodsmetastore",
       "weight": 0.8
     },
@@ -120922,7 +121008,7 @@
       "relation": "uses",
       "source": "openghg_objectstore_irods_irodsobjectstore",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L415",
+      "source_location": "L416",
       "target": "openghg_objectstore_datasource_datasourcefactory",
       "weight": 0.8
     },
@@ -120933,7 +121019,7 @@
       "relation": "uses",
       "source": "openghg_objectstore_irods_irodsobjectstore",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L527",
+      "source_location": "L529",
       "target": "openghg_objectstore_irods_metastore_publicationconflicterror",
       "weight": 0.8
     },
@@ -121307,7 +121393,7 @@
       "relation": "uses",
       "source": "tests_objectstore_test_irods_backend_backend",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L43",
+      "source_location": "L45",
       "target": "openghg_objectstore_irods_irodsobjectstore",
       "weight": 0.8
     },
@@ -121318,7 +121404,7 @@
       "relation": "uses",
       "source": "tests_objectstore_test_irods_backend_test_borrowed_session_is_not_closed",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L211",
+      "source_location": "L254",
       "target": "openghg_objectstore_irods_irodsobjectstore",
       "weight": 0.8
     },
@@ -121329,7 +121415,7 @@
       "relation": "uses",
       "source": "tests_objectstore_test_irods_backend_test_exclusive_lock_nested_context_and_exception_cleanup",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L150",
+      "source_location": "L193",
       "target": "openghg_objectstore_irods_irodsobjectstore",
       "weight": 0.8
     },
@@ -121340,7 +121426,7 @@
       "relation": "uses",
       "source": "tests_objectstore_test_irods_backend_test_native_readonly_access_does_not_change_remote_state",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L126",
+      "source_location": "L169",
       "target": "openghg_objectstore_irods_irodsobjectstore",
       "weight": 0.8
     },
@@ -122043,7 +122129,7 @@
       "id": "openghg_objectstore_irods_documents",
       "label": "_Documents",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L52"
+      "source_location": "L53"
     },
     {
       "_callable": true,
@@ -122053,7 +122139,7 @@
       "id": "openghg_objectstore_irods_irodsdatasource",
       "label": "IRODSDatasource",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L96"
+      "source_location": "L97"
     },
     {
       "_callable": true,
@@ -122063,7 +122149,7 @@
       "id": "openghg_objectstore_irods_irodsobjectstore",
       "label": "IRODSObjectStore",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L340"
+      "source_location": "L341"
     },
     {
       "_callable": true,
@@ -125018,7 +125104,7 @@
       "id": "openghg_objectstore_irods_documents_init",
       "label": ".__init__()",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L53"
+      "source_location": "L54"
     },
     {
       "_callable": true,
@@ -125027,7 +125113,7 @@
       "id": "openghg_objectstore_irods_documents_key",
       "label": "._key()",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L58"
+      "source_location": "L59"
     },
     {
       "_callable": true,
@@ -125036,7 +125122,7 @@
       "id": "openghg_objectstore_irods_documents_read",
       "label": ".read()",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L72"
+      "source_location": "L73"
     },
     {
       "_callable": true,
@@ -125045,7 +125131,7 @@
       "id": "openghg_objectstore_irods_documents_read_be4100",
       "label": "._read()",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L61"
+      "source_location": "L62"
     },
     {
       "_callable": true,
@@ -125054,7 +125140,7 @@
       "id": "openghg_objectstore_irods_documents_write",
       "label": ".write()",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L77"
+      "source_location": "L78"
     },
     {
       "_callable": true,
@@ -125063,7 +125149,7 @@
       "id": "openghg_objectstore_irods_irods_object_store",
       "label": "irods_object_store()",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L586"
+      "source_location": "L588"
     },
     {
       "_callable": true,
@@ -125072,7 +125158,7 @@
       "id": "openghg_objectstore_irods_irodsdatasource_add",
       "label": ".add()",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L198"
+      "source_location": "L199"
     },
     {
       "_callable": true,
@@ -125081,7 +125167,7 @@
       "id": "openghg_objectstore_irods_irodsdatasource_add_data",
       "label": ".add_data()",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L206"
+      "source_location": "L207"
     },
     {
       "_callable": true,
@@ -125090,7 +125176,7 @@
       "id": "openghg_objectstore_irods_irodsdatasource_add_timed_data",
       "label": ".add_timed_data()",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L239"
+      "source_location": "L240"
     },
     {
       "_callable": true,
@@ -125099,7 +125185,7 @@
       "id": "openghg_objectstore_irods_irodsdatasource_check_current",
       "label": "._check_current()",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L133"
+      "source_location": "L134"
     },
     {
       "_callable": true,
@@ -125108,7 +125194,7 @@
       "id": "openghg_objectstore_irods_irodsdatasource_create_store",
       "label": "._create_store()",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L162"
+      "source_location": "L163"
     },
     {
       "_callable": true,
@@ -125117,7 +125203,7 @@
       "id": "openghg_objectstore_irods_irodsdatasource_delete",
       "label": ".delete()",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L334"
+      "source_location": "L335"
     },
     {
       "_callable": true,
@@ -125126,7 +125212,7 @@
       "id": "openghg_objectstore_irods_irodsdatasource_delete_all_data",
       "label": ".delete_all_data()",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L328"
+      "source_location": "L329"
     },
     {
       "_callable": true,
@@ -125135,7 +125221,7 @@
       "id": "openghg_objectstore_irods_irodsdatasource_delete_version",
       "label": ".delete_version()",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L298"
+      "source_location": "L299"
     },
     {
       "_callable": true,
@@ -125144,7 +125230,7 @@
       "id": "openghg_objectstore_irods_irodsdatasource_init",
       "label": ".__init__()",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L113"
+      "source_location": "L114"
     },
     {
       "_callable": true,
@@ -125153,7 +125239,7 @@
       "id": "openghg_objectstore_irods_irodsdatasource_load",
       "label": ".load()",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L191"
+      "source_location": "L192"
     },
     {
       "_callable": true,
@@ -125162,7 +125248,7 @@
       "id": "openghg_objectstore_irods_irodsdatasource_mapping",
       "label": ".mapping()",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L184"
+      "source_location": "L185"
     },
     {
       "_callable": true,
@@ -125171,7 +125257,7 @@
       "id": "openghg_objectstore_irods_irodsdatasource_mapping_6f83d4",
       "label": "._mapping()",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L141"
+      "source_location": "L142"
     },
     {
       "_callable": true,
@@ -125180,7 +125266,7 @@
       "id": "openghg_objectstore_irods_irodsdatasource_new_generation",
       "label": "._new_generation()",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L156"
+      "source_location": "L157"
     },
     {
       "_callable": true,
@@ -125189,7 +125275,7 @@
       "id": "openghg_objectstore_irods_irodsdatasource_revision",
       "label": ".revision()",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L129"
+      "source_location": "L130"
     },
     {
       "_callable": true,
@@ -125198,7 +125284,7 @@
       "id": "openghg_objectstore_irods_irodsdatasource_stage_version",
       "label": "._stage_version()",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L172"
+      "source_location": "L173"
     },
     {
       "_callable": true,
@@ -125207,7 +125293,7 @@
       "id": "openghg_objectstore_irods_irodsdatasource_update_attributes",
       "label": ".update_attributes()",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L261"
+      "source_location": "L262"
     },
     {
       "_callable": true,
@@ -125216,7 +125302,7 @@
       "id": "openghg_objectstore_irods_irodsdatasource_write_state",
       "label": "._write_state()",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L280"
+      "source_location": "L281"
     },
     {
       "_callable": true,
@@ -125225,7 +125311,7 @@
       "id": "openghg_objectstore_irods_irodsobjectstore_close",
       "label": ".close()",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L459"
+      "source_location": "L461"
     },
     {
       "_callable": true,
@@ -125234,7 +125320,7 @@
       "id": "openghg_objectstore_irods_irodsobjectstore_create",
       "label": ".create()",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L494"
+      "source_location": "L496"
     },
     {
       "_callable": true,
@@ -125243,7 +125329,7 @@
       "id": "openghg_objectstore_irods_irodsobjectstore_delete",
       "label": ".delete()",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L543"
+      "source_location": "L545"
     },
     {
       "_callable": true,
@@ -125252,7 +125338,7 @@
       "id": "openghg_objectstore_irods_irodsobjectstore_enter",
       "label": ".__enter__()",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L420"
+      "source_location": "L421"
     },
     {
       "_callable": true,
@@ -125261,7 +125347,7 @@
       "id": "openghg_objectstore_irods_irodsobjectstore_init",
       "label": ".__init__()",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L362"
+      "source_location": "L363"
     },
     {
       "_callable": true,
@@ -125270,7 +125356,7 @@
       "id": "openghg_objectstore_irods_irodsobjectstore_replicate",
       "label": ".replicate()",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L553"
+      "source_location": "L555"
     },
     {
       "_callable": true,
@@ -125279,7 +125365,7 @@
       "id": "openghg_objectstore_irods_irodsobjectstore_require_write",
       "label": "._require_write()",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L486"
+      "source_location": "L488"
     },
     {
       "_callable": true,
@@ -125288,7 +125374,7 @@
       "id": "openghg_objectstore_irods_irodsobjectstore_update",
       "label": ".update()",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L510"
+      "source_location": "L512"
     },
     {
       "_callable": true,
@@ -125414,7 +125500,7 @@
       "id": "openghg_objectstore_irods_sessions_call",
       "label": ".__call__()",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L44"
+      "source_location": "L45"
     },
     {
       "_callable": true,
@@ -135341,7 +135427,7 @@
       "id": "tests_objectstore_test_irods_backend_backend",
       "label": "backend()",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L22"
+      "source_location": "L24"
     },
     {
       "_callable": true,
@@ -135350,7 +135436,7 @@
       "id": "tests_objectstore_test_irods_backend_dataset",
       "label": "dataset()",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L48"
+      "source_location": "L50"
     },
     {
       "_callable": true,
@@ -135359,7 +135445,7 @@
       "id": "tests_objectstore_test_irods_backend_test_borrowed_session_is_not_closed",
       "label": "test_borrowed_session_is_not_closed()",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L209"
+      "source_location": "L252"
     },
     {
       "_callable": true,
@@ -135368,7 +135454,16 @@
       "id": "tests_objectstore_test_irods_backend_test_context_reentry_catalog_state_and_deferred_lazy_reads",
       "label": "test_context_reentry_catalog_state_and_deferred_lazy_reads()",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L70"
+      "source_location": "L72"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_backend_test_dataset_close_does_not_close_writer_or_sibling_reader",
+      "label": "test_dataset_close_does_not_close_writer_or_sibling_reader()",
+      "source_file": "tests/objectstore/test_irods_backend.py",
+      "source_location": "L124"
     },
     {
       "_callable": true,
@@ -135377,7 +135472,7 @@
       "id": "tests_objectstore_test_irods_backend_test_escaped_writable_datasource_cannot_mutate_without_lock",
       "label": "test_escaped_writable_datasource_cannot_mutate_without_lock()",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L171"
+      "source_location": "L214"
     },
     {
       "_callable": true,
@@ -135386,7 +135481,7 @@
       "id": "tests_objectstore_test_irods_backend_test_exclusive_lock_nested_context_and_exception_cleanup",
       "label": "test_exclusive_lock_nested_context_and_exception_cleanup()",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L149"
+      "source_location": "L192"
     },
     {
       "_callable": true,
@@ -135395,7 +135490,7 @@
       "id": "tests_objectstore_test_irods_backend_test_factory_reads_without_cache_by_default",
       "label": "test_factory_reads_without_cache_by_default()",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L56"
+      "source_location": "L58"
     },
     {
       "_callable": true,
@@ -135404,7 +135499,7 @@
       "id": "tests_objectstore_test_irods_backend_test_failed_datasource_state_write_does_not_publish_a_searchable_record",
       "label": "test_failed_datasource_state_write_does_not_publish_a_searchable_record()",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L237"
+      "source_location": "L280"
     },
     {
       "_callable": true,
@@ -135413,7 +135508,16 @@
       "id": "tests_objectstore_test_irods_backend_test_failed_lock_release_closes_connection_and_disallows_writes",
       "label": "test_failed_lock_release_closes_connection_and_disallows_writes()",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L189"
+      "source_location": "L232"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_objectstore_test_irods_backend_test_inflight_lazy_read_owns_session_when_writer_context_closes",
+      "label": "test_inflight_lazy_read_owns_session_when_writer_context_closes()",
+      "source_file": "tests/objectstore/test_irods_backend.py",
+      "source_location": "L97"
     },
     {
       "_callable": true,
@@ -135422,7 +135526,7 @@
       "id": "tests_objectstore_test_irods_backend_test_native_readonly_access_does_not_change_remote_state",
       "label": "test_native_readonly_access_does_not_change_remote_state()",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L123"
+      "source_location": "L166"
     },
     {
       "_callable": true,
@@ -135431,7 +135535,7 @@
       "id": "tests_objectstore_test_irods_backend_test_session_cleanup_failure_discards_context_before_deferred_reads",
       "label": "test_session_cleanup_failure_discards_context_before_deferred_reads()",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L217"
+      "source_location": "L260"
     },
     {
       "_callable": true,
@@ -135440,7 +135544,7 @@
       "id": "tests_objectstore_test_irods_backend_test_version_overlap_attribute_edit_and_delete_parity",
       "label": "test_version_overlap_attribute_edit_and_delete_parity()",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L95"
+      "source_location": "L138"
     },
     {
       "_callable": true,
@@ -151044,130 +151148,130 @@
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_objectstore_irods_rationale_130",
+      "id": "openghg_objectstore_irods_rationale_131",
       "label": "Opaque publication revision for explicit optimistic conflict checks.",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L130"
+      "source_location": "L131"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_objectstore_irods_rationale_185",
+      "id": "openghg_objectstore_irods_rationale_186",
       "label": "Return a read-only, pinned transport for cache and provenance inspection.",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L185"
+      "source_location": "L186"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_objectstore_irods_rationale_192",
+      "id": "openghg_objectstore_irods_rationale_193",
       "label": "Pin metadata, datasource state, and generations from one atomic document.",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L192"
+      "source_location": "L193"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_objectstore_irods_rationale_269",
+      "id": "openghg_objectstore_irods_rationale_270",
       "label": "Stage an attribute edit; save publishes it without changing pinned readers.",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L269"
+      "source_location": "L270"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_objectstore_irods_rationale_299",
+      "id": "openghg_objectstore_irods_rationale_300",
       "label": "Unlink one version on save; its generations remain available to readers.",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L299"
+      "source_location": "L300"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_objectstore_irods_rationale_329",
+      "id": "openghg_objectstore_irods_rationale_330",
       "label": "Unlink every version on save without reclaiming immutable generations.",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L329"
+      "source_location": "L330"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_objectstore_irods_rationale_335",
+      "id": "openghg_objectstore_irods_rationale_336",
       "label": "Publish a tombstone while preserving already loaded readers.",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L335"
+      "source_location": "L336"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_objectstore_irods_rationale_341",
+      "id": "openghg_objectstore_irods_rationale_342",
       "label": "ObjectStore using an ordinary iRODS collection as its catalog root. Args:…",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L341"
+      "source_location": "L342"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
       "id": "openghg_objectstore_irods_rationale_37",
-      "label": "Reuse the context's connection, reopening connections for deferred reads.",
+      "label": "Reuse the owning thread's connection; other operations open their own.",
       "source_file": "openghg/objectstore/_irods.py",
       "source_location": "L37"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_objectstore_irods_rationale_460",
+      "id": "openghg_objectstore_irods_rationale_462",
       "label": "Release this context's writer lock and connection; deferred reads reopen.",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L460"
+      "source_location": "L462"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_objectstore_irods_rationale_495",
+      "id": "openghg_objectstore_irods_rationale_497",
       "label": "Stage a datasource, then publish metadata and generations together.",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L495"
+      "source_location": "L497"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_objectstore_irods_rationale_521",
+      "id": "openghg_objectstore_irods_rationale_523",
       "label": "Publish one complete update, optionally rejecting a stale expected revision.",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L521"
+      "source_location": "L523"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_objectstore_irods_rationale_544",
+      "id": "openghg_objectstore_irods_rationale_546",
       "label": "Publish a tombstone; retain payloads so existing readers stay valid.",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L544"
+      "source_location": "L546"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_objectstore_irods_rationale_554",
+      "id": "openghg_objectstore_irods_rationale_556",
       "label": "Replicate every Zarr object to a registered resource under its existing data ID.",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L554"
+      "source_location": "L556"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_objectstore_irods_rationale_598",
+      "id": "openghg_objectstore_irods_rationale_600",
       "label": "Configured factory using a native iRODS environment and optional credentials.…",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L598"
+      "source_location": "L600"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_objectstore_irods_rationale_97",
+      "id": "openghg_objectstore_irods_rationale_98",
       "label": "A pinned publication with immutable payload generations and guarded saves.…",
       "source_file": "openghg/objectstore/_irods.py",
-      "source_location": "L97"
+      "source_location": "L98"
     },
     {
       "_origin": "ast",
@@ -159748,10 +159852,10 @@
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_objectstore_test_irods_backend_rationale_23",
+      "id": "tests_objectstore_test_irods_backend_rationale_25",
       "label": "Add exclusive collection creation and lock removal to the shared transport.",
       "source_file": "tests/objectstore/test_irods_backend.py",
-      "source_location": "L23"
+      "source_location": "L25"
     },
     {
       "_origin": "ast",
