@@ -160,3 +160,34 @@ def test_copy_v2_delegates(stores, monkeypatch):
         4,
     )
     assert calls == [(*stores, {"source_path": "a", "dest_path": "b", "if_exists": "skip", "dry_run": True})]
+
+
+@pytest.mark.parametrize(
+    "source_path,dest_path",
+    [
+        ("group", "group/archive"),
+        ("group/archive", "group"),
+        ("/group//", "group"),
+        ("", "group"),
+        ("group", ""),
+    ],
+)
+@pytest.mark.parametrize("dry_run", [False, True])
+def test_same_store_overlapping_paths_are_rejected_without_changes(stores, source_path, dest_path, dry_run):
+    store, _ = stores
+    original = {"group/a": b"A", "group/archive/a": b"B"}
+    write_keys(store, original)
+
+    with pytest.raises(ValueError, match="paths overlap"):
+        copy_zarr_store(store, store, source_path=source_path, dest_path=dest_path, dry_run=dry_run)
+
+    assert read_keys(store) == original
+
+
+def test_same_store_disjoint_paths_preserve_source_payloads(stores):
+    store, _ = stores
+    original = {"group/a": b"A", "group/archive/a": b"B"}
+    write_keys(store, original)
+
+    assert copy_zarr_store(store, store, source_path="group", dest_path="group2") == (2, 0, 2)
+    assert read_keys(store) == {**original, "group2/a": b"A", "group2/archive/a": b"B"}
