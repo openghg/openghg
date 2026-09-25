@@ -86,7 +86,8 @@ class ZarrStore(Store, Generic[ZST]):
               Accepted arguments are:
               - `write_empty_chunks`
               - `align_chunks`: rechunk Dask writes safely (defaults to True when supported by Xarray).
-              - `zarr_format`: 2 (default for new stores) or 3; existing stores retain their format
+              - `zarr_format`: 2 (default for new stores) or 3; existing stores retain their format.
+                Format 3 requires zarr-python 3 and native Zarr 3 codecs when specifying compression.
               - `storage_options`: only relevant to cloud storage, see
                  https://github.com/pydata/xarray/pull/5615
 
@@ -393,7 +394,8 @@ class VersionedZarrStore(VersionedStore, SimpleVersioning[ZST], ZarrStore[ZST]):
               Accepted arguments are:
               - `write_empty_chunks`
               - `align_chunks`: rechunk Dask writes safely (defaults to True when supported by Xarray).
-              - `zarr_format`: 2 (default for new stores) or 3; existing stores retain their format
+              - `zarr_format`: 2 (default for new stores) or 3; existing stores retain their format.
+                Format 3 requires zarr-python 3 and native Zarr 3 codecs when specifying compression.
               - `storage_options`: only relevant to cloud storage, see
                  https://github.com/pydata/xarray/pull/5615
 

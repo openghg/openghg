@@ -2,8 +2,9 @@ import logging
 import bz2
 from functools import partial, wraps
 import json
+from importlib.resources.abc import Traversable
 from pathlib import Path
-from typing import Any, Iterator, cast
+from typing import Any, IO, Iterator, cast
 from collections.abc import Callable
 import numpy as np
 import xarray as xr
@@ -132,7 +133,7 @@ def get_datapath(filename: pathType, directory: str | None = None) -> Path:
         return Path(__file__).resolve().parent.parent.joinpath(f"data/{directory}/{filename}")
 
 
-def load_json(path: str | Path) -> dict:
+def load_json(path: str | Path | Traversable) -> dict:
     """Returns a dictionary deserialised from JSON.
 
     Args:
@@ -140,7 +141,13 @@ def load_json(path: str | Path) -> dict:
     Returns:
         dict: Dictionary created from JSON
     """
-    with open(path) as f:
+    file: IO[str]
+    if isinstance(path, (str, Path)):
+        file = open(path)
+    else:
+        file = path.open()
+
+    with file as f:
         data: dict[str, Any] = json.load(f)
 
     return data
