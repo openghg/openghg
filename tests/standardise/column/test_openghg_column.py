@@ -2,6 +2,7 @@ import logging
 
 import numpy as np
 import pytest
+import xarray as xr
 from helpers import get_column_datapath  # , parsed_surface_metachecker, check_cf_compliance
 from openghg.standardise.column import parse_openghg, parse_tccon
 from openghg.standardise.meta import attributes_default_keys
@@ -60,6 +61,22 @@ def test_parse_openghg():
 
     attributes = data_ch4.attrs
     assert attributes.items() >= expected_metadata.items()
+
+
+def test_parse_openghg_data():
+    """Test parsing an OpenGHG column dataset supplied directly."""
+    filepath = get_column_datapath(filename="gosat-fts_gosat_20170318_ch4-column.nc")
+
+    with xr.open_dataset(filepath) as dataset:
+        data = parse_openghg(
+            data=dataset.load(),
+            satellite="GOSAT",
+            domain="BRAZIL",
+            species="methane",
+        )
+
+    assert "ch4" in data
+    assert data["ch4"]["data"].time[0] == Timestamp("2017-03-18T15:32:54")
 
 
 def test_parse_tccon():

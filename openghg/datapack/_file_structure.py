@@ -410,7 +410,6 @@ def define_stored_data_filename(
     obs_types = define_obs_types()
 
     if obs_type in obs_types:
-
         if isinstance(name_components, dict):
             try:
                 name_components = name_components[obs_type]

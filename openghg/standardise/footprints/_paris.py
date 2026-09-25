@@ -10,6 +10,7 @@ from openghg.util import (
     check_species_lifetime,
     timestamp_now,
     open_time_nc_fn,
+    preprocess_nc_data,
 )
 from openghg.store import infer_date_range, update_zero_dim
 from openghg.types import ParseError
@@ -19,11 +20,11 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_paris(
-    filepath: str | Path | list[str] | list[Path],
-    domain: str,
-    model: str,
-    inlet: str,
-    species: str,
+    filepath: str | Path | list[str] | list[Path] | None = None,
+    domain: str | None = None,
+    model: str | None = None,
+    inlet: str | None = None,
+    species: str | None = None,
     obs_region: str | None = None,
     site: str | None = None,
     satellite: str | None = None,
@@ -32,16 +33,20 @@ def parse_paris(
     period: str | tuple | None = None,
     continuous: bool = True,
     high_spatial_resolution: bool = False,
-    time_resolved: bool = False,
+    time_resolved: bool | None = None,
     high_time_resolution: bool = False,
     short_lifetime: bool = False,
     inner_domain: str | None = None,
+    data: Dataset | None = None,
 ) -> dict:
     """
     Read and parse input footprints data in "paris" format.
 
     Args:
-        filepath: Path of file to load
+        filepath: Path of file to load. Specify either ``filepath`` or
+            ``data``.
+        data: In-memory PARIS footprint dataset. Time and domain preprocessing
+            matches the file-input path without mutating the caller's dataset.
         domain: Domain of footprints
         model: Model used to create footprint (e.g. NAME or FLEXPART)
         inlet: Height above ground level in metres. Format 'NUMUNIT' e.g. "10m"
@@ -54,14 +59,20 @@ def parse_paris(
         period: Period of measurements. Only needed if this can not be inferred from the time coords
         continuous: Whether time stamps have to be continuous.
         high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.
-        time_resolved: Indicate footprints are high time resolution (include H_back dimension)
-            Note this will be set to True automatically if species="co2" (Carbon Dioxide).
+        time_resolved: Indicate whether footprints are time resolved (include an
+            H_back dimension). For CO2, the default (None) selects time-resolved
+            footprints. Set this explicitly to False to parse the integrated fp.
         high_time_resolution:  This argument is deprecated and will be replaced in future versions with time_resolved.
         short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
             Note this will be set to True if species has an associated lifetime.
         inner_domain: If the footprints are for an inner domain. This will affect the expected dimensions of the data and how these are stored in the output Dataset.
+
     Returns:
         dict: Dictionary of data
+
+    Raises:
+        ValueError: If no input is supplied, required metadata is missing, or
+            the dataset coordinates do not match the selected domain.
     """
 
     if high_time_resolution:
@@ -71,13 +82,24 @@ def parse_paris(
         )
         time_resolved = high_time_resolution
 
+    if domain is None or model is None or inlet is None:
+        raise ValueError("`domain`, `model`, and `inlet` must be specified.")
+    species = species or "inert"
+
     if inner_domain:
         domain = f"{domain}-{inner_domain}"
-    xr_open_fn, filepath = open_time_nc_fn(filepath, domain)
+    if data is None:
+        if filepath is None:
+            raise ValueError("Please specify either `filepath` or `data`.")
+        xr_open_fn, filepath = open_time_nc_fn(filepath, domain)
+        fp_data = xr_open_fn(filepath)
+    else:
+        fp_data = preprocess_nc_data(data, realign_on_domain=domain, check_coords="time")
 
-    fp_data = xr_open_fn(filepath)
-
-    time_resolved = check_species_time_resolved(species, time_resolved)
+    if time_resolved is None:
+        time_resolved = check_species_time_resolved(species)
+    elif time_resolved:
+        time_resolved = check_species_time_resolved(species, time_resolved)
     short_lifetime = check_species_lifetime(species, short_lifetime)
 
     # Mapping NAME 2025 processed footprint variables to pre-2025
@@ -99,6 +121,15 @@ def parse_paris(
         dv_rename["srr_time_resolved"] = "fp_time_resolved"
         dv_rename["srr_residual"] = "fp_residual"
         dim_rename["resolution"] = "H_back"
+    else:
+        drop_vars = [v for v in ["srr_time_resolved", "srr_residual"] if v in fp_data]
+        if drop_vars:
+            fp_data = fp_data.drop_vars(drop_vars)
+        if "resolution" in fp_data.dims:
+            if fp_data.sizes["resolution"] == 1:
+                fp_data = fp_data.squeeze("resolution", drop=True)
+            else:
+                fp_data = fp_data.drop_dims("resolution")
 
     try:
         # Ignore type - dv_rename type should be fine as a dict but mypy unhappy.
@@ -117,7 +148,9 @@ def parse_paris(
 
     # Converts H_back values from timestamps to hours back
     if "H_back" in fp_data.dims:
-        fp_data["H_back"] = fp_data.H_back.dt.seconds / 3600.0
+        H_back = fp_data.H_back
+        if H_back.dtype == "timedelta64[ns]":
+            fp_data["H_back"] = H_back.dt.seconds / 3600.0
 
     for attr, new_attr in attribute_rename.items():
         if attr in fp_data:
@@ -148,8 +181,10 @@ def parse_paris(
     if network is not None:
         metadata["network"] = network
 
-    if site is not None and inlet == "column":
+    if inlet == "column":
         metadata["max_level"] = str(fp_data.attrs.get("max_level", "unknown"))
+
+    if site is not None and inlet == "column":
         metadata["obs_openghg_uuid"] = fp_data.attrs.get("obs_openghg_uuid", None)
 
     # Check if time has 0-dimensions and, if so, expand this so time is 1D

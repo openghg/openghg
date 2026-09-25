@@ -213,7 +213,8 @@ def _format_species(
             species_data = inlet_data[["mf", "mf_repeatability", "mf_variability"]]
         else:
             species_data = inlet_data[["mf", "mf_repeatability"]]
-        species_data = species_data.dropna(axis="index", how="any")
+        # JP 2026-05-20 - remove this dropna to deal with occasional nans in mf_repeatability
+        # species_data = species_data.dropna(axis="index", how="any")
 
         # Check that the Dataframe has something in it
         if species_data.empty:

@@ -70,9 +70,9 @@ def retrieve_site_met(
             months = [months]
 
         # check that all months are valid
-        assert np.all(
-            [month in all_months for month in months]
-        ), "One of more of the months passed does not exist - pass them in format 'MM' eg '08' or '10' "
+        assert np.all([month in all_months for month in months]), (
+            "One of more of the months passed does not exist - pass them in format 'MM' eg '08' or '10' "
+        )
 
     filepaths = pull_site_met(
         site=site, network=network, years=years, months=months, variables=variables, save_path=local_save_path
@@ -191,9 +191,9 @@ def pull_site_met(
         save_path = default_save_path
         os.makedirs(save_path, exist_ok=True)
     else:
-        assert os.path.isdir(
-            save_path
-        ), f"The save path {save_path} is not a directory. Please create it or pass a different save_path"
+        assert os.path.isdir(save_path), (
+            f"The save path {save_path} is not a directory. Please create it or pass a different save_path"
+        )
 
     dataset_savepaths: list[str] = []
 
@@ -206,9 +206,9 @@ def pull_site_met(
         if isinstance(months, str):
             months = [months]
 
-        assert np.all(
-            [month in all_months for month in months]
-        ), "One of more of the months passed does not exist - pass them in format 'MM' eg '08' or '10' "
+        assert np.all([month in all_months for month in months]), (
+            "One of more of the months passed does not exist - pass them in format 'MM' eg '08' or '10' "
+        )
 
     for year in years:
         for month in months:

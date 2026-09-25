@@ -68,16 +68,16 @@ def _define_var_attrs(ds: xr.Dataset, species: str, method: str) -> xr.Dataset:
 
     if method == "pressure_weights":
         ds["pressure_weights"].attrs["long_name"] = "pressure_weights derived using pressure weight method"
-        ds["pressure_weights"].attrs[
-            "description"
-        ] = "see doc https://tccon-wiki.caltech.edu/Main/AuxiliaryDataGGG2020#Using_pressure_weights"
+        ds["pressure_weights"].attrs["description"] = (
+            "see doc https://tccon-wiki.caltech.edu/Main/AuxiliaryDataGGG2020#Using_pressure_weights"
+        )
         ds.attrs["derivation_method"] = "pressure weight"
 
     elif method == "integration_operator":
         ds["pressure_weights"].attrs["long_name"] = "pressure_weights derived using integration_operator"
-        ds["pressure_weights"].attrs[
-            "description"
-        ] = "see doc https://tccon-wiki.caltech.edu/Main/AuxiliaryDataGGG2020#Using_the_integration_operator"
+        ds["pressure_weights"].attrs["description"] = (
+            "see doc https://tccon-wiki.caltech.edu/Main/AuxiliaryDataGGG2020#Using_the_integration_operator"
+        )
         ds.attrs["derivation_method"] = "integration operator"
 
     for var in ds.data_vars:

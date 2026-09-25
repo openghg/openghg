@@ -21,7 +21,6 @@ def fp_x_flux_integrated(footprint: xr.Dataset, flux: xr.Dataset) -> xr.DataArra
 
     """
     flux = reindex_on_dims(flux, footprint, ["lat", "lon"])
-
     # align separately on time
     # TODO: if method="nearest" was acceptable, then we could align all coordinates at once with reindex_like
     flux = flux.reindex_like(footprint, method="ffill")
@@ -34,6 +33,13 @@ def fp_x_flux_integrated(footprint: xr.Dataset, flux: xr.Dataset) -> xr.DataArra
 
     result = footprint.fp.pint.quantify() * flux.flux.pint.quantify()
     return cast(xr.DataArray, result.pint.dequantify())
+
+
+def make_integrated_low_freq_flux(flux: xr.DataArray | xr.Dataset) -> xr.Dataset:
+    """Create monthly-mean flux for integrated footprint calculations."""
+    flux_var = flux.flux if isinstance(flux, xr.Dataset) else flux
+    flux_low_freq = flux_var.resample({"time": "1MS"}).mean()
+    return flux_low_freq.to_dataset(name="flux")
 
 
 # helper functions for time-resolved calculation
@@ -159,19 +165,18 @@ def _make_hf_flux_rolling_avg_array(
 def _make_high_freq_flux(
     flux: xr.DataArray,
     fp: xr.DataArray | xr.Dataset,
-    *,
-    align_to_fp_time: bool = True,
 ) -> xr.DataArray:
     fp_highest_res_hours = _fp_time_and_h_back_freq_gcd(fp)
     start, end = _padded_flux_slice_start_and_end(fp)
-    offset = time_of_day_offset(start)
-
-    # select values with start time padded to include first rolling window backwards in time
-    flux_high_freq = flux.sel(time=slice(start, end))
-
-    # resample flux
-    freq = f"{fp_highest_res_hours}h"
     flux_res_hours = calc_hourly_freq(flux.time, input_nanoseconds=True)
+    offset = time_of_day_offset(flux.time.values[0])
+
+    # Include the flux interval containing the padded start of the rolling window.
+    flux_slice_start = start - np.timedelta64(flux_res_hours, "h")
+    flux_high_freq = flux.sel(time=slice(flux_slice_start, end))
+
+    # Resample on the flux interval grid, not the offset of the first footprint release.
+    freq = f"{fp_highest_res_hours}h"
     flux_resampler = flux_high_freq.resample({"time": freq}, offset=offset)
 
     if flux_res_hours <= fp_highest_res_hours:
@@ -181,25 +186,20 @@ def _make_high_freq_flux(
         # upsampling
         flux_high_freq = flux_resampler.ffill()
 
-    # reindex to align
-    full_dates = pd.date_range(start, end, freq=freq, inclusive="left").to_numpy()
+    # Fill gaps on the regular, flux-aligned grid before constructing lag windows.
+    full_dates = pd.date_range(flux_high_freq.time.values[0], end, freq=freq, inclusive="left").to_numpy()
     flux_high_freq = flux_high_freq.reindex({"time": full_dates}, method="ffill")
 
     # create rolling windows
     flux_high_freq = _make_hf_flux_rolling_avg_array(flux_high_freq, fp)
 
-    if align_to_fp_time:
-        # reindex to align with fp time coordinates (after creating rolling windows to avoid NaN values at start of time series)
-        fp_index = pd.DatetimeIndex(fp.time.values)
-        flux_index = pd.DatetimeIndex(flux_high_freq.time.values)
-        need_second_reindex = (flux_index.get_indexer(fp_index) < 0).any()
-
-        if need_second_reindex:
-            flux_high_freq = flux_high_freq.reindex(
-                {"time": fp.time},
-                method="ffill",
-                tolerance=pd.Timedelta(hours=fp_highest_res_hours),
-            )
+    # Map each irregular release to the flux interval containing it. Do this after
+    # constructing rolling windows so the first release retains its full lag history.
+    flux_high_freq = flux_high_freq.reindex(
+        {"time": fp.time},
+        method="ffill",
+        tolerance=pd.Timedelta(hours=fp_highest_res_hours),
+    )
 
     flux_high_freq.attrs["units"] = flux.attrs.get("units")
 

@@ -5,7 +5,32 @@ All notable changes to OpenGHG will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/openghg/openghg/compare/0.18.0...HEAD)
+## [Unreleased](https://github.com/openghg/openghg/compare/0.19.0...HEAD)
+
+### Fixed
+
+- Added column `max_level` consistency validation to `ModelScenario` and preserved `max_level` metadata when standardising ACRG and PARIS column footprints, preventing observations and footprints with different vertical extents from being combined. [PR #1718](https://github.com/openghg/openghg/pull/1718)
+- Ensured explicitly integrated CO2 site and satellite footprints are standardised and modelled through the integrated-footprint pathway, while preserving the time-resolved default for CO2 footprints. [PR #1698](https://github.com/openghg/openghg/pull/1698)
+- Added a dimension dtype checker for H_back dimension to "timedelta64[ns]". Bug occured for dimension "resolution" and dtype "resolution".[PR #1671](https://github.com/openghg/openghg/pull/1671)
+- Added config-driven metadata key handling for transformed flux and boundary condition data: removed hard-coded required-key lookups.[PR #1686](https://github.com/openghg/openghg/pull/1686)
+
+### Updated
+
+- Removed file and retrieved-data hashing from standardisation. Repeated inputs now follow the normal `if_exists` overlap policy, and data can be standardised again after its datasource is deleted. The deprecated `force` argument remains accepted but is ignored; passing `force=True` emits a `DeprecationWarning`, and callers should use `if_exists` to choose update behaviour. [Issue #1676](https://github.com/openghg/openghg/issues/1676)
+- Updated the standardisation of AGAGE format data so that rows containing nans are no longer dropped. [PR #1634](https://github.com/openghg/openghg/pull/1634)
+- Updated copilot instructions and added repo graph using graphify.[PR #1684](https://github.com/openghg/openghg/pull/1684)
+
+### Added
+
+- Added reproducible Graphify regeneration, CI freshness checking, and a focused navigation
+  skill for cross-module impact analysis. [Issue #1695](https://github.com/openghg/openghg/issues/1695)
+- Added a lazy `fp_x_flux_time_resolved_numba` analysis operator that preserves source and spatial dimensions, supports single-source and regular coarse-frequency flux, and includes optional atomic ppm Zarr persistence and worker warm-up helpers.
+- Added support for passing in-memory `xarray.Dataset` objects to supported standardisation and transformation parsers, including object-store retrieval and forward `ModelScenario` coverage.
+- Added a tutorial for adding CO2 satellite data, including how integrated footprints differ from time-resolved footprints in OpenGHG. [PR #1698](https://github.com/openghg/openghg/pull/1698)
+- Added ability to save output of plot_comparison using save_path and ability to pass additional figure modifications.[PR #1672](https://github.com/openghg/openghg/pull/1672)
+- Added more tests and explanation in the tutorial regarding if_exists behaviour.[PR #1693](https://github.com/openghg/openghg/pull/1693)
+
+## [0.19.0] - 2026-06-11
 
 ### Fixed
 
@@ -23,16 +48,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Updated
 
 - Refactored `Datasource` to use `VersionedZarrStore` directly, removed `LocalZarrStore` and `openghg.store.storage`, and moved storage utilities into `openghg.storage`. [PR #1618](https://github.com/openghg/openghg/pull/1618)
+- Updated dependency versions: `black` (26.5.1), `mypy` (2.1.0), `pre-commit` (4.6.0), `filelock` (3.29.0), `h5netcdf` (1.8.1), `msgpack-types` (0.7.0), `rapidfuzz` (3.14.5), `nbsphinx` (0.9.8), `sphinxcontrib-bibtex` (2.7.0), `types-paramiko`, `types-requests` (2.33.0.20260518). Also added a change in dependabot.yml to group all major package version changes into one PR. [PR #1636](https://github.com/openghg/openghg/pull/1636)
 
 ### Added
 
 - Option to set location of openghg log via an environment variable `OPENGHG_LOG_PATH`. [PR #1607](https://github.com/openghg/openghg/pull/1607)
 - Added the ability to standardise GEMINI data using standardise_column.[PR #1501](https://github.com/openghg/openghg/pull/1501)
-
-### Updated
-
-- Updated dependency versions: `black` (26.5.1), `mypy` (2.1.0), `pre-commit` (4.6.0), `filelock` (3.29.0), `h5netcdf` (1.8.1), `msgpack-types` (0.7.0), `rapidfuzz` (3.14.5), `nbsphinx` (0.9.8), `sphinxcontrib-bibtex` (2.7.0), `types-paramiko`, `types-requests` (2.33.0.20260518). Also added a change in dependabot.yml to group all major package version changes into one PR. [PR #1636](https://github.com/openghg/openghg/pull/1636)
-
 
 ## [0.18.0] - 2026-02-18
 

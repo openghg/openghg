@@ -22,7 +22,7 @@ First we'll clone the repository and make sure we're on the ``devel`` branch. Th
    cd openghg
    git checkout devel
 
-Next we'll get a virtual environment setup using either ``pip`` or ``conda``.
+Next we'll get a virtual environment setup using ``pixi``, ``pip``, or ``conda``.
 
 Environments
 ------------
@@ -31,6 +31,62 @@ Here we cover the creation of an environment and the installation of OpenGHG int
 We'll install it in developer mode so that any changes you make to the code will automatically be available when you run commands. Similarly, if you
 run a ``git pull`` on the ``devel`` branch all changes made will be available to you straight away, without having to reinstall or update OpenGHG within
 the environment.
+
+``pixi``
+^^^^^^^^
+
+Pixi is the recommended development environment when working with
+NetCDF, HDF5, or Zarr data. It installs the compiled scientific,
+HDF5, and NetCDF stack from ``conda-forge`` and keeps this OpenGHG
+checkout editable.
+
+Install Pixi directly with one of the following commands.
+
+On macOS or Linux, use the official installer:
+
+.. code-block:: bash
+
+   curl -fsSL https://pixi.sh/install.sh | sh
+
+If ``curl`` is unavailable, use ``wget``:
+
+.. code-block:: bash
+
+   wget -qO- https://pixi.sh/install.sh | sh
+
+On macOS with Homebrew:
+
+.. code-block:: bash
+
+   brew install pixi
+
+Then create the editable OpenGHG development environment from this
+checkout:
+
+.. code-block:: bash
+
+   pixi install -e dev
+   pixi run -e dev python -c "import openghg, h5py, h5netcdf, netCDF4, xarray, zarr"
+
+Useful development commands:
+
+.. code-block:: bash
+
+   pixi run -e dev test
+   pixi run -e dev test-storage
+   pixi run -e dev lint
+   pixi run -e dev typecheck
+
+Avoid running commands such as ``pip install -U h5py h5netcdf netcdf4``
+inside the Pixi environment. That can replace Pixi's conda-forge
+HDF5/NetCDF packages with PyPI wheels and reintroduce binary
+incompatibilities.
+
+OpenGHG should now be installed, you can check this by opening ``ipython`` and running
+
+.. code-block:: ipython
+
+   In [1]: import openghg
 
 ``pip``
 ^^^^^^^
@@ -152,7 +208,7 @@ The ``python`` command will default to the first version in the list; in this ca
 Running tests with ``tox``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To run tests against Python 3.10, 3.11, and 3.12, as well as run the linters (``black`` and ``flake8``) and ``mypy``, call ``tox``
+To run tests against Python 3.10, 3.11, and 3.12, as well as run ``ruff`` and ``mypy``, call ``tox``
 in your OpenGHG repo.
 
 To see all jobs that ``tox`` can run, use ``tox -l``. You can run a specific job with ``tox run -e <env>``.
@@ -176,7 +232,7 @@ Coding Style
 
 OpenGHG is written in Python 3 (>= 3.9). We aim as much as possible to follow a
 `PEP8 <https://www.python.org/dev/peps/pep-0008/>`__ python coding style and
-recommend that use a linter such as `flake8 <https://flake8.pycqa.org/en/latest/>`__.
+use `Ruff <https://docs.astral.sh/ruff/>`__ for linting and formatting.
 
 This code has to run on a wide variety of architectures, operating
 systems and machines - some of which don't have any graphic libraries,
@@ -343,8 +399,8 @@ Now create and switch to a feature branch. This should be prefixed with
 Pre-commit
 ----------
 
-This project uses `pre-commit <https://pre-commit.com/>`__ to ensure code is linted and formatted using tools such as flake8,
-black and others. This ensures errors are caught before the code is checked in the CI pipeline.
+This project uses `pre-commit <https://pre-commit.com/>`__ to ensure code is linted and formatted using Ruff and
+other repository checks. This ensures errors are caught before the code is checked in the CI pipeline.
 
 To install the hook
 

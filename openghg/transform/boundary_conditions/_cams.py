@@ -12,6 +12,7 @@ from openghg.util import (
     find_domain,
     normalise_to_filepath_list,
     open_time_nc_fn,
+    get_data,
     timestamp_now,
     cf_ureg,
 )
@@ -22,7 +23,7 @@ logger = logging.getLogger("openghg.transform.boundary_conditions")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-def get_cams_data_units(ds: xr.DataArray, species: str) -> str:
+def get_cams_data_units(ds: xr.Dataset, species: str) -> str:
     """Get unit of CAMS dataset.
     Args:
         ds: dataset from raw cams data from which extract the units
@@ -339,7 +340,7 @@ def set_units(ds: xr.Dataset, units: str) -> None:
 def parse_cams(
     bc_input: str,
     domain: str,
-    datapath: pathlib.Path,
+    datapath: str | pathlib.Path | list[str] | list[pathlib.Path] | None = None,
     species: str | None = None,
     period: str | None = None,
     cams_version: str | None = None,
@@ -347,40 +348,60 @@ def parse_cams(
     get_footprint_kwargs: dict | None = None,
     continuous: bool = True,
     chunks: dict | None = None,
+    data: xr.Dataset | None = None,
 ) -> dict:
-    """
-    Parses the boundary conditions directly from the cams raw files and adds data and metadata.
-    Args
+    """Parse raw CAMS boundary conditions and add data and metadata.
+
+    Args:
         bc_input: Input used to create boundary conditions. For example:
             - a model name and version and period such as "cams_v24r1_daily"
             - a description such as "cams_uniform_mixedversion_daily" (uniform values based on CAMS average from a mix of version at daily resolution)
             Advice is to always put cams to state the model, as well as info on the cams version used and period, even though this will be put in the metadata.
         domain: Region for boundary conditions
-        filepath: (List of) Path of boundary conditions file
+        datapath: Path or paths containing raw boundary-condition data.
+            Specify either ``datapath`` or ``data``.
+        data: In-memory raw CAMS dataset. Specify either ``datapath`` or
+            ``data``.
         species: Species name
         period: period at which at resample and store the data
         cams_version: cams version to use. Put 'mix' if you want to use files from multiple cams versions.
         input_observations: input observations used to make the cams file (e.g. "surface_satellite_dm"). Put 'mix' if you want to use files from multiple input observations.
         get_footprint_kwargs: arguments passed to openghg.retrieve.get_footprint to get the grid that that will be used to store the data
         continuous: whether time stamps have to be continuous
-        make_climatology: If True climatologies will be created. Not implemented yet.
         chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,
                 for example {"time": 100}. If None then a chunking schema will be set automatically by OpenGHG.
                 See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.
                 To disable chunking pass in an empty dictionary.
+
     Returns:
         Dict: Dictionary of "species_bc_input_domain" : data, metadata, attributes
+
+    Raises:
+        ValueError: If exactly one input is not supplied or the species or
+            units cannot be determined from direct data.
     """
 
-    xr_open_fn, filepath = open_time_nc_fn(datapath)
+    if (datapath is None and data is None) or (datapath is not None and data is not None):
+        raise ValueError("Please specify exactly one of `datapath` or `data`.")
 
-    filepath_list = normalise_to_filepath_list(datapath)
-    cams_version, species, input_observations = _check_and_set_params(
-        filepath_list, cams_version, species, input_observations
-    )
+    if data is None:
+        assert datapath is not None
+        xr_open_fn, datapath = open_time_nc_fn(datapath)
+        filepath_list = normalise_to_filepath_list(datapath)
+        cams_version, species, input_observations = _check_and_set_params(
+            filepath_list, cams_version, species, input_observations
+        )
+    else:
+        filepath_list = []
+        species = species or data.attrs.get("species")
+        cams_version = cams_version or data.attrs.get("CAMS_version", "unknown")
+        input_observations = input_observations or data.attrs.get("CAMS_input_observations", "unknown")
+        if species is None:
+            raise ValueError("Species must be specified when transforming direct data.")
 
     units = None
-    with xr_open_fn(filepath).chunk(chunks) as ds:
+    with get_data(dataset=data, filepath=datapath, check_coords="time") as ds:
+        ds = ds.chunk(chunks)
 
         units = get_cams_data_units(ds, species)
         ds = ds.sortby(list(ds.dims))

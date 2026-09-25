@@ -1,0 +1,8 @@
+# Generated and third-party data are not useful for source impact analysis.
+*
+!openghg/
+!openghg/**
+!tests/
+!tests/**/
+!tests/**/*.py
+!pyproject.toml

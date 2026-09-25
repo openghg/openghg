@@ -10,6 +10,7 @@ from openghg.util import (
     check_species_lifetime,
     timestamp_now,
     open_time_nc_fn,
+    preprocess_nc_data,
 )
 from openghg.store import infer_date_range, update_zero_dim
 from openghg.types import ParseError
@@ -19,11 +20,11 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_acrg_org(
-    filepath: str | Path | list[str] | list[Path],
-    domain: str,
-    model: str,
-    inlet: str,
-    species: str,
+    filepath: str | Path | list[str] | list[Path] | None = None,
+    domain: str | None = None,
+    model: str | None = None,
+    inlet: str | None = None,
+    species: str | None = None,
     obs_region: str | None = None,
     site: str | None = None,
     satellite: str | None = None,
@@ -32,15 +33,19 @@ def parse_acrg_org(
     period: str | tuple | None = None,
     continuous: bool = True,
     high_spatial_resolution: bool = False,
-    time_resolved: bool = False,
+    time_resolved: bool | None = None,
     high_time_resolution: bool = False,
     short_lifetime: bool = False,
+    data: Dataset | None = None,
 ) -> dict:
     """
     Read and parse input emissions data in original ACRG format.
 
     Args:
-        filepath: Path of file to load
+        filepath: Path of file to load. Specify either ``filepath`` or
+            ``data``.
+        data: In-memory ACRG footprint dataset. Time and domain preprocessing
+            matches the file-input path without mutating the caller's dataset.
         domain: Domain of footprints
         model: Model used to create footprint (e.g. NAME or FLEXPART)
         inlet: Height above ground level in metres. Format 'NUMUNIT' e.g. "10m"
@@ -53,13 +58,19 @@ def parse_acrg_org(
         period: Period of measurements. Only needed if this can not be inferred from the time coords
         continuous: Whether time stamps have to be continuous.
         high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.
-        time_resolved: Indicate footprints are high time resolution (include H_back dimension)
-            Note this will be set to True automatically if species="co2" (Carbon Dioxide).
+        time_resolved: Indicate whether footprints are time resolved (include an
+            H_back dimension). For CO2, the default (None) selects time-resolved
+            footprints. Set this explicitly to False to parse the integrated fp.
         high_time_resolution:  This argument is deprecated and will be replaced in future versions with time_resolved.
         short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
             Note this will be set to True if species has an associated lifetime.
+
     Returns:
         dict: Dictionary of data
+
+    Raises:
+        ValueError: If no input is supplied, required metadata is missing, or
+            the dataset coordinates do not match the selected domain.
     """
 
     if high_time_resolution:
@@ -69,11 +80,33 @@ def parse_acrg_org(
         )
         time_resolved = high_time_resolution
 
-    xr_open_fn, filepath = open_time_nc_fn(filepath, domain, sel_month=True)
+    if domain is None or model is None or inlet is None:
+        raise ValueError("`domain`, `model`, and `inlet` must be specified.")
+    species = species or "inert"
 
-    fp_data = xr_open_fn(filepath)
+    if data is None:
+        if filepath is None:
+            raise ValueError("Please specify either `filepath` or `data`.")
+        xr_open_fn, filepath = open_time_nc_fn(filepath, domain, sel_month=True)
+        fp_data = xr_open_fn(filepath)
+    else:
+        fp_data = preprocess_nc_data(
+            data,
+            realign_on_domain=domain,
+            sel_month=True,
+            check_coords="time",
+        )
 
-    time_resolved = check_species_time_resolved(species, time_resolved)
+    if time_resolved is None:
+        time_resolved = check_species_time_resolved(species)
+    elif time_resolved:
+        time_resolved = check_species_time_resolved(species, time_resolved)
+
+    if time_resolved is False:
+        drop_vars = [name for name in ("fp_HiTRes", "H_back") if name in fp_data]
+        if drop_vars:
+            fp_data = fp_data.drop_vars(drop_vars)
+
     short_lifetime = check_species_lifetime(species, short_lifetime)
 
     dv_rename = {
@@ -114,9 +147,9 @@ def parse_acrg_org(
     dv_attribute_updates["fp"]["long_name"] = "source_receptor_relationship"
     dv_attribute_updates["air_temperature"]["long_name"] = "air temperature at release"
     dv_attribute_updates["air_pressure"]["long_name"] = "air pressure at release"
-    dv_attribute_updates["atmosphere_boundary_layer_thickness"][
-        "long_name"
-    ] = "atmospheric boundary layer thickness at release"
+    dv_attribute_updates["atmosphere_boundary_layer_thickness"]["long_name"] = (
+        "atmospheric boundary layer thickness at release"
+    )
 
     dv_attribute_updates["wind_speed"]["units"] = "m s-1"
     dv_attribute_updates["wind_speed"]["long_name"] = "wind speed at release"
@@ -131,7 +164,6 @@ def parse_acrg_org(
 
     # create 'release_heigt' variable for compatibility between different footprints
     if inlet != "column":
-
         inlet_int = int(inlet.replace("magl", "").replace("m", ""))
         fp_data["release_height"] = inlet_int * ones_like(fp_data["time"].astype(int))
 
@@ -187,6 +219,9 @@ def parse_acrg_org(
 
     if network is not None:
         metadata["network"] = network
+
+    if inlet == "column":
+        metadata["max_level"] = str(fp_data.attrs.get("max_level", "unknown"))
 
     # Check if time has 0-dimensions and, if so, expand this so time is 1D
     if "time" in fp_data.coords:

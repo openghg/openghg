@@ -438,7 +438,9 @@ class Datasource(AbstractDatasource[XrDataset]):
                 raise ValueError("Cannot update empty Zarr store.")
             self._ensure_store_version(version_str, copy_current=True)
             self._store.upsert(data)
-            date_keys = [get_representative_daterange_str(self.get_data(version=version_str))]
+            date_keys = [
+                get_representative_daterange_str(self.get_data(version=version_str), period=self.period)
+            ]
 
         self._data_type = data_type
         self.add_metadata_key(key="data_type", value=data_type)

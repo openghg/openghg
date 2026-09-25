@@ -1,6 +1,33 @@
 import pytest
+import numpy as np
 from copy import deepcopy
-from openghg.util import get_overlap_keys, merge_dict, merge_and_extend_dict
+from openghg.util import convert_numpy_scalars, get_overlap_keys, merge_dict, merge_and_extend_dict
+
+
+def test_convert_numpy_scalars_preserves_other_values():
+    """Convert NumPy scalars while retaining native and non-scalar values."""
+    array = np.array([1, 2])
+    marker = object()
+    values = {
+        "integer": np.int64(4),
+        "float": np.float64(1.5),
+        "boolean": np.bool_(True),
+        "native": "unchanged",
+        "array": array,
+        "marker": marker,
+    }
+
+    converted = convert_numpy_scalars(values)
+
+    assert converted["integer"] == 4
+    assert type(converted["integer"]) is int
+    assert converted["float"] == 1.5
+    assert type(converted["float"]) is float
+    assert converted["boolean"] is True
+    assert converted["native"] == "unchanged"
+    assert converted["array"] is array
+    assert converted["marker"] is marker
+    assert converted is not values
 
 
 @pytest.mark.parametrize(

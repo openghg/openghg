@@ -239,6 +239,16 @@ def test_insert_ignore_overlap(store_name, request, ds1, ds4):
     np.testing.assert_equal(store.get().x.values, expected)
 
 
+def test_zarr_insert_ignore_exact_overlap_skips_append(zarr_memory_store, ds1, mocker):
+    """Test that ignoring an exact overlap does not attempt an empty Zarr append."""
+    zarr_memory_store.insert(ds1)
+    to_zarr = mocker.spy(xr.Dataset, "to_zarr")
+
+    zarr_memory_store.insert(ds1, on_overlap="ignore")
+
+    to_zarr.assert_not_called()
+
+
 @pytest.mark.parametrize("store_name", store_names)
 def test_update(store_name, request, ds1, twice_ds1):
     store = request.getfixturevalue(store_name)

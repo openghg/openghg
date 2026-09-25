@@ -1,7 +1,8 @@
 import logging
 from pathlib import Path
+import xarray as xr
 
-from openghg.util import clean_string, timestamp_now, synonyms, open_time_nc_fn
+from openghg.util import clean_string, timestamp_now, synonyms, get_data
 from openghg.store import infer_date_range, update_zero_dim
 
 logger = logging.getLogger("openghg.standardise.boundary_conditions")
@@ -9,13 +10,14 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_openghg(
-    filepath: str | Path | list[str] | list[Path],
-    species: str,
-    bc_input: str,
-    domain: str,
+    filepath: str | Path | list[str] | list[Path] | None = None,
+    species: str | None = None,
+    bc_input: str | None = None,
+    domain: str | None = None,
     period: str | None = None,
     continuous: bool = True,
     chunks: dict | None = None,
+    data: xr.Dataset | None = None,
 ) -> dict:
     """
     Parses the boundary conditions file and adds data and metadata.
@@ -33,14 +35,24 @@ def parse_openghg(
     Returns:
         Dict: Dictionary of "species_bc_input_domain" : data, metadata, attributes
     """
+    if species is None or bc_input is None or domain is None:
+        raise ValueError("`species`, `bc_input`, and `domain` must be specified.")
+
     species = clean_string(species)
     species = synonyms(species)
     bc_input = clean_string(bc_input)
     domain = clean_string(domain)
 
-    xr_open_fn, filepath = open_time_nc_fn(filepath, domain)
+    if isinstance(filepath, list) and len(filepath) == 1:
+        filepath = filepath[0]
 
-    with xr_open_fn(filepath).chunk(chunks if chunks is not None else {}) as bc_data:
+    with get_data(
+        dataset=data,
+        filepath=filepath,
+        realign_on_domain=domain,
+        check_coords="time",
+    ) as bc_data:
+        bc_data = bc_data.chunk(chunks if chunks is not None else {})
         # Some attributes are numpy types we can't serialise to JSON so convert them
         # to their native types here
         attrs = {}

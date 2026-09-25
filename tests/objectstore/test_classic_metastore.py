@@ -72,6 +72,20 @@ def test_safety_caching_middleware_error(tmp_path):
                 db2.remove(doc_ids=[first_item])
 
 
+def test_safety_caching_middleware_detects_type_change(tmp_path):
+    """Concurrent changes that compare equal in Python are still detected."""
+    db_file = tmp_path / "test.json"
+    with tinydb.TinyDB(db_file) as db:
+        first_item = db.insert({"value": 1})
+
+    with pytest.raises(MetastoreError):
+        with tinydb.TinyDB(db_file, storage=SafetyCachingMiddleware(JSONStorage)) as db:
+            db.insert({"another_key": "another_value"})
+
+            with tinydb.TinyDB(db_file) as db2:
+                db2.update({"value": True}, doc_ids=[first_item])
+
+
 def test_safety_caching_middleware_no_write_no_error(tmp_path):
     """A similar scenario to the error test, but no writes are made, so
     no error is raised.

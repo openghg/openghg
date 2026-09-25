@@ -102,20 +102,22 @@ class Flux(BaseStore):
 
     def transform_data(
         self,
-        datapath: pathType,
-        database: str,
+        datapath: pathType | None,
+        database: str | None,
         if_exists: str = "auto",
         save_current: str = "auto",
         overwrite: bool = False,
         compressor: Any | None = None,
         filters: Any | None = None,
         info_metadata: dict | None = None,
+        data: Any | None = None,
         **kwargs: dict,
     ) -> list[dict]:
-        """
-        Read and transform a flux / emissions database. This will find the appropriate
-        parser function to use for the database specified. The necessary inputs
-        are determined by which database is being used.
+        """Transform raw flux data and assign it to the object store.
+
+        The database selects a parser such as
+        :func:`openghg.transform.flux.parse_edgar`. Exactly one of
+        ``datapath`` and ``data`` must be provided.
 
         The underlying parser functions will be of the form:
             - openghg.transform.flux.parse_{database.lower()}
@@ -140,15 +142,32 @@ class Flux(BaseStore):
                 See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+            info_metadata: Optional informational metadata to add to each
+                transformed datasource.
+            data: Raw in-memory data to transform instead of reading
+                ``datapath``.
             **kwargs: Inputs for underlying parser function for the database.
 
                 Necessary inputs will depend on the database being parsed.
 
-        TODO: Could allow Callable[..., Dataset] type for a pre-defined function be passed
+        Returns:
+            Metadata dictionaries identifying the assigned datasources.
+
+        Raises:
+            ValueError: If the database is unsupported or exactly one of
+                ``datapath`` and ``data`` is not provided.
+
+        TODO: Could allow Callable[..., Dataset] type for a pre-defined function be passed.
         """
-        import inspect
         from openghg.store.spec import define_transform_parsers
-        from openghg.util import load_transform_parser, check_if_need_new_version
+        from openghg.util import load_transform_parser, check_if_need_new_version, split_function_inputs
+
+        transform_parsers = define_transform_parsers()[self._data_type]
+        if not isinstance(database, str) or database.upper() not in transform_parsers.__members__:
+            raise ValueError(f"Unable to transform '{database}' selected.")
+
+        if (datapath is None and data is None) or (datapath is not None and data is not None):
+            raise ValueError("Please specify exactly one of `datapath` or `data`.")
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -159,26 +178,23 @@ class Flux(BaseStore):
 
         new_version = check_if_need_new_version(if_exists, save_current)
 
-        datapath = Path(datapath)
-
-        transform_parsers = define_transform_parsers()[self._data_type]
-
-        try:
-            transform_parsers[database.upper()].value
-        except KeyError:
-            raise ValueError(f"Unable to transform '{database}' selected.")
+        # Format input parameters (specific to data_type)
+        fn_input_parameters = self.format_inputs(**kwargs)
+        if data is not None:
+            fn_input_parameters["data"] = data
+        else:
+            assert datapath is not None
+            fn_input_parameters["datapath"] = Path(datapath)
 
         # Load the data retrieve object
         parser_fn = load_transform_parser(data_type=self._data_type, source_format=database)
 
-        # Find all parameters that can be accepted by parse function
-        all_param = list(inspect.signature(parser_fn).parameters.keys())
+        # Define parameters to pass to the parser function and remaining keys
+        fn_input_parameters, additional_input_parameters = split_function_inputs(
+            fn_input_parameters, parser_fn
+        )
 
-        # Define parameters to pass to the parser function from kwargs
-        param: dict[Any, Any] = {key: value for key, value in kwargs.items() if key in all_param}
-        param["datapath"] = datapath  # Add datapath explicitly (for now)
-
-        flux_data = parser_fn(**param)
+        flux_data = parser_fn(**fn_input_parameters)
 
         chunks = self.check_chunks(
             ds=flux_data[0].data,
@@ -194,32 +210,26 @@ class Flux(BaseStore):
                 mdd.data = mdd.data.chunk(chunks)
             Flux.validate_data(mdd.data)
 
-        required_keys = ("species", "source", "domain")
+        # Check to ensure no required keys are being passed through info_metadata dict
+        self.check_info_keys(info_metadata)
 
-        if info_metadata:
-            common_keys = set(required_keys) & set(info_metadata.keys())
-
-            if common_keys:
-                raise ValueError(
-                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
-                )
-            else:
-                for parsed_data in flux_data:
-                    parsed_data.metadata.update(info_metadata)
+        # Mop up and add additional keys to metadata which weren't passed to the parser
+        flux_data = self.update_metadata(
+            flux_data, additional_input_parameters, additional_metadata=info_metadata
+        )
 
         datasource_uuids = self.assign_data(
             data=flux_data,
             if_exists=if_exists,
             new_version=new_version,
-            required_keys=required_keys,
             compressor=compressor,
             filters=filters,
         )
 
         # "date" used to be part of the "keys" in the old datasource_uuids format
-        if "date" in param:
+        if "date" in fn_input_parameters:
             for du in datasource_uuids:
-                du["date"] = param["date"]
+                du["date"] = fn_input_parameters["date"]
 
         return datasource_uuids
 

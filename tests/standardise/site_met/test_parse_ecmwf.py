@@ -1,4 +1,5 @@
 import pytest
+import xarray as xr
 
 from openghg.util import clean_string
 from openghg.standardise.site_met import parse_ecmwf
@@ -52,3 +53,14 @@ def test_ecmwf_site_met(site, network, filename):
     assert metadata["site"] == site
     assert metadata["network"] == network
     assert metadata["met_source"] == clean_string("ECMWF ERA5")
+
+
+def test_ecmwf_site_met_data():
+    """Test parsing ECMWF site meteorology supplied directly."""
+    filepath = get_met_datapath("Met_tac_agage_201608.nc")
+
+    with xr.open_dataset(filepath) as dataset:
+        parsed = parse_ecmwf(data=dataset.load(), site="tac", network="AGAGE")
+
+    assert parsed[0].metadata["site"] == "tac"
+    assert "u_wind" in parsed[0].data

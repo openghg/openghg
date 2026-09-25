@@ -3,7 +3,7 @@ from pathlib import Path
 import xarray as xr
 
 from openghg.types import MetadataAndData
-from openghg.util import timestamp_now, _get_site_data, clean_string
+from openghg.util import timestamp_now, _get_site_data, clean_string, get_data
 from openghg.util import _get_site_pressure
 
 logger = logging.getLogger("openghg.standardise.met")
@@ -11,7 +11,12 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def parse_ecmwf(
-    filepath: str | Path, site: str, network: str, met_source: str | None = None, chunks: dict | None = None
+    filepath: str | Path | None = None,
+    site: str = "",
+    network: str = "",
+    met_source: str | None = None,
+    chunks: dict | None = None,
+    data: xr.Dataset | None = None,
 ) -> list[MetadataAndData]:
     """
     Parse Met ECMWF data (typically downloaded from the Copernicus Climate Data Store).
@@ -24,7 +29,8 @@ def parse_ecmwf(
     Returns:
         list[MetadataAndData]: List of parsed data objects
     """
-    with xr.open_dataset(filepath).chunk(chunks) as data:
+    with get_data(dataset=data, filepath=filepath, check_coords=None) as data:
+        data = data.chunk(chunks)
 
         rename_coords = {"valid_time": "time", "latitude": "lat", "longitude": "lon"}
 

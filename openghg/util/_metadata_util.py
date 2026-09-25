@@ -1,3 +1,11 @@
+"""Helpers for normalising, comparing, and combining metadata mappings.
+
+These utilities define OpenGHG's null and unset metadata conventions, compare
+metadata values with appropriate numeric and string handling, merge mappings,
+and convert NumPy scalar values to native Python values suitable for storage.
+Functions return new mappings unless their documentation states otherwise.
+"""
+
 from typing import Any, cast, Literal
 from collections.abc import Iterable
 import logging
@@ -13,11 +21,35 @@ __all__ = [
     "check_not_set_value",
     "get_overlap_keys",
     "merge_dict",
+    "convert_numpy_scalars",
 ]
 
 
 logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.INFO)  # Have to set level for logger as well as handler
+
+
+def convert_numpy_scalars(values: dict[Any, Any]) -> dict[Any, Any]:
+    """Convert NumPy scalar mapping values to native Python values.
+
+    Values exposing a successful ``item()`` conversion are replaced by its
+    result. Native Python values, non-scalar arrays, and other values that
+    cannot be converted with ``item()`` are retained unchanged. The input
+    mapping is not modified.
+
+    Args:
+        values: Mapping whose scalar values should be converted.
+
+    Returns:
+        A new mapping containing converted scalar values.
+    """
+    converted = {}
+    for key, value in values.items():
+        try:
+            converted[key] = value.item()
+        except (AttributeError, ValueError):
+            converted[key] = value
+    return converted
 
 
 def null_metadata_values() -> list:

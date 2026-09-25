@@ -87,6 +87,79 @@ def test_parse_edgar_raw(folder, version, species, mean_raw_flux):
     assert metadata.items() >= expected_metadata.items()
 
 
+@pytest.fixture
+def direct_edgar_2015_dataset():
+    """Create deterministic raw pre-v8 EDGAR data for direct-input tests."""
+    raw_flux = np.array([[1.0e-12, 2.0e-12], [3.0e-12, 4.0e-12]], dtype=np.float64)
+    dataset = xr.Dataset(
+        {"emi_ch4": (("lat", "lon"), raw_flux, {"units": "kg m-2 s-1"})},
+        coords={"lat": [-1.0, 1.0], "lon": [-2.0, 2.0]},
+        attrs={
+            "database_version": np.str_("v6.0"),
+            "filename": np.str_("v6.0_CH4_2015_TOTALS.0.1x0.1.nc"),
+            "year": np.int64(2015),
+        },
+    )
+    return dataset, raw_flux
+
+
+def test_parse_edgar_data(direct_edgar_2015_dataset):
+    """Direct pre-v8 raw data is converted, dated, and safely attributed."""
+    dataset, raw_flux = direct_edgar_2015_dataset
+
+    result = parse_edgar(data=dataset, date=2015, species="ch4", source="anthro")
+
+    values = result["ch4_anthro_globaledgar_2015"]
+    transformed = values["data"]
+    np.testing.assert_allclose(transformed["flux"].isel(time=0), raw_flux * 1e3 / 16.0426)
+    np.testing.assert_array_equal(transformed.time.values, [np.datetime64("2015-01-01T00:00:00")])
+    assert transformed["flux"].attrs["units"] == "mol/m2/s"
+    assert transformed.attrs["domain"] == "globaledgar"
+    assert transformed.attrs["year"] == 2015
+    assert isinstance(transformed.attrs["year"], int)
+    assert values["metadata"]["filename"] == "v6.0_CH4_2015_TOTALS.0.1x0.1.nc"
+    assert isinstance(values["metadata"]["filename"], str)
+    assert values["metadata"]["start_date"] == "2015-01-01 00:00:00+00:00"
+    assert values["metadata"]["end_date"] == "2015-12-31 23:59:59+00:00"
+
+
+def test_parse_edgar_data_supports_v8_variable_and_infers_date(direct_edgar_2015_dataset):
+    """Direct v8-style ``fluxes`` data is detected when version metadata is absent."""
+    dataset, raw_flux = direct_edgar_2015_dataset
+    dataset = dataset.rename({"emi_ch4": "fluxes"}).expand_dims(
+        time=np.array(["2015-07-01"], dtype="datetime64[ns]")
+    )
+    dataset.attrs.pop("database_version")
+
+    result = parse_edgar(data=dataset, species="ch4", source="anthro")
+
+    transformed = result["ch4_anthro_globaledgar_2015"]["data"]
+    np.testing.assert_allclose(transformed["flux"].isel(time=0), raw_flux * 1e3 / 16.0426)
+    np.testing.assert_array_equal(transformed.time.values, [np.datetime64("2015-01-01T00:00:00")])
+    assert transformed["flux"].attrs["units"] == "mol/m2/s"
+    metadata = result["ch4_anthro_globaledgar_2015"]["metadata"]
+    assert metadata["start_date"] == "2015-01-01 00:00:00+00:00"
+    assert metadata["end_date"] == "2015-12-31 23:59:59+00:00"
+
+
+def test_parse_edgar_data_rejects_standardised_flux(direct_edgar_2015_dataset):
+    """Already-standardised ``flux`` data is directed to the standardise API."""
+    dataset, _ = direct_edgar_2015_dataset
+    dataset = dataset.rename({"emi_ch4": "flux"})
+
+    with pytest.raises(ValueError, match="standardise_flux"):
+        parse_edgar(data=dataset, date=2015, species="ch4")
+
+
+def test_parse_edgar_data_validates_date_against_time(direct_edgar_2015_dataset):
+    """A supplied year must agree with the direct dataset's time coordinate."""
+    dataset, _ = direct_edgar_2015_dataset
+    dataset = dataset.expand_dims(time=np.array(["2015-01-01"], dtype="datetime64[ns]"))
+
+    with pytest.raises(ValueError, match="does not match"):
+        parse_edgar(data=dataset, date="2014", species="ch4")
+
+
 @pytest.mark.xesmf
 def test_parse_edgar_domain():
     """

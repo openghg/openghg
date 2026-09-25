@@ -12,7 +12,51 @@ For more information, please visit [our documentation](https://docs.openghg.org/
 
 ## Install OpenGHG
 
-OpenGHG supports Python 3.10 and later on Linux or MacOS. To install the package, you can use either `uv` (recommended for its environment management abilities) or `conda`.
+OpenGHG supports Python 3.10 and later on Linux or MacOS. To install the released package, you can use `uv` or `conda`. For development installs from a local checkout, you can also use `pixi`.
+
+### Installing with Pixi for development
+
+OpenGHG reads and writes NetCDF/HDF5 data through `xarray`, `h5netcdf`, `h5py`, `netcdf4`, and `zarr`. The Pixi environment in this repository installs the compiled scientific, HDF5, and NetCDF stack from `conda-forge` and installs the local OpenGHG checkout in editable mode.
+
+Install Pixi directly with one of the following commands.
+
+On macOS or Linux, use the official installer:
+
+```bash
+curl -fsSL https://pixi.sh/install.sh | sh
+```
+
+If `curl` is unavailable, use `wget`:
+
+```bash
+wget -qO- https://pixi.sh/install.sh | sh
+```
+
+On macOS with Homebrew:
+
+```bash
+brew install pixi
+```
+
+Then create the editable OpenGHG development environment from a cloned checkout:
+
+```bash
+git clone https://github.com/openghg/openghg.git
+cd openghg
+pixi install -e dev
+pixi run -e dev python -c "import openghg, h5py, h5netcdf, netCDF4, xarray, zarr"
+```
+
+Useful development commands:
+
+```bash
+pixi run -e dev test
+pixi run -e dev test-storage
+pixi run -e dev lint
+pixi run -e dev typecheck
+```
+
+Do not run commands such as `pip install -U h5py h5netcdf netcdf4` inside the Pixi environment. That can replace Pixi's conda-forge HDF5/NetCDF packages with PyPI wheels and reintroduce binary incompatibilities.
 
 ### Installing with `uv`
 
@@ -96,7 +140,28 @@ When prompted, you can specify the path to the object store. Leave the field bla
 
 ## Developers
 
-If you'd like to contribute to OpenGHG, here are the steps to set up a development environment. You can use either `uv` or `conda`.
+If you'd like to contribute to OpenGHG, here are the steps to set up a development environment. Pixi is recommended when working with NetCDF, HDF5, or Zarr data because it keeps the compiled data stack on `conda-forge`. You can also use `uv` or `conda`.
+
+### Using Pixi for Development
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/openghg/openghg.git
+   cd openghg
+   ```
+
+2. **Install the development environment:**
+   ```bash
+   pixi install -e dev
+   ```
+
+   This installs the local OpenGHG repository in editable mode.
+
+3. **Run checks:**
+   ```bash
+   pixi run -e dev test-storage
+   pixi run -e dev lint
+   ```
 
 ### Using `uv` for Development
 
