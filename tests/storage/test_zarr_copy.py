@@ -68,6 +68,33 @@ def test_copy_prefixes_respect_path_boundaries(stores):
     assert read_keys(dest) == {"archive/a": b"a", "archive/b/c": b"bc", "archive-extra/a": b"keep"}
 
 
+def test_copy_normalizes_separators(stores):
+    source, dest = stores
+    write_keys(source, {"group/sub/a": b"data", "group/submarine/a": b"keep"})
+
+    assert copy_zarr_store(source, dest, source_path=r"\group//sub\\", dest_path=r"/archive\\nested//") == (
+        1,
+        0,
+        4,
+    )
+    assert read_keys(dest) == {"archive/nested/a": b"data"}
+
+
+@pytest.mark.parametrize("path", ["..", "../escaped", "./group", r"group\..\escaped"])
+@pytest.mark.parametrize("argument", ["source_path", "dest_path"])
+@pytest.mark.parametrize("dry_run", [False, True])
+def test_copy_rejects_dot_segments_before_writing(stores, tmp_path, path, argument, dry_run):
+    source, dest = stores
+    write_keys(source, {"a": b"data"})
+    write_keys(dest, {"existing": b"keep"})
+
+    with pytest.raises(ValueError, match="segment"):
+        copy_zarr_store(source, dest, **{argument: path}, dry_run=dry_run)
+
+    assert read_keys(dest) == {"existing": b"keep"}
+    assert not (tmp_path / "escaped").exists()
+
+
 @pytest.mark.parametrize("if_exists", ["raise", "replace", "skip"])
 @pytest.mark.parametrize("dry_run", [False, True])
 def test_copy_conflict_policies(stores, if_exists, dry_run):
