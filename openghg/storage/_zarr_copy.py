@@ -20,7 +20,8 @@ def copy_zarr_store(
 
     Args:
         source: Store to read.
-        dest: Store to write.
+        dest: Store to write. When this is the source object, the source and
+            destination paths must be disjoint.
         source_path: Copy descendants of this slash-delimited path only.
             Paths normalize separators and reject ``.`` and ``..`` segments.
         dest_path: Prefix to add to copied keys after removing ``source_path``.
@@ -33,7 +34,8 @@ def copy_zarr_store(
         a dry run the first count is planned copies and the byte count is zero.
 
     Raises:
-        ValueError: If ``if_exists`` or either path is invalid.
+        ValueError: If ``if_exists`` or either path is invalid, or the paths
+            overlap within the same store object.
         FileExistsError: On a conflicting key with ``if_exists="raise"`` under
             Zarr 3. Zarr 2 raises its native ``zarr.errors.CopyError`` instead.
 
@@ -42,6 +44,25 @@ def copy_zarr_store(
     """
     if if_exists not in ("raise", "replace", "skip"):
         raise ValueError("if_exists must be 'raise', 'replace', or 'skip'.")
+
+    if zarr_has_async_store_api():
+        from zarr.storage._common import normalize_path
+
+        source_path = normalize_path(source_path)
+        dest_path = normalize_path(dest_path)
+    else:
+        from zarr.util import normalize_storage_path
+
+        source_path = normalize_storage_path(source_path)
+        dest_path = normalize_storage_path(dest_path)
+    if source is dest and (
+        not source_path
+        or not dest_path
+        or source_path == dest_path
+        or source_path.startswith(dest_path + "/")
+        or dest_path.startswith(source_path + "/")
+    ):
+        raise ValueError("Source and destination paths overlap within the same store.")
 
     if not zarr_has_async_store_api():
         from zarr.convenience import copy_store
@@ -72,10 +93,9 @@ async def _copy_async(
     dry_run: bool,
 ) -> tuple[int, int, int]:
     from zarr.core.buffer import default_buffer_prototype
-    from zarr.storage._common import normalize_path
 
-    source_prefix = normalize_path(source_path)
-    dest_prefix = normalize_path(dest_path)
+    source_prefix = source_path
+    dest_prefix = dest_path
     if source_prefix:
         source_prefix += "/"
     if dest_prefix:
