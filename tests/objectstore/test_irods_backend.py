@@ -1,7 +1,9 @@
 """Backend lifecycle and datasource parity over the in-memory iRODS transport."""
 
 from contextlib import contextmanager
+from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
+from threading import Event
 
 import numpy as np
 import pandas as pd
@@ -89,6 +91,47 @@ def test_context_reentry_catalog_state_and_deferred_lazy_reads(backend, remote):
     with backend:
         backend.update(uuid, metadata={"comment": "changed"})
     assert backend.search(comment="changed")[0]["uuid"] == uuid
+    assert remote.state.opened == remote.state.closed
+
+
+def test_inflight_lazy_read_owns_session_when_writer_context_closes(backend, remote):
+    backend.cache_dir = None
+    original = dataset()
+    started, resume = Event(), Event()
+    open_object = remote.session.data_objects.open.side_effect
+
+    def blocked_open(*args, **kwargs):
+        started.set()
+        assert resume.wait(timeout=5)
+        return open_object(*args, **kwargs)
+
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        try:
+            with backend:
+                uuid = backend.create({"species": "ch4"}, original, period="3600s")
+                lazy = backend.get_datasource(uuid).get_data()
+                remote.session.data_objects.open.side_effect = blocked_open
+                result = pool.submit(lazy.load, scheduler="synchronous")
+                assert started.wait(timeout=5)
+            # Closing the writer must leave the in-flight reader's session alive.
+            assert remote.state.active == 1
+        finally:
+            resume.set()
+        xr.testing.assert_equal(result.result(timeout=5), original)
+    assert remote.state.opened == remote.state.closed
+
+
+def test_dataset_close_does_not_close_writer_or_sibling_reader(backend, remote):
+    original = dataset()
+    with backend:
+        uuid = backend.create({"species": "ch4"}, original, period="3600s")
+        source = backend.get_datasource(uuid)
+        reader, sibling = source.get_data(), source.get_data()
+        reader.close()
+        reader.close()
+        assert remote.state.active == 1
+    xr.testing.assert_equal(sibling.load(), original)
+    sibling.close()
     assert remote.state.opened == remote.state.closed
 
 

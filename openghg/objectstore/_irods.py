@@ -34,15 +34,16 @@ from openghg.types import ObjectStoreError
 
 
 class _Sessions:
-    """Reuse the context's connection, reopening connections for deferred reads."""
+    """Reuse the owning thread's connection; other operations open their own."""
 
     def __init__(self, factory: SessionFactory) -> None:
         self.factory = factory
         self.active: Any = None
+        self.active_thread: int | None = None
 
     @contextmanager
     def __call__(self) -> Iterator[Any]:
-        if self.active is not None:
+        if self.active is not None and self.active_thread == threading.get_ident():
             yield self.active
         else:
             with self.factory() as session:
@@ -432,6 +433,7 @@ class IRODSObjectStore(ObjectStore[IRODSDatasource, xr.Dataset]):
             self._context_guard.release()
             raise
         self._connection = connection
+        self._sessions.active_thread = threading.get_ident()
         self._sessions.active = active
         try:
             if self.mode == "rw":
