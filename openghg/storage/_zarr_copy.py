@@ -22,6 +22,7 @@ def copy_zarr_store(
         source: Store to read.
         dest: Store to write.
         source_path: Copy descendants of this slash-delimited path only.
+            Paths normalize separators and reject ``.`` and ``..`` segments.
         dest_path: Prefix to add to copied keys after removing ``source_path``.
         if_exists: Raise on, replace, or skip existing destination keys.
             Destination-only keys are retained.
@@ -32,7 +33,7 @@ def copy_zarr_store(
         a dry run the first count is planned copies and the byte count is zero.
 
     Raises:
-        ValueError: If ``if_exists`` is invalid.
+        ValueError: If ``if_exists`` or either path is invalid.
         FileExistsError: On a conflicting key with ``if_exists="raise"`` under
             Zarr 3. Zarr 2 raises its native ``zarr.errors.CopyError`` instead.
 
@@ -71,9 +72,10 @@ async def _copy_async(
     dry_run: bool,
 ) -> tuple[int, int, int]:
     from zarr.core.buffer import default_buffer_prototype
+    from zarr.storage._common import normalize_path
 
-    source_prefix = source_path.strip("/")
-    dest_prefix = dest_path.strip("/")
+    source_prefix = normalize_path(source_path)
+    dest_prefix = normalize_path(dest_path)
     if source_prefix:
         source_prefix += "/"
     if dest_prefix:
