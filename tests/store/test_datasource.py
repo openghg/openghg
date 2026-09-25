@@ -7,6 +7,7 @@ import xarray as xr
 from helpers import get_surface_datapath, get_footprint_datapath
 from openghg.objectstore import get_bucket, exists
 from openghg.standardise.surface import parse_crds
+from openghg.storage._zarr_compat import iter_store_keys
 from openghg.objectstore import Datasource
 from openghg.objectstore._legacy_datasource import plan_timed_data_update
 from openghg.types import ObjectStoreError, ZarrStoreError
@@ -409,7 +410,7 @@ def test_data_version_deletion(data, datasource):
     d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
 
     d._store.checkout_version("v1")
-    zarr_keys = set(d._store.store.keys())
+    zarr_keys = set(iter_store_keys(d._store.store))
 
     partial_expected_keys = {
         "ch4/.zarray",

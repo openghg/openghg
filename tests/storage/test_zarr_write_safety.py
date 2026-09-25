@@ -6,10 +6,16 @@ import pytest
 import xarray as xr
 
 from openghg.storage import get_zarr_directory_store
+from openghg.storage._zarr_compat import zarr_has_async_store_api
 
 
-def test_noncontiguous_regions_sharing_chunk_are_written_sequentially(tmp_path, monkeypatch):
-    store = get_zarr_directory_store(tmp_path, encoding={"x": {"chunks": (12,)}})
+@pytest.fixture(params=(2, 3) if zarr_has_async_store_api() else (2,), ids=lambda value: f"format{value}")
+def zarr_format(request):
+    return request.param
+
+
+def test_noncontiguous_regions_sharing_chunk_are_written_sequentially(tmp_path, monkeypatch, zarr_format):
+    store = get_zarr_directory_store(tmp_path, zarr_format=zarr_format, encoding={"x": {"chunks": (12,)}})
     original = xr.Dataset({"x": ("time", np.arange(12))}, coords={"time": np.arange(12)})
     store.insert(original)
     update = original.isel(time=[1, 2, 8, 9]).copy(deep=True)
@@ -37,8 +43,8 @@ def test_noncontiguous_regions_sharing_chunk_are_written_sequentially(tmp_path, 
     assert region_calls == [{"time": slice(1, 3)}, {"time": slice(8, 10)}]
 
 
-def test_misaligned_dask_insert_append_and_update(tmp_path):
-    store = get_zarr_directory_store(tmp_path, encoding={"x": {"chunks": (4,)}})
+def test_misaligned_dask_insert_append_and_update(tmp_path, zarr_format):
+    store = get_zarr_directory_store(tmp_path, zarr_format=zarr_format, encoding={"x": {"chunks": (4,)}})
     original = xr.Dataset({"x": ("time", np.arange(15))}, coords={"time": np.arange(15)})
 
     with dask.config.set(scheduler="threads", num_workers=4):
@@ -55,14 +61,16 @@ def test_misaligned_dask_insert_append_and_update(tmp_path):
     xr.testing.assert_equal(store.get(), expected)
 
 
-def test_disabled_alignment_keeps_chunk_safety_validation(tmp_path):
-    store = get_zarr_directory_store(tmp_path, encoding={"x": {"chunks": (4,)}}, align_chunks=False)
+def test_disabled_alignment_keeps_chunk_safety_validation(tmp_path, zarr_format):
+    store = get_zarr_directory_store(
+        tmp_path, zarr_format=zarr_format, encoding={"x": {"chunks": (4,)}}, align_chunks=False
+    )
     data = xr.Dataset({"x": ("time", np.arange(12))}, coords={"time": np.arange(12)}).chunk(time=3)
     with pytest.raises(ValueError, match="overlap multiple Dask chunks"):
         store.insert(data)
 
 
-def test_older_xarray_uses_validation_and_rejects_explicit_alignment(tmp_path, monkeypatch):
+def test_older_xarray_uses_validation_and_rejects_explicit_alignment(tmp_path, monkeypatch, zarr_format):
     to_zarr = xr.Dataset.to_zarr
 
     # Model the pre-align_chunks API while still exercising real chunk validation.
@@ -71,9 +79,9 @@ def test_older_xarray_uses_validation_and_rejects_explicit_alignment(tmp_path, m
         return to_zarr(self, *args, **kwargs)
 
     monkeypatch.setattr(xr.Dataset, "to_zarr", old_to_zarr)
-    store = get_zarr_directory_store(tmp_path, encoding={"x": {"chunks": (4,)}})
+    store = get_zarr_directory_store(tmp_path, zarr_format=zarr_format, encoding={"x": {"chunks": (4,)}})
     data = xr.Dataset({"x": ("time", np.arange(12))}, coords={"time": np.arange(12)})
     with pytest.raises(ValueError, match="overlap multiple Dask chunks"):
         store.insert(data.chunk(time=3))
     with pytest.raises(ValueError, match="newer Xarray"):
-        get_zarr_directory_store(tmp_path, align_chunks=True)
+        get_zarr_directory_store(tmp_path, zarr_format=zarr_format, align_chunks=True)
