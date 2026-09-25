@@ -73,6 +73,7 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS"]
 [project.optional-dependencies]
+    irods = ["python-irodsclient>=3.3,<4"]
     fp-x-flux = [
         # Prevent resolvers backtracking to old Numba/llvmlite releases.
         # This mirrors the lower bound used by openghg_inversions.

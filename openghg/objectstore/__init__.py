@@ -2,6 +2,10 @@ from importlib import import_module as _import_module
 from typing import Any
 
 __all__ = [
+    "IRODSObjectStore",
+    "PublicationConflictError",
+    "ObjectStore",
+    "DocumentStore",
     "delete_object",
     "delete_objects",
     "exists",
@@ -38,6 +42,10 @@ __all__ = [
 ]
 
 _EXPORTS = {
+    "IRODSObjectStore": "._irods",
+    "PublicationConflictError": "._irods_metastore",
+    "ObjectStore": "._objectstore",
+    "DocumentStore": "._documents",
     "delete_object": "._local_store",
     "delete_objects": "._local_store",
     "exists": "._local_store",
