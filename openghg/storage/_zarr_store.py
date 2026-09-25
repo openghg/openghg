@@ -239,8 +239,6 @@ class ZarrStore(Store, Generic[ZST]):
                     safe_chunks=False,
                 )
             except (ValueError, IndexError):
-                import dask
-
                 kwargs = self.index_options.copy()
 
                 # only allow one source value to align to a given target value; if multiple source values
@@ -277,29 +275,19 @@ class ZarrStore(Store, Generic[ZST]):
                 # now proceed with variables that contain the append dim
                 data = data.drop_vars(non_region_vars)
 
-                # create delayed tasks to write to each region
-                delayed = []
-
-                # We will execute multiple writes with dask, so these writes need to share the
-                # same ThreadSynchronizer, which keeps a lock for each chunk. A chunk can
-                # only be written to while the writer holds this lock. If we create the synchronizers
-                # inside the loop (e.g. inside the call to `to_zarr`, as above) then each chunk would have
-                # multiple locks, and we could have data corruption from competing writes.
-                synchronizer = zarr.ThreadSynchronizer()
+                # Separate regions can share a stored chunk. Finish each write before
+                # starting the next so their read-modify-write cycles cannot race.
                 for sregion, tregion in zip(source_regions, target_regions):
                     region = {self.append_dim: slice(tregion[0], tregion[-1] + 1)}
-                    res = data.isel({self.append_dim: sregion}).to_zarr(
+                    data.isel({self.append_dim: sregion}).to_zarr(
                         store=self._xarray_store,
                         mode="r+",
                         region=region,
                         consolidated=True,
-                        compute=False,
-                        synchronizer=synchronizer,
+                        compute=True,
+                        synchronizer=zarr.ThreadSynchronizer(),
                         safe_chunks=False,
                     )
-                    delayed.append(res)
-
-                dask.compute(*delayed)  # type: ignore
 
 
 def get_zarr_directory_store(
