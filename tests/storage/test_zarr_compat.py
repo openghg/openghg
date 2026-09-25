@@ -58,3 +58,16 @@ def test_store_helpers(tmp_path: Path, local: bool) -> None:
 def test_runtime_detection() -> None:
     """Detect the storage API independently of the data's Zarr format."""
     assert zarr_has_async_store_api() == (int(zarr.__version__.split(".")[0]) >= 3)
+
+
+def test_clear_nonexistent_local_store(tmp_path: Path) -> None:
+    """Empty destination cleanup is repeatable before and after its first write."""
+    path = tmp_path / "missing" / "store"
+    store = make_local_store(path)
+    clear_store(store)
+    assert not path.exists()
+    put_bytes(store, "array/0", b"chunk")
+    clear_store(store)
+    clear_store(store)
+    assert not path.exists()
+    assert store_is_empty(store)

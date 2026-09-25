@@ -16,12 +16,12 @@ from ._store import Store, UpdateError, VersionedStore
 from ._zarr_compat import (
     ZarrStoreLike,
     clear_store,
-    copy_store,
     make_local_store,
     make_memory_store,
     store_byte_size,
     store_is_empty,
 )
+from ._zarr_copy import copy_zarr_store
 
 logger = logging.getLogger("openghg.storage")
 logger.setLevel(logging.DEBUG)
@@ -419,8 +419,11 @@ class VersionedZarrStore(VersionedStore, SimpleVersioning[ZST], ZarrStore[ZST]):
 
         The version "v" is created if it doesn't exist, and is overwritten otherwise.
 
-        This overrides the default method using `.deepcopy` to use Zarr's built in
-        copying method.
+        Encoded chunks and metadata are copied without decoding. A failed copy
+        to a new version removes its partial data and does not register the
+        version. Replacing an existing version is not transactional; a failed
+        replacement can leave it partially written. Copying to the current
+        version does nothing.
 
         Args:
             v: version to copy to
@@ -430,11 +433,19 @@ class VersionedZarrStore(VersionedStore, SimpleVersioning[ZST], ZarrStore[ZST]):
 
         """
         source = self._current  # will raise VersionError if no version checked out
+        if v == self.current_version:
+            return
 
-        if v not in self.versions:
-            self._versions[v] = self.factory(v)
-        dest = self._versions[v]
-        copy_store(source, dest)
+        is_new = v not in self.versions
+        dest = self.factory(v) if is_new else self._versions[v]
+        try:
+            clear_store(dest)
+            copy_zarr_store(source, dest, if_exists="replace")
+        except Exception:
+            if is_new:
+                clear_store(dest)
+            raise
+        self._versions[v] = dest
 
 
 def get_versioned_zarr_directory_store(

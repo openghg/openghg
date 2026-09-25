@@ -69,6 +69,8 @@ def clear_store(store: ZarrStoreLike, prefix: str | None = None) -> None:
         from zarr.core.sync import sync
 
         if not prefix:
+            if isinstance(store, zarr.storage.LocalStore) and not store.root.exists() and not store.read_only:
+                return
             sync(store.clear())
             if isinstance(store, zarr.storage.LocalStore) and store.root.exists():
                 store.root.rmdir()
@@ -95,10 +97,3 @@ def store_byte_size(store: ZarrStoreLike, prefix: str | None = None) -> int:
 
         return sum(sync(store.getsize(key)) for key in iter_store_keys(store, prefix))
     return sum(store.getsize(key) for key in iter_store_keys(store, prefix))
-
-
-def copy_store(source: ZarrStoreLike, dest: ZarrStoreLike) -> None:
-    """Copy a Zarr 2 store; Zarr 3 copying is supplied by the next migration stage."""
-    if zarr_has_async_store_api():
-        raise NotImplementedError("Zarr 3 store copying is not implemented yet.")
-    zarr.copy_store(source, dest)
