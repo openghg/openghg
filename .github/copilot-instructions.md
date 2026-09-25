@@ -96,5 +96,4 @@ Special test handling:
 - If a relevant check could not run because dependencies, network access, or
   compiled system libraries were unavailable, say so explicitly.
 - Do not include generated caches, local object stores, virtual environments, or
-  graphify output in code changes unless the task explicitly asks for them or the
-  Graphify freshness check requires regeneration.
+  graphify output in code changes unless the task explicitly asks for them.
