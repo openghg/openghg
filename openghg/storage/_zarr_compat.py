@@ -95,10 +95,3 @@ def store_byte_size(store: ZarrStoreLike, prefix: str | None = None) -> int:
 
         return sum(sync(store.getsize(key)) for key in iter_store_keys(store, prefix))
     return sum(store.getsize(key) for key in iter_store_keys(store, prefix))
-
-
-def copy_store(source: ZarrStoreLike, dest: ZarrStoreLike) -> None:
-    """Copy a Zarr 2 store; Zarr 3 copying is supplied by the next migration stage."""
-    if zarr_has_async_store_api():
-        raise NotImplementedError("Zarr 3 store copying is not implemented yet.")
-    zarr.copy_store(source, dest)
