@@ -1,12 +1,12 @@
 from collections.abc import Callable, Iterable
 import logging
+from inspect import signature
 from pathlib import Path
 import re
 from typing import Any, cast, Generic, Literal, TypeVar
 
 import pandas as pd
 import xarray as xr
-import zarr
 
 from openghg.types import DataOverlapError
 from openghg.util._versioning import SimpleVersioning
@@ -37,7 +37,12 @@ def parse_to_zarr_kwargs(to_zarr_kwargs: dict) -> dict:
         Dictionary containing supported zarr writer keyword arguments.
     """
     accepted_keys = ["write_empty_chunks", "zarr_format", "storage_options"]
-    result = {}
+    supports_alignment = "align_chunks" in signature(xr.Dataset.to_zarr).parameters
+    if to_zarr_kwargs.get("align_chunks") and not supports_alignment:
+        raise ValueError("align_chunks=True requires a newer Xarray with chunk alignment support.")
+    result = {"align_chunks": True} if supports_alignment else {}
+    if supports_alignment:
+        accepted_keys.append("align_chunks")
     for k, v in to_zarr_kwargs.items():
         if k in accepted_keys:
             result[k] = v
@@ -78,6 +83,7 @@ class ZarrStore(Store, Generic[ZST]):
 
               Accepted arguments are:
               - `write_empty_chunks`
+              - `align_chunks`: rechunk Dask writes safely (defaults to True when supported by Xarray).
               - `zarr_format` (automatically inferred by default)
               - `storage_options`: only relevant to cloud storage, see
                  https://github.com/pydata/xarray/pull/5615
@@ -172,7 +178,6 @@ class ZarrStore(Store, Generic[ZST]):
                 mode="w",
                 consolidated=True,
                 compute=True,
-                synchronizer=zarr.ThreadSynchronizer(),
                 encoding=encoding,
                 **self.to_zarr_kwargs,
             )
@@ -193,8 +198,6 @@ class ZarrStore(Store, Generic[ZST]):
                 append_dim=self.append_dim,
                 consolidated=True,
                 compute=True,
-                synchronizer=zarr.ThreadSynchronizer(),
-                safe_chunks=False,
                 **self.to_zarr_kwargs,
             )
 
@@ -235,8 +238,7 @@ class ZarrStore(Store, Generic[ZST]):
                     region="auto",
                     consolidated=True,
                     compute=True,
-                    synchronizer=zarr.ThreadSynchronizer(),
-                    safe_chunks=False,
+                    **self.to_zarr_kwargs,
                 )
             except (ValueError, IndexError):
                 kwargs = self.index_options.copy()
@@ -268,8 +270,7 @@ class ZarrStore(Store, Generic[ZST]):
                     region="auto",
                     consolidated=True,
                     compute=True,
-                    synchronizer=zarr.ThreadSynchronizer(),
-                    safe_chunks=False,
+                    **self.to_zarr_kwargs,
                 )
 
                 # now proceed with variables that contain the append dim
@@ -285,8 +286,7 @@ class ZarrStore(Store, Generic[ZST]):
                         region=region,
                         consolidated=True,
                         compute=True,
-                        synchronizer=zarr.ThreadSynchronizer(),
-                        safe_chunks=False,
+                        **self.to_zarr_kwargs,
                     )
 
 
@@ -374,6 +374,7 @@ class VersionedZarrStore(VersionedStore, SimpleVersioning[ZST], ZarrStore[ZST]):
 
               Accepted arguments are:
               - `write_empty_chunks`
+              - `align_chunks`: rechunk Dask writes safely (defaults to True when supported by Xarray).
               - `zarr_format` (automatically inferred by default)
               - `storage_options`: only relevant to cloud storage, see
                  https://github.com/pydata/xarray/pull/5615
