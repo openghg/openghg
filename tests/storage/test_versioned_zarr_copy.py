@@ -1,3 +1,5 @@
+"""Test version copying independently of the OpenGHG append/update writers."""
+
 import numpy as np
 import pytest
 import xarray as xr
@@ -22,10 +24,12 @@ def dataset():
 
 def test_copy_replaces_existing_version_exactly(store, dataset):
     store.create_version("v1", checkout=True)
-    store.insert(dataset)
+    dataset.to_zarr(store.store, mode="w", consolidated=True, zarr_format=2)
     source_keys = set(iter_store_keys(store.store))
     store.create_version("v2", checkout=True)
-    store.insert(dataset.assign(stale=("time", np.ones(6))))
+    dataset.assign(stale=("time", np.ones(6))).to_zarr(
+        store.store, mode="w", consolidated=True, zarr_format=2
+    )
     assert any(key.startswith("stale/") for key in iter_store_keys(store.store))
 
     store.checkout_version("v1")
@@ -40,7 +44,7 @@ def test_copy_replaces_existing_version_exactly(store, dataset):
 
 def test_failed_new_version_copy_cleans_up(store, dataset, monkeypatch, tmp_path):
     store.create_version("v1", checkout=True)
-    store.insert(dataset)
+    dataset.to_zarr(store.store, mode="w", consolidated=True, zarr_format=2)
     source_keys = set(iter_store_keys(store.store))
 
     def fail_after_write(source, dest, **kwargs):
@@ -63,14 +67,14 @@ def test_failed_new_version_copy_cleans_up(store, dataset, monkeypatch, tmp_path
 
     # The same name is reusable after cleanup and the successful copy is isolated.
     store.create_version("v2", checkout=True, copy_current=True)
-    store.update(dataset.assign(x=dataset.x + 10))
+    dataset.assign(x=dataset.x + 10).to_zarr(store.store, mode="w", consolidated=True, zarr_format=2)
     store.checkout_version("v1")
     xr.testing.assert_identical(store.get().compute(), dataset)
 
 
 def test_copy_current_version_is_noop(store, dataset, monkeypatch):
     store.create_version("v1", checkout=True)
-    store.insert(dataset)
+    dataset.to_zarr(store.store, mode="w", consolidated=True, zarr_format=2)
 
     def unexpected_copy(*args, **kwargs):
         pytest.fail("Copying to the current version must not clear or copy its data.")

@@ -69,6 +69,8 @@ def clear_store(store: ZarrStoreLike, prefix: str | None = None) -> None:
         from zarr.core.sync import sync
 
         if not prefix:
+            if isinstance(store, zarr.storage.LocalStore) and not store.root.exists() and not store.read_only:
+                return
             sync(store.clear())
             if isinstance(store, zarr.storage.LocalStore) and store.root.exists():
                 store.root.rmdir()
