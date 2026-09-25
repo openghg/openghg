@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Serialize non-contiguous Zarr update regions so regions sharing a chunk cannot overwrite each other. [Issue #1663](https://github.com/openghg/openghg/issues/1663)
+
 - Made Zarr version copies replace stale destination keys and clean up newly created destinations after failed copies. [Issue #1661](https://github.com/openghg/openghg/issues/1661)
 
 - Added column `max_level` consistency validation to `ModelScenario` and preserved `max_level` metadata when standardising ACRG and PARIS column footprints, preventing observations and footprints with different vertical extents from being combined. [PR #1718](https://github.com/openghg/openghg/pull/1718)
