@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Align Dask-backed Zarr writes with stored chunks when supported by Xarray, and retain safe-chunk validation without Zarr synchronizers. [Issue #1662](https://github.com/openghg/openghg/issues/1662)
+
 - Serialize non-contiguous Zarr update regions so regions sharing a chunk cannot overwrite each other. [Issue #1663](https://github.com/openghg/openghg/issues/1663)
 
 - Made Zarr version copies replace stale destination keys and clean up newly created destinations after failed copies. [Issue #1661](https://github.com/openghg/openghg/issues/1661)
