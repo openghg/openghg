@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-import json
 import logging
 from pathlib import Path
-from typing import Any, Optional, cast
+from typing import Any, Optional
+
+from openghg.util._file import load_json
 
 __all__ = [
     "get_species_info",
@@ -32,8 +33,7 @@ def get_species_info(species_filepath: str | Path | None = None) -> dict[str, An
     from openghg_defs import species_info_file
 
     fpath = species_info_file if species_filepath is None else species_filepath
-
-    return cast(dict[str, Any], json.loads(Path(fpath).read_text()))
+    return load_json(fpath)
 
 
 def synonyms(
