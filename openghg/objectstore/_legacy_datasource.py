@@ -903,10 +903,9 @@ class Datasource(AbstractDatasource[XrDataset]):
         if version == "latest":
             version = self._latest_version
 
-        try:
-            keys = self._data_keys[version]
-        except KeyError:
+        if version not in self._data_keys:
             raise KeyError(f"Invalid version, valid versions {list(self._data_keys.keys())}")
+        keys = self._data_keys[version]
 
         return list(keys) if self._versioning_policy == "immutable" else keys
 

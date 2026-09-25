@@ -1,10 +1,16 @@
 from collections import defaultdict
+from collections.abc import Iterator
+from contextlib import contextmanager
 import copy
 import logging
+from typing import TYPE_CHECKING
 
 from openghg.objectstore import locking_object_store, LockingObjectStoreType
 from openghg.objectstore import get_writable_bucket, get_writable_buckets
 from openghg.types import ObjectStoreError
+
+if TYPE_CHECKING:
+    from openghg.objectstore import Datasource
 
 logger = logging.getLogger("openghg.dataobjects")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -28,6 +34,52 @@ class DataManager:
 
     def objectstore(self, data_type: str) -> LockingObjectStoreType:
         return locking_object_store(bucket=self._bucket, data_type=data_type)
+
+    @contextmanager
+    def datasource(self, uuid: str) -> Iterator["Datasource"]:
+        """Open a selected Datasource for explicit edits under its store's writer lock.
+
+        Use ``begin_edit`` on the yielded handle and explicitly commit the editor
+        to publish a new version. Exiting either context discards pending edits;
+        this context never saves the Datasource automatically. The handle remains
+        readable after exit, including lazy data already returned, but cannot
+        start or perform further writes.
+
+        Args:
+            uuid: UUID selected by this manager, in its configured object store.
+
+        Yields:
+            The backend's writable Datasource, without merged search metadata.
+
+        Raises:
+            ValueError: If the UUID is not selected by this manager.
+            ObjectStoreError: If the configured object store denies write access.
+            PermissionError: If the configured backend denies write access.
+        """
+        if not isinstance(uuid, str):
+            raise ValueError("Pass a single selected Datasource UUID.")
+        data_type = self._check_datatypes(uuid)
+        with self.objectstore(data_type=data_type) as objstore:
+            datasource = objstore.get_datasource(uuid=uuid)
+            active = True
+
+            def require_active_context() -> None:
+                if not active:
+                    raise RuntimeError("Reopen manager.datasource(uuid) before editing this Datasource.")
+
+            datasource._edit_context_guard = require_active_context
+            try:
+                yield datasource
+            finally:
+                try:
+                    pending_edit = getattr(datasource, "_active_edit", None)
+                    if pending_edit is not None:
+                        pending_edit.abort()
+                finally:
+                    active = False
+                results = objstore.search(uuid=uuid)
+                if results:
+                    self.metadata[uuid] = self._clean_metadata({uuid: dict(results[0])})[uuid]
 
     def _clean_metadata(self, metadata: dict) -> dict:
         """Ensures the metadata we give to the user is the metadata

@@ -27,4 +27,7 @@ jobs:
       - name: Select the Zarr runtime for this compatibility lane
         run: uv pip install "zarr==${{ matrix.zarr }}"
       - name: Test storage without restoring the default Zarr pin
-        run: uv run --no-sync pytest -v tests/storage tests/store/test_datasource.py
+        run: >-
+          uv run --no-sync pytest -v tests/storage tests/store/test_datasource.py
+          tests/store/test_datasource_edit.py tests/store/test_datasource_edit_backend.py
+          tests/dataobjects/test_datasource_handle.py
