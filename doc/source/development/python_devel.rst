@@ -234,6 +234,31 @@ To pass arguments to ``pytest``, you can append them after the ``tox`` command a
    tox run -e py313 -- tests/analyse/test_scenario.py
 
 
+Testing Zarr storage compatibility
+---------------------------------
+
+The storage compatibility workflow tests zarr-python 2.18.3 with Zarr format 2,
+and zarr-python 3.1.6 with formats 2 and 3. These are separate choices: installing
+zarr-python 3 does not change the default format of newly created OpenGHG stores,
+which remains format 2. Pass ``zarr_format=3`` to a Zarr storage factory to opt in
+to format 3.
+
+The normal installation remains pinned to zarr-python 2.18.3. To reproduce the
+compatibility lane, use a separate checkout with Python 3.12 and ``uv``:
+
+.. code-block:: bash
+
+   uv sync --extra dev
+   uv pip install "zarr==3.1.6"
+   uv run --no-sync pytest -v tests/storage tests/store/test_datasource.py
+
+Use ``zarr==2.18.3`` instead for the baseline lane. ``--no-sync`` is necessary
+after the override, because an ordinary ``uv run`` restores the project's Zarr
+pin. Do not apply this override to a Pixi environment. The matrix checks memory
+and local stores, including version copying, appends, overlaps, updates, clearing,
+deletion and storage accounting. It does not establish compatibility of the whole
+OpenGHG application with zarr-python 3.
+
 Coding Style
 ============
 

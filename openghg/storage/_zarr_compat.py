@@ -30,7 +30,7 @@ def make_local_store(path: str | Path) -> ZarrStoreLike:
     """Create a store rooted at a filesystem path without clearing existing data."""
     if zarr_has_async_store_api():
         return zarr.storage.LocalStore(path)
-    return zarr.storage.DirectoryStore(path)
+    return getattr(zarr.storage, "DirectoryStore")(path)
 
 
 def iter_store_keys(store: ZarrStoreLike, prefix: str | None = None) -> Iterator[str]:
