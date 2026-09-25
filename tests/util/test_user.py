@@ -192,3 +192,46 @@ def test_handle_direct_store_path(caplog, reset_mock_user_config):
 
     with pytest.raises(ObjectStoreError):
         handle_direct_store_path(path=path, add_new_store=True)
+
+
+def test_custom_factory_config_preserves_uri_and_options(
+    mock_get_user_config_path, tmp_config_path, monkeypatch
+):
+    from openghg.util._user import _combine_config
+
+    store = {
+        "path": "custom://server/zone/catalog",
+        "permissions": "rw",
+        "factory": "example.backend:factory",
+        "options": {"environment_file": "~/.irods/irods_environment.json"},
+        "credentials_env": {"password": "IRODS_PASSWORD"},
+    }
+    config = _combine_config("2", {"user": store})
+    tmp_config_path.write_text(toml.dumps(config))
+
+    def unexpected_local_probe(*args):
+        pytest.fail("Custom factories must not be checked for local Zarr layout")
+
+    monkeypatch.setattr("openghg.util._user._check_valid_store", unexpected_local_probe)
+    assert read_local_config()["object_store"]["user"] == store
+    check_config()
+
+
+@pytest.mark.parametrize("new_path", [None, "custom://other-server/zone/catalog"])
+def test_interactive_config_retains_custom_factory(mock_get_user_config_path, tmp_config_path, new_path):
+    from openghg.util._user import _combine_config
+
+    store = {
+        "path": "custom://server/zone/catalog",
+        "permissions": "r",
+        "factory": "example.backend:factory",
+        "options": {"profile": "science"},
+        "credentials_env": {"password": "IRODS_PASSWORD"},
+    }
+    tmp_config_path.write_text(toml.dumps(_combine_config("2", {"user": store})))
+    responses = ["y", new_path, "n"] if new_path else ["n", "n"]
+    with patch.object(builtins, "input", side_effect=responses):
+        create_config()
+    if new_path:
+        store["path"] = new_path
+    assert toml.loads(tmp_config_path.read_text())["object_store"]["user"] == store
