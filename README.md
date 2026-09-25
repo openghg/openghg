@@ -181,8 +181,12 @@ If you'd like to contribute to OpenGHG, here are the steps to set up a developme
    Python 3.13 is the recommended version. A python environment with name can
    also be created, as showed in non-developer instance previously.
    Additionally, any supported python version (3.11-3.13) can be specified
-   while creating the environment as follows.
+   while creating the environment as follows. Keep `UV_PYTHON` set when
+   running subsequent `uv sync` and `uv run` commands so that uv continues
+   to use the selected version; substitute `3.11` if that is your chosen
+   version.
    ```bash
+   export UV_PYTHON=3.12
    uv venv --python 3.12
    ```
    > **Note:**

@@ -200,14 +200,16 @@ After following the installation instructions, you can install multiple versions
     pyenv install 3.12
     pyenv install 3.13
 
-To view all available versions, call ``pyenv versions``. To view and set your preferred version globally, use ``pyenv global``.
-To activate multiple versions of Python, you can use ``pyenv local``:
+To view all available versions, call ``pyenv versions``. To view and set your preferred version globally,
+use ``pyenv global``.
+To activate multiple versions of Python for the current shell, you can use ``pyenv shell``:
 
 .. code-block:: bash
 
-    pyenv local 3.11 3.12 3.13
+    pyenv shell 3.11 3.12 3.13
 
-This makes Python 3.11 through 3.13 available in the current directory.
+This makes Python 3.11 through 3.13 available in the current shell without modifying the repository's
+``.python-version`` file.
 The ``python`` command will default to the first version in the list; in this case, Python 3.11.
 
 Running tests with ``tox``
