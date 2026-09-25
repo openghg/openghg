@@ -3210,6 +3210,18 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "tests_storage_test_zarr_copy_test_same_store_overlapping_paths_are_rejected_without_changes",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L182",
+      "target": "openghg_storage_zarr_copy_copy_zarr_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "tests_store_test_base_test_default_metakey_is_class_attribute",
       "source_file": "tests/store/test_base.py",
       "source_location": "L6",
@@ -10630,7 +10642,7 @@
       "relation": "calls",
       "source": "openghg_storage_zarr_copy_copy_zarr_store",
       "source_file": "openghg/storage/_zarr_copy.py",
-      "source_location": "L46",
+      "source_location": "L48",
       "target": "openghg_storage_zarr_compat_zarr_has_async_store_api",
       "weight": 1.0
     },
@@ -10641,7 +10653,7 @@
       "relation": "calls",
       "source": "openghg_storage_zarr_copy_copy_zarr_store",
       "source_file": "openghg/storage/_zarr_copy.py",
-      "source_location": "L62",
+      "source_location": "L83",
       "target": "openghg_storage_zarr_copy_copy_async",
       "weight": 1.0
     },
@@ -20418,6 +20430,61 @@
       "confidence": "EXTRACTED",
       "context": "call",
       "relation": "calls",
+      "source": "tests_storage_test_zarr_copy_test_same_store_disjoint_paths_preserve_source_payloads",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L190",
+      "target": "tests_storage_test_zarr_copy_write_keys",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_storage_test_zarr_copy_test_same_store_disjoint_paths_preserve_source_payloads",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L192",
+      "target": "openghg_storage_zarr_copy_copy_zarr_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_storage_test_zarr_copy_test_same_store_disjoint_paths_preserve_source_payloads",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L193",
+      "target": "tests_storage_test_zarr_copy_read_keys",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_storage_test_zarr_copy_test_same_store_overlapping_paths_are_rejected_without_changes",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L179",
+      "target": "tests_storage_test_zarr_copy_write_keys",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_storage_test_zarr_copy_test_same_store_overlapping_paths_are_rejected_without_changes",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L184",
+      "target": "tests_storage_test_zarr_copy_read_keys",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
       "source": "tests_storage_test_zarr_copy_write_keys",
       "source_file": "tests/storage/test_zarr_copy.py",
       "source_location": "L16",
@@ -25547,6 +25614,17 @@
       "source": "tests_storage_test_zarr_copy_test_copy_rejects_dot_segments_before_writing",
       "source_file": "tests/storage/test_zarr_copy.py",
       "source_location": "L83",
+      "target": "tests_storage_test_zarr_copy_py_parametrize",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "decorator",
+      "relation": "references",
+      "source": "tests_storage_test_zarr_copy_test_same_store_overlapping_paths_are_rejected_without_changes",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L165",
       "target": "tests_storage_test_zarr_copy_py_parametrize",
       "weight": 1.0
     },
@@ -57193,7 +57271,7 @@
       "relation": "references",
       "source": "openghg_storage_zarr_copy_copy_async",
       "source_file": "openghg/storage/_zarr_copy.py",
-      "source_location": "L66",
+      "source_location": "L87",
       "target": "openghg_storage_zarr_copy_py_zarrstorelike",
       "weight": 1.0
     },
@@ -65557,7 +65635,7 @@
       "relation": "contains",
       "source": "openghg_storage_zarr_copy",
       "source_file": "openghg/storage/_zarr_copy.py",
-      "source_location": "L66",
+      "source_location": "L87",
       "target": "openghg_storage_zarr_copy_copy_async",
       "weight": 1.0
     },
@@ -75149,6 +75227,26 @@
       "source_file": "tests/storage/test_zarr_copy.py",
       "source_location": "L15",
       "target": "tests_storage_test_zarr_copy_write_keys",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_storage_test_zarr_copy",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L176",
+      "target": "tests_storage_test_zarr_copy_test_same_store_overlapping_paths_are_rejected_without_changes",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_storage_test_zarr_copy",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L187",
+      "target": "tests_storage_test_zarr_copy_test_same_store_disjoint_paths_preserve_source_payloads",
       "weight": 1.0
     },
     {
@@ -116453,7 +116551,7 @@
       "id": "openghg_storage_zarr_copy_copy_async",
       "label": "_copy_async()",
       "source_file": "openghg/storage/_zarr_copy.py",
-      "source_location": "L66"
+      "source_location": "L87"
     },
     {
       "_callable": true,
@@ -125715,6 +125813,24 @@
       "label": "test_copy_v2_delegates()",
       "source_file": "tests/storage/test_zarr_copy.py",
       "source_location": "L145"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_storage_test_zarr_copy_test_same_store_disjoint_paths_preserve_source_payloads",
+      "label": "test_same_store_disjoint_paths_preserve_source_payloads()",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L187"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_storage_test_zarr_copy_test_same_store_overlapping_paths_are_rejected_without_changes",
+      "label": "test_same_store_overlapping_paths_are_rejected_without_changes()",
+      "source_file": "tests/storage/test_zarr_copy.py",
+      "source_location": "L176"
     },
     {
       "_callable": true,
