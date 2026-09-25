@@ -7,6 +7,7 @@ from typing import Any, cast, Generic, Literal, TypeVar
 
 import pandas as pd
 import xarray as xr
+import zarr
 
 from openghg.types import DataOverlapError
 from openghg.util._versioning import SimpleVersioning
@@ -20,6 +21,7 @@ from ._zarr_compat import (
     make_memory_store,
     store_byte_size,
     store_is_empty,
+    zarr_has_async_store_api,
 )
 from ._zarr_copy import copy_zarr_store
 
@@ -84,7 +86,8 @@ class ZarrStore(Store, Generic[ZST]):
               Accepted arguments are:
               - `write_empty_chunks`
               - `align_chunks`: rechunk Dask writes safely (defaults to True when supported by Xarray).
-              - `zarr_format` (automatically inferred by default)
+              - `zarr_format`: 2 (default for new stores) or 3; existing stores retain their format.
+                Format 3 requires zarr-python 3 and native Zarr 3 codecs when specifying compression.
               - `storage_options`: only relevant to cloud storage, see
                  https://github.com/pydata/xarray/pull/5615
 
@@ -118,6 +121,25 @@ class ZarrStore(Store, Generic[ZST]):
         return self.store
 
     @property
+    def _zarr_format(self) -> int:
+        """Use the stored format when reopening, or format 2 for new stores by default."""
+        if not store_is_empty(self.store):
+            if not zarr_has_async_store_api():
+                return 2
+            return int(
+                zarr.open_group(self._xarray_store, mode="r", use_consolidated=False).metadata.zarr_format
+            )
+        return int(self.to_zarr_kwargs.get("zarr_format") or 2)
+
+    @property
+    def _write_kwargs(self) -> dict[str, Any]:
+        """Use consolidated metadata for format 2 and unconsolidated metadata for format 3."""
+        result = self.to_zarr_kwargs.copy()
+        result["zarr_format"] = self._zarr_format
+        result["consolidated"] = result["zarr_format"] == 2
+        return result
+
+    @property
     def index(self) -> pd.Index:
         """Index of append dimension of data.
 
@@ -147,7 +169,7 @@ class ZarrStore(Store, Generic[ZST]):
             return xr.Dataset()
 
         # need to sort to be consistent with MemoryStore
-        result = xr.open_zarr(self._xarray_store, consolidated=True)
+        result = xr.open_zarr(self._xarray_store, consolidated=self._zarr_format == 2)
 
         if sort:
             result = result.sortby(self.append_dim)
@@ -171,15 +193,16 @@ class ZarrStore(Store, Generic[ZST]):
                 "error".
         """
         if store_is_empty(self.store):
-            encoding = get_zarr_encoding(data.data_vars, self.compressor, self.filters)
+            encoding = get_zarr_encoding(
+                data.data_vars, self.compressor, self.filters, zarr_format=self._zarr_format
+            )
             encoding.update(self.encoding)
             data.to_zarr(
                 store=self._xarray_store,
                 mode="w",
-                consolidated=True,
                 compute=True,
                 encoding=encoding,
-                **self.to_zarr_kwargs,
+                **self._write_kwargs,
             )
         else:
             if self._overlap_determiner.has_overlaps(data.get_index(self.append_dim)):
@@ -196,9 +219,8 @@ class ZarrStore(Store, Generic[ZST]):
                 store=self._xarray_store,
                 mode="a",
                 append_dim=self.append_dim,
-                consolidated=True,
                 compute=True,
-                **self.to_zarr_kwargs,
+                **self._write_kwargs,
             )
 
     def update(self, data: xr.Dataset, on_nonoverlap: Literal["error", "ignore"] = "error") -> None:
@@ -236,9 +258,8 @@ class ZarrStore(Store, Generic[ZST]):
                     store=self._xarray_store,
                     mode="r+",
                     region="auto",
-                    consolidated=True,
                     compute=True,
-                    **self.to_zarr_kwargs,
+                    **self._write_kwargs,
                 )
             except (ValueError, IndexError):
                 kwargs = self.index_options.copy()
@@ -268,9 +289,8 @@ class ZarrStore(Store, Generic[ZST]):
                     store=self._xarray_store,
                     mode="r+",
                     region="auto",
-                    consolidated=True,
                     compute=True,
-                    **self.to_zarr_kwargs,
+                    **self._write_kwargs,
                 )
 
                 # now proceed with variables that contain the append dim
@@ -284,9 +304,8 @@ class ZarrStore(Store, Generic[ZST]):
                         store=self._xarray_store,
                         mode="r+",
                         region=region,
-                        consolidated=True,
                         compute=True,
-                        **self.to_zarr_kwargs,
+                        **self._write_kwargs,
                     )
 
 
@@ -375,7 +394,8 @@ class VersionedZarrStore(VersionedStore, SimpleVersioning[ZST], ZarrStore[ZST]):
               Accepted arguments are:
               - `write_empty_chunks`
               - `align_chunks`: rechunk Dask writes safely (defaults to True when supported by Xarray).
-              - `zarr_format` (automatically inferred by default)
+              - `zarr_format`: 2 (default for new stores) or 3; existing stores retain their format.
+                Format 3 requires zarr-python 3 and native Zarr 3 codecs when specifying compression.
               - `storage_options`: only relevant to cloud storage, see
                  https://github.com/pydata/xarray/pull/5615
 

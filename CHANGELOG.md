@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Made Zarr version copies replace stale destination keys and clean up newly created destinations after failed copies. [Issue #1661](https://github.com/openghg/openghg/issues/1661)
 
+- Matched Zarr metadata and compression settings to the stored format: new stores default to format 2, existing stores retain their format when reopened, and format 3 uses native codecs without consolidated metadata. [Issue #1664](https://github.com/openghg/openghg/issues/1664)
 - Added column `max_level` consistency validation to `ModelScenario` and preserved `max_level` metadata when standardising ACRG and PARIS column footprints, preventing observations and footprints with different vertical extents from being combined. [PR #1718](https://github.com/openghg/openghg/pull/1718)
 - Ensured explicitly integrated CO2 site and satellite footprints are standardised and modelled through the integrated-footprint pathway, while preserving the time-resolved default for CO2 footprints. [PR #1698](https://github.com/openghg/openghg/pull/1698)
 - Added a dimension dtype checker for H_back dimension to "timedelta64[ns]". Bug occured for dimension "resolution" and dtype "resolution".[PR #1671](https://github.com/openghg/openghg/pull/1671)
