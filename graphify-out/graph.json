@@ -10616,7 +10616,7 @@
       "relation": "calls",
       "source": "openghg_storage_zarr_copy_copy_zarr_store",
       "source_file": "openghg/storage/_zarr_copy.py",
-      "source_location": "L59",
+      "source_location": "L61",
       "target": "openghg_storage_zarr_copy_copy_async",
       "weight": 1.0
     },
@@ -56750,7 +56750,7 @@
       "relation": "references",
       "source": "openghg_storage_zarr_copy_copy_async",
       "source_file": "openghg/storage/_zarr_copy.py",
-      "source_location": "L62",
+      "source_location": "L65",
       "target": "openghg_storage_zarr_copy_py_zarrstorelike",
       "weight": 1.0
     },
@@ -65113,7 +65113,7 @@
       "relation": "contains",
       "source": "openghg_storage_zarr_copy",
       "source_file": "openghg/storage/_zarr_copy.py",
-      "source_location": "L62",
+      "source_location": "L65",
       "target": "openghg_storage_zarr_copy_copy_async",
       "weight": 1.0
     },
@@ -115857,7 +115857,7 @@
       "id": "openghg_storage_zarr_copy_copy_async",
       "label": "_copy_async()",
       "source_file": "openghg/storage/_zarr_copy.py",
-      "source_location": "L62"
+      "source_location": "L65"
     },
     {
       "_callable": true,

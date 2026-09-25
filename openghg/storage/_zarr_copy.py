@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Literal, cast
 
 from ._zarr_compat import ZarrStoreLike, zarr_has_async_store_api
 
@@ -45,7 +45,7 @@ def copy_zarr_store(
     if not zarr_has_async_store_api():
         from zarr.convenience import copy_store
 
-        return copy_store(
+        result = copy_store(
             source,
             dest,
             source_path=source_path,
@@ -53,10 +53,13 @@ def copy_zarr_store(
             if_exists=if_exists,
             dry_run=dry_run,
         )
+        return cast(tuple[int, int, int], result)
 
     from zarr.core.sync import sync
 
-    return sync(_copy_async(source, dest, source_path, dest_path, if_exists, dry_run))
+    return cast(
+        tuple[int, int, int], sync(_copy_async(source, dest, source_path, dest_path, if_exists, dry_run))
+    )
 
 
 async def _copy_async(
