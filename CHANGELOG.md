@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Align Dask-backed Zarr writes with stored chunks when supported by Xarray, and retain safe-chunk validation without Zarr synchronizers. [Issue #1662](https://github.com/openghg/openghg/issues/1662)
+
 - Serialize non-contiguous Zarr update regions so regions sharing a chunk cannot overwrite each other. [Issue #1663](https://github.com/openghg/openghg/issues/1663)
 
 - Made Zarr version copies replace stale destination keys and clean up newly created destinations after failed copies. [Issue #1661](https://github.com/openghg/openghg/issues/1661)
@@ -19,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added config-driven metadata key handling for transformed flux and boundary condition data: removed hard-coded required-key lookups.[PR #1686](https://github.com/openghg/openghg/pull/1686)
 
 ### Updated
+
+- Raised the minimum Xarray version to 2025.9.1, which correctly forwards `align_chunks` from `Dataset.to_zarr` for safe Dask writes. [Issue #1662](https://github.com/openghg/openghg/issues/1662)
 
 - Added Python 3.13 to the CI test matrices, dropped Python 3.10 support, and restricted OpenGHG to Python 3.11-3.13. [PR #1741](https://github.com/openghg/openghg/pull/1741).
 - Removed file and retrieved-data hashing from standardisation. Repeated inputs now follow the normal `if_exists` overlap policy, and data can be standardised again after its datasource is deleted. The deprecated `force` argument remains accepted but is ignored; passing `force=True` emits a `DeprecationWarning`, and callers should use `if_exists` to choose update behaviour. [Issue #1676](https://github.com/openghg/openghg/issues/1676)
