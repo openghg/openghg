@@ -3008,7 +3008,7 @@
       "relation": "calls",
       "source": "tests_storage_test_store_memory_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L94",
+      "source_location": "L95",
       "target": "openghg_storage_store_memorystore",
       "weight": 1.0
     },
@@ -3020,7 +3020,7 @@
       "relation": "calls",
       "source": "tests_storage_test_store_versioned_memory_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L100",
+      "source_location": "L101",
       "target": "openghg_storage_store_versionedmemorystore",
       "weight": 1.0
     },
@@ -3032,7 +3032,7 @@
       "relation": "calls",
       "source": "tests_storage_test_store_versioned_zarr_directory_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L124",
+      "source_location": "L125",
       "target": "openghg_storage_zarr_store_get_versioned_zarr_directory_store",
       "weight": 1.0
     },
@@ -3044,7 +3044,7 @@
       "relation": "calls",
       "source": "tests_storage_test_store_versioned_zarr_memory_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L118",
+      "source_location": "L119",
       "target": "openghg_storage_zarr_store_get_versioned_zarr_memory_store",
       "weight": 1.0
     },
@@ -3056,7 +3056,7 @@
       "relation": "calls",
       "source": "tests_storage_test_store_zarr_directory_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L112",
+      "source_location": "L113",
       "target": "openghg_storage_zarr_store_get_zarr_directory_store",
       "weight": 1.0
     },
@@ -3068,7 +3068,7 @@
       "relation": "calls",
       "source": "tests_storage_test_store_zarr_memory_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L106",
+      "source_location": "L107",
       "target": "openghg_storage_zarr_store_get_zarr_memory_store",
       "weight": 1.0
     },
@@ -3296,7 +3296,7 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_data",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L46",
+      "source_location": "L47",
       "target": "tests_helpers_helpers_get_surface_datapath",
       "weight": 1.0
     },
@@ -3308,7 +3308,7 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_data",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L48",
+      "source_location": "L49",
       "target": "openghg_standardise_surface_crds_parse_crds",
       "weight": 1.0
     },
@@ -3320,7 +3320,7 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L68",
+      "source_location": "L69",
       "target": "openghg_objectstore_legacy_datasource_datasource",
       "weight": 1.0
     },
@@ -3332,7 +3332,7 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_test_bytes_stored",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L718",
+      "source_location": "L719",
       "target": "openghg_objectstore_legacy_datasource_datasource",
       "weight": 1.0
     },
@@ -3344,7 +3344,7 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_test_incorrect_datatype_raises",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L346",
+      "source_location": "L347",
       "target": "openghg_objectstore_legacy_datasource_datasource",
       "weight": 1.0
     },
@@ -3356,7 +3356,7 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_test_integrity_check",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L392",
+      "source_location": "L393",
       "target": "openghg_objectstore_legacy_datasource_datasource_load",
       "weight": 1.0
     },
@@ -3368,7 +3368,7 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_test_read_only_load_cannot_modify_data",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L280",
+      "source_location": "L281",
       "target": "openghg_objectstore_legacy_datasource_datasource_load",
       "weight": 1.0
     },
@@ -3380,7 +3380,7 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_test_save_and_load",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L332",
+      "source_location": "L333",
       "target": "openghg_objectstore_legacy_datasource_datasource_load",
       "weight": 1.0
     },
@@ -3392,7 +3392,7 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_test_save_footprint",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L265",
+      "source_location": "L266",
       "target": "openghg_objectstore_legacy_datasource_datasource_load",
       "weight": 1.0
     },
@@ -19983,7 +19983,7 @@
       "relation": "calls",
       "source": "tests_storage_test_store_ds1",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L56",
+      "source_location": "L57",
       "target": "tests_storage_test_store_dummy_dataset",
       "weight": 1.0
     },
@@ -19994,7 +19994,7 @@
       "relation": "calls",
       "source": "tests_storage_test_store_ds2",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L61",
+      "source_location": "L62",
       "target": "tests_storage_test_store_dummy_dataset",
       "weight": 1.0
     },
@@ -20005,7 +20005,7 @@
       "relation": "calls",
       "source": "tests_storage_test_store_ds3",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L66",
+      "source_location": "L67",
       "target": "tests_storage_test_store_dummy_dataset",
       "weight": 1.0
     },
@@ -20016,7 +20016,7 @@
       "relation": "calls",
       "source": "tests_storage_test_store_ds4",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L71",
+      "source_location": "L72",
       "target": "tests_storage_test_store_dummy_dataset",
       "weight": 1.0
     },
@@ -20027,7 +20027,7 @@
       "relation": "calls",
       "source": "tests_storage_test_store_ds5",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L76",
+      "source_location": "L77",
       "target": "tests_storage_test_store_dummy_dataset",
       "weight": 1.0
     },
@@ -20038,7 +20038,7 @@
       "relation": "calls",
       "source": "tests_storage_test_store_test_versioned_zarr_append_loop_has_no_missing_data",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L521",
+      "source_location": "L547",
       "target": "openghg_storage_zarr_store_get_versioned_zarr_directory_store",
       "weight": 1.0
     },
@@ -20049,7 +20049,7 @@
       "relation": "calls",
       "source": "tests_storage_test_store_test_versioned_zarr_bytes_stored_compression",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L475",
+      "source_location": "L498",
       "target": "tests_helpers_helpers_get_footprint_datapath",
       "weight": 1.0
     },
@@ -20060,7 +20060,7 @@
       "relation": "calls",
       "source": "tests_storage_test_store_test_versioned_zarr_bytes_stored_compression",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L478",
+      "source_location": "L501",
       "target": "openghg_storage_zarr_store_get_versioned_zarr_directory_store",
       "weight": 1.0
     },
@@ -20071,7 +20071,7 @@
       "relation": "calls",
       "source": "tests_storage_test_store_twice_ds1",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L82",
+      "source_location": "L83",
       "target": "tests_storage_test_store_dummy_dataset",
       "weight": 1.0
     },
@@ -20082,7 +20082,7 @@
       "relation": "calls",
       "source": "tests_storage_test_store_twice_ds2",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L87",
+      "source_location": "L88",
       "target": "tests_storage_test_store_dummy_dataset",
       "weight": 1.0
     },
@@ -20423,7 +20423,7 @@
       "relation": "calls",
       "source": "tests_storage_test_zarr_write_safety_test_disabled_alignment_keeps_chunk_safety_validation",
       "source_file": "tests/storage/test_zarr_write_safety.py",
-      "source_location": "L59",
+      "source_location": "L65",
       "target": "openghg_storage_zarr_store_get_zarr_directory_store",
       "weight": 1.0
     },
@@ -20434,7 +20434,7 @@
       "relation": "calls",
       "source": "tests_storage_test_zarr_write_safety_test_misaligned_dask_insert_append_and_update",
       "source_file": "tests/storage/test_zarr_write_safety.py",
-      "source_location": "L41",
+      "source_location": "L47",
       "target": "openghg_storage_zarr_store_get_zarr_directory_store",
       "weight": 1.0
     },
@@ -20445,7 +20445,7 @@
       "relation": "calls",
       "source": "tests_storage_test_zarr_write_safety_test_noncontiguous_regions_sharing_chunk_are_written_sequentially",
       "source_file": "tests/storage/test_zarr_write_safety.py",
-      "source_location": "L12",
+      "source_location": "L18",
       "target": "openghg_storage_zarr_store_get_zarr_directory_store",
       "weight": 1.0
     },
@@ -20456,7 +20456,7 @@
       "relation": "calls",
       "source": "tests_storage_test_zarr_write_safety_test_older_xarray_uses_validation_and_rejects_explicit_alignment",
       "source_file": "tests/storage/test_zarr_write_safety.py",
-      "source_location": "L74",
+      "source_location": "L82",
       "target": "openghg_storage_zarr_store_get_zarr_directory_store",
       "weight": 1.0
     },
@@ -20698,7 +20698,7 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_create_three_datasets",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L34",
+      "source_location": "L35",
       "target": "tests_store_test_datasource_create_attributes",
       "weight": 1.0
     },
@@ -20709,7 +20709,7 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_datasets_with_gaps",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L100",
+      "source_location": "L101",
       "target": "tests_store_test_datasource_create_three_datasets",
       "weight": 1.0
     },
@@ -20720,7 +20720,7 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_datasets_with_overlap",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L109",
+      "source_location": "L110",
       "target": "tests_store_test_datasource_create_three_datasets",
       "weight": 1.0
     },
@@ -20731,7 +20731,7 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_test_add_data_out_of_order_no_combine",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L685",
+      "source_location": "L686",
       "target": "tests_store_test_datasource_create_attributes",
       "weight": 1.0
     },
@@ -20742,7 +20742,7 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_test_add_data_with_gaps_check_stored_dataset",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L452",
+      "source_location": "L453",
       "target": "tests_store_test_datasource_create_attributes",
       "weight": 1.0
     },
@@ -20753,7 +20753,7 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_test_add_data_with_overlap_check_stored_dataset",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L623",
+      "source_location": "L624",
       "target": "tests_store_test_datasource_create_attributes",
       "weight": 1.0
     },
@@ -20764,7 +20764,7 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_test_attributes_overwritten_on_combine",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L669",
+      "source_location": "L670",
       "target": "tests_store_test_datasource_create_attributes",
       "weight": 1.0
     },
@@ -20775,7 +20775,7 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_test_auto_overlap_does_not_create_orphan_version",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L568",
+      "source_location": "L569",
       "target": "tests_store_test_datasource_create_attributes",
       "weight": 1.0
     },
@@ -20786,7 +20786,7 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_test_combine_nonoverlapping_new_version_copies_current_data",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L514",
+      "source_location": "L515",
       "target": "tests_store_test_datasource_create_attributes",
       "weight": 1.0
     },
@@ -20797,7 +20797,7 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_test_combine_nonoverlapping_read_only_does_not_create_version",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L532",
+      "source_location": "L533",
       "target": "tests_store_test_datasource_create_attributes",
       "weight": 1.0
     },
@@ -20808,8 +20808,19 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_test_combine_overlapping_new_version_uses_new_version_date_keys",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L585",
+      "source_location": "L586",
       "target": "tests_store_test_datasource_create_attributes",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_store_test_datasource_test_data_version_deletion",
+      "source_file": "tests/store/test_datasource.py",
+      "source_location": "L413",
+      "target": "openghg_storage_zarr_compat_iter_store_keys",
       "weight": 1.0
     },
     {
@@ -20819,7 +20830,7 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_test_error_if_overlap_and_not_combine",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L647",
+      "source_location": "L648",
       "target": "tests_store_test_datasource_create_attributes",
       "weight": 1.0
     },
@@ -20830,7 +20841,7 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_test_new_nonoverlapping_version_does_not_mutate_previous_date_keys",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L551",
+      "source_location": "L552",
       "target": "tests_store_test_datasource_create_attributes",
       "weight": 1.0
     },
@@ -20841,7 +20852,7 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_test_overlap_detection_uses_latest_version_after_getting_old_version",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L603",
+      "source_location": "L604",
       "target": "tests_store_test_datasource_create_attributes",
       "weight": 1.0
     },
@@ -20852,7 +20863,7 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_test_plan_timed_data_update_matrix",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L475",
+      "source_location": "L476",
       "target": "openghg_objectstore_legacy_datasource_plan_timed_data_update",
       "weight": 1.0
     },
@@ -20863,7 +20874,7 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_test_read_only_load_cannot_modify_data",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L275",
+      "source_location": "L276",
       "target": "tests_store_test_datasource_create_attributes",
       "weight": 1.0
     },
@@ -20874,7 +20885,7 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_test_replace_version",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L204",
+      "source_location": "L205",
       "target": "tests_helpers_helpers_get_surface_datapath",
       "weight": 1.0
     },
@@ -20885,7 +20896,7 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_test_replace_version",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L209",
+      "source_location": "L210",
       "target": "openghg_standardise_surface_crds_parse_crds",
       "weight": 1.0
     },
@@ -20896,7 +20907,7 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_test_save_footprint",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L256",
+      "source_location": "L257",
       "target": "tests_helpers_helpers_get_footprint_datapath",
       "weight": 1.0
     },
@@ -20907,7 +20918,7 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_test_versioning",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L153",
+      "source_location": "L154",
       "target": "tests_helpers_helpers_get_surface_datapath",
       "weight": 1.0
     },
@@ -20918,7 +20929,7 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_test_versioning",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L158",
+      "source_location": "L159",
       "target": "openghg_standardise_surface_crds_parse_crds",
       "weight": 1.0
     },
@@ -25120,7 +25131,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_ds1",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L54",
+      "source_location": "L55",
       "target": "tests_storage_test_store_py_fixture",
       "weight": 1.0
     },
@@ -25131,7 +25142,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_ds2",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L59",
+      "source_location": "L60",
       "target": "tests_storage_test_store_py_fixture",
       "weight": 1.0
     },
@@ -25142,7 +25153,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_ds3",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L64",
+      "source_location": "L65",
       "target": "tests_storage_test_store_py_fixture",
       "weight": 1.0
     },
@@ -25153,7 +25164,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_ds4",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L69",
+      "source_location": "L70",
       "target": "tests_storage_test_store_py_fixture",
       "weight": 1.0
     },
@@ -25164,7 +25175,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_ds5",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L74",
+      "source_location": "L75",
       "target": "tests_storage_test_store_py_fixture",
       "weight": 1.0
     },
@@ -25175,7 +25186,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_idx1",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L29",
+      "source_location": "L30",
       "target": "tests_storage_test_store_py_fixture",
       "weight": 1.0
     },
@@ -25186,7 +25197,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_idx2",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L34",
+      "source_location": "L35",
       "target": "tests_storage_test_store_py_fixture",
       "weight": 1.0
     },
@@ -25197,7 +25208,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_idx3",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L39",
+      "source_location": "L40",
       "target": "tests_storage_test_store_py_fixture",
       "weight": 1.0
     },
@@ -25208,7 +25219,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_idx4",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L44",
+      "source_location": "L45",
       "target": "tests_storage_test_store_py_fixture",
       "weight": 1.0
     },
@@ -25219,7 +25230,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_idx5",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L49",
+      "source_location": "L50",
       "target": "tests_storage_test_store_py_fixture",
       "weight": 1.0
     },
@@ -25230,7 +25241,18 @@
       "relation": "references",
       "source": "tests_storage_test_store_memory_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L91",
+      "source_location": "L92",
+      "target": "tests_storage_test_store_py_fixture",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "decorator",
+      "relation": "references",
+      "source": "tests_storage_test_store_store",
+      "source_file": "tests/storage/test_store.py",
+      "source_location": "L149",
       "target": "tests_storage_test_store_py_fixture",
       "weight": 1.0
     },
@@ -25241,7 +25263,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_test_add_data_to_new_version",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L359",
+      "source_location": "L389",
       "target": "tests_storage_test_store_py_parametrize",
       "weight": 1.0
     },
@@ -25252,7 +25274,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_test_bool",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L402",
+      "source_location": "L430",
       "target": "tests_storage_test_store_py_parametrize",
       "weight": 1.0
     },
@@ -25263,7 +25285,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_test_clear",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L165",
+      "source_location": "L193",
       "target": "tests_storage_test_store_py_parametrize",
       "weight": 1.0
     },
@@ -25274,7 +25296,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_test_clear_data_from_old_version",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L423",
+      "source_location": "L448",
       "target": "tests_storage_test_store_py_parametrize",
       "weight": 1.0
     },
@@ -25285,7 +25307,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_test_contiguous_update",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L312",
+      "source_location": "L332",
       "target": "tests_storage_test_store_py_parametrize",
       "weight": 1.0
     },
@@ -25296,7 +25318,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_test_delete_data_from_old_version",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L446",
+      "source_location": "L470",
       "target": "tests_storage_test_store_py_parametrize",
       "weight": 1.0
     },
@@ -25307,7 +25329,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_test_error_on_insert_overlap",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L206",
+      "source_location": "L232",
       "target": "tests_storage_test_store_py_parametrize",
       "weight": 1.0
     },
@@ -25318,7 +25340,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_test_insert_creates",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L145",
+      "source_location": "L171",
       "target": "tests_storage_test_store_py_parametrize",
       "weight": 1.0
     },
@@ -25329,7 +25351,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_test_insert_ignore_overlap",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L220",
+      "source_location": "L245",
       "target": "tests_storage_test_store_py_parametrize",
       "weight": 1.0
     },
@@ -25340,7 +25362,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_test_insert_twice",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L185",
+      "source_location": "L212",
       "target": "tests_storage_test_store_py_parametrize",
       "weight": 1.0
     },
@@ -25351,7 +25373,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_test_nbytes_stored",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L382",
+      "source_location": "L411",
       "target": "tests_storage_test_store_py_parametrize",
       "weight": 1.0
     },
@@ -25362,7 +25384,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_test_non_contiguous_update",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L288",
+      "source_location": "L310",
       "target": "tests_storage_test_store_py_parametrize",
       "weight": 1.0
     },
@@ -25373,7 +25395,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_test_update",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L252",
+      "source_location": "L276",
       "target": "tests_storage_test_store_py_parametrize",
       "weight": 1.0
     },
@@ -25384,7 +25406,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_test_update_ignore_nonoverlaps",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L269",
+      "source_location": "L292",
       "target": "tests_storage_test_store_py_parametrize",
       "weight": 1.0
     },
@@ -25395,7 +25417,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_test_zarr_encoding",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L333",
+      "source_location": "L352",
       "target": "tests_storage_test_store_py_parametrize",
       "weight": 1.0
     },
@@ -25406,7 +25428,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_twice_ds1",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L80",
+      "source_location": "L81",
       "target": "tests_storage_test_store_py_fixture",
       "weight": 1.0
     },
@@ -25417,7 +25439,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_twice_ds2",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L85",
+      "source_location": "L86",
       "target": "tests_storage_test_store_py_fixture",
       "weight": 1.0
     },
@@ -25428,7 +25450,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_versioned_memory_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L97",
+      "source_location": "L98",
       "target": "tests_storage_test_store_py_fixture",
       "weight": 1.0
     },
@@ -25439,7 +25461,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_versioned_zarr_directory_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L121",
+      "source_location": "L122",
       "target": "tests_storage_test_store_py_fixture",
       "weight": 1.0
     },
@@ -25450,7 +25472,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_versioned_zarr_memory_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L115",
+      "source_location": "L116",
       "target": "tests_storage_test_store_py_fixture",
       "weight": 1.0
     },
@@ -25461,7 +25483,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_zarr_directory_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L109",
+      "source_location": "L110",
       "target": "tests_storage_test_store_py_fixture",
       "weight": 1.0
     },
@@ -25472,7 +25494,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_zarr_memory_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L103",
+      "source_location": "L104",
       "target": "tests_storage_test_store_py_fixture",
       "weight": 1.0
     },
@@ -25547,6 +25569,17 @@
       "confidence": "EXTRACTED",
       "context": "decorator",
       "relation": "references",
+      "source": "tests_storage_test_zarr_write_safety_zarr_format",
+      "source_file": "tests/storage/test_zarr_write_safety.py",
+      "source_location": "L12",
+      "target": "tests_storage_test_zarr_write_safety_py_fixture",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "decorator",
+      "relation": "references",
       "source": "tests_store_test_boundary_conditions_clear_store",
       "source_file": "tests/store/test_boundary_conditions.py",
       "source_location": "L12",
@@ -25582,7 +25615,7 @@
       "relation": "references",
       "source": "tests_store_test_datasource_bucket",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L89",
+      "source_location": "L90",
       "target": "tests_store_test_datasource_py_fixture",
       "weight": 1.0
     },
@@ -25593,7 +25626,7 @@
       "relation": "references",
       "source": "tests_store_test_datasource_data",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L43",
+      "source_location": "L44",
       "target": "tests_store_test_datasource_py_fixture",
       "weight": 1.0
     },
@@ -25604,7 +25637,7 @@
       "relation": "references",
       "source": "tests_store_test_datasource_datasets_with_gaps",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L94",
+      "source_location": "L95",
       "target": "tests_store_test_datasource_py_fixture",
       "weight": 1.0
     },
@@ -25615,7 +25648,7 @@
       "relation": "references",
       "source": "tests_store_test_datasource_datasets_with_overlap",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L103",
+      "source_location": "L104",
       "target": "tests_store_test_datasource_py_fixture",
       "weight": 1.0
     },
@@ -25626,7 +25659,7 @@
       "relation": "references",
       "source": "tests_store_test_datasource_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L66",
+      "source_location": "L67",
       "target": "tests_store_test_datasource_py_fixture",
       "weight": 1.0
     },
@@ -25637,7 +25670,7 @@
       "relation": "references",
       "source": "tests_store_test_datasource_mock_uuid",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L73",
+      "source_location": "L74",
       "target": "tests_store_test_datasource_py_fixture",
       "weight": 1.0
     },
@@ -25648,7 +25681,7 @@
       "relation": "references",
       "source": "tests_store_test_datasource_mock_uuid2",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L81",
+      "source_location": "L82",
       "target": "tests_store_test_datasource_py_fixture",
       "weight": 1.0
     },
@@ -25659,7 +25692,7 @@
       "relation": "references",
       "source": "tests_store_test_datasource_test_incorrect_datatype_raises",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L344",
+      "source_location": "L345",
       "target": "tests_store_test_datasource_py_xfail",
       "weight": 1.0
     },
@@ -39794,7 +39827,7 @@
       "relation": "imports",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L15",
+      "source_location": "L16",
       "target": "openghg_storage_store_versionedstore",
       "weight": 1.0
     },
@@ -39805,7 +39838,7 @@
       "relation": "imports",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L16",
+      "source_location": "L17",
       "target": "openghg_storage_zarr_store_versionedzarrstore",
       "weight": 1.0
     },
@@ -39816,7 +39849,7 @@
       "relation": "imports",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L16",
+      "source_location": "L17",
       "target": "openghg_storage_zarr_store_zarrstore",
       "weight": 1.0
     },
@@ -39827,18 +39860,7 @@
       "relation": "imports",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L18",
-      "target": "openghg_util_versioning_simpleversioning",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_storage_test_store",
-      "source_file": "tests/storage/test_store.py",
-      "source_location": "L18",
+      "source_location": "L19",
       "target": "openghg_util_versioning_versionerror",
       "weight": 1.0
     },
@@ -39882,7 +39904,7 @@
       "relation": "imports",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L473",
+      "source_location": "L496",
       "target": "tests_helpers_helpers_get_footprint_datapath",
       "weight": 1.0
     },
@@ -39904,7 +39926,18 @@
       "relation": "imports",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L7",
+      "source_location": "L6",
+      "target": "zarr",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_storage_test_store",
+      "source_file": "tests/storage/test_store.py",
+      "source_location": "L8",
       "target": "openghg_storage_store_memorystore",
       "weight": 1.0
     },
@@ -39915,7 +39948,7 @@
       "relation": "imports",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L7",
+      "source_location": "L8",
       "target": "openghg_storage_store_versionedmemorystore",
       "weight": 1.0
     },
@@ -39926,7 +39959,7 @@
       "relation": "imports",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L7",
+      "source_location": "L8",
       "target": "openghg_storage_zarr_store_get_versioned_zarr_directory_store",
       "weight": 1.0
     },
@@ -39937,7 +39970,7 @@
       "relation": "imports",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L7",
+      "source_location": "L8",
       "target": "openghg_storage_zarr_store_get_versioned_zarr_memory_store",
       "weight": 1.0
     },
@@ -39948,7 +39981,7 @@
       "relation": "imports",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L7",
+      "source_location": "L8",
       "target": "openghg_storage_zarr_store_get_zarr_directory_store",
       "weight": 1.0
     },
@@ -39959,7 +39992,7 @@
       "relation": "imports",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L7",
+      "source_location": "L8",
       "target": "openghg_storage_zarr_store_get_zarr_memory_store",
       "weight": 1.0
     },
@@ -40375,6 +40408,17 @@
       "confidence": "EXTRACTED",
       "context": "import",
       "relation": "imports",
+      "source": "tests_storage_test_zarr_write_safety",
+      "source_file": "tests/storage/test_zarr_write_safety.py",
+      "source_location": "L9",
+      "target": "openghg_storage_zarr_compat_zarr_has_async_store_api",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
       "source": "tests_store_test_base",
       "source_file": "tests/store/test_base.py",
       "source_location": "L1",
@@ -40509,7 +40553,18 @@
       "relation": "imports",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L11",
+      "source_location": "L10",
+      "target": "openghg_storage_zarr_compat_iter_store_keys",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_store_test_datasource",
+      "source_file": "tests/store/test_datasource.py",
+      "source_location": "L12",
       "target": "openghg_objectstore_legacy_datasource_plan_timed_data_update",
       "weight": 1.0
     },
@@ -40520,7 +40575,7 @@
       "relation": "imports",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L13",
+      "source_location": "L14",
       "target": "openghg_types_errors_dataoverlaperror",
       "weight": 1.0
     },
@@ -50926,7 +50981,7 @@
       "relation": "imports_from",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L15",
+      "source_location": "L16",
       "target": "openghg_storage_store",
       "weight": 1.0
     },
@@ -50937,7 +50992,7 @@
       "relation": "imports_from",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L16",
+      "source_location": "L17",
       "target": "openghg_storage_zarr_store",
       "weight": 1.0
     },
@@ -50948,7 +51003,7 @@
       "relation": "imports_from",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L17",
+      "source_location": "L18",
       "target": "openghg_types",
       "weight": 1.0
     },
@@ -50959,7 +51014,7 @@
       "relation": "imports_from",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L18",
+      "source_location": "L19",
       "target": "openghg_util_versioning",
       "weight": 1.0
     },
@@ -50970,7 +51025,7 @@
       "relation": "imports_from",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L7",
+      "source_location": "L8",
       "target": "openghg_storage",
       "weight": 1.0
     },
@@ -51122,6 +51177,17 @@
       "confidence": "EXTRACTED",
       "context": "import",
       "relation": "imports_from",
+      "source": "tests_storage_test_zarr_write_safety",
+      "source_file": "tests/storage/test_zarr_write_safety.py",
+      "source_location": "L9",
+      "target": "openghg_storage_zarr_compat",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
       "source": "tests_store_test_base",
       "source_file": "tests/store/test_base.py",
       "source_location": "L1",
@@ -51234,8 +51300,8 @@
       "relation": "imports_from",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L11",
-      "target": "openghg_objectstore_legacy_datasource",
+      "source_location": "L10",
+      "target": "openghg_storage_zarr_compat",
       "weight": 1.0
     },
     {
@@ -51246,7 +51312,7 @@
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
       "source_location": "L12",
-      "target": "openghg_types",
+      "target": "openghg_objectstore_legacy_datasource",
       "weight": 1.0
     },
     {
@@ -51257,7 +51323,7 @@
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
       "source_location": "L13",
-      "target": "openghg_types_errors",
+      "target": "openghg_types",
       "weight": 1.0
     },
     {
@@ -51268,6 +51334,17 @@
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
       "source_location": "L14",
+      "target": "openghg_types_errors",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_store_test_datasource",
+      "source_file": "tests/store/test_datasource.py",
+      "source_location": "L15",
       "target": "openghg_util",
       "weight": 1.0
     },
@@ -61937,7 +62014,7 @@
       "relation": "references",
       "source": "tests_storage_test_store_dummy_dataset",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L22",
+      "source_location": "L23",
       "target": "tests_storage_test_store_py_dataset",
       "weight": 1.0
     },
@@ -74772,7 +74849,7 @@
       "relation": "contains",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L104",
+      "source_location": "L105",
       "target": "tests_storage_test_store_zarr_memory_store",
       "weight": 1.0
     },
@@ -74782,7 +74859,7 @@
       "relation": "contains",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L110",
+      "source_location": "L111",
       "target": "tests_storage_test_store_zarr_directory_store",
       "weight": 1.0
     },
@@ -74792,7 +74869,7 @@
       "relation": "contains",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L116",
+      "source_location": "L117",
       "target": "tests_storage_test_store_versioned_zarr_memory_store",
       "weight": 1.0
     },
@@ -74802,7 +74879,7 @@
       "relation": "contains",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L122",
+      "source_location": "L123",
       "target": "tests_storage_test_store_versioned_zarr_directory_store",
       "weight": 1.0
     },
@@ -74812,7 +74889,27 @@
       "relation": "contains",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L146",
+      "source_location": "L139",
+      "target": "tests_storage_test_store_store_cases",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_storage_test_store",
+      "source_file": "tests/storage/test_store.py",
+      "source_location": "L150",
+      "target": "tests_storage_test_store_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_storage_test_store",
+      "source_file": "tests/storage/test_store.py",
+      "source_location": "L172",
       "target": "tests_storage_test_store_test_insert_creates",
       "weight": 1.0
     },
@@ -74822,7 +74919,7 @@
       "relation": "contains",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L166",
+      "source_location": "L194",
       "target": "tests_storage_test_store_test_clear",
       "weight": 1.0
     },
@@ -74832,7 +74929,7 @@
       "relation": "contains",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L186",
+      "source_location": "L213",
       "target": "tests_storage_test_store_test_insert_twice",
       "weight": 1.0
     },
@@ -74842,17 +74939,7 @@
       "relation": "contains",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L207",
-      "target": "tests_storage_test_store_test_error_on_insert_overlap",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "relation": "contains",
-      "source": "tests_storage_test_store",
-      "source_file": "tests/storage/test_store.py",
-      "source_location": "L22",
+      "source_location": "L23",
       "target": "tests_storage_test_store_dummy_dataset",
       "weight": 1.0
     },
@@ -74862,7 +74949,17 @@
       "relation": "contains",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L221",
+      "source_location": "L233",
+      "target": "tests_storage_test_store_test_error_on_insert_overlap",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_storage_test_store",
+      "source_file": "tests/storage/test_store.py",
+      "source_location": "L246",
       "target": "tests_storage_test_store_test_insert_ignore_overlap",
       "weight": 1.0
     },
@@ -74872,7 +74969,7 @@
       "relation": "contains",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L242",
+      "source_location": "L266",
       "target": "tests_storage_test_store_test_zarr_insert_ignore_exact_overlap_skips_append",
       "weight": 1.0
     },
@@ -74882,7 +74979,7 @@
       "relation": "contains",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L253",
+      "source_location": "L277",
       "target": "tests_storage_test_store_test_update",
       "weight": 1.0
     },
@@ -74892,7 +74989,7 @@
       "relation": "contains",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L270",
+      "source_location": "L293",
       "target": "tests_storage_test_store_test_update_ignore_nonoverlaps",
       "weight": 1.0
     },
@@ -74902,17 +74999,7 @@
       "relation": "contains",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L289",
-      "target": "tests_storage_test_store_test_non_contiguous_update",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "relation": "contains",
-      "source": "tests_storage_test_store",
-      "source_file": "tests/storage/test_store.py",
-      "source_location": "L30",
+      "source_location": "L31",
       "target": "tests_storage_test_store_idx1",
       "weight": 1.0
     },
@@ -74922,7 +75009,17 @@
       "relation": "contains",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L313",
+      "source_location": "L311",
+      "target": "tests_storage_test_store_test_non_contiguous_update",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_storage_test_store",
+      "source_file": "tests/storage/test_store.py",
+      "source_location": "L333",
       "target": "tests_storage_test_store_test_contiguous_update",
       "weight": 1.0
     },
@@ -74932,7 +75029,7 @@
       "relation": "contains",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L334",
+      "source_location": "L355",
       "target": "tests_storage_test_store_test_zarr_encoding",
       "weight": 1.0
     },
@@ -74942,7 +75039,7 @@
       "relation": "contains",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L35",
+      "source_location": "L36",
       "target": "tests_storage_test_store_idx2",
       "weight": 1.0
     },
@@ -74952,7 +75049,7 @@
       "relation": "contains",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L360",
+      "source_location": "L390",
       "target": "tests_storage_test_store_test_add_data_to_new_version",
       "weight": 1.0
     },
@@ -74962,17 +75059,7 @@
       "relation": "contains",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L383",
-      "target": "tests_storage_test_store_test_nbytes_stored",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "relation": "contains",
-      "source": "tests_storage_test_store",
-      "source_file": "tests/storage/test_store.py",
-      "source_location": "L40",
+      "source_location": "L41",
       "target": "tests_storage_test_store_idx3",
       "weight": 1.0
     },
@@ -74982,7 +75069,17 @@
       "relation": "contains",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L403",
+      "source_location": "L412",
+      "target": "tests_storage_test_store_test_nbytes_stored",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_storage_test_store",
+      "source_file": "tests/storage/test_store.py",
+      "source_location": "L431",
       "target": "tests_storage_test_store_test_bool",
       "weight": 1.0
     },
@@ -74992,7 +75089,7 @@
       "relation": "contains",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L424",
+      "source_location": "L449",
       "target": "tests_storage_test_store_test_clear_data_from_old_version",
       "weight": 1.0
     },
@@ -75002,17 +75099,7 @@
       "relation": "contains",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L447",
-      "target": "tests_storage_test_store_test_delete_data_from_old_version",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "relation": "contains",
-      "source": "tests_storage_test_store",
-      "source_file": "tests/storage/test_store.py",
-      "source_location": "L45",
+      "source_location": "L46",
       "target": "tests_storage_test_store_idx4",
       "weight": 1.0
     },
@@ -75023,6 +75110,16 @@
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
       "source_location": "L471",
+      "target": "tests_storage_test_store_test_delete_data_from_old_version",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_storage_test_store",
+      "source_file": "tests/storage/test_store.py",
+      "source_location": "L494",
       "target": "tests_storage_test_store_test_versioned_zarr_bytes_stored_compression",
       "weight": 1.0
     },
@@ -75032,7 +75129,7 @@
       "relation": "contains",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L50",
+      "source_location": "L51",
       "target": "tests_storage_test_store_idx5",
       "weight": 1.0
     },
@@ -75042,7 +75139,7 @@
       "relation": "contains",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L501",
+      "source_location": "L527",
       "target": "tests_storage_test_store_test_versioned_zarr_append_loop_has_no_missing_data",
       "weight": 1.0
     },
@@ -75052,7 +75149,7 @@
       "relation": "contains",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L55",
+      "source_location": "L56",
       "target": "tests_storage_test_store_ds1",
       "weight": 1.0
     },
@@ -75062,7 +75159,7 @@
       "relation": "contains",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L60",
+      "source_location": "L61",
       "target": "tests_storage_test_store_ds2",
       "weight": 1.0
     },
@@ -75072,7 +75169,7 @@
       "relation": "contains",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L65",
+      "source_location": "L66",
       "target": "tests_storage_test_store_ds3",
       "weight": 1.0
     },
@@ -75082,7 +75179,7 @@
       "relation": "contains",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L70",
+      "source_location": "L71",
       "target": "tests_storage_test_store_ds4",
       "weight": 1.0
     },
@@ -75092,7 +75189,7 @@
       "relation": "contains",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L75",
+      "source_location": "L76",
       "target": "tests_storage_test_store_ds5",
       "weight": 1.0
     },
@@ -75102,7 +75199,7 @@
       "relation": "contains",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L81",
+      "source_location": "L82",
       "target": "tests_storage_test_store_twice_ds1",
       "weight": 1.0
     },
@@ -75112,7 +75209,7 @@
       "relation": "contains",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L86",
+      "source_location": "L87",
       "target": "tests_storage_test_store_twice_ds2",
       "weight": 1.0
     },
@@ -75122,7 +75219,7 @@
       "relation": "contains",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L92",
+      "source_location": "L93",
       "target": "tests_storage_test_store_memory_store",
       "weight": 1.0
     },
@@ -75132,7 +75229,7 @@
       "relation": "contains",
       "source": "tests_storage_test_store",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L98",
+      "source_location": "L99",
       "target": "tests_storage_test_store_versioned_memory_store",
       "weight": 1.0
     },
@@ -75352,7 +75449,17 @@
       "relation": "contains",
       "source": "tests_storage_test_zarr_write_safety",
       "source_file": "tests/storage/test_zarr_write_safety.py",
-      "source_location": "L11",
+      "source_location": "L13",
+      "target": "tests_storage_test_zarr_write_safety_zarr_format",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_storage_test_zarr_write_safety",
+      "source_file": "tests/storage/test_zarr_write_safety.py",
+      "source_location": "L17",
       "target": "tests_storage_test_zarr_write_safety_test_noncontiguous_regions_sharing_chunk_are_written_sequentially",
       "weight": 1.0
     },
@@ -75362,7 +75469,7 @@
       "relation": "contains",
       "source": "tests_storage_test_zarr_write_safety",
       "source_file": "tests/storage/test_zarr_write_safety.py",
-      "source_location": "L40",
+      "source_location": "L46",
       "target": "tests_storage_test_zarr_write_safety_test_misaligned_dask_insert_append_and_update",
       "weight": 1.0
     },
@@ -75372,7 +75479,7 @@
       "relation": "contains",
       "source": "tests_storage_test_zarr_write_safety",
       "source_file": "tests/storage/test_zarr_write_safety.py",
-      "source_location": "L58",
+      "source_location": "L64",
       "target": "tests_storage_test_zarr_write_safety_test_disabled_alignment_keeps_chunk_safety_validation",
       "weight": 1.0
     },
@@ -75382,7 +75489,7 @@
       "relation": "contains",
       "source": "tests_storage_test_zarr_write_safety",
       "source_file": "tests/storage/test_zarr_write_safety.py",
-      "source_location": "L65",
+      "source_location": "L73",
       "target": "tests_storage_test_zarr_write_safety_test_older_xarray_uses_validation_and_rejects_explicit_alignment",
       "weight": 1.0
     },
@@ -75582,7 +75689,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L104",
+      "source_location": "L105",
       "target": "tests_store_test_datasource_datasets_with_overlap",
       "weight": 1.0
     },
@@ -75592,7 +75699,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L112",
+      "source_location": "L113",
       "target": "tests_store_test_datasource_test_add_data",
       "weight": 1.0
     },
@@ -75602,7 +75709,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L152",
+      "source_location": "L153",
       "target": "tests_store_test_datasource_test_versioning",
       "weight": 1.0
     },
@@ -75612,7 +75719,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L199",
+      "source_location": "L200",
       "target": "tests_store_test_datasource_test_replace_version",
       "weight": 1.0
     },
@@ -75622,7 +75729,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L20",
+      "source_location": "L21",
       "target": "tests_store_test_datasource_create_attributes",
       "weight": 1.0
     },
@@ -75632,7 +75739,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L245",
+      "source_location": "L246",
       "target": "tests_store_test_datasource_test_save",
       "weight": 1.0
     },
@@ -75642,7 +75749,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L253",
+      "source_location": "L254",
       "target": "tests_store_test_datasource_test_save_footprint",
       "weight": 1.0
     },
@@ -75652,7 +75759,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L273",
+      "source_location": "L274",
       "target": "tests_store_test_datasource_test_read_only_load_cannot_modify_data",
       "weight": 1.0
     },
@@ -75662,17 +75769,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L29",
-      "target": "tests_store_test_datasource_create_three_datasets",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "relation": "contains",
-      "source": "tests_store_test_datasource",
-      "source_file": "tests/store/test_datasource.py",
-      "source_location": "L297",
+      "source_location": "L298",
       "target": "tests_store_test_datasource_test_add_metadata_key",
       "weight": 1.0
     },
@@ -75682,7 +75779,17 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L305",
+      "source_location": "L30",
+      "target": "tests_store_test_datasource_create_three_datasets",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_store_test_datasource",
+      "source_file": "tests/store/test_datasource.py",
+      "source_location": "L306",
       "target": "tests_store_test_datasource_test_add_metadata_lowercases_correctly",
       "weight": 1.0
     },
@@ -75692,7 +75799,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L323",
+      "source_location": "L324",
       "target": "tests_store_test_datasource_test_save_and_load",
       "weight": 1.0
     },
@@ -75702,7 +75809,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L345",
+      "source_location": "L346",
       "target": "tests_store_test_datasource_test_incorrect_datatype_raises",
       "weight": 1.0
     },
@@ -75712,7 +75819,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L355",
+      "source_location": "L356",
       "target": "tests_store_test_datasource_test_update_daterange_replacement",
       "weight": 1.0
     },
@@ -75722,7 +75829,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L377",
+      "source_location": "L378",
       "target": "tests_store_test_datasource_test_integrity_check",
       "weight": 1.0
     },
@@ -75732,7 +75839,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L403",
+      "source_location": "L404",
       "target": "tests_store_test_datasource_test_data_version_deletion",
       "weight": 1.0
     },
@@ -75742,7 +75849,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L431",
+      "source_location": "L432",
       "target": "tests_store_test_datasource_test_surface_data_stored_and_dated_correctly",
       "weight": 1.0
     },
@@ -75752,7 +75859,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L44",
+      "source_location": "L45",
       "target": "tests_store_test_datasource_data",
       "weight": 1.0
     },
@@ -75762,7 +75869,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L450",
+      "source_location": "L451",
       "target": "tests_store_test_datasource_test_add_data_with_gaps_check_stored_dataset",
       "weight": 1.0
     },
@@ -75772,7 +75879,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L473",
+      "source_location": "L474",
       "target": "tests_store_test_datasource_test_plan_timed_data_update_matrix",
       "weight": 1.0
     },
@@ -75782,17 +75889,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L51",
-      "target": "tests_store_test_datasource_uuid",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "relation": "contains",
-      "source": "tests_store_test_datasource",
-      "source_file": "tests/store/test_datasource.py",
-      "source_location": "L512",
+      "source_location": "L513",
       "target": "tests_store_test_datasource_test_combine_nonoverlapping_new_version_copies_current_data",
       "weight": 1.0
     },
@@ -75802,7 +75899,17 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L530",
+      "source_location": "L52",
+      "target": "tests_store_test_datasource_uuid",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "tests_store_test_datasource",
+      "source_file": "tests/store/test_datasource.py",
+      "source_location": "L531",
       "target": "tests_store_test_datasource_test_combine_nonoverlapping_read_only_does_not_create_version",
       "weight": 1.0
     },
@@ -75812,7 +75919,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L549",
+      "source_location": "L550",
       "target": "tests_store_test_datasource_test_new_nonoverlapping_version_does_not_mutate_previous_date_keys",
       "weight": 1.0
     },
@@ -75822,7 +75929,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L566",
+      "source_location": "L567",
       "target": "tests_store_test_datasource_test_auto_overlap_does_not_create_orphan_version",
       "weight": 1.0
     },
@@ -75832,7 +75939,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L582",
+      "source_location": "L583",
       "target": "tests_store_test_datasource_test_combine_overlapping_new_version_uses_new_version_date_keys",
       "weight": 1.0
     },
@@ -75842,7 +75949,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L601",
+      "source_location": "L602",
       "target": "tests_store_test_datasource_test_overlap_detection_uses_latest_version_after_getting_old_version",
       "weight": 1.0
     },
@@ -75852,7 +75959,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L619",
+      "source_location": "L620",
       "target": "tests_store_test_datasource_test_add_data_with_overlap_check_stored_dataset",
       "weight": 1.0
     },
@@ -75862,7 +75969,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L643",
+      "source_location": "L644",
       "target": "tests_store_test_datasource_test_error_if_overlap_and_not_combine",
       "weight": 1.0
     },
@@ -75872,7 +75979,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L659",
+      "source_location": "L660",
       "target": "tests_store_test_datasource_test_attributes_overwritten_on_combine",
       "weight": 1.0
     },
@@ -75882,7 +75989,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L67",
+      "source_location": "L68",
       "target": "tests_store_test_datasource_datasource",
       "weight": 1.0
     },
@@ -75892,7 +75999,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L682",
+      "source_location": "L683",
       "target": "tests_store_test_datasource_test_add_data_out_of_order_no_combine",
       "weight": 1.0
     },
@@ -75902,7 +76009,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L707",
+      "source_location": "L708",
       "target": "tests_store_test_datasource_test_bytes_stored",
       "weight": 1.0
     },
@@ -75912,7 +76019,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L74",
+      "source_location": "L75",
       "target": "tests_store_test_datasource_mock_uuid",
       "weight": 1.0
     },
@@ -75922,7 +76029,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L82",
+      "source_location": "L83",
       "target": "tests_store_test_datasource_mock_uuid2",
       "weight": 1.0
     },
@@ -75932,7 +76039,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L90",
+      "source_location": "L91",
       "target": "tests_store_test_datasource_bucket",
       "weight": 1.0
     },
@@ -75942,7 +76049,7 @@
       "relation": "contains",
       "source": "tests_store_test_datasource",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L95",
+      "source_location": "L96",
       "target": "tests_store_test_datasource_datasets_with_gaps",
       "weight": 1.0
     },
@@ -83592,7 +83699,7 @@
       "relation": "method",
       "source": "tests_store_test_datasource_uuid",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L59",
+      "source_location": "L60",
       "target": "tests_store_test_datasource_uuid_init",
       "weight": 1.0
     },
@@ -83602,7 +83709,7 @@
       "relation": "method",
       "source": "tests_store_test_datasource_uuid",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L62",
+      "source_location": "L63",
       "target": "tests_store_test_datasource_uuid_str",
       "weight": 1.0
     },
@@ -98010,9 +98117,19 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_storage_test_store_rationale_105",
+      "source": "tests_storage_test_store_rationale_100",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L105",
+      "source_location": "L100",
+      "target": "tests_storage_test_store_versioned_memory_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "tests_storage_test_store_rationale_106",
+      "source_file": "tests/storage/test_store.py",
+      "source_location": "L106",
       "target": "tests_storage_test_store_zarr_memory_store",
       "weight": 1.0
     },
@@ -98020,9 +98137,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_storage_test_store_rationale_111",
+      "source": "tests_storage_test_store_rationale_112",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L111",
+      "source_location": "L112",
       "target": "tests_storage_test_store_zarr_directory_store",
       "weight": 1.0
     },
@@ -98030,9 +98147,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_storage_test_store_rationale_117",
+      "source": "tests_storage_test_store_rationale_118",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L117",
+      "source_location": "L118",
       "target": "tests_storage_test_store_versioned_zarr_memory_store",
       "weight": 1.0
     },
@@ -98040,9 +98157,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_storage_test_store_rationale_123",
+      "source": "tests_storage_test_store_rationale_124",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L123",
+      "source_location": "L124",
       "target": "tests_storage_test_store_versioned_zarr_directory_store",
       "weight": 1.0
     },
@@ -98050,9 +98167,19 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_storage_test_store_rationale_147",
+      "source": "tests_storage_test_store_rationale_140",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L147",
+      "source_location": "L140",
+      "target": "tests_storage_test_store_store_cases",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "tests_storage_test_store_rationale_173",
+      "source_file": "tests/storage/test_store.py",
+      "source_location": "L173",
       "target": "tests_storage_test_store_test_insert_creates",
       "weight": 1.0
     },
@@ -98060,9 +98187,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_storage_test_store_rationale_167",
+      "source": "tests_storage_test_store_rationale_195",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L167",
+      "source_location": "L195",
       "target": "tests_storage_test_store_test_clear",
       "weight": 1.0
     },
@@ -98070,9 +98197,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_storage_test_store_rationale_187",
+      "source": "tests_storage_test_store_rationale_214",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L187",
+      "source_location": "L214",
       "target": "tests_storage_test_store_test_insert_twice",
       "weight": 1.0
     },
@@ -98080,9 +98207,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_storage_test_store_rationale_208",
+      "source": "tests_storage_test_store_rationale_234",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L208",
+      "source_location": "L234",
       "target": "tests_storage_test_store_test_error_on_insert_overlap",
       "weight": 1.0
     },
@@ -98090,9 +98217,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_storage_test_store_rationale_222",
+      "source": "tests_storage_test_store_rationale_247",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L222",
+      "source_location": "L247",
       "target": "tests_storage_test_store_test_insert_ignore_overlap",
       "weight": 1.0
     },
@@ -98100,9 +98227,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_storage_test_store_rationale_243",
+      "source": "tests_storage_test_store_rationale_267",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L243",
+      "source_location": "L267",
       "target": "tests_storage_test_store_test_zarr_insert_ignore_exact_overlap_skips_append",
       "weight": 1.0
     },
@@ -98110,9 +98237,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_storage_test_store_rationale_271",
+      "source": "tests_storage_test_store_rationale_294",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L271",
+      "source_location": "L294",
       "target": "tests_storage_test_store_test_update_ignore_nonoverlaps",
       "weight": 1.0
     },
@@ -98120,9 +98247,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_storage_test_store_rationale_290",
+      "source": "tests_storage_test_store_rationale_312",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L290",
+      "source_location": "L312",
       "target": "tests_storage_test_store_test_non_contiguous_update",
       "weight": 1.0
     },
@@ -98130,9 +98257,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_storage_test_store_rationale_314",
+      "source": "tests_storage_test_store_rationale_334",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L314",
+      "source_location": "L334",
       "target": "tests_storage_test_store_test_contiguous_update",
       "weight": 1.0
     },
@@ -98140,9 +98267,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_storage_test_store_rationale_335",
+      "source": "tests_storage_test_store_rationale_356",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L335",
+      "source_location": "L356",
       "target": "tests_storage_test_store_test_zarr_encoding",
       "weight": 1.0
     },
@@ -98150,9 +98277,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_storage_test_store_rationale_361",
+      "source": "tests_storage_test_store_rationale_391",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L361",
+      "source_location": "L391",
       "target": "tests_storage_test_store_test_add_data_to_new_version",
       "weight": 1.0
     },
@@ -98160,9 +98287,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_storage_test_store_rationale_384",
+      "source": "tests_storage_test_store_rationale_413",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L384",
+      "source_location": "L413",
       "target": "tests_storage_test_store_test_nbytes_stored",
       "weight": 1.0
     },
@@ -98170,9 +98297,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_storage_test_store_rationale_404",
+      "source": "tests_storage_test_store_rationale_432",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L404",
+      "source_location": "L432",
       "target": "tests_storage_test_store_test_bool",
       "weight": 1.0
     },
@@ -98180,20 +98307,10 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_storage_test_store_rationale_425",
+      "source": "tests_storage_test_store_rationale_450",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L425",
+      "source_location": "L450",
       "target": "tests_storage_test_store_test_clear_data_from_old_version",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "relation": "rationale_for",
-      "source": "tests_storage_test_store_rationale_448",
-      "source_file": "tests/storage/test_store.py",
-      "source_location": "L448",
-      "target": "tests_storage_test_store_test_delete_data_from_old_version",
       "weight": 1.0
     },
     {
@@ -98203,6 +98320,16 @@
       "source": "tests_storage_test_store_rationale_472",
       "source_file": "tests/storage/test_store.py",
       "source_location": "L472",
+      "target": "tests_storage_test_store_test_delete_data_from_old_version",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "tests_storage_test_store_rationale_495",
+      "source_file": "tests/storage/test_store.py",
+      "source_location": "L495",
       "target": "tests_storage_test_store_test_versioned_zarr_bytes_stored_compression",
       "weight": 1.0
     },
@@ -98210,20 +98337,10 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_storage_test_store_rationale_502",
+      "source": "tests_storage_test_store_rationale_528",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L502",
+      "source_location": "L528",
       "target": "tests_storage_test_store_test_versioned_zarr_append_loop_has_no_missing_data",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "relation": "rationale_for",
-      "source": "tests_storage_test_store_rationale_99",
-      "source_file": "tests/storage/test_store.py",
-      "source_location": "L99",
-      "target": "tests_storage_test_store_versioned_memory_store",
       "weight": 1.0
     },
     {
@@ -98510,9 +98627,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_store_test_datasource_rationale_196",
+      "source": "tests_store_test_datasource_rationale_197",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L196",
+      "source_location": "L197",
       "target": "tests_store_test_datasource",
       "weight": 1.0
     },
@@ -98520,9 +98637,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_store_test_datasource_rationale_200",
+      "source": "tests_store_test_datasource_rationale_201",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L200",
+      "source_location": "L201",
       "target": "tests_store_test_datasource_test_replace_version",
       "weight": 1.0
     },
@@ -98530,9 +98647,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_store_test_datasource_rationale_242",
+      "source": "tests_store_test_datasource_rationale_243",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L242",
+      "source_location": "L243",
       "target": "tests_store_test_datasource",
       "weight": 1.0
     },
@@ -98540,9 +98657,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_store_test_datasource_rationale_52",
+      "source": "tests_store_test_datasource_rationale_53",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L52",
+      "source_location": "L53",
       "target": "tests_store_test_datasource_uuid",
       "weight": 1.0
     },
@@ -98550,9 +98667,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_store_test_datasource_rationale_583",
+      "source": "tests_store_test_datasource_rationale_584",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L583",
+      "source_location": "L584",
       "target": "tests_store_test_datasource_test_combine_overlapping_new_version_uses_new_version_date_keys",
       "weight": 1.0
     },
@@ -98560,9 +98677,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_store_test_datasource_rationale_620",
+      "source": "tests_store_test_datasource_rationale_621",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L620",
+      "source_location": "L621",
       "target": "tests_store_test_datasource_test_add_data_with_overlap_check_stored_dataset",
       "weight": 1.0
     },
@@ -98570,9 +98687,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_store_test_datasource_rationale_644",
+      "source": "tests_store_test_datasource_rationale_645",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L644",
+      "source_location": "L645",
       "target": "tests_store_test_datasource_test_error_if_overlap_and_not_combine",
       "weight": 1.0
     },
@@ -98580,9 +98697,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_store_test_datasource_rationale_657",
+      "source": "tests_store_test_datasource_rationale_658",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L657",
+      "source_location": "L658",
       "target": "tests_store_test_datasource",
       "weight": 1.0
     },
@@ -98590,9 +98707,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_store_test_datasource_rationale_660",
+      "source": "tests_store_test_datasource_rationale_661",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L660",
+      "source_location": "L661",
       "target": "tests_store_test_datasource_test_attributes_overwritten_on_combine",
       "weight": 1.0
     },
@@ -98600,9 +98717,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_store_test_datasource_rationale_683",
+      "source": "tests_store_test_datasource_rationale_684",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L683",
+      "source_location": "L684",
       "target": "tests_store_test_datasource_test_add_data_out_of_order_no_combine",
       "weight": 1.0
     },
@@ -101002,7 +101119,7 @@
       "relation": "indirect_call",
       "source": "tests_store_test_datasource_mock_uuid",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L78",
+      "source_location": "L79",
       "target": "openghg_objectstore_legacy_datasource_datasource_uuid",
       "weight": 1.0
     },
@@ -101014,7 +101131,7 @@
       "relation": "indirect_call",
       "source": "tests_store_test_datasource_mock_uuid2",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L86",
+      "source_location": "L87",
       "target": "openghg_objectstore_legacy_datasource_datasource_uuid",
       "weight": 1.0
     },
@@ -101026,7 +101143,7 @@
       "relation": "indirect_call",
       "source": "tests_store_test_datasource_mock_uuid2",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L86",
+      "source_location": "L87",
       "target": "tests_store_test_datasource_mock_uuid",
       "weight": 1.0
     },
@@ -107446,7 +107563,7 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_bucket",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L91",
+      "source_location": "L92",
       "target": "openghg_objectstore_local_store_get_bucket",
       "weight": 1.0
     },
@@ -107458,7 +107575,7 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_test_save",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L250",
+      "source_location": "L251",
       "target": "openghg_objectstore_local_store_exists",
       "weight": 1.0
     },
@@ -107470,7 +107587,7 @@
       "relation": "calls",
       "source": "tests_store_test_datasource_test_surface_data_stored_and_dated_correctly",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L444",
+      "source_location": "L445",
       "target": "openghg_util_time_timestamp_tzaware",
       "weight": 1.0
     },
@@ -109856,6 +109973,54 @@
       "confidence_score": 0.85,
       "context": "collection",
       "relation": "indirect_call",
+      "source": "tests_storage_test_store_store",
+      "source_file": "tests/storage/test_store.py",
+      "source_location": "L155",
+      "target": "openghg_storage_zarr_store_get_zarr_memory_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "collection",
+      "relation": "indirect_call",
+      "source": "tests_storage_test_store_store",
+      "source_file": "tests/storage/test_store.py",
+      "source_location": "L156",
+      "target": "openghg_storage_zarr_store_get_zarr_directory_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "collection",
+      "relation": "indirect_call",
+      "source": "tests_storage_test_store_store",
+      "source_file": "tests/storage/test_store.py",
+      "source_location": "L157",
+      "target": "openghg_storage_zarr_store_get_versioned_zarr_memory_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "collection",
+      "relation": "indirect_call",
+      "source": "tests_storage_test_store_store",
+      "source_file": "tests/storage/test_store.py",
+      "source_location": "L158",
+      "target": "openghg_storage_zarr_store_get_versioned_zarr_directory_store",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "collection",
+      "relation": "indirect_call",
       "source": "tests_store_test_footprints_test_passing_in_different_chunks_to_same_store_works",
       "source_file": "tests/store/test_footprints.py",
       "source_location": "L810",
@@ -110300,20 +110465,9 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "relation": "uses",
-      "source": "tests_storage_test_store_test_bool",
-      "source_file": "tests/storage/test_store.py",
-      "source_location": "L416",
-      "target": "openghg_util_versioning_simpleversioning",
-      "weight": 0.8
-    },
-    {
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.95,
-      "relation": "uses",
       "source": "tests_storage_test_store_test_clear",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L170",
+      "source_location": "L197",
       "target": "openghg_storage_store_versionedstore",
       "weight": 0.8
     },
@@ -110324,7 +110478,7 @@
       "relation": "uses",
       "source": "tests_storage_test_store_test_contiguous_update",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L317",
+      "source_location": "L336",
       "target": "openghg_storage_store_versionedstore",
       "weight": 0.8
     },
@@ -110335,7 +110489,7 @@
       "relation": "uses",
       "source": "tests_storage_test_store_test_delete_data_from_old_version",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L463",
+      "source_location": "L486",
       "target": "openghg_util_versioning_versionerror",
       "weight": 0.8
     },
@@ -110346,7 +110500,7 @@
       "relation": "uses",
       "source": "tests_storage_test_store_test_error_on_insert_overlap",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L211",
+      "source_location": "L236",
       "target": "openghg_storage_store_versionedstore",
       "weight": 0.8
     },
@@ -110357,8 +110511,19 @@
       "relation": "uses",
       "source": "tests_storage_test_store_test_insert_creates",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L153",
+      "source_location": "L178",
       "target": "openghg_storage_store_versionedstore",
+      "weight": 0.8
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "relation": "uses",
+      "source": "tests_storage_test_store_test_insert_creates",
+      "source_file": "tests/storage/test_store.py",
+      "source_location": "L188",
+      "target": "openghg_storage_zarr_store_zarrstore",
       "weight": 0.8
     },
     {
@@ -110368,7 +110533,7 @@
       "relation": "uses",
       "source": "tests_storage_test_store_test_insert_ignore_overlap",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L225",
+      "source_location": "L249",
       "target": "openghg_storage_store_versionedstore",
       "weight": 0.8
     },
@@ -110379,7 +110544,7 @@
       "relation": "uses",
       "source": "tests_storage_test_store_test_insert_twice",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L195",
+      "source_location": "L221",
       "target": "openghg_storage_store_versionedstore",
       "weight": 0.8
     },
@@ -110390,7 +110555,7 @@
       "relation": "uses",
       "source": "tests_storage_test_store_test_non_contiguous_update",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L297",
+      "source_location": "L317",
       "target": "openghg_storage_store_versionedstore",
       "weight": 0.8
     },
@@ -110401,7 +110566,7 @@
       "relation": "uses",
       "source": "tests_storage_test_store_test_update",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L256",
+      "source_location": "L279",
       "target": "openghg_storage_store_versionedstore",
       "weight": 0.8
     },
@@ -110412,7 +110577,7 @@
       "relation": "uses",
       "source": "tests_storage_test_store_test_update_ignore_nonoverlaps",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L274",
+      "source_location": "L296",
       "target": "openghg_storage_store_versionedstore",
       "weight": 0.8
     },
@@ -110423,18 +110588,7 @@
       "relation": "uses",
       "source": "tests_storage_test_store_test_zarr_encoding",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L336",
-      "target": "openghg_storage_zarr_store_zarrstore",
-      "weight": 0.8
-    },
-    {
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.95,
-      "relation": "uses",
-      "source": "tests_storage_test_store_test_zarr_encoding",
-      "source_file": "tests/storage/test_store.py",
-      "source_location": "L344",
+      "source_location": "L371",
       "target": "openghg_storage_zarr_store_versionedzarrstore",
       "weight": 0.8
     },
@@ -110456,7 +110610,7 @@
       "relation": "uses",
       "source": "tests_store_test_datasource_test_auto_overlap_does_not_create_orphan_version",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L574",
+      "source_location": "L575",
       "target": "openghg_types_errors_dataoverlaperror",
       "weight": 0.8
     },
@@ -110467,7 +110621,7 @@
       "relation": "uses",
       "source": "tests_store_test_datasource_test_error_if_overlap_and_not_combine",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L653",
+      "source_location": "L654",
       "target": "openghg_types_errors_dataoverlaperror",
       "weight": 0.8
     },
@@ -111580,7 +111734,7 @@
       "id": "tests_store_test_datasource_uuid",
       "label": "UUID",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L51"
+      "source_location": "L52"
     },
     {
       "_callable": true,
@@ -125413,7 +125567,7 @@
       "id": "tests_storage_test_store_ds1",
       "label": "ds1()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L55"
+      "source_location": "L56"
     },
     {
       "_callable": true,
@@ -125422,7 +125576,7 @@
       "id": "tests_storage_test_store_ds2",
       "label": "ds2()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L60"
+      "source_location": "L61"
     },
     {
       "_callable": true,
@@ -125431,7 +125585,7 @@
       "id": "tests_storage_test_store_ds3",
       "label": "ds3()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L65"
+      "source_location": "L66"
     },
     {
       "_callable": true,
@@ -125440,7 +125594,7 @@
       "id": "tests_storage_test_store_ds4",
       "label": "ds4()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L70"
+      "source_location": "L71"
     },
     {
       "_callable": true,
@@ -125449,7 +125603,7 @@
       "id": "tests_storage_test_store_ds5",
       "label": "ds5()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L75"
+      "source_location": "L76"
     },
     {
       "_callable": true,
@@ -125458,7 +125612,7 @@
       "id": "tests_storage_test_store_dummy_dataset",
       "label": "dummy_dataset()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L22"
+      "source_location": "L23"
     },
     {
       "_callable": true,
@@ -125467,7 +125621,7 @@
       "id": "tests_storage_test_store_idx1",
       "label": "idx1()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L30"
+      "source_location": "L31"
     },
     {
       "_callable": true,
@@ -125476,7 +125630,7 @@
       "id": "tests_storage_test_store_idx2",
       "label": "idx2()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L35"
+      "source_location": "L36"
     },
     {
       "_callable": true,
@@ -125485,7 +125639,7 @@
       "id": "tests_storage_test_store_idx3",
       "label": "idx3()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L40"
+      "source_location": "L41"
     },
     {
       "_callable": true,
@@ -125494,7 +125648,7 @@
       "id": "tests_storage_test_store_idx4",
       "label": "idx4()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L45"
+      "source_location": "L46"
     },
     {
       "_callable": true,
@@ -125503,7 +125657,7 @@
       "id": "tests_storage_test_store_idx5",
       "label": "idx5()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L50"
+      "source_location": "L51"
     },
     {
       "_callable": true,
@@ -125512,7 +125666,25 @@
       "id": "tests_storage_test_store_memory_store",
       "label": "memory_store()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L92"
+      "source_location": "L93"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_storage_test_store_store",
+      "label": "store()",
+      "source_file": "tests/storage/test_store.py",
+      "source_location": "L150"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_storage_test_store_store_cases",
+      "label": "store_cases()",
+      "source_file": "tests/storage/test_store.py",
+      "source_location": "L139"
     },
     {
       "_callable": true,
@@ -125521,7 +125693,7 @@
       "id": "tests_storage_test_store_test_add_data_to_new_version",
       "label": "test_add_data_to_new_version()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L360"
+      "source_location": "L390"
     },
     {
       "_callable": true,
@@ -125530,7 +125702,7 @@
       "id": "tests_storage_test_store_test_bool",
       "label": "test_bool()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L403"
+      "source_location": "L431"
     },
     {
       "_callable": true,
@@ -125539,7 +125711,7 @@
       "id": "tests_storage_test_store_test_clear",
       "label": "test_clear()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L166"
+      "source_location": "L194"
     },
     {
       "_callable": true,
@@ -125548,7 +125720,7 @@
       "id": "tests_storage_test_store_test_clear_data_from_old_version",
       "label": "test_clear_data_from_old_version()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L424"
+      "source_location": "L449"
     },
     {
       "_callable": true,
@@ -125557,7 +125729,7 @@
       "id": "tests_storage_test_store_test_contiguous_update",
       "label": "test_contiguous_update()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L313"
+      "source_location": "L333"
     },
     {
       "_callable": true,
@@ -125566,7 +125738,7 @@
       "id": "tests_storage_test_store_test_delete_data_from_old_version",
       "label": "test_delete_data_from_old_version()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L447"
+      "source_location": "L471"
     },
     {
       "_callable": true,
@@ -125575,7 +125747,7 @@
       "id": "tests_storage_test_store_test_error_on_insert_overlap",
       "label": "test_error_on_insert_overlap()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L207"
+      "source_location": "L233"
     },
     {
       "_callable": true,
@@ -125584,7 +125756,7 @@
       "id": "tests_storage_test_store_test_insert_creates",
       "label": "test_insert_creates()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L146"
+      "source_location": "L172"
     },
     {
       "_callable": true,
@@ -125593,7 +125765,7 @@
       "id": "tests_storage_test_store_test_insert_ignore_overlap",
       "label": "test_insert_ignore_overlap()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L221"
+      "source_location": "L246"
     },
     {
       "_callable": true,
@@ -125602,7 +125774,7 @@
       "id": "tests_storage_test_store_test_insert_twice",
       "label": "test_insert_twice()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L186"
+      "source_location": "L213"
     },
     {
       "_callable": true,
@@ -125611,7 +125783,7 @@
       "id": "tests_storage_test_store_test_nbytes_stored",
       "label": "test_nbytes_stored()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L383"
+      "source_location": "L412"
     },
     {
       "_callable": true,
@@ -125620,7 +125792,7 @@
       "id": "tests_storage_test_store_test_non_contiguous_update",
       "label": "test_non_contiguous_update()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L289"
+      "source_location": "L311"
     },
     {
       "_callable": true,
@@ -125629,7 +125801,7 @@
       "id": "tests_storage_test_store_test_update",
       "label": "test_update()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L253"
+      "source_location": "L277"
     },
     {
       "_callable": true,
@@ -125638,7 +125810,7 @@
       "id": "tests_storage_test_store_test_update_ignore_nonoverlaps",
       "label": "test_update_ignore_nonoverlaps()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L270"
+      "source_location": "L293"
     },
     {
       "_callable": true,
@@ -125647,7 +125819,7 @@
       "id": "tests_storage_test_store_test_versioned_zarr_append_loop_has_no_missing_data",
       "label": "test_versioned_zarr_append_loop_has_no_missing_data()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L501"
+      "source_location": "L527"
     },
     {
       "_callable": true,
@@ -125656,7 +125828,7 @@
       "id": "tests_storage_test_store_test_versioned_zarr_bytes_stored_compression",
       "label": "test_versioned_zarr_bytes_stored_compression()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L471"
+      "source_location": "L494"
     },
     {
       "_callable": true,
@@ -125665,7 +125837,7 @@
       "id": "tests_storage_test_store_test_zarr_encoding",
       "label": "test_zarr_encoding()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L334"
+      "source_location": "L355"
     },
     {
       "_callable": true,
@@ -125674,7 +125846,7 @@
       "id": "tests_storage_test_store_test_zarr_insert_ignore_exact_overlap_skips_append",
       "label": "test_zarr_insert_ignore_exact_overlap_skips_append()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L242"
+      "source_location": "L266"
     },
     {
       "_callable": true,
@@ -125683,7 +125855,7 @@
       "id": "tests_storage_test_store_twice_ds1",
       "label": "twice_ds1()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L81"
+      "source_location": "L82"
     },
     {
       "_callable": true,
@@ -125692,7 +125864,7 @@
       "id": "tests_storage_test_store_twice_ds2",
       "label": "twice_ds2()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L86"
+      "source_location": "L87"
     },
     {
       "_callable": true,
@@ -125701,7 +125873,7 @@
       "id": "tests_storage_test_store_versioned_memory_store",
       "label": "versioned_memory_store()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L98"
+      "source_location": "L99"
     },
     {
       "_callable": true,
@@ -125710,7 +125882,7 @@
       "id": "tests_storage_test_store_versioned_zarr_directory_store",
       "label": "versioned_zarr_directory_store()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L122"
+      "source_location": "L123"
     },
     {
       "_callable": true,
@@ -125719,7 +125891,7 @@
       "id": "tests_storage_test_store_versioned_zarr_memory_store",
       "label": "versioned_zarr_memory_store()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L116"
+      "source_location": "L117"
     },
     {
       "_callable": true,
@@ -125728,7 +125900,7 @@
       "id": "tests_storage_test_store_zarr_directory_store",
       "label": "zarr_directory_store()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L110"
+      "source_location": "L111"
     },
     {
       "_callable": true,
@@ -125737,7 +125909,7 @@
       "id": "tests_storage_test_store_zarr_memory_store",
       "label": "zarr_memory_store()",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L104"
+      "source_location": "L105"
     },
     {
       "_callable": true,
@@ -125935,7 +126107,7 @@
       "id": "tests_storage_test_zarr_write_safety_test_disabled_alignment_keeps_chunk_safety_validation",
       "label": "test_disabled_alignment_keeps_chunk_safety_validation()",
       "source_file": "tests/storage/test_zarr_write_safety.py",
-      "source_location": "L58"
+      "source_location": "L64"
     },
     {
       "_callable": true,
@@ -125944,7 +126116,7 @@
       "id": "tests_storage_test_zarr_write_safety_test_misaligned_dask_insert_append_and_update",
       "label": "test_misaligned_dask_insert_append_and_update()",
       "source_file": "tests/storage/test_zarr_write_safety.py",
-      "source_location": "L40"
+      "source_location": "L46"
     },
     {
       "_callable": true,
@@ -125953,7 +126125,7 @@
       "id": "tests_storage_test_zarr_write_safety_test_noncontiguous_regions_sharing_chunk_are_written_sequentially",
       "label": "test_noncontiguous_regions_sharing_chunk_are_written_sequentially()",
       "source_file": "tests/storage/test_zarr_write_safety.py",
-      "source_location": "L11"
+      "source_location": "L17"
     },
     {
       "_callable": true,
@@ -125962,7 +126134,16 @@
       "id": "tests_storage_test_zarr_write_safety_test_older_xarray_uses_validation_and_rejects_explicit_alignment",
       "label": "test_older_xarray_uses_validation_and_rejects_explicit_alignment()",
       "source_file": "tests/storage/test_zarr_write_safety.py",
-      "source_location": "L65"
+      "source_location": "L73"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_storage_test_zarr_write_safety_zarr_format",
+      "label": "zarr_format()",
+      "source_file": "tests/storage/test_zarr_write_safety.py",
+      "source_location": "L13"
     },
     {
       "_callable": true,
@@ -126142,7 +126323,7 @@
       "id": "tests_store_test_datasource_bucket",
       "label": "bucket()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L90"
+      "source_location": "L91"
     },
     {
       "_callable": true,
@@ -126151,7 +126332,7 @@
       "id": "tests_store_test_datasource_create_attributes",
       "label": "create_attributes()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L20"
+      "source_location": "L21"
     },
     {
       "_callable": true,
@@ -126160,7 +126341,7 @@
       "id": "tests_store_test_datasource_create_three_datasets",
       "label": "create_three_datasets()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L29"
+      "source_location": "L30"
     },
     {
       "_callable": true,
@@ -126169,7 +126350,7 @@
       "id": "tests_store_test_datasource_data",
       "label": "data()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L44"
+      "source_location": "L45"
     },
     {
       "_callable": true,
@@ -126178,7 +126359,7 @@
       "id": "tests_store_test_datasource_datasets_with_gaps",
       "label": "datasets_with_gaps()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L95"
+      "source_location": "L96"
     },
     {
       "_callable": true,
@@ -126187,7 +126368,7 @@
       "id": "tests_store_test_datasource_datasets_with_overlap",
       "label": "datasets_with_overlap()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L104"
+      "source_location": "L105"
     },
     {
       "_callable": true,
@@ -126196,7 +126377,7 @@
       "id": "tests_store_test_datasource_datasource",
       "label": "datasource()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L67"
+      "source_location": "L68"
     },
     {
       "_callable": true,
@@ -126205,7 +126386,7 @@
       "id": "tests_store_test_datasource_mock_uuid",
       "label": "mock_uuid()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L74"
+      "source_location": "L75"
     },
     {
       "_callable": true,
@@ -126214,7 +126395,7 @@
       "id": "tests_store_test_datasource_mock_uuid2",
       "label": "mock_uuid2()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L82"
+      "source_location": "L83"
     },
     {
       "_callable": true,
@@ -126223,7 +126404,7 @@
       "id": "tests_store_test_datasource_test_add_data",
       "label": "test_add_data()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L112"
+      "source_location": "L113"
     },
     {
       "_callable": true,
@@ -126232,7 +126413,7 @@
       "id": "tests_store_test_datasource_test_add_data_out_of_order_no_combine",
       "label": "test_add_data_out_of_order_no_combine()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L682"
+      "source_location": "L683"
     },
     {
       "_callable": true,
@@ -126241,7 +126422,7 @@
       "id": "tests_store_test_datasource_test_add_data_with_gaps_check_stored_dataset",
       "label": "test_add_data_with_gaps_check_stored_dataset()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L450"
+      "source_location": "L451"
     },
     {
       "_callable": true,
@@ -126250,7 +126431,7 @@
       "id": "tests_store_test_datasource_test_add_data_with_overlap_check_stored_dataset",
       "label": "test_add_data_with_overlap_check_stored_dataset()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L619"
+      "source_location": "L620"
     },
     {
       "_callable": true,
@@ -126259,7 +126440,7 @@
       "id": "tests_store_test_datasource_test_add_metadata_key",
       "label": "test_add_metadata_key()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L297"
+      "source_location": "L298"
     },
     {
       "_callable": true,
@@ -126268,7 +126449,7 @@
       "id": "tests_store_test_datasource_test_add_metadata_lowercases_correctly",
       "label": "test_add_metadata_lowercases_correctly()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L305"
+      "source_location": "L306"
     },
     {
       "_callable": true,
@@ -126277,7 +126458,7 @@
       "id": "tests_store_test_datasource_test_attributes_overwritten_on_combine",
       "label": "test_attributes_overwritten_on_combine()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L659"
+      "source_location": "L660"
     },
     {
       "_callable": true,
@@ -126286,7 +126467,7 @@
       "id": "tests_store_test_datasource_test_auto_overlap_does_not_create_orphan_version",
       "label": "test_auto_overlap_does_not_create_orphan_version()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L566"
+      "source_location": "L567"
     },
     {
       "_callable": true,
@@ -126295,7 +126476,7 @@
       "id": "tests_store_test_datasource_test_bytes_stored",
       "label": "test_bytes_stored()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L707"
+      "source_location": "L708"
     },
     {
       "_callable": true,
@@ -126304,7 +126485,7 @@
       "id": "tests_store_test_datasource_test_combine_nonoverlapping_new_version_copies_current_data",
       "label": "test_combine_nonoverlapping_new_version_copies_current_data()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L512"
+      "source_location": "L513"
     },
     {
       "_callable": true,
@@ -126313,7 +126494,7 @@
       "id": "tests_store_test_datasource_test_combine_nonoverlapping_read_only_does_not_create_version",
       "label": "test_combine_nonoverlapping_read_only_does_not_create_version()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L530"
+      "source_location": "L531"
     },
     {
       "_callable": true,
@@ -126322,7 +126503,7 @@
       "id": "tests_store_test_datasource_test_combine_overlapping_new_version_uses_new_version_date_keys",
       "label": "test_combine_overlapping_new_version_uses_new_version_date_keys()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L582"
+      "source_location": "L583"
     },
     {
       "_callable": true,
@@ -126331,7 +126512,7 @@
       "id": "tests_store_test_datasource_test_data_version_deletion",
       "label": "test_data_version_deletion()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L403"
+      "source_location": "L404"
     },
     {
       "_callable": true,
@@ -126340,7 +126521,7 @@
       "id": "tests_store_test_datasource_test_error_if_overlap_and_not_combine",
       "label": "test_error_if_overlap_and_not_combine()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L643"
+      "source_location": "L644"
     },
     {
       "_callable": true,
@@ -126349,7 +126530,7 @@
       "id": "tests_store_test_datasource_test_incorrect_datatype_raises",
       "label": "test_incorrect_datatype_raises()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L345"
+      "source_location": "L346"
     },
     {
       "_callable": true,
@@ -126358,7 +126539,7 @@
       "id": "tests_store_test_datasource_test_integrity_check",
       "label": "test_integrity_check()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L377"
+      "source_location": "L378"
     },
     {
       "_callable": true,
@@ -126367,7 +126548,7 @@
       "id": "tests_store_test_datasource_test_new_nonoverlapping_version_does_not_mutate_previous_date_keys",
       "label": "test_new_nonoverlapping_version_does_not_mutate_previous_date_keys()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L549"
+      "source_location": "L550"
     },
     {
       "_callable": true,
@@ -126376,7 +126557,7 @@
       "id": "tests_store_test_datasource_test_overlap_detection_uses_latest_version_after_getting_old_version",
       "label": "test_overlap_detection_uses_latest_version_after_getting_old_version()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L601"
+      "source_location": "L602"
     },
     {
       "_callable": true,
@@ -126385,7 +126566,7 @@
       "id": "tests_store_test_datasource_test_plan_timed_data_update_matrix",
       "label": "test_plan_timed_data_update_matrix()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L473"
+      "source_location": "L474"
     },
     {
       "_callable": true,
@@ -126394,7 +126575,7 @@
       "id": "tests_store_test_datasource_test_read_only_load_cannot_modify_data",
       "label": "test_read_only_load_cannot_modify_data()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L273"
+      "source_location": "L274"
     },
     {
       "_callable": true,
@@ -126403,7 +126584,7 @@
       "id": "tests_store_test_datasource_test_replace_version",
       "label": "test_replace_version()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L199"
+      "source_location": "L200"
     },
     {
       "_callable": true,
@@ -126412,7 +126593,7 @@
       "id": "tests_store_test_datasource_test_save",
       "label": "test_save()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L245"
+      "source_location": "L246"
     },
     {
       "_callable": true,
@@ -126421,7 +126602,7 @@
       "id": "tests_store_test_datasource_test_save_and_load",
       "label": "test_save_and_load()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L323"
+      "source_location": "L324"
     },
     {
       "_callable": true,
@@ -126430,7 +126611,7 @@
       "id": "tests_store_test_datasource_test_save_footprint",
       "label": "test_save_footprint()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L253"
+      "source_location": "L254"
     },
     {
       "_callable": true,
@@ -126439,7 +126620,7 @@
       "id": "tests_store_test_datasource_test_surface_data_stored_and_dated_correctly",
       "label": "test_surface_data_stored_and_dated_correctly()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L431"
+      "source_location": "L432"
     },
     {
       "_callable": true,
@@ -126448,7 +126629,7 @@
       "id": "tests_store_test_datasource_test_update_daterange_replacement",
       "label": "test_update_daterange_replacement()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L355"
+      "source_location": "L356"
     },
     {
       "_callable": true,
@@ -126457,7 +126638,7 @@
       "id": "tests_store_test_datasource_test_versioning",
       "label": "test_versioning()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L152"
+      "source_location": "L153"
     },
     {
       "_callable": true,
@@ -126466,7 +126647,7 @@
       "id": "tests_store_test_datasource_uuid_init",
       "label": ".__init__()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L59"
+      "source_location": "L60"
     },
     {
       "_callable": true,
@@ -126475,7 +126656,7 @@
       "id": "tests_store_test_datasource_uuid_str",
       "label": ".__str__()",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L62"
+      "source_location": "L63"
     },
     {
       "_callable": true,
@@ -134688,6 +134869,14 @@
       "label": "test_zarr_write_safety.py",
       "source_file": "tests/storage/test_zarr_write_safety.py",
       "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "code",
+      "id": "tests_storage_test_zarr_write_safety_py_fixture",
+      "label": "fixture",
+      "source_file": "",
+      "source_location": ""
     },
     {
       "_origin": "ast",
@@ -146972,178 +147161,186 @@
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_storage_test_store_rationale_105",
+      "id": "tests_storage_test_store_rationale_100",
+      "label": "Test VersionedMemoryStore.",
+      "source_file": "tests/storage/test_store.py",
+      "source_location": "L100"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "tests_storage_test_store_rationale_106",
       "label": "Test ZarrStore with zarr.MemoryStore as underlying storage.",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L105"
+      "source_location": "L106"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_storage_test_store_rationale_111",
+      "id": "tests_storage_test_store_rationale_112",
       "label": "Test ZarrStore with zarr.DirectoryStore as underlying storage.",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L111"
+      "source_location": "L112"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_storage_test_store_rationale_117",
+      "id": "tests_storage_test_store_rationale_118",
       "label": "Test VersionedZarrStore with zarr.MemoryStore as underlying storage.",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L117"
+      "source_location": "L118"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_storage_test_store_rationale_123",
+      "id": "tests_storage_test_store_rationale_124",
       "label": "Test VersionedZarrStore with zarr.DirectoryStore as underlying storage.",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L123"
+      "source_location": "L124"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_storage_test_store_rationale_147",
+      "id": "tests_storage_test_store_rationale_140",
+      "label": "Exercise supported on-disk formats independently of the installed Zarr API.",
+      "source_file": "tests/storage/test_store.py",
+      "source_location": "L140"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "tests_storage_test_store_rationale_173",
       "label": "Test that a store registers as False until data is added. After data is added,…",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L147"
+      "source_location": "L173"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_storage_test_store_rationale_167",
+      "id": "tests_storage_test_store_rationale_195",
       "label": "Test clearing data from the store.",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L167"
+      "source_location": "L195"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_storage_test_store_rationale_187",
+      "id": "tests_storage_test_store_rationale_214",
       "label": "Test inserting data twice. The datasets `ds1` and `ds5` do not overlap, so…",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L187"
+      "source_location": "L214"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_storage_test_store_rationale_208",
+      "id": "tests_storage_test_store_rationale_234",
       "label": "Test an error is raised on overlap.",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L208"
+      "source_location": "L234"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_storage_test_store_rationale_222",
+      "id": "tests_storage_test_store_rationale_247",
       "label": "Test that insert with `on_overlap = 'ignore'` inserts non-overlaping values.",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L222"
+      "source_location": "L247"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_storage_test_store_rationale_243",
+      "id": "tests_storage_test_store_rationale_267",
       "label": "Test that ignoring an exact overlap does not attempt an empty Zarr append.",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L243"
+      "source_location": "L267"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_storage_test_store_rationale_271",
+      "id": "tests_storage_test_store_rationale_294",
       "label": "Test `update` with non-overlaps ignored.",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L271"
+      "source_location": "L294"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_storage_test_store_rationale_290",
-      "label": "Test `update` when only some of the values are updated. This raises an error…",
+      "id": "tests_storage_test_store_rationale_312",
+      "label": "Test `update` when only some of the values are updated. Zarr stores must…",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L290"
+      "source_location": "L312"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_storage_test_store_rationale_314",
+      "id": "tests_storage_test_store_rationale_334",
       "label": "Test `update` on contiguous region of times.",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L314"
+      "source_location": "L334"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_storage_test_store_rationale_335",
+      "id": "tests_storage_test_store_rationale_356",
       "label": "Check that data can be compressed with a specified encoding.",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L335"
+      "source_location": "L356"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_storage_test_store_rationale_361",
+      "id": "tests_storage_test_store_rationale_391",
       "label": "Check that data can be added to a new version without affecting an old version.",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L361"
+      "source_location": "L391"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_storage_test_store_rationale_384",
+      "id": "tests_storage_test_store_rationale_413",
       "label": "Check that for subclasses of VersionedStore, `bytes_stored` sums over versions.",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L384"
+      "source_location": "L413"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_storage_test_store_rationale_404",
+      "id": "tests_storage_test_store_rationale_432",
       "label": "Check that for subclasses of VersionedStore, ``bool`` looks to see if any…",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L404"
+      "source_location": "L432"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_storage_test_store_rationale_425",
+      "id": "tests_storage_test_store_rationale_450",
       "label": "Check that data can be cleared from an old version without affecting a new…",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L425"
-    },
-    {
-      "_origin": "ast",
-      "file_type": "rationale",
-      "id": "tests_storage_test_store_rationale_448",
-      "label": "Check that an old version can be deleted without affecting a new version.",
-      "source_file": "tests/storage/test_store.py",
-      "source_location": "L448"
+      "source_location": "L450"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
       "id": "tests_storage_test_store_rationale_472",
-      "label": "Test bytes stored with different compression settings.",
+      "label": "Check that an old version can be deleted without affecting a new version.",
       "source_file": "tests/storage/test_store.py",
       "source_location": "L472"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_storage_test_store_rationale_502",
-      "label": "Check repeated appends do not lose values when source chunks share target…",
+      "id": "tests_storage_test_store_rationale_495",
+      "label": "Test bytes stored with different compression settings.",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L502"
+      "source_location": "L495"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_storage_test_store_rationale_99",
-      "label": "Test VersionedMemoryStore.",
+      "id": "tests_storage_test_store_rationale_528",
+      "label": "Check repeated appends do not lose values when source chunks share target…",
       "source_file": "tests/storage/test_store.py",
-      "source_location": "L99"
+      "source_location": "L528"
     },
     {
       "_origin": "ast",
@@ -147372,82 +147569,82 @@
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_store_test_datasource_rationale_196",
+      "id": "tests_store_test_datasource_rationale_197",
       "label": "# TODO: Add case for if_exists=\"combine\" which should look more like original…",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L196"
+      "source_location": "L197"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_store_test_datasource_rationale_200",
+      "id": "tests_store_test_datasource_rationale_201",
       "label": "Test that new data can replace previous data. This involves deleting the…",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L200"
+      "source_location": "L201"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_store_test_datasource_rationale_242",
+      "id": "tests_store_test_datasource_rationale_243",
       "label": "# TODO: Add case for if_exists=\"combine\" which should look more like original…",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L242"
+      "source_location": "L243"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_store_test_datasource_rationale_52",
+      "id": "tests_store_test_datasource_rationale_53",
       "label": "Make a sequence of unique uuids. They have the form \"uuid1\", \"uuid2\", etc.",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L52"
+      "source_location": "L53"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_store_test_datasource_rationale_583",
+      "id": "tests_store_test_datasource_rationale_584",
       "label": "Combining overlaps derives the new version date key using the datasource period.",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L583"
+      "source_location": "L584"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_store_test_datasource_rationale_620",
+      "id": "tests_store_test_datasource_rationale_621",
       "label": "Check that we can add data with overlaps.",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L620"
+      "source_location": "L621"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_store_test_datasource_rationale_644",
+      "id": "tests_store_test_datasource_rationale_645",
       "label": "Check that we can get an error if we add overlapping data with if_exists ==…",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L644"
+      "source_location": "L645"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_store_test_datasource_rationale_657",
+      "id": "tests_store_test_datasource_rationale_658",
       "label": "# TODO: fix attribute handling so this doesn't happen!",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L657"
+      "source_location": "L658"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_store_test_datasource_rationale_660",
+      "id": "tests_store_test_datasource_rationale_661",
       "label": "Test that shows attributes are overwritten when writing to zarr. We probably…",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L660"
+      "source_location": "L661"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_store_test_datasource_rationale_683",
+      "id": "tests_store_test_datasource_rationale_684",
       "label": "Check that data is retrieved in order, even if it is added out of order.",
       "source_file": "tests/store/test_datasource.py",
-      "source_location": "L683"
+      "source_location": "L684"
     },
     {
       "_origin": "ast",
