@@ -227,11 +227,15 @@ target-version = "py311"
 
 [tool.ruff.lint]
 preview = true
-select = ["E", "F", "W"]
+select = ["E", "F", "W", "D101", "D102", "D103"]
 ignore = ["E203", "E501", "W291", "E701"]
 
 [tool.ruff.lint.per-file-ignores]
 "**/__init__.py" = ["F401", "E402", "F822"]
+"tests/**/*.py" = ["D101", "D102", "D103"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
 
 [tool.pytest.ini_options]
 pythonpath = [
