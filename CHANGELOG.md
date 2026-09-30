@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Preserved mole-fraction and variability metadata when resampling surface observations weighted by observation count. [Issue #1765](https://github.com/openghg/openghg/issues/1765)
 - Added column `max_level` consistency validation to `ModelScenario` and preserved `max_level` metadata when standardising ACRG and PARIS column footprints, preventing observations and footprints with different vertical extents from being combined. [PR #1718](https://github.com/openghg/openghg/pull/1718)
 - Ensured explicitly integrated CO2 site and satellite footprints are standardised and modelled through the integrated-footprint pathway, while preserving the time-resolved default for CO2 footprints. [PR #1698](https://github.com/openghg/openghg/pull/1698)
 - Added a dimension dtype checker for H_back dimension to "timedelta64[ns]". Bug occured for dimension "resolution" and dtype "resolution".[PR #1671](https://github.com/openghg/openghg/pull/1671)
@@ -16,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Updated
 
+- Added Python 3.13 to the CI test matrices, dropped Python 3.10 support, and restricted OpenGHG to Python 3.11-3.13. [PR #1741](https://github.com/openghg/openghg/pull/1741).
 - Removed file and retrieved-data hashing from standardisation. Repeated inputs now follow the normal `if_exists` overlap policy, and data can be standardised again after its datasource is deleted. The deprecated `force` argument remains accepted but is ignored; passing `force=True` emits a `DeprecationWarning`, and callers should use `if_exists` to choose update behaviour. [Issue #1676](https://github.com/openghg/openghg/issues/1676)
 - Updated the standardisation of AGAGE format data so that rows containing nans are no longer dropped. [PR #1634](https://github.com/openghg/openghg/pull/1634)
 - Updated copilot instructions and added repo graph using graphify.[PR #1684](https://github.com/openghg/openghg/pull/1684)
@@ -23,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added reproducible Graphify regeneration, CI freshness checking, and a focused navigation
+- Added automatic post-merge Graphify regeneration and a focused navigation
   skill for cross-module impact analysis. [Issue #1695](https://github.com/openghg/openghg/issues/1695)
 - Added a lazy `fp_x_flux_time_resolved_numba` analysis operator that preserves source and spatial dimensions, supports single-source and regular coarse-frequency flux, and includes optional atomic ppm Zarr persistence and worker warm-up helpers.
 - Added support for passing in-memory `xarray.Dataset` objects to supported standardisation and transformation parsers, including object-store retrieval and forward `ModelScenario` coverage.

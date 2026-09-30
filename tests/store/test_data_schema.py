@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 import xarray as xr
 from openghg.store import DataSchema
+from openghg.types import ValidationError
 
 
 def test_data_schema():
@@ -64,3 +65,18 @@ def test_data_schema_empty(dummy_data_1):
     data_schema = DataSchema()
 
     data_schema.validate_data(dummy_data_1)
+
+
+def test_data_schema_missing_variable(data_schema_1, dummy_data_1):
+    with pytest.raises(ValidationError, match="fp"):
+        data_schema_1.validate_data(dummy_data_1.drop_vars("fp"))
+
+
+def test_data_schema_wrong_dtype(data_schema_1, dummy_data_1):
+    with pytest.raises(ValidationError, match="dtype mismatch"):
+        data_schema_1.validate_data(dummy_data_1.assign(fp=dummy_data_1.fp.astype(int)))
+
+
+def test_data_schema_missing_variable_dimension(data_schema_1, dummy_data_1):
+    with pytest.raises(ValueError, match="Missing dimension for data variable: fp, lon"):
+        data_schema_1.validate_data(dummy_data_1.rename(lon="height"))
