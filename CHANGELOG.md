@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed file and retrieved-data hashing from standardisation. Repeated inputs now follow the normal `if_exists` overlap policy, and data can be standardised again after its datasource is deleted. The deprecated `force` argument remains accepted but is ignored; passing `force=True` emits a `DeprecationWarning`, and callers should use `if_exists` to choose update behaviour. [Issue #1676](https://github.com/openghg/openghg/issues/1676)
 - Updated the standardisation of AGAGE format data so that rows containing nans are no longer dropped. [PR #1634](https://github.com/openghg/openghg/pull/1634)
 - Updated copilot instructions and added repo graph using graphify.[PR #1684](https://github.com/openghg/openghg/pull/1684)
+- Made small tidy up changes to the attribute and metadata details associated with the Flux data object class. For the input attribute details from file this updates the `source` attribute to be `source_url`, moves details from `file_created` to `history`, updates `processed_by` to always be "OpenGHG Cloud" (to align with other data types) and corrects the `species` value to contain the correct string rather than the incorrect tuple. For the metadata, the `processed` keyword is removed. [PR #1746](https://github.com/openghg/openghg/pull/1746)
 
 ### Added
 
@@ -31,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a tutorial for adding CO2 satellite data, including how integrated footprints differ from time-resolved footprints in OpenGHG. [PR #1698](https://github.com/openghg/openghg/pull/1698)
 - Added ability to save output of plot_comparison using save_path and ability to pass additional figure modifications.[PR #1672](https://github.com/openghg/openghg/pull/1672)
 - Added more tests and explanation in the tutorial regarding if_exists behaviour.[PR #1693](https://github.com/openghg/openghg/pull/1693)
+- Added find_url function which checks whether a URL is valid using regular expressions. [PR #1746](https://github.com/openghg/openghg/pull/1746)
 
 ## [0.19.0] - 2026-06-11
 
