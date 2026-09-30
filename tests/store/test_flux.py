@@ -115,7 +115,6 @@ def test_read_file(caplog):
         "time_period": "1 year",
     }
 
-    del metadata["processed"]
     del metadata["prior_file_1_version"]
 
     assert metadata.items() >= expected_metadata.items()

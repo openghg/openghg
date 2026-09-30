@@ -1,9 +1,29 @@
 from pathlib import Path
 from rich.progress import wrap_file
+import re
 import logging
 
 logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
+
+
+URL_PATTERN = re.compile(
+    r"""
+    \b
+    (?:https?://|www\.)           # scheme or www prefix (literal :// optionally included)
+    [a-zA-Z0-9.-]+                # domain
+    (?:\.[a-zA-Z]+)               # top level domain
+    (?::\d+)?                     # optional port (literal : included)
+    (?:/[^\s<>"')\]]*)?           # optional path/query/fragment
+    """,
+    re.VERBOSE | re.IGNORECASE,
+)
+
+
+def find_url(text: str) -> str | None:
+    """Check whether URL pattern is present and return that pattern if found (else None)"""
+    match = URL_PATTERN.search(text)
+    return match.group(0) if match else None
 
 
 def parse_url_filename(url: str) -> str:

@@ -528,12 +528,14 @@ def get_flux_attributes(
     else:
         global_attributes["title"] = f"{source} emissions/flux of {species} for {domain} domain"
 
-    if "file_created" not in global_attributes:
+    if "file_created" in global_attributes:
+        history = global_attributes.get("history", "")
+        global_attributes["history"] = history + f" Previously processed: {global_attributes['file_created']}"
         global_attributes["file_created"] = str(timestamp_now())
-    if "process_by" not in global_attributes:
-        global_attributes["processed_by"] = "OpenGHG_Cloud"
 
-    species_label = define_species_label(species)
+    global_attributes["processed_by"] = "OpenGHG_Cloud"
+
+    species_label, species_key = define_species_label(species)
 
     global_attributes["species"] = species_label
     global_attributes["source"] = source
