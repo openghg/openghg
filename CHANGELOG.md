@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.19.0...HEAD)
 
+### Added
+
+- Added versioned JSON metadata and CF history helpers for xarray DataArrays and Datasets. [Issue #1682](https://github.com/openghg/openghg/issues/1682)
+
 ### Fixed
 
 - Added column `max_level` consistency validation to `ModelScenario` and preserved `max_level` metadata when standardising ACRG and PARIS column footprints, preventing observations and footprints with different vertical extents from being combined. [PR #1718](https://github.com/openghg/openghg/pull/1718)
