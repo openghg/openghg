@@ -529,8 +529,7 @@ def get_flux_attributes(
         global_attributes["title"] = f"{source} emissions/flux of {species} for {domain} domain"
 
     if "file_created" in global_attributes:
-        history = global_attributes.get("history", "")
-        global_attributes["history"] = history + f" Previously processed: {global_attributes['file_created']}"
+        global_attributes["org_file_created"] = global_attributes['file_created']
         global_attributes["file_created"] = str(timestamp_now())
 
     global_attributes["processed_by"] = "OpenGHG_Cloud"
