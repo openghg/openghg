@@ -525,6 +525,9 @@ def get_flux_attributes(
     generated_title = f"{source} emissions/flux of {species} for {domain} domain"
     attrs.setdefault("title", generated_title)
 
+    if "file_created" in attrs:
+        attrs["original_file_created"] = attrs["file_created"]
+
     attrs["file_created"] = str(timestamp_now())
     attrs["processed_by"] = "OpenGHG_Cloud"
 
