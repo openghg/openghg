@@ -479,11 +479,12 @@ request until all tests pass. We only accept pull requests to devel.
 Documentation
 =============
 
-OpenGHG is fully documented using a combination of hand-written files
-(in the ``doc`` folder) and auto-generated api documentation created from
-Google `style docstrings <https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html>`__.
-for details. The documentation is automatically built using `Sphinx <http://sphinx-doc.org>`__. Whenever a commit is pushed to devel the
-documentation is automatically rebuilt and updated.
+OpenGHG is documented using a combination of hand-written files in the ``doc``
+folder and auto-generated API documentation created from docstrings. See the
+:doc:`docstring policy <docstrings>` for the required content and Google-style
+conventions. The documentation is built using `Sphinx <https://www.sphinx-doc.org/>`__.
+Whenever a commit is pushed to devel the documentation is automatically rebuilt and
+updated.
 
 To build the documentation locally you will first need to install the
 documentation dependencies. If you haven't yet installed the documentation dependencies please do so by running
