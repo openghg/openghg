@@ -133,5 +133,9 @@ from ._util import verify_site as verify_site
 from ._util import verify_site_with_satellite as verify_site_with_satellite
 from ._versions import check_if_need_new_version as check_if_need_new_version
 from ._versions import show_versions as show_versions
+from ._xarray_metadata import append_xarray_history as append_xarray_history
+from ._xarray_metadata import decode_xarray_metadata as decode_xarray_metadata
+from ._xarray_metadata import encode_xarray_metadata as encode_xarray_metadata
+from ._xarray_metadata import with_xarray_metadata as with_xarray_metadata
 
 __all__: list[str]
