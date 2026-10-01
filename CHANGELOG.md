@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated copilot instructions and added repo graph using graphify.[PR #1684](https://github.com/openghg/openghg/pull/1684)
 - Made small tidy up changes to the attribute and metadata details associated with the Flux data object class. For the input attribute details from file this updates the `source` attribute to be `source_url`, moves details from `file_created` to `original_file_created`, updates `processed_by` to always be "OpenGHG Cloud" (to align with other data types) and corrects the `species` value to contain the correct string rather than the incorrect tuple. For the metadata, the `processed` keyword is removed. [PR #1746](https://github.com/openghg/openghg/pull/1746) and [PR #1769](https://github.com/openghg/openghg/pull/1769)
 - The order of assignment for the internally created flux attributes when storing the flux dataset has been clarified. This order of preference is now global_attributes passed to the assignment function, attributes on the original dataset and defaults set within the function. This may result in some small differences from previous attribute creation. [PR #1771](https://github.com/openghg/openghg/pull/1771)
+- Aligning attribute and metadata details for all data type classes (previously just surface) using the underlying openghg.standardise.meta.align_metadata_attributes function [PR #1743](https://github.com/openghg/openghg/pull/1743)
 
 ### Added
 
