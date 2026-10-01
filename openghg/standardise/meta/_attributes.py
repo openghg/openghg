@@ -514,54 +514,44 @@ def get_flux_attributes(
         "Conventions": "CF-1.8",
     }
 
-    if global_attributes is None:
-        global_attributes = global_attributes_default
-    else:
-        global_attributes.update(global_attributes_default)
+    # Merge values from the different sources. Order of preference is bottom to top.
+    attrs = {
+        **global_attributes_default,
+        **ds.attrs,
+        **(global_attributes or {}),
+    }
 
-    # Extract any current attributes from the Dataset
-    current_attributes = ds.attrs
+    # Set title if this doesn't already exist
+    generated_title = f"{source} emissions/flux of {species} for {domain} domain"
+    attrs.setdefault("title", generated_title)
 
-    # Extract "title" from current attributes or define this.
-    if "title" in current_attributes and "title" not in global_attributes:
-        global_attributes["title"] = current_attributes["title"]
-    else:
-        global_attributes["title"] = f"{source} emissions/flux of {species} for {domain} domain"
+    if "file_created" in attrs:
+        attrs["original_file_created"] = attrs["file_created"]
 
-    if "file_created" in global_attributes:
-        global_attributes["original_file_created"] = global_attributes["file_created"]
-
-    global_attributes["file_created"] = str(timestamp_now())
-    global_attributes["processed_by"] = "OpenGHG_Cloud"
+    attrs["file_created"] = str(timestamp_now())
+    attrs["processed_by"] = "OpenGHG_Cloud"
 
     species_label, species_key = define_species_label(species)
 
-    global_attributes["species"] = species_label
-    global_attributes["source"] = source
-    global_attributes["domain"] = domain
+    attrs["species"] = species_label
+    attrs["source"] = source
+    attrs["domain"] = domain
 
     # Add any 'prior' information for flux / emissions databases.
     if prior_info_dict is not None:
         # For composite flux / emissions files this may contain > 1 prior input
-        global_attributes["number_of_prior_files_used"] = len(prior_info_dict.keys())
+        attrs["number_of_prior_files_used"] = len(prior_info_dict.keys())
         for i, source_key in enumerate(prior_info_dict.keys()):
             prior_number = i + 1
             label_start = f"prior_file_{prior_number}"
-            global_attributes[label_start] = source_key
+            attrs[label_start] = source_key
 
             for key, value in prior_info_dict[source_key].items():
                 attr_key = f"{label_start}_{key}"
-                global_attributes[attr_key] = value
+                attrs[attr_key] = value
 
-    # Ensure keys which have been updated by OpenGHG are not overwritten
-    # by current attributes.
-    updated_keys = ["Conventions", "title", "file_created", "processed_by"]
-    for key in updated_keys:
-        if key in current_attributes:
-            current_attributes.pop(key)
-
-    global_attributes.update(current_attributes)
-    ds.attrs = global_attributes
+    # Reassign combined attributes back to the dataset
+    ds.attrs = attrs
 
     return ds
 
