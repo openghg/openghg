@@ -514,14 +514,15 @@ def get_flux_attributes(
         "Conventions": "CF-1.8",
     }
 
+    # Merge values from the different sources. Order of preference is bottom to top.
     attrs = {
         **global_attributes_default,
         **ds.attrs,
         **(global_attributes or {}),
     }
 
+    # Set title if this doesn't already exist
     generated_title = f"{source} emissions/flux of {species} for {domain} domain"
-
     attrs.setdefault("title", generated_title)
 
     attrs["file_created"] = str(timestamp_now())
