@@ -712,11 +712,19 @@ def _retrieve_remote(
     # Annoyingly FastTrack and EYE-AVE-PAR data don't have the species anywhere in the data_pids dataframe
     # so we need to handle these cases separately.
     if dataset_source == "ICOS FastTrack":
-        search_str = "FastTrack"
+        search_str = "FastTrack NRT"
     elif dataset_source == "EYE-AVE-PAR":
         search_str = "GHG"
     elif dataset_source == "ICOS Flask":
-        search_str = "ICOS ATC/CAL Flask Release"
+        data_level = int(data_level)
+        if data_level == 1:
+            search_str = "Flask data in ICOS ATC/CAL format"
+        elif data_level == 2:
+            search_str = "ICOS ATC/CAL Flask Release"
+        else:
+            msg = "Error: for ICOS Flask data the data level must be 1 or 2."
+            logger.error(msg)
+            raise MetadataFormatError(msg)
     else:
         # For this see https://stackoverflow.com/a/55335207
         # Need to make sure this is a raw string and that all \ characters have been escaped.
