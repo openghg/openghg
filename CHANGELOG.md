@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- AGAGE surface standardisation now drops rows with missing mole fractions while retaining missing repeatability and variability. [PR #1776](https://github.com/openghg/openghg/pull/1776)
+- Stabilized observation-count-weighted resampling with centered float64 variance, consistent concentration/count validity masks, and default variability fallback when supplied variability is unavailable. [Issue #1775](https://github.com/openghg/openghg/issues/1775)
+- Repaired zero surface observation counts to one, with a contextual warning, only where mole fractions are finite; positive counts are preserved. [PR #1776](https://github.com/openghg/openghg/pull/1776)
 - Preserved mole-fraction and variability metadata when resampling surface observations weighted by observation count. [Issue #1765](https://github.com/openghg/openghg/issues/1765)
 - Added column `max_level` consistency validation to `ModelScenario` and preserved `max_level` metadata when standardising ACRG and PARIS column footprints, preventing observations and footprints with different vertical extents from being combined. [PR #1718](https://github.com/openghg/openghg/pull/1718)
 - Ensured explicitly integrated CO2 site and satellite footprints are standardised and modelled through the integrated-footprint pathway, while preserving the time-resolved default for CO2 footprints. [PR #1698](https://github.com/openghg/openghg/pull/1698)

@@ -100,6 +100,20 @@ def test_surface_retrieval_replaces_unusable_variability(monkeypatch, counts, un
     _assert_fallback(result.data, units="1e-06")
 
 
+def _configure_regression_store(monkeypatch, tmp_path):
+    """Redirect surface storage to an isolated temporary writable store."""
+    bucket_path = tmp_path / "store"
+    config = {
+        "object_store": {"regression": {"path": str(bucket_path), "permissions": "rw"}},
+        "user_id": "issue-1775-regression",
+        "config_version": "2",
+    }
+    monkeypatch.delenv("OPENGHG_TUT_STORE", raising=False)
+    monkeypatch.setattr("openghg.objectstore._local_store.read_local_config", lambda: config)
+    monkeypatch.setattr("openghg.util._user.read_local_config", lambda: config)
+    return bucket_path
+
+
 @pytest.mark.parametrize(
     "counts,expected_counts",
     [([0, 0], [1, 1]), ([0, 3], [1, 3])],
@@ -114,15 +128,7 @@ def test_surface_standardisation_repairs_zero_counts(monkeypatch, tmp_path, capl
     from openghg.objectstore import get_datasource
     from openghg.standardise import standardise_surface
 
-    bucket_path = tmp_path / "store"
-    config = {
-        "object_store": {"regression": {"path": str(bucket_path), "permissions": "rw"}},
-        "user_id": "issue-1775-regression",
-        "config_version": "2",
-    }
-    monkeypatch.delenv("OPENGHG_TUT_STORE", raising=False)
-    monkeypatch.setattr("openghg.objectstore._local_store.read_local_config", lambda: config)
-    monkeypatch.setattr("openghg.util._user.read_local_config", lambda: config)
+    bucket_path = _configure_regression_store(monkeypatch, tmp_path)
     ds = _observations(counts=counts)
     ds.attrs.update(
         network="decc",
@@ -153,3 +159,88 @@ def test_surface_standardisation_repairs_zero_counts(monkeypatch, tmp_path, capl
         "co2" in message and ("count" in message.lower() or "number_of_observations" in message)
         for message in warning_messages
     )
+
+
+def test_openghg_storage_and_retrieval_guard_missing_mole_fractions(monkeypatch, tmp_path):
+    """OPENGHG retains missing concentrations, so averaging must exclude their weights.
+
+    A finite observation with zero count is repaired during ingestion. Missing
+    observations keep both zero and positive counts in storage; neither can
+    affect the averaged concentration or variability.
+    """
+    from openghg.standardise import standardise_surface
+
+    _configure_regression_store(monkeypatch, tmp_path)
+    times = pd.date_range("2020-01-01", periods=4, freq="h")
+    ds = _observations().reindex(time=times)
+    ds.co2[:] = [1.0, np.nan, 3.0, np.nan]
+    ds["co2_number_of_observations"] = ("time", [0, 100, 3, 0])
+    ds["co2_variability"] = ("time", [0.5, np.nan, 0.5, np.nan])
+    ds.co2_variability.attrs = {"units": "ppm"}
+    ds.attrs.update(
+        network="decc",
+        instrument="crds",
+        sampling_period="1h",
+        calibration_scale="WMOX2007",
+        data_owner="Test owner",
+        data_owner_email="test@example.invalid",
+    )
+    standardise_surface(
+        data=ds,
+        source_format="OPENGHG",
+        site="tac",
+        network="decc",
+        store="regression",
+        update_mismatch="from_definition",
+    )
+    unaveraged = get_obs_surface(
+        site="TAC",
+        species="co2",
+        store="regression",
+        rename_vars=False,
+        keep_missing=True,
+    )
+    assert unaveraged is not None
+    np.testing.assert_array_equal(unaveraged.data.co2, [1.0, np.nan, 3.0, np.nan])
+    np.testing.assert_array_equal(unaveraged.data.co2_number_of_observations, [1, 100, 3, 0])
+    averaged = get_obs_surface(
+        site="TAC",
+        species="co2",
+        store="regression",
+        rename_vars=False,
+        average="4h",
+    )
+    assert averaged is not None
+    np.testing.assert_allclose(averaged.data.co2, [2.5])
+    np.testing.assert_array_equal(averaged.data.co2_number_of_observations, [4])
+    # Within-record variance 0.25 plus weighted between-record variance 0.75.
+    np.testing.assert_allclose(averaged.data.co2_variability, [1.0])
+
+
+@pytest.mark.parametrize("with_counts", [True, False], ids=["counts", "absent-counts"])
+def test_direct_surface_storage_repairs_only_finite_zero_counts(monkeypatch, with_counts):
+    """Direct storage applies the same count guard while preserving labels and attributes."""
+    from openghg.store import ObsSurface
+    from openghg.store.base import BaseStore
+    from openghg.types import MetadataAndData
+
+    ds = _observations().reindex(time=pd.date_range("2020-01-01", periods=4, freq="h"))
+    ds.co2[:] = [1.0, np.nan, 3.0, np.nan]
+    if with_counts:
+        ds["co2_number_of_observations"] = ("time", [0, 0, 4, 2])
+        ds.co2_number_of_observations.attrs = {"units": "1", "long_name": "observation count"}
+    expected = ds.copy(deep=True)
+    if with_counts:
+        expected.co2_number_of_observations[0] = 1
+    submitted = []
+
+    def capture_assign_data(self, data, **kwargs):
+        """Capture data passed to the common persistence boundary."""
+        submitted.extend(data)
+        return []
+
+    monkeypatch.setattr(BaseStore, "assign_data", capture_assign_data)
+    store = object.__new__(ObsSurface)
+    store.store_data([MetadataAndData(metadata={"species": "co2", "site": "tac"}, data=ds)])
+    assert len(submitted) == 1
+    xr.testing.assert_identical(submitted[0].data, expected)

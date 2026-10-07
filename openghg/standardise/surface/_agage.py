@@ -1,3 +1,10 @@
+"""Parse AGAGE observations into inlet-specific surface datasets and metadata.
+
+Rows with missing mole fractions are excluded before dataset formatting. Finite
+observations retain missing uncertainty components for downstream handling, and
+inlets without remaining observations are skipped.
+"""
+
 import pandas as pd
 import re
 import xarray as xr
@@ -213,8 +220,7 @@ def _format_species(
             species_data = inlet_data[["mf", "mf_repeatability", "mf_variability"]]
         else:
             species_data = inlet_data[["mf", "mf_repeatability"]]
-        # JP 2026-05-20 - remove this dropna to deal with occasional nans in mf_repeatability
-        # species_data = species_data.dropna(axis="index", how="any")
+        species_data = species_data.dropna(subset=["mf"])
 
         # Check that the Dataframe has something in it
         if species_data.empty:
