@@ -174,7 +174,9 @@ def _format_species(
     file_params: dict,
 ) -> dict:
     """Formats the dataframes and splits up by species_inlet combination to be stored within individual Datasources.
-    Note that because .nc files contain only a single species, this function is no longer called _split_species
+    Note that because .nc files contain only a single species, this function is no longer called _split_species.
+    Rows with missing mole fractions are removed while missing uncertainty values
+    are retained. Inlets with no remaining observations are omitted.
 
     Args:
         data: DataFrame of raw data
@@ -184,7 +186,11 @@ def _format_species(
         scale: calibration scale used
         file_params: dictionary of metadata/attributes
     Returns:
-        dict: Dictionary of gas data and metadata, paired by species_inlet combination (so for a single inlet this is just a single entry)
+        dict: Dictionary of gas data and metadata, paired by species_inlet combination (so for a single inlet this is just a single entry).
+
+    Raises:
+        KeyError: If the input has no inlet-height column.
+        ValueError: If all mole fractions for the species are missing.
     """
 
     # data_inlets is a list of unique inlets for this species
