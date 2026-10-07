@@ -24,6 +24,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated unit preprocessing/definitions (e.g., degrees_* handling and masl/magl.) [PR #1565](https://github.com/openghg/openghg/pull/1565)
 - calibration_scale and sampling_period updated so calibration_scale = dataset_calibration_scale and sampling_period is calculated based on dataset_data_frequency_unit and dataset_data_frequency. [PR #1565](https://github.com/openghg/openghg/pull/1565)
 - Some attributes/metadata removed or improved e.g instrument attr/meta data now has info rather than NA.
+- Created a new dataset_source = ICOS Flask and set spec_label = None in the case
+ to deal with searching for entries where spec_label includes SF6, but for the flask measurements spec_label is always ICOS ATC/CAL Flask Release.
+- Within the flask data there are 2 spec_labels rather than 1.
+Both spec labels contain the literal substring "FastTrack":
+  - "ICOS ATC FastTrack NRT GHG data product" (continuous, asciiAtcProductTimeSer) - Level 2
+  - "Flask data in ICOS ATC/CAL format, processed as FastTrack product" (flask, asciiAtcFlaskTimeSer) - Level 1
+For the “FastTrack” we want “FastTrack NRT” so have updated the search_str for dataset_source == "ICOS FastTrack" in retrieve .py so it is now “FastTrack NRT” rather than “FastTrack” .
+- Added ascii level 1 flask data processing (from above point) by adding functionality to retrieve.py.
 
 ### Updated
 
