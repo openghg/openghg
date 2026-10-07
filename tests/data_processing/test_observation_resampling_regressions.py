@@ -1,7 +1,6 @@
 """Public observation-resampling regressions for issue #1775.
 
-Strict expected failures document confirmed bugs while keeping the tests-only
-PR usable in CI. Uniform counts avoid choosing an unequal-weight fallback policy.
+Uniform counts avoid choosing an unequal-weight fallback policy.
 """
 
 import warnings
@@ -17,21 +16,6 @@ from openghg.retrieve import get_obs_surface
 
 
 RESAMPLERS = [surface_obs_resampler, column_obs_resampler]
-MISSING_FALLBACK = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Issue #1775: observation counts suppress documented variability fallback",
-)
-ALL_NAN_VARIABILITY = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Issue #1775: all-NaN variability is propagated instead of using concentration spread",
-)
-ZERO_COUNTS = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Issue #1775: zero observation counts survive standardisation without repair or warning",
-)
 
 
 def _observations(counts=None, variability=None):
@@ -67,7 +51,6 @@ def test_missing_variability_without_counts_uses_population_spread(resample):
     _assert_fallback(result)
 
 
-@MISSING_FALLBACK
 @pytest.mark.parametrize("resample", RESAMPLERS, ids=["surface", "column"])
 def test_missing_variability_with_uniform_counts_uses_population_spread(resample):
     """Uniform positive counts must not suppress the documented variability fallback."""
@@ -76,7 +59,6 @@ def test_missing_variability_with_uniform_counts_uses_population_spread(resample
     np.testing.assert_array_equal(result.co2_number_of_observations, [4])
 
 
-@ALL_NAN_VARIABILITY
 @pytest.mark.parametrize("resample", RESAMPLERS, ids=["surface", "column"])
 @pytest.mark.parametrize("counts", [None, [2, 2]], ids=["no-counts", "uniform-counts"])
 def test_all_nan_variability_uses_population_spread(resample, counts):
@@ -98,7 +80,7 @@ def test_single_observation_retains_supplied_variability(resample):
 
 @pytest.mark.parametrize(
     "counts",
-    [None, pytest.param([2, 2], marks=MISSING_FALLBACK)],
+    [None, pytest.param([2, 2])],
     ids=["no-counts", "uniform-counts"],
 )
 @pytest.mark.parametrize("uncertainty", [np.nan, -9.99], ids=["nan", "negative-sentinel"])
@@ -118,7 +100,6 @@ def test_surface_retrieval_replaces_unusable_variability(monkeypatch, counts, un
     _assert_fallback(result.data, units="1e-06")
 
 
-@ZERO_COUNTS
 @pytest.mark.parametrize(
     "counts,expected_counts",
     [([0, 0], [1, 1]), ([0, 3], [1, 3])],

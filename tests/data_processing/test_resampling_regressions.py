@@ -10,23 +10,6 @@ import xarray as xr
 from openghg.data_processing._resampling import weighted_resample
 
 
-PRECISION_BUG = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Issue #1775: second-moment subtraction loses small supplied variability",
-)
-MISSING_MF_BUG = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Issue #1775: missing mole fractions retain weight in the denominator",
-)
-MISSING_VARIABILITY_BUG = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Issue #1775: partial missing variability makes variance depend on concentration offset",
-)
-
-
 def _observations(mf, variability, counts, dtype=np.float64):
     """Make hourly observations while preserving the requested stored floating dtype."""
     return xr.Dataset(
@@ -58,7 +41,6 @@ def _population_reference(ds):
             [0.02, 0.02],
             [1, 1],
             np.float32,
-            marks=PRECISION_BUG,
             id="float32-zero-spread",
         ),
         pytest.param(
@@ -66,7 +48,6 @@ def _population_reference(ds):
             [0.02, 0.02],
             [1, 1],
             np.float32,
-            marks=PRECISION_BUG,
             id="float32-inflated-spread",
         ),
         pytest.param(
@@ -74,7 +55,6 @@ def _population_reference(ds):
             [0.02] * 4,
             [1, 2, 3, 4],
             np.float32,
-            marks=PRECISION_BUG,
             id="float32-unequal-counts",
         ),
         pytest.param(
@@ -82,7 +62,6 @@ def _population_reference(ds):
             [1e-6, 1e-6],
             [1, 1],
             np.float64,
-            marks=PRECISION_BUG,
             id="float64-tiny-variability",
         ),
         pytest.param([333, 333.01], [0.02, 0.02], [1, 2], np.float64, id="float64-control"),
@@ -113,7 +92,7 @@ def test_weighted_variability_matches_centered_population(mf, variability, count
 @pytest.mark.parametrize(
     "missing_count",
     [
-        pytest.param(1, marks=MISSING_MF_BUG, id="positive-count"),
+        pytest.param(1, id="positive-count"),
         pytest.param(0, id="zero-count-control"),
     ],
 )
@@ -127,7 +106,6 @@ def test_missing_mole_fraction_excludes_observation_weight(missing_count):
     assert result.co2_variability.item() == pytest.approx(0.02, rel=1e-7)
 
 
-@MISSING_VARIABILITY_BUG
 def test_partial_missing_variability_is_translation_invariant():
     """Shifting every concentration cannot change spread, regardless of missing-data policy."""
     ds = _observations([0, 0], [0.02, np.nan], [1, 1])
