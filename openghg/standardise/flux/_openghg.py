@@ -101,6 +101,11 @@ def parse_openghg(
     metadata = {}
     metadata.update(attrs)
 
+    # Patch for now to remove the "file_created" key which is currently present in the attributes.
+    # This value is updated in the attributes within assign_flux_attributes() and so causes a mismatch
+    # with the metadata otherwise.
+    metadata.pop("file_created", None)
+
     metadata["species"] = species
     metadata["domain"] = domain
     metadata["source"] = source
