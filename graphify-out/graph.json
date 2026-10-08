@@ -500,7 +500,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_add_metakeys",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L729",
+      "source_location": "L728",
       "target": "openghg_store_metakeys_config_get_metakeys",
       "weight": 1.0
     },
@@ -510,34 +510,22 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
-      "source": "openghg_store_base_base_basestore_align_metadata_attributes",
-      "source_file": "openghg/store/base/_base.py",
-      "source_location": "L905",
-      "target": "openghg_store_spec_specification_define_data_types",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
       "source": "openghg_store_base_base_basestore_assign_data",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1001",
-      "target": "openghg_util_strings_to_lowercase",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "openghg_store_base_base_basestore_assign_data",
-      "source_file": "openghg/store/base/_base.py",
-      "source_location": "L985",
+      "source_location": "L966",
       "target": "openghg_util_metadata_util_get_period",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_store_base_base_basestore_assign_data",
+      "source_file": "openghg/store/base/_base.py",
+      "source_location": "L982",
+      "target": "openghg_util_strings_to_lowercase",
       "weight": 1.0
     },
     {
@@ -548,7 +536,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_check_chunks",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L702",
+      "source_location": "L701",
       "target": "openghg_storage_chunking_chunk_size_in_megabytes",
       "weight": 1.0
     },
@@ -560,7 +548,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_datasource_lookup",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1053",
+      "source_location": "L1034",
       "target": "openghg_util_strings_to_lowercase",
       "weight": 1.0
     },
@@ -572,7 +560,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_find_chunking_schema_inputs",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L608",
+      "source_location": "L607",
       "target": "openghg_util_registry_get_parameters",
       "weight": 1.0
     },
@@ -584,7 +572,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_find_data_schema_inputs",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L597",
+      "source_location": "L596",
       "target": "openghg_util_registry_get_parameters",
       "weight": 1.0
     },
@@ -596,7 +584,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_get_informational_dict_keys",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L754",
+      "source_location": "L753",
       "target": "openghg_store_metakeys_config_define_general_informational_keys",
       "weight": 1.0
     },
@@ -608,7 +596,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_get_list_metakeys",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L882",
+      "source_location": "L881",
       "target": "openghg_store_metakeys_config_find_list_metakeys",
       "weight": 1.0
     },
@@ -620,7 +608,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_get_rank",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1107",
+      "source_location": "L1088",
       "target": "openghg_util_time_create_daterange_str",
       "weight": 1.0
     },
@@ -632,7 +620,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_get_rank",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1114",
+      "source_location": "L1095",
       "target": "openghg_util_time_daterange_overlap",
       "weight": 1.0
     },
@@ -668,7 +656,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_set_rank",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1178",
+      "source_location": "L1159",
       "target": "openghg_util_time_sanitise_daterange",
       "weight": 1.0
     },
@@ -680,7 +668,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_set_rank",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1180",
+      "source_location": "L1161",
       "target": "openghg_util_time_combine_dateranges",
       "weight": 1.0
     },
@@ -692,7 +680,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_set_rank",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1194",
+      "source_location": "L1175",
       "target": "openghg_util_time_daterange_overlap",
       "weight": 1.0
     },
@@ -704,7 +692,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_set_rank",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1241",
+      "source_location": "L1222",
       "target": "openghg_util_time_daterange_contains",
       "weight": 1.0
     },
@@ -716,7 +704,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_set_rank",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1242",
+      "source_location": "L1223",
       "target": "openghg_util_time_split_encompassed_daterange",
       "weight": 1.0
     },
@@ -728,7 +716,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_set_rank",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1260",
+      "source_location": "L1241",
       "target": "openghg_util_time_trim_daterange",
       "weight": 1.0
     },
@@ -740,7 +728,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_standardise_and_store",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L354",
+      "source_location": "L353",
       "target": "openghg_util_deprecation_warn_if_force_ignored",
       "weight": 1.0
     },
@@ -752,7 +740,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_standardise_and_store",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L362",
+      "source_location": "L361",
       "target": "openghg_store_spec_specification_check_parser",
       "weight": 1.0
     },
@@ -764,7 +752,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_standardise_and_store",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L400",
+      "source_location": "L399",
       "target": "openghg_util_util_normalise_to_filepath_list",
       "weight": 1.0
     },
@@ -776,7 +764,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_standardise_and_store_469424",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L264",
+      "source_location": "L263",
       "target": "openghg_util_util_normalise_to_filepath_list",
       "weight": 1.0
     },
@@ -788,7 +776,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_validate_datasources",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L554",
+      "source_location": "L553",
       "target": "openghg_util_util_normalise_to_filepath_list",
       "weight": 1.0
     },
@@ -836,7 +824,7 @@
       "relation": "calls",
       "source": "openghg_store_obssurface_obssurface_schema",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L327",
+      "source_location": "L349",
       "target": "openghg_standardise_meta_attributes_define_species_label",
       "weight": 1.0
     },
@@ -848,7 +836,7 @@
       "relation": "calls",
       "source": "openghg_store_obssurface_obssurface_store_data",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L376",
+      "source_location": "L398",
       "target": "openghg_util_deprecation_warn_if_force_ignored",
       "weight": 1.0
     },
@@ -3152,7 +3140,7 @@
       "relation": "calls",
       "source": "tests_store_test_flux_test_add_edgar_v8_database",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L326",
+      "source_location": "L327",
       "target": "tests_helpers_helpers_get_flux_datapath",
       "weight": 1.0
     },
@@ -3164,7 +3152,7 @@
       "relation": "calls",
       "source": "tests_store_test_flux_test_add_edgar_v8_database",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L332",
+      "source_location": "L333",
       "target": "openghg_transform_transform_transform_flux_data",
       "weight": 1.0
     },
@@ -8953,7 +8941,7 @@
       "relation": "calls",
       "source": "openghg_standardise_flux_openghg_parse_openghg",
       "source_file": "openghg/standardise/flux/_openghg.py",
-      "source_location": "L157",
+      "source_location": "L144",
       "target": "openghg_standardise_meta_attributes_assign_flux_attributes",
       "weight": 1.0
     },
@@ -8986,7 +8974,7 @@
       "relation": "calls",
       "source": "openghg_standardise_meta_attributes_dataset_formatter",
       "source_file": "openghg/standardise/meta/_attributes.py",
-      "source_location": "L585",
+      "source_location": "L583",
       "target": "openghg_standardise_meta_attributes_define_species_label",
       "weight": 1.0
     },
@@ -8997,7 +8985,7 @@
       "relation": "calls",
       "source": "openghg_standardise_meta_attributes_dataset_formatter",
       "source_file": "openghg/standardise/meta/_attributes.py",
-      "source_location": "L586",
+      "source_location": "L584",
       "target": "openghg_standardise_meta_attributes_data_variable_formatter",
       "weight": 1.0
     },
@@ -9030,7 +9018,7 @@
       "relation": "calls",
       "source": "openghg_standardise_meta_attributes_get_flux_attributes",
       "source_file": "openghg/standardise/meta/_attributes.py",
-      "source_location": "L538",
+      "source_location": "L536",
       "target": "openghg_standardise_meta_attributes_define_species_label",
       "weight": 1.0
     },
@@ -10416,7 +10404,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_assign_data",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L959",
+      "source_location": "L940",
       "target": "openghg_store_base_base_basestore_get_lookup_keys",
       "weight": 1.0
     },
@@ -10427,7 +10415,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_assign_data",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L963",
+      "source_location": "L944",
       "target": "openghg_store_base_base_basestore_get_list_metakeys",
       "weight": 1.0
     },
@@ -10438,7 +10426,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_assign_data",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L966",
+      "source_location": "L947",
       "target": "openghg_store_base_base_basestore_datasource_lookup",
       "weight": 1.0
     },
@@ -10449,7 +10437,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_check_chunks",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L675",
+      "source_location": "L674",
       "target": "openghg_store_base_base_basestore_chunking_schema",
       "weight": 1.0
     },
@@ -10460,7 +10448,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_check_chunks_datasource",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L638",
+      "source_location": "L637",
       "target": "openghg_store_base_base_basestore_find_chunking_schema_inputs",
       "weight": 1.0
     },
@@ -10471,7 +10459,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_check_chunks_datasource",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L641",
+      "source_location": "L640",
       "target": "openghg_store_base_base_basestore_create_schema_kwargs",
       "weight": 1.0
     },
@@ -10482,7 +10470,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_check_chunks_datasource",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L642",
+      "source_location": "L641",
       "target": "openghg_store_base_base_basestore_check_chunks",
       "weight": 1.0
     },
@@ -10493,7 +10481,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_check_info_keys",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L830",
+      "source_location": "L829",
       "target": "openghg_store_base_base_basestore_add_metakeys",
       "weight": 1.0
     },
@@ -10504,7 +10492,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_clear_rank",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1130",
+      "source_location": "L1111",
       "target": "openghg_store_base_base_basestore_save",
       "weight": 1.0
     },
@@ -10526,7 +10514,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_get_list_metakeys",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L881",
+      "source_location": "L880",
       "target": "openghg_store_base_base_basestore_add_metakeys",
       "weight": 1.0
     },
@@ -10537,7 +10525,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_get_lookup_keys",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L853",
+      "source_location": "L852",
       "target": "openghg_store_base_base_basestore_add_metakeys",
       "weight": 1.0
     },
@@ -10592,7 +10580,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_schema",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L532",
+      "source_location": "L531",
       "target": "openghg_store_data_schema_dataschema",
       "weight": 1.0
     },
@@ -10603,7 +10591,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_set_rank",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1276",
+      "source_location": "L1257",
       "target": "openghg_store_base_base_basestore_save",
       "weight": 1.0
     },
@@ -10614,7 +10602,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_standardise_and_store",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L375",
+      "source_location": "L374",
       "target": "openghg_store_base_base_basestore_format_inputs",
       "weight": 1.0
     },
@@ -10625,7 +10613,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_standardise_and_store",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L381",
+      "source_location": "L380",
       "target": "openghg_store_base_base_basestore_standardise_and_store_469424",
       "weight": 1.0
     },
@@ -10636,7 +10624,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_standardise_and_store",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L438",
+      "source_location": "L437",
       "target": "openghg_store_base_base_basestore_define_loop_params",
       "weight": 1.0
     },
@@ -10647,7 +10635,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_standardise_and_store",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L463",
+      "source_location": "L462",
       "target": "openghg_store_base_base_py_path",
       "weight": 1.0
     },
@@ -10658,7 +10646,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_standardise_and_store_469424",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L229",
+      "source_location": "L228",
       "target": "openghg_store_base_base_basestore_check_chunks_datasource",
       "weight": 1.0
     },
@@ -10669,7 +10657,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_standardise_and_store_469424",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L232",
+      "source_location": "L231",
       "target": "openghg_store_base_base_basestore_validate_datasources",
       "weight": 1.0
     },
@@ -10680,7 +10668,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_standardise_and_store_469424",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L240",
+      "source_location": "L239",
       "target": "openghg_store_base_base_basestore_align_metadata_attributes",
       "weight": 1.0
     },
@@ -10691,7 +10679,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_standardise_and_store_469424",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L244",
+      "source_location": "L243",
       "target": "openghg_store_base_base_basestore_check_info_keys",
       "weight": 1.0
     },
@@ -10702,7 +10690,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_standardise_and_store_469424",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L249",
+      "source_location": "L248",
       "target": "openghg_store_base_base_basestore_update_metadata",
       "weight": 1.0
     },
@@ -10713,7 +10701,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_standardise_and_store_469424",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L254",
+      "source_location": "L253",
       "target": "openghg_store_base_base_basestore_assign_data",
       "weight": 1.0
     },
@@ -10724,7 +10712,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_update_metadata",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L776",
+      "source_location": "L775",
       "target": "openghg_store_base_base_basestore_add_metakeys",
       "weight": 1.0
     },
@@ -10735,7 +10723,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_update_metadata",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L782",
+      "source_location": "L781",
       "target": "openghg_store_base_base_basestore_get_informational_dict_keys",
       "weight": 1.0
     },
@@ -10746,7 +10734,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_validate_data",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L585",
+      "source_location": "L584",
       "target": "openghg_store_base_base_basestore_schema",
       "weight": 1.0
     },
@@ -10757,7 +10745,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_validate_datasources",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L551",
+      "source_location": "L550",
       "target": "openghg_store_base_base_basestore_find_data_schema_inputs",
       "weight": 1.0
     },
@@ -10768,7 +10756,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_validate_datasources",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L557",
+      "source_location": "L556",
       "target": "openghg_store_base_base_basestore_create_schema_kwargs",
       "weight": 1.0
     },
@@ -10779,7 +10767,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_validate_datasources",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L560",
+      "source_location": "L559",
       "target": "openghg_store_base_base_basestore_validate_data",
       "weight": 1.0
     },
@@ -11109,7 +11097,7 @@
       "relation": "calls",
       "source": "openghg_store_obssurface_obssurface_schema",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L332",
+      "source_location": "L354",
       "target": "openghg_store_data_schema_dataschema",
       "weight": 1.0
     },
@@ -12308,7 +12296,7 @@
       "relation": "calls",
       "source": "openghg_util_download_download_data",
       "source_file": "openghg/util/_download.py",
-      "source_location": "L93",
+      "source_location": "L73",
       "target": "openghg_util_download_py_path",
       "weight": 1.0
     },
@@ -12319,7 +12307,7 @@
       "relation": "calls",
       "source": "openghg_util_download_parse_url_filename",
       "source_file": "openghg/util/_download.py",
-      "source_location": "L39",
+      "source_location": "L19",
       "target": "openghg_util_download_py_path",
       "weight": 1.0
     },
@@ -20217,7 +20205,7 @@
       "relation": "calls",
       "source": "tests_store_test_flux_test_add_edgar_database",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L272",
+      "source_location": "L273",
       "target": "tests_helpers_helpers_get_flux_datapath",
       "weight": 1.0
     },
@@ -20228,7 +20216,7 @@
       "relation": "calls",
       "source": "tests_store_test_flux_test_add_edgar_database",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L277",
+      "source_location": "L278",
       "target": "openghg_transform_transform_transform_flux_data",
       "weight": 1.0
     },
@@ -20239,7 +20227,7 @@
       "relation": "calls",
       "source": "tests_store_test_flux_test_edgar_v8_raises_error",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L436",
+      "source_location": "L437",
       "target": "tests_helpers_helpers_get_flux_datapath",
       "weight": 1.0
     },
@@ -20250,7 +20238,7 @@
       "relation": "calls",
       "source": "tests_store_test_flux_test_edgar_v8_raises_error",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L441",
+      "source_location": "L442",
       "target": "openghg_transform_transform_transform_flux_data",
       "weight": 1.0
     },
@@ -20393,7 +20381,7 @@
       "relation": "calls",
       "source": "tests_store_test_flux_test_read_file_additional_keys",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L169",
+      "source_location": "L170",
       "target": "tests_store_test_flux_load_edgar",
       "weight": 1.0
     },
@@ -20404,7 +20392,7 @@
       "relation": "calls",
       "source": "tests_store_test_flux_test_read_file_align_correct_datasource",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L214",
+      "source_location": "L215",
       "target": "tests_store_test_flux_load_edgar",
       "weight": 1.0
     },
@@ -20415,7 +20403,7 @@
       "relation": "calls",
       "source": "tests_store_test_flux_test_read_file_fails_ambiguous",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L258",
+      "source_location": "L259",
       "target": "tests_store_test_flux_load_edgar",
       "weight": 1.0
     },
@@ -20426,7 +20414,7 @@
       "relation": "calls",
       "source": "tests_store_test_flux_test_search_flux_uses_raw_source_when_datasource_has_duplicate_source",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L378",
+      "source_location": "L379",
       "target": "tests_helpers_helpers_get_flux_datapath",
       "weight": 1.0
     },
@@ -20437,7 +20425,7 @@
       "relation": "calls",
       "source": "tests_store_test_flux_test_search_flux_uses_raw_source_when_datasource_has_duplicate_source",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L382",
+      "source_location": "L383",
       "target": "openghg_standardise_standardise_standardise_flux",
       "weight": 1.0
     },
@@ -20448,7 +20436,7 @@
       "relation": "calls",
       "source": "tests_store_test_flux_test_transform_and_add_edgar_database",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L453",
+      "source_location": "L454",
       "target": "tests_helpers_helpers_get_flux_datapath",
       "weight": 1.0
     },
@@ -20459,7 +20447,7 @@
       "relation": "calls",
       "source": "tests_store_test_flux_test_transform_and_add_edgar_database",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L459",
+      "source_location": "L460",
       "target": "openghg_transform_transform_transform_flux_data",
       "weight": 1.0
     },
@@ -24837,7 +24825,7 @@
       "relation": "references",
       "source": "tests_store_test_flux_load_edgar",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L124",
+      "source_location": "L125",
       "target": "tests_store_test_flux_py_fixture",
       "weight": 1.0
     },
@@ -24848,7 +24836,7 @@
       "relation": "references",
       "source": "tests_store_test_flux_test_add_edgar_v8_database",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L322",
+      "source_location": "L323",
       "target": "tests_store_test_flux_py_parametrize",
       "weight": 1.0
     },
@@ -27411,7 +27399,7 @@
       "relation": "references",
       "source": "openghg_store_base_base_basestore_align_metadata_attributes",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L886",
+      "source_location": "L885",
       "target": "openghg_types_types_metadataanddata",
       "weight": 1.0
     },
@@ -27422,7 +27410,7 @@
       "relation": "references",
       "source": "openghg_store_base_base_basestore_assign_data",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L915",
+      "source_location": "L896",
       "target": "openghg_types_types_metadataanddata",
       "weight": 1.0
     },
@@ -27433,7 +27421,7 @@
       "relation": "references",
       "source": "openghg_store_base_base_basestore_datasource_lookup",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1022",
+      "source_location": "L1003",
       "target": "openghg_types_types_metadataanddata",
       "weight": 1.0
     },
@@ -27455,7 +27443,7 @@
       "relation": "references",
       "source": "openghg_store_base_base_basestore_get_lookup_keys",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L842",
+      "source_location": "L841",
       "target": "openghg_types_types_metadataanddata",
       "weight": 1.0
     },
@@ -27466,7 +27454,7 @@
       "relation": "references",
       "source": "openghg_store_base_base_basestore_validate_datasources",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L534",
+      "source_location": "L533",
       "target": "openghg_types_types_metadataanddata",
       "weight": 1.0
     },
@@ -27497,9 +27485,20 @@
       "confidence": "EXTRACTED",
       "context": "generic_arg",
       "relation": "references",
+      "source": "openghg_store_obssurface_obssurface_align_metadata_attributes",
+      "source_file": "openghg/store/_obssurface.py",
+      "source_location": "L294",
+      "target": "openghg_types_types_metadataanddata",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "generic_arg",
+      "relation": "references",
       "source": "openghg_store_obssurface_obssurface_store_data",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L336",
+      "source_location": "L358",
       "target": "openghg_types_types_metadataanddata",
       "weight": 1.0
     },
@@ -32240,7 +32239,7 @@
       "relation": "imports",
       "source": "openghg_store_base_base",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L356",
+      "source_location": "L355",
       "target": "openghg_store_spec_specification_check_parser",
       "weight": 1.0
     },
@@ -32251,7 +32250,7 @@
       "relation": "imports",
       "source": "openghg_store_base_base",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L594",
+      "source_location": "L593",
       "target": "openghg_util_registry_get_parameters",
       "weight": 1.0
     },
@@ -32273,7 +32272,7 @@
       "relation": "imports",
       "source": "openghg_store_base_base",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L746",
+      "source_location": "L745",
       "target": "openghg_store_metakeys_config_define_general_informational_keys",
       "weight": 1.0
     },
@@ -32295,7 +32294,7 @@
       "relation": "imports",
       "source": "openghg_store_base_base",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L879",
+      "source_location": "L878",
       "target": "openghg_store_metakeys_config_find_list_metakeys",
       "weight": 1.0
     },
@@ -32306,29 +32305,7 @@
       "relation": "imports",
       "source": "openghg_store_base_base",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L902",
-      "target": "openghg_standardise_meta_metadata_align_metadata_attributes",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "context": "import",
-      "relation": "imports",
-      "source": "openghg_store_base_base",
-      "source_file": "openghg/store/base/_base.py",
-      "source_location": "L903",
-      "target": "openghg_store_spec_specification_define_data_types",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "context": "import",
-      "relation": "imports",
-      "source": "openghg_store_base_base",
-      "source_file": "openghg/store/base/_base.py",
-      "source_location": "L953",
+      "source_location": "L934",
       "target": "openghg_util_metadata_util_get_period",
       "weight": 1.0
     },
@@ -32812,7 +32789,18 @@
       "relation": "imports",
       "source": "openghg_store_obssurface",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L11",
+      "source_location": "L10",
+      "target": "openghg_store_base_base_basestore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports",
+      "source": "openghg_store_obssurface",
+      "source_file": "openghg/store/_obssurface.py",
+      "source_location": "L12",
       "target": "openghg_util_deprecation_warn_if_force_ignored",
       "weight": 1.0
     },
@@ -32834,7 +32822,7 @@
       "relation": "imports",
       "source": "openghg_store_obssurface",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L325",
+      "source_location": "L347",
       "target": "openghg_standardise_meta_attributes_define_species_label",
       "weight": 1.0
     },
@@ -32856,8 +32844,8 @@
       "relation": "imports",
       "source": "openghg_store_obssurface",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L9",
-      "target": "openghg_store_base_base_basestore",
+      "source_location": "L8",
+      "target": "openghg_standardise_meta_metadata_align_metadata_attributes",
       "weight": 1.0
     },
     {
@@ -33748,17 +33736,6 @@
       "source": "openghg_util_download",
       "source_file": "openghg/util/_download.py",
       "source_location": "L3",
-      "target": "re",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "context": "import",
-      "relation": "imports",
-      "source": "openghg_util_download",
-      "source_file": "openghg/util/_download.py",
-      "source_location": "L4",
       "target": "logging",
       "weight": 1.0
     },
@@ -45881,7 +45858,7 @@
       "source": "openghg_store_obssurface",
       "source_file": "openghg/store/_obssurface.py",
       "source_location": "L10",
-      "target": "openghg_types",
+      "target": "openghg_store_base",
       "weight": 1.0
     },
     {
@@ -45892,7 +45869,7 @@
       "source": "openghg_store_obssurface",
       "source_file": "openghg/store/_obssurface.py",
       "source_location": "L11",
-      "target": "openghg_util_deprecation",
+      "target": "openghg_types",
       "weight": 1.0
     },
     {
@@ -45903,6 +45880,17 @@
       "source": "openghg_store_obssurface",
       "source_file": "openghg/store/_obssurface.py",
       "source_location": "L12",
+      "target": "openghg_util_deprecation",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "context": "import",
+      "relation": "imports_from",
+      "source": "openghg_store_obssurface",
+      "source_file": "openghg/store/_obssurface.py",
+      "source_location": "L13",
       "target": "collections",
       "weight": 1.0
     },
@@ -45947,7 +45935,7 @@
       "source": "openghg_store_obssurface",
       "source_file": "openghg/store/_obssurface.py",
       "source_location": "L8",
-      "target": "openghg_store",
+      "target": "openghg_standardise_meta",
       "weight": 1.0
     },
     {
@@ -45958,7 +45946,7 @@
       "source": "openghg_store_obssurface",
       "source_file": "openghg/store/_obssurface.py",
       "source_location": "L9",
-      "target": "openghg_store_base",
+      "target": "openghg_store",
       "weight": 1.0
     },
     {
@@ -54504,7 +54492,7 @@
       "relation": "references",
       "source": "openghg_standardise_meta_attributes_data_variable_formatter",
       "source_file": "openghg/standardise/meta/_attributes.py",
-      "source_location": "L593",
+      "source_location": "L591",
       "target": "openghg_standardise_meta_attributes_py_dataset",
       "weight": 1.0
     },
@@ -55879,7 +55867,7 @@
       "relation": "references",
       "source": "openghg_store_base_base_basestore_assign_data",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L915",
+      "source_location": "L896",
       "target": "openghg_store_base_base_py_any",
       "weight": 1.0
     },
@@ -55890,7 +55878,7 @@
       "relation": "references",
       "source": "openghg_store_base_base_basestore_assign_data",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L915",
+      "source_location": "L896",
       "target": "openghg_store_base_base_py_mutablesequence",
       "weight": 1.0
     },
@@ -55901,7 +55889,7 @@
       "relation": "references",
       "source": "openghg_store_base_base_basestore_check_chunks",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L653",
+      "source_location": "L652",
       "target": "openghg_store_base_base_py_any",
       "weight": 1.0
     },
@@ -55912,7 +55900,7 @@
       "relation": "references",
       "source": "openghg_store_base_base_basestore_check_chunks",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L653",
+      "source_location": "L652",
       "target": "openghg_store_base_base_py_dataset",
       "weight": 1.0
     },
@@ -55923,7 +55911,7 @@
       "relation": "references",
       "source": "openghg_store_base_base_basestore_check_chunks_datasource",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L615",
+      "source_location": "L614",
       "target": "openghg_types_types_metadataanddata",
       "weight": 1.0
     },
@@ -55934,7 +55922,7 @@
       "relation": "references",
       "source": "openghg_store_base_base_basestore_create_schema_kwargs",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L490",
+      "source_location": "L489",
       "target": "openghg_types_types_metadataanddata",
       "weight": 1.0
     },
@@ -55945,7 +55933,7 @@
       "relation": "references",
       "source": "openghg_store_base_base_basestore_datasource_lookup",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1022",
+      "source_location": "L1003",
       "target": "openghg_store_base_base_py_mutablesequence",
       "weight": 1.0
     },
@@ -55967,7 +55955,7 @@
       "relation": "references",
       "source": "openghg_store_base_base_basestore_format_inputs",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L483",
+      "source_location": "L482",
       "target": "openghg_store_base_base_py_any",
       "weight": 1.0
     },
@@ -55978,7 +55966,7 @@
       "relation": "references",
       "source": "openghg_store_base_base_basestore_get_lookup_keys",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L842",
+      "source_location": "L841",
       "target": "openghg_store_base_base_py_mutablesequence",
       "weight": 1.0
     },
@@ -55989,7 +55977,7 @@
       "relation": "references",
       "source": "openghg_store_base_base_basestore_get_rank",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1090",
+      "source_location": "L1071",
       "target": "openghg_store_base_base_py_timestamp",
       "weight": 1.0
     },
@@ -56011,7 +55999,7 @@
       "relation": "references",
       "source": "openghg_store_base_base_basestore_schema",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L527",
+      "source_location": "L526",
       "target": "openghg_store_base_base_py_any",
       "weight": 1.0
     },
@@ -56022,7 +56010,7 @@
       "relation": "references",
       "source": "openghg_store_base_base_basestore_standardise_and_store",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L282",
+      "source_location": "L281",
       "target": "openghg_store_base_base_py_any",
       "weight": 1.0
     },
@@ -56033,7 +56021,7 @@
       "relation": "references",
       "source": "openghg_store_base_base_basestore_standardise_and_store",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L282",
+      "source_location": "L281",
       "target": "openghg_store_base_base_py_dataset",
       "weight": 1.0
     },
@@ -56044,7 +56032,7 @@
       "relation": "references",
       "source": "openghg_store_base_base_basestore_standardise_and_store",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L282",
+      "source_location": "L281",
       "target": "openghg_store_base_base_py_path",
       "weight": 1.0
     },
@@ -56088,7 +56076,7 @@
       "relation": "references",
       "source": "openghg_store_base_base_basestore_store_data",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L477",
+      "source_location": "L476",
       "target": "openghg_store_base_base_py_any",
       "weight": 1.0
     },
@@ -56099,7 +56087,7 @@
       "relation": "references",
       "source": "openghg_store_base_base_basestore_transform_data",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L480",
+      "source_location": "L479",
       "target": "openghg_store_base_base_py_any",
       "weight": 1.0
     },
@@ -56110,7 +56098,7 @@
       "relation": "references",
       "source": "openghg_store_base_base_basestore_update_metadata",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L761",
+      "source_location": "L760",
       "target": "mst",
       "weight": 1.0
     },
@@ -56121,7 +56109,7 @@
       "relation": "references",
       "source": "openghg_store_base_base_basestore_validate_data",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L572",
+      "source_location": "L571",
       "target": "openghg_store_base_base_py_any",
       "weight": 1.0
     },
@@ -56132,7 +56120,7 @@
       "relation": "references",
       "source": "openghg_store_base_base_basestore_validate_data",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L572",
+      "source_location": "L571",
       "target": "openghg_store_base_base_py_dataset",
       "weight": 1.0
     },
@@ -56143,7 +56131,7 @@
       "relation": "references",
       "source": "openghg_store_base_base_basestore_validate_datasources",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L534",
+      "source_location": "L533",
       "target": "openghg_store_base_base_py_path",
       "weight": 1.0
     },
@@ -56352,7 +56340,7 @@
       "relation": "references",
       "source": "openghg_store_obssurface_obssurface_format_inputs",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L183",
+      "source_location": "L184",
       "target": "openghg_store_obssurface_py_any",
       "weight": 1.0
     },
@@ -56363,7 +56351,7 @@
       "relation": "references",
       "source": "openghg_store_obssurface_obssurface_read_multisite_aqmesh",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L106",
+      "source_location": "L107",
       "target": "openghg_store_obssurface_py_pathtype",
       "weight": 1.0
     },
@@ -56374,7 +56362,7 @@
       "relation": "references",
       "source": "openghg_store_obssurface_obssurface_read_raw_data",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L26",
+      "source_location": "L27",
       "target": "openghg_store_obssurface_py_pathtype",
       "weight": 1.0
     },
@@ -56385,7 +56373,7 @@
       "relation": "references",
       "source": "openghg_store_obssurface_obssurface_store_data",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L336",
+      "source_location": "L358",
       "target": "openghg_store_obssurface_py_any",
       "weight": 1.0
     },
@@ -56396,7 +56384,7 @@
       "relation": "references",
       "source": "openghg_store_obssurface_obssurface_store_data",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L336",
+      "source_location": "L358",
       "target": "openghg_store_obssurface_py_mutablesequence",
       "weight": 1.0
     },
@@ -57210,7 +57198,7 @@
       "relation": "references",
       "source": "openghg_util_download_download_data",
       "source_file": "openghg/util/_download.py",
-      "source_location": "L42",
+      "source_location": "L22",
       "target": "openghg_util_download_py_path",
       "weight": 1.0
     },
@@ -59619,7 +59607,7 @@
       "relation": "references",
       "source": "openghg_store_base_base_basestore_chunking_schema",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L612",
+      "source_location": "L611",
       "target": "openghg_storage_chunking_chunkingschema",
       "weight": 1.0
     },
@@ -59641,7 +59629,7 @@
       "relation": "references",
       "source": "openghg_store_base_base_basestore_schema",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L527",
+      "source_location": "L526",
       "target": "openghg_store_data_schema_dataschema",
       "weight": 1.0
     },
@@ -59795,7 +59783,7 @@
       "relation": "references",
       "source": "openghg_store_obssurface_obssurface_read_multisite_aqmesh",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L106",
+      "source_location": "L107",
       "target": "defaultdict",
       "weight": 1.0
     },
@@ -59806,7 +59794,7 @@
       "relation": "references",
       "source": "openghg_store_obssurface_obssurface_schema",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L309",
+      "source_location": "L331",
       "target": "openghg_store_data_schema_dataschema",
       "weight": 1.0
     },
@@ -59971,7 +59959,7 @@
       "relation": "references",
       "source": "openghg_util_init_getattr",
       "source_file": "openghg/util/__init__.py",
-      "source_location": "L285",
+      "source_location": "L283",
       "target": "openghg_util_init_py_any",
       "weight": 1.0
     },
@@ -63154,7 +63142,7 @@
       "relation": "contains",
       "source": "openghg_standardise_meta_attributes",
       "source_file": "openghg/standardise/meta/_attributes.py",
-      "source_location": "L570",
+      "source_location": "L568",
       "target": "openghg_standardise_meta_attributes_dataset_formatter",
       "weight": 1.0
     },
@@ -63164,7 +63152,7 @@
       "relation": "contains",
       "source": "openghg_standardise_meta_attributes",
       "source_file": "openghg/standardise/meta/_attributes.py",
-      "source_location": "L593",
+      "source_location": "L591",
       "target": "openghg_standardise_meta_attributes_data_variable_formatter",
       "weight": 1.0
     },
@@ -64324,7 +64312,7 @@
       "relation": "contains",
       "source": "openghg_store_obssurface",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L18",
+      "source_location": "L19",
       "target": "openghg_store_obssurface_obssurface",
       "weight": 1.0
     },
@@ -65694,28 +65682,18 @@
       "relation": "contains",
       "source": "openghg_util_download",
       "source_file": "openghg/util/_download.py",
-      "source_location": "L23",
-      "target": "openghg_util_download_find_url",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "relation": "contains",
-      "source": "openghg_util_download",
-      "source_file": "openghg/util/_download.py",
-      "source_location": "L29",
-      "target": "openghg_util_download_parse_url_filename",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "relation": "contains",
-      "source": "openghg_util_download",
-      "source_file": "openghg/util/_download.py",
-      "source_location": "L42",
+      "source_location": "L22",
       "target": "openghg_util_download_download_data",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "contains",
+      "source": "openghg_util_download",
+      "source_file": "openghg/util/_download.py",
+      "source_location": "L9",
+      "target": "openghg_util_download_parse_url_filename",
       "weight": 1.0
     },
     {
@@ -65984,7 +65962,7 @@
       "relation": "contains",
       "source": "openghg_util_init",
       "source_file": "openghg/util/__init__.py",
-      "source_location": "L285",
+      "source_location": "L283",
       "target": "openghg_util_init_getattr",
       "weight": 1.0
     },
@@ -65994,7 +65972,7 @@
       "relation": "contains",
       "source": "openghg_util_init",
       "source_file": "openghg/util/__init__.py",
-      "source_location": "L297",
+      "source_location": "L295",
       "target": "openghg_util_init_dir",
       "weight": 1.0
     },
@@ -74024,7 +74002,7 @@
       "relation": "contains",
       "source": "tests_store_test_flux",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L125",
+      "source_location": "L126",
       "target": "tests_store_test_flux_load_edgar",
       "weight": 1.0
     },
@@ -74044,7 +74022,7 @@
       "relation": "contains",
       "source": "tests_store_test_flux",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L154",
+      "source_location": "L155",
       "target": "tests_store_test_flux_test_read_file_additional_keys",
       "weight": 1.0
     },
@@ -74064,7 +74042,7 @@
       "relation": "contains",
       "source": "tests_store_test_flux",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L200",
+      "source_location": "L201",
       "target": "tests_store_test_flux_test_read_file_align_correct_datasource",
       "weight": 1.0
     },
@@ -74074,7 +74052,7 @@
       "relation": "contains",
       "source": "tests_store_test_flux",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L248",
+      "source_location": "L249",
       "target": "tests_store_test_flux_test_read_file_fails_ambiguous",
       "weight": 1.0
     },
@@ -74084,7 +74062,7 @@
       "relation": "contains",
       "source": "tests_store_test_flux",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L269",
+      "source_location": "L270",
       "target": "tests_store_test_flux_test_add_edgar_database",
       "weight": 1.0
     },
@@ -74094,7 +74072,7 @@
       "relation": "contains",
       "source": "tests_store_test_flux",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L323",
+      "source_location": "L324",
       "target": "tests_store_test_flux_test_add_edgar_v8_database",
       "weight": 1.0
     },
@@ -74104,7 +74082,7 @@
       "relation": "contains",
       "source": "tests_store_test_flux",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L376",
+      "source_location": "L377",
       "target": "tests_store_test_flux_test_search_flux_uses_raw_source_when_datasource_has_duplicate_source",
       "weight": 1.0
     },
@@ -74114,7 +74092,7 @@
       "relation": "contains",
       "source": "tests_store_test_flux",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L427",
+      "source_location": "L428",
       "target": "tests_store_test_flux_test_edgar_v8_raises_error",
       "weight": 1.0
     },
@@ -74124,7 +74102,7 @@
       "relation": "contains",
       "source": "tests_store_test_flux",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L444",
+      "source_location": "L445",
       "target": "tests_store_test_flux_test_transform_and_add_edgar_database",
       "weight": 1.0
     },
@@ -74134,7 +74112,7 @@
       "relation": "contains",
       "source": "tests_store_test_flux",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L505",
+      "source_location": "L506",
       "target": "tests_store_test_flux_test_flux_schema",
       "weight": 1.0
     },
@@ -74144,8 +74122,8 @@
       "relation": "contains",
       "source": "tests_store_test_flux",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L519",
-      "target": "tests_store_test_flux_test_info_metadata_raise_error",
+      "source_location": "L52",
+      "target": "tests_store_test_flux_test_read_file",
       "weight": 1.0
     },
     {
@@ -77524,7 +77502,7 @@
       "relation": "inherits",
       "source": "openghg_store_obssurface_obssurface",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L18",
+      "source_location": "L19",
       "target": "openghg_store_base_base_basestore",
       "weight": 1.0
     },
@@ -80464,8 +80442,28 @@
       "relation": "method",
       "source": "openghg_store_base_base_basestore",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1022",
+      "source_location": "L1003",
       "target": "openghg_store_base_base_basestore_datasource_lookup",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "openghg_store_base_base_basestore",
+      "source_file": "openghg/store/base/_base.py",
+      "source_location": "L1055",
+      "target": "openghg_store_base_base_basestore_uuid",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "openghg_store_base_base_basestore",
+      "source_file": "openghg/store/base/_base.py",
+      "source_location": "L1063",
+      "target": "openghg_store_base_base_basestore_datasources",
       "weight": 1.0
     },
     {
@@ -80484,28 +80482,18 @@
       "relation": "method",
       "source": "openghg_store_base_base_basestore",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1074",
-      "target": "openghg_store_base_base_basestore_uuid",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "relation": "method",
-      "source": "openghg_store_base_base_basestore",
-      "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1082",
-      "target": "openghg_store_base_base_basestore_datasources",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "relation": "method",
-      "source": "openghg_store_base_base_basestore",
-      "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1090",
+      "source_location": "L1071",
       "target": "openghg_store_base_base_basestore_get_rank",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "openghg_store_base_base_basestore",
+      "source_file": "openghg/store/base/_base.py",
+      "source_location": "L1100",
+      "target": "openghg_store_base_base_basestore_clear_rank",
       "weight": 1.0
     },
     {
@@ -80524,17 +80512,7 @@
       "relation": "method",
       "source": "openghg_store_base_base_basestore",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1119",
-      "target": "openghg_store_base_base_basestore_clear_rank",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "relation": "method",
-      "source": "openghg_store_base_base_basestore",
-      "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1134",
+      "source_location": "L1115",
       "target": "openghg_store_base_base_basestore_set_rank",
       "weight": 1.0
     },
@@ -80564,7 +80542,7 @@
       "relation": "method",
       "source": "openghg_store_base_base_basestore",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1278",
+      "source_location": "L1259",
       "target": "openghg_store_base_base_basestore_rank_data",
       "weight": 1.0
     },
@@ -80594,7 +80572,7 @@
       "relation": "method",
       "source": "openghg_store_base_base_basestore",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L282",
+      "source_location": "L281",
       "target": "openghg_store_base_base_basestore_standardise_and_store",
       "weight": 1.0
     },
@@ -80604,7 +80582,7 @@
       "relation": "method",
       "source": "openghg_store_base_base_basestore",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L477",
+      "source_location": "L476",
       "target": "openghg_store_base_base_basestore_store_data",
       "weight": 1.0
     },
@@ -80614,7 +80592,7 @@
       "relation": "method",
       "source": "openghg_store_base_base_basestore",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L480",
+      "source_location": "L479",
       "target": "openghg_store_base_base_basestore_transform_data",
       "weight": 1.0
     },
@@ -80624,7 +80602,7 @@
       "relation": "method",
       "source": "openghg_store_base_base_basestore",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L483",
+      "source_location": "L482",
       "target": "openghg_store_base_base_basestore_format_inputs",
       "weight": 1.0
     },
@@ -80634,7 +80612,7 @@
       "relation": "method",
       "source": "openghg_store_base_base_basestore",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L490",
+      "source_location": "L489",
       "target": "openghg_store_base_base_basestore_create_schema_kwargs",
       "weight": 1.0
     },
@@ -80654,7 +80632,7 @@
       "relation": "method",
       "source": "openghg_store_base_base_basestore",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L527",
+      "source_location": "L526",
       "target": "openghg_store_base_base_basestore_schema",
       "weight": 1.0
     },
@@ -80664,7 +80642,7 @@
       "relation": "method",
       "source": "openghg_store_base_base_basestore",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L534",
+      "source_location": "L533",
       "target": "openghg_store_base_base_basestore_validate_datasources",
       "weight": 1.0
     },
@@ -80674,7 +80652,7 @@
       "relation": "method",
       "source": "openghg_store_base_base_basestore",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L572",
+      "source_location": "L571",
       "target": "openghg_store_base_base_basestore_validate_data",
       "weight": 1.0
     },
@@ -80684,7 +80662,7 @@
       "relation": "method",
       "source": "openghg_store_base_base_basestore",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L590",
+      "source_location": "L589",
       "target": "openghg_store_base_base_basestore_find_data_schema_inputs",
       "weight": 1.0
     },
@@ -80694,7 +80672,7 @@
       "relation": "method",
       "source": "openghg_store_base_base_basestore",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L601",
+      "source_location": "L600",
       "target": "openghg_store_base_base_basestore_find_chunking_schema_inputs",
       "weight": 1.0
     },
@@ -80704,7 +80682,7 @@
       "relation": "method",
       "source": "openghg_store_base_base_basestore",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L612",
+      "source_location": "L611",
       "target": "openghg_store_base_base_basestore_chunking_schema",
       "weight": 1.0
     },
@@ -80714,7 +80692,7 @@
       "relation": "method",
       "source": "openghg_store_base_base_basestore",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L615",
+      "source_location": "L614",
       "target": "openghg_store_base_base_basestore_check_chunks_datasource",
       "weight": 1.0
     },
@@ -80724,7 +80702,7 @@
       "relation": "method",
       "source": "openghg_store_base_base_basestore",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L653",
+      "source_location": "L652",
       "target": "openghg_store_base_base_basestore_check_chunks",
       "weight": 1.0
     },
@@ -80744,7 +80722,7 @@
       "relation": "method",
       "source": "openghg_store_base_base_basestore",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L722",
+      "source_location": "L721",
       "target": "openghg_store_base_base_basestore_add_metakeys",
       "weight": 1.0
     },
@@ -80754,7 +80732,7 @@
       "relation": "method",
       "source": "openghg_store_base_base_basestore",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L739",
+      "source_location": "L738",
       "target": "openghg_store_base_base_basestore_get_informational_dict_keys",
       "weight": 1.0
     },
@@ -80764,7 +80742,7 @@
       "relation": "method",
       "source": "openghg_store_base_base_basestore",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L761",
+      "source_location": "L760",
       "target": "openghg_store_base_base_basestore_update_metadata",
       "weight": 1.0
     },
@@ -80774,7 +80752,7 @@
       "relation": "method",
       "source": "openghg_store_base_base_basestore",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L820",
+      "source_location": "L819",
       "target": "openghg_store_base_base_basestore_check_info_keys",
       "weight": 1.0
     },
@@ -80784,7 +80762,7 @@
       "relation": "method",
       "source": "openghg_store_base_base_basestore",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L842",
+      "source_location": "L841",
       "target": "openghg_store_base_base_basestore_get_lookup_keys",
       "weight": 1.0
     },
@@ -80794,7 +80772,7 @@
       "relation": "method",
       "source": "openghg_store_base_base_basestore",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L872",
+      "source_location": "L871",
       "target": "openghg_store_base_base_basestore_get_list_metakeys",
       "weight": 1.0
     },
@@ -80804,7 +80782,7 @@
       "relation": "method",
       "source": "openghg_store_base_base_basestore",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L886",
+      "source_location": "L885",
       "target": "openghg_store_base_base_basestore_align_metadata_attributes",
       "weight": 1.0
     },
@@ -80814,7 +80792,7 @@
       "relation": "method",
       "source": "openghg_store_base_base_basestore",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L911",
+      "source_location": "L892",
       "target": "openghg_store_base_base_basestore_define_loop_params",
       "weight": 1.0
     },
@@ -80824,7 +80802,7 @@
       "relation": "method",
       "source": "openghg_store_base_base_basestore",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L915",
+      "source_location": "L896",
       "target": "openghg_store_base_base_basestore_assign_data",
       "weight": 1.0
     },
@@ -81104,7 +81082,7 @@
       "relation": "method",
       "source": "openghg_store_obssurface_obssurface",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L106",
+      "source_location": "L107",
       "target": "openghg_store_obssurface_obssurface_read_multisite_aqmesh",
       "weight": 1.0
     },
@@ -81114,7 +81092,7 @@
       "relation": "method",
       "source": "openghg_store_obssurface_obssurface",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L183",
+      "source_location": "L184",
       "target": "openghg_store_obssurface_obssurface_format_inputs",
       "weight": 1.0
     },
@@ -81124,7 +81102,7 @@
       "relation": "method",
       "source": "openghg_store_obssurface_obssurface",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L26",
+      "source_location": "L27",
       "target": "openghg_store_obssurface_obssurface_read_raw_data",
       "weight": 1.0
     },
@@ -81134,7 +81112,17 @@
       "relation": "method",
       "source": "openghg_store_obssurface_obssurface",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L293",
+      "source_location": "L294",
+      "target": "openghg_store_obssurface_obssurface_align_metadata_attributes",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "method",
+      "source": "openghg_store_obssurface_obssurface",
+      "source_file": "openghg/store/_obssurface.py",
+      "source_location": "L315",
       "target": "openghg_store_obssurface_obssurface_define_loop_params",
       "weight": 1.0
     },
@@ -81144,7 +81132,7 @@
       "relation": "method",
       "source": "openghg_store_obssurface_obssurface",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L309",
+      "source_location": "L331",
       "target": "openghg_store_obssurface_obssurface_schema",
       "weight": 1.0
     },
@@ -81154,7 +81142,7 @@
       "relation": "method",
       "source": "openghg_store_obssurface_obssurface",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L336",
+      "source_location": "L358",
       "target": "openghg_store_obssurface_obssurface_store_data",
       "weight": 1.0
     },
@@ -86242,9 +86230,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_standardise_meta_attributes_rationale_573",
+      "source": "openghg_standardise_meta_attributes_rationale_571",
       "source_file": "openghg/standardise/meta/_attributes.py",
-      "source_location": "L573",
+      "source_location": "L571",
       "target": "openghg_standardise_meta_attributes_dataset_formatter",
       "weight": 1.0
     },
@@ -86252,9 +86240,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_standardise_meta_attributes_rationale_594",
+      "source": "openghg_standardise_meta_attributes_rationale_592",
       "source_file": "openghg/standardise/meta/_attributes.py",
-      "source_location": "L594",
+      "source_location": "L592",
       "target": "openghg_standardise_meta_attributes_data_variable_formatter",
       "weight": 1.0
     },
@@ -87392,9 +87380,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_base_base_rationale_1028",
+      "source": "openghg_store_base_base_rationale_1009",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1028",
+      "source_location": "L1009",
       "target": "openghg_store_base_base_basestore_datasource_lookup",
       "weight": 1.0
     },
@@ -87402,9 +87390,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_base_base_rationale_1075",
+      "source": "openghg_store_base_base_rationale_1056",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1075",
+      "source_location": "L1056",
       "target": "openghg_store_base_base_basestore_uuid",
       "weight": 1.0
     },
@@ -87412,9 +87400,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_base_base_rationale_1083",
+      "source": "openghg_store_base_base_rationale_1064",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1083",
+      "source_location": "L1064",
       "target": "openghg_store_base_base_basestore_datasources",
       "weight": 1.0
     },
@@ -87422,9 +87410,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_base_base_rationale_1091",
+      "source": "openghg_store_base_base_rationale_1072",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1091",
+      "source_location": "L1072",
       "target": "openghg_store_base_base_basestore_get_rank",
       "weight": 1.0
     },
@@ -87432,9 +87420,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_base_base_rationale_1120",
+      "source": "openghg_store_base_base_rationale_1101",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1120",
+      "source_location": "L1101",
       "target": "openghg_store_base_base_basestore_clear_rank",
       "weight": 1.0
     },
@@ -87442,9 +87430,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_base_base_rationale_1141",
+      "source": "openghg_store_base_base_rationale_1122",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1141",
+      "source_location": "L1122",
       "target": "openghg_store_base_base_basestore_set_rank",
       "weight": 1.0
     },
@@ -87462,9 +87450,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_base_base_rationale_1279",
+      "source": "openghg_store_base_base_rationale_1260",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1279",
+      "source_location": "L1260",
       "target": "openghg_store_base_base_basestore_rank_data",
       "weight": 1.0
     },
@@ -87482,9 +87470,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_base_base_rationale_299",
+      "source": "openghg_store_base_base_rationale_298",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L299",
+      "source_location": "L298",
       "target": "openghg_store_base_base_basestore_standardise_and_store",
       "weight": 1.0
     },
@@ -87492,9 +87480,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_base_base_rationale_484",
+      "source": "openghg_store_base_base_rationale_483",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L484",
+      "source_location": "L483",
       "target": "openghg_store_base_base_basestore_format_inputs",
       "weight": 1.0
     },
@@ -87502,9 +87490,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_base_base_rationale_493",
+      "source": "openghg_store_base_base_rationale_492",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L493",
+      "source_location": "L492",
       "target": "openghg_store_base_base_basestore_create_schema_kwargs",
       "weight": 1.0
     },
@@ -87512,9 +87500,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_base_base_rationale_528",
+      "source": "openghg_store_base_base_rationale_527",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L528",
+      "source_location": "L527",
       "target": "openghg_store_base_base_basestore_schema",
       "weight": 1.0
     },
@@ -87522,9 +87510,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_base_base_rationale_540",
+      "source": "openghg_store_base_base_rationale_539",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L540",
+      "source_location": "L539",
       "target": "openghg_store_base_base_basestore_validate_datasources",
       "weight": 1.0
     },
@@ -87532,9 +87520,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_base_base_rationale_573",
+      "source": "openghg_store_base_base_rationale_572",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L573",
+      "source_location": "L572",
       "target": "openghg_store_base_base_basestore_validate_data",
       "weight": 1.0
     },
@@ -87542,9 +87530,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_base_base_rationale_591",
+      "source": "openghg_store_base_base_rationale_590",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L591",
+      "source_location": "L590",
       "target": "openghg_store_base_base_basestore_find_data_schema_inputs",
       "weight": 1.0
     },
@@ -87552,9 +87540,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_base_base_rationale_602",
+      "source": "openghg_store_base_base_rationale_601",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L602",
+      "source_location": "L601",
       "target": "openghg_store_base_base_basestore_find_chunking_schema_inputs",
       "weight": 1.0
     },
@@ -87562,9 +87550,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_base_base_rationale_623",
+      "source": "openghg_store_base_base_rationale_622",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L623",
+      "source_location": "L622",
       "target": "openghg_store_base_base_basestore_check_chunks_datasource",
       "weight": 1.0
     },
@@ -87572,9 +87560,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_base_base_rationale_652",
+      "source": "openghg_store_base_base_rationale_651",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L652",
+      "source_location": "L651",
       "target": "openghg_store_base_base",
       "weight": 1.0
     },
@@ -87582,9 +87570,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_base_base_rationale_661",
+      "source": "openghg_store_base_base_rationale_660",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L661",
+      "source_location": "L660",
       "target": "openghg_store_base_base_basestore_check_chunks",
       "weight": 1.0
     },
@@ -87592,9 +87580,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_base_base_rationale_723",
+      "source": "openghg_store_base_base_rationale_722",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L723",
+      "source_location": "L722",
       "target": "openghg_store_base_base_basestore_add_metakeys",
       "weight": 1.0
     },
@@ -87602,9 +87590,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_base_base_rationale_740",
+      "source": "openghg_store_base_base_rationale_739",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L740",
+      "source_location": "L739",
       "target": "openghg_store_base_base_basestore_get_informational_dict_keys",
       "weight": 1.0
     },
@@ -87612,9 +87600,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_base_base_rationale_764",
+      "source": "openghg_store_base_base_rationale_763",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L764",
+      "source_location": "L763",
       "target": "openghg_store_base_base_basestore_update_metadata",
       "weight": 1.0
     },
@@ -87622,9 +87610,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_base_base_rationale_821",
+      "source": "openghg_store_base_base_rationale_820",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L821",
+      "source_location": "L820",
       "target": "openghg_store_base_base_basestore_check_info_keys",
       "weight": 1.0
     },
@@ -87632,9 +87620,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_base_base_rationale_843",
+      "source": "openghg_store_base_base_rationale_842",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L843",
+      "source_location": "L842",
       "target": "openghg_store_base_base_basestore_get_lookup_keys",
       "weight": 1.0
     },
@@ -87642,9 +87630,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_base_base_rationale_873",
+      "source": "openghg_store_base_base_rationale_872",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L873",
+      "source_location": "L872",
       "target": "openghg_store_base_base_basestore_get_list_metakeys",
       "weight": 1.0
     },
@@ -87652,9 +87640,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_base_base_rationale_887",
+      "source": "openghg_store_base_base_rationale_886",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L887",
+      "source_location": "L886",
       "target": "openghg_store_base_base_basestore_align_metadata_attributes",
       "weight": 1.0
     },
@@ -87662,9 +87650,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_base_base_rationale_912",
+      "source": "openghg_store_base_base_rationale_893",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L912",
+      "source_location": "L893",
       "target": "openghg_store_base_base_basestore_define_loop_params",
       "weight": 1.0
     },
@@ -87672,9 +87660,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_base_base_rationale_928",
+      "source": "openghg_store_base_base_rationale_909",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L928",
+      "source_location": "L909",
       "target": "openghg_store_base_base_basestore_assign_data",
       "weight": 1.0
     },
@@ -88222,9 +88210,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_obssurface_rationale_117",
+      "source": "openghg_store_obssurface_rationale_118",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L117",
+      "source_location": "L118",
       "target": "openghg_store_obssurface_obssurface_read_multisite_aqmesh",
       "weight": 1.0
     },
@@ -88232,9 +88220,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_obssurface_rationale_184",
+      "source": "openghg_store_obssurface_rationale_185",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L184",
+      "source_location": "L185",
       "target": "openghg_store_obssurface_obssurface_format_inputs",
       "weight": 1.0
     },
@@ -88242,9 +88230,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_obssurface_rationale_19",
+      "source": "openghg_store_obssurface_rationale_20",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L19",
+      "source_location": "L20",
       "target": "openghg_store_obssurface_obssurface",
       "weight": 1.0
     },
@@ -88252,9 +88240,19 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_obssurface_rationale_294",
+      "source": "openghg_store_obssurface_rationale_295",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L294",
+      "source_location": "L295",
+      "target": "openghg_store_obssurface_obssurface_align_metadata_attributes",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "relation": "rationale_for",
+      "source": "openghg_store_obssurface_rationale_316",
+      "source_file": "openghg/store/_obssurface.py",
+      "source_location": "L316",
       "target": "openghg_store_obssurface_obssurface_define_loop_params",
       "weight": 1.0
     },
@@ -88262,9 +88260,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_obssurface_rationale_310",
+      "source": "openghg_store_obssurface_rationale_332",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L310",
+      "source_location": "L332",
       "target": "openghg_store_obssurface_obssurface_schema",
       "weight": 1.0
     },
@@ -88272,9 +88270,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_obssurface_rationale_322",
+      "source": "openghg_store_obssurface_rationale_344",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L322",
+      "source_location": "L344",
       "target": "openghg_store_obssurface",
       "weight": 1.0
     },
@@ -88282,9 +88280,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_obssurface_rationale_34",
+      "source": "openghg_store_obssurface_rationale_35",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L34",
+      "source_location": "L35",
       "target": "openghg_store_obssurface_obssurface_read_raw_data",
       "weight": 1.0
     },
@@ -88292,9 +88290,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_obssurface_rationale_346",
+      "source": "openghg_store_obssurface_rationale_368",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L346",
+      "source_location": "L368",
       "target": "openghg_store_obssurface_obssurface_store_data",
       "weight": 1.0
     },
@@ -88302,9 +88300,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_obssurface_rationale_385",
+      "source": "openghg_store_obssurface_rationale_407",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L385",
+      "source_location": "L407",
       "target": "openghg_store_obssurface",
       "weight": 1.0
     },
@@ -88312,9 +88310,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_store_obssurface_rationale_406",
+      "source": "openghg_store_obssurface_rationale_428",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L406",
+      "source_location": "L428",
       "target": "openghg_store_obssurface",
       "weight": 1.0
     },
@@ -89722,19 +89720,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_util_download_rationale_24",
+      "source": "openghg_util_download_rationale_10",
       "source_file": "openghg/util/_download.py",
-      "source_location": "L24",
-      "target": "openghg_util_download_find_url",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "relation": "rationale_for",
-      "source": "openghg_util_download_rationale_30",
-      "source_file": "openghg/util/_download.py",
-      "source_location": "L30",
+      "source_location": "L10",
       "target": "openghg_util_download_parse_url_filename",
       "weight": 1.0
     },
@@ -89742,9 +89730,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_util_download_rationale_43",
+      "source": "openghg_util_download_rationale_23",
       "source_file": "openghg/util/_download.py",
-      "source_location": "L43",
+      "source_location": "L23",
       "target": "openghg_util_download_download_data",
       "weight": 1.0
     },
@@ -90022,9 +90010,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_util_init_rationale_286",
+      "source": "openghg_util_init_rationale_284",
       "source_file": "openghg/util/__init__.py",
-      "source_location": "L286",
+      "source_location": "L284",
       "target": "openghg_util_init_getattr",
       "weight": 1.0
     },
@@ -90032,9 +90020,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "openghg_util_init_rationale_298",
+      "source": "openghg_util_init_rationale_296",
       "source_file": "openghg/util/__init__.py",
-      "source_location": "L298",
+      "source_location": "L296",
       "target": "openghg_util_init_dir",
       "weight": 1.0
     },
@@ -96322,9 +96310,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_store_test_flux_rationale_121",
+      "source": "tests_store_test_flux_rationale_122",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L121",
+      "source_location": "L122",
       "target": "tests_store_test_flux",
       "weight": 1.0
     },
@@ -96332,9 +96320,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_store_test_flux_rationale_155",
+      "source": "tests_store_test_flux_rationale_156",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L155",
+      "source_location": "L156",
       "target": "tests_store_test_flux_test_read_file_additional_keys",
       "weight": 1.0
     },
@@ -96352,9 +96340,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_store_test_flux_rationale_201",
+      "source": "tests_store_test_flux_rationale_202",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L201",
+      "source_location": "L202",
       "target": "tests_store_test_flux_test_read_file_align_correct_datasource",
       "weight": 1.0
     },
@@ -96372,9 +96360,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_store_test_flux_rationale_249",
+      "source": "tests_store_test_flux_rationale_250",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L249",
+      "source_location": "L250",
       "target": "tests_store_test_flux_test_read_file_fails_ambiguous",
       "weight": 1.0
     },
@@ -96382,9 +96370,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_store_test_flux_rationale_270",
+      "source": "tests_store_test_flux_rationale_271",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L270",
+      "source_location": "L271",
       "target": "tests_store_test_flux_test_add_edgar_database",
       "weight": 1.0
     },
@@ -96392,9 +96380,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_store_test_flux_rationale_324",
+      "source": "tests_store_test_flux_rationale_325",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L324",
+      "source_location": "L325",
       "target": "tests_store_test_flux_test_add_edgar_v8_database",
       "weight": 1.0
     },
@@ -96402,9 +96390,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_store_test_flux_rationale_377",
+      "source": "tests_store_test_flux_rationale_378",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L377",
+      "source_location": "L378",
       "target": "tests_store_test_flux_test_search_flux_uses_raw_source_when_datasource_has_duplicate_source",
       "weight": 1.0
     },
@@ -96412,9 +96400,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_store_test_flux_rationale_428",
+      "source": "tests_store_test_flux_rationale_429",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L428",
+      "source_location": "L429",
       "target": "tests_store_test_flux_test_edgar_v8_raises_error",
       "weight": 1.0
     },
@@ -96422,9 +96410,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_store_test_flux_rationale_445",
+      "source": "tests_store_test_flux_rationale_446",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L445",
+      "source_location": "L446",
       "target": "tests_store_test_flux_test_transform_and_add_edgar_database",
       "weight": 1.0
     },
@@ -96432,9 +96420,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_store_test_flux_rationale_482",
+      "source": "tests_store_test_flux_rationale_483",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L482",
+      "source_location": "L483",
       "target": "tests_store_test_flux",
       "weight": 1.0
     },
@@ -96442,9 +96430,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_store_test_flux_rationale_506",
+      "source": "tests_store_test_flux_rationale_507",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L506",
+      "source_location": "L507",
       "target": "tests_store_test_flux_test_flux_schema",
       "weight": 1.0
     },
@@ -96452,9 +96440,9 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_store_test_flux_rationale_516",
+      "source": "tests_store_test_flux_rationale_517",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L516",
+      "source_location": "L517",
       "target": "tests_store_test_flux",
       "weight": 1.0
     },
@@ -96462,7 +96450,7 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "relation": "rationale_for",
-      "source": "tests_store_test_flux_rationale_520",
+      "source": "tests_store_test_flux_rationale_521",
       "source_file": "tests/store/test_flux.py",
       "source_location": "L521",
       "target": "tests_store_test_flux_test_flux_schema_with_file_data",
@@ -100686,7 +100674,19 @@
       "relation": "calls",
       "source": "openghg_standardise_flux_openghg_parse_openghg",
       "source_file": "openghg/standardise/flux/_openghg.py",
-      "source_location": "L123",
+      "source_location": "L100",
+      "target": "openghg_util_time_timestamp_now",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "relation": "calls",
+      "source": "openghg_standardise_flux_openghg_parse_openghg",
+      "source_file": "openghg/standardise/flux/_openghg.py",
+      "source_location": "L110",
       "target": "openghg_store_infer_time_update_zero_dim",
       "weight": 1.0
     },
@@ -100698,7 +100698,7 @@
       "relation": "calls",
       "source": "openghg_standardise_flux_openghg_parse_openghg",
       "source_file": "openghg/standardise/flux/_openghg.py",
-      "source_location": "L135",
+      "source_location": "L122",
       "target": "openghg_store_infer_time_infer_date_range",
       "weight": 1.0
     },
@@ -100724,18 +100724,6 @@
       "source_file": "openghg/standardise/flux/_openghg.py",
       "source_location": "L72",
       "target": "openghg_util_file_preprocess_nc_data",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "call",
-      "relation": "calls",
-      "source": "openghg_standardise_flux_openghg_parse_openghg",
-      "source_file": "openghg/standardise/flux/_openghg.py",
-      "source_location": "L94",
-      "target": "openghg_util_download_find_url",
       "weight": 1.0
     },
     {
@@ -101046,7 +101034,7 @@
       "relation": "calls",
       "source": "openghg_standardise_meta_attributes_get_flux_attributes",
       "source_file": "openghg/standardise/meta/_attributes.py",
-      "source_location": "L534",
+      "source_location": "L532",
       "target": "openghg_util_time_timestamp_now",
       "weight": 1.0
     },
@@ -101946,7 +101934,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_assign_data",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L975",
+      "source_location": "L956",
       "target": "openghg_util_metadata_util_not_set_metadata_values",
       "weight": 1.0
     },
@@ -101958,7 +101946,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_datasource_lookup",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1068",
+      "source_location": "L1049",
       "target": "openghg_types_errors_datasourcelookuperror",
       "weight": 1.0
     },
@@ -101970,7 +101958,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_get_rank",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1111",
+      "source_location": "L1092",
       "target": "defaultdict",
       "weight": 1.0
     },
@@ -102030,7 +102018,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_standardise_and_store",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L372",
+      "source_location": "L371",
       "target": "openghg_util_versions_check_if_need_new_version",
       "weight": 1.0
     },
@@ -102042,7 +102030,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_standardise_and_store_469424",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L201",
+      "source_location": "L200",
       "target": "openghg_util_file_load_standardise_parser",
       "weight": 1.0
     },
@@ -102054,7 +102042,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_standardise_and_store_469424",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L213",
+      "source_location": "L212",
       "target": "openghg_util_function_inputs_split_function_inputs",
       "weight": 1.0
     },
@@ -102066,7 +102054,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_standardise_and_store_469424",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L223",
+      "source_location": "L222",
       "target": "openghg_types_errors_standardiseerror",
       "weight": 1.0
     },
@@ -102078,7 +102066,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_update_metadata",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L794",
+      "source_location": "L793",
       "target": "openghg_util_metadata_util_merge_dict",
       "weight": 1.0
     },
@@ -102090,7 +102078,7 @@
       "relation": "calls",
       "source": "openghg_store_base_base_basestore_validate_datasources",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L569",
+      "source_location": "L568",
       "target": "openghg_types_errors_validationerror",
       "weight": 1.0
     },
@@ -102546,7 +102534,7 @@
       "relation": "calls",
       "source": "openghg_store_obssurface_obssurface_format_inputs",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L221",
+      "source_location": "L222",
       "target": "openghg_util_util_verify_site",
       "weight": 1.0
     },
@@ -102558,7 +102546,7 @@
       "relation": "calls",
       "source": "openghg_store_obssurface_obssurface_format_inputs",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L235",
+      "source_location": "L236",
       "target": "openghg_util_strings_clean_string",
       "weight": 1.0
     },
@@ -102570,7 +102558,7 @@
       "relation": "calls",
       "source": "openghg_store_obssurface_obssurface_format_inputs",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L260",
+      "source_location": "L261",
       "target": "openghg_util_time_evaluate_sampling_period",
       "weight": 1.0
     },
@@ -102582,7 +102570,7 @@
       "relation": "calls",
       "source": "openghg_store_obssurface_obssurface_format_inputs",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L263",
+      "source_location": "L264",
       "target": "openghg_util_platform_format_platform",
       "weight": 1.0
     },
@@ -102594,7 +102582,7 @@
       "relation": "calls",
       "source": "openghg_store_obssurface_obssurface_format_inputs",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L268",
+      "source_location": "L269",
       "target": "openghg_util_inlet_format_inlet",
       "weight": 1.0
     },
@@ -102606,7 +102594,7 @@
       "relation": "calls",
       "source": "openghg_store_obssurface_obssurface_format_inputs",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L271",
+      "source_location": "L272",
       "target": "openghg_util_data_level_format_data_level",
       "weight": 1.0
     },
@@ -102618,7 +102606,7 @@
       "relation": "calls",
       "source": "openghg_store_obssurface_obssurface_format_inputs",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L274",
+      "source_location": "L275",
       "target": "openghg_util_strings_check_and_set_null_variable",
       "weight": 1.0
     },
@@ -105174,7 +105162,7 @@
       "relation": "calls",
       "source": "tests_store_test_flux_test_add_edgar_database",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L289",
+      "source_location": "L290",
       "target": "openghg_retrieve_search_search_flux",
       "weight": 1.0
     },
@@ -105186,7 +105174,7 @@
       "relation": "calls",
       "source": "tests_store_test_flux_test_add_edgar_v8_database",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L345",
+      "source_location": "L346",
       "target": "openghg_retrieve_search_search_flux",
       "weight": 1.0
     },
@@ -105210,7 +105198,7 @@
       "relation": "calls",
       "source": "tests_store_test_flux_test_read_file_additional_keys",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L178",
+      "source_location": "L179",
       "target": "openghg_retrieve_search_search_flux",
       "weight": 1.0
     },
@@ -105222,7 +105210,7 @@
       "relation": "calls",
       "source": "tests_store_test_flux_test_read_file_align_correct_datasource",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L218",
+      "source_location": "L219",
       "target": "openghg_retrieve_search_search_flux",
       "weight": 1.0
     },
@@ -105234,7 +105222,7 @@
       "relation": "calls",
       "source": "tests_store_test_flux_test_search_flux_uses_raw_source_when_datasource_has_duplicate_source",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L391",
+      "source_location": "L392",
       "target": "openghg_objectstore_local_store_get_writable_bucket",
       "weight": 1.0
     },
@@ -105246,7 +105234,7 @@
       "relation": "calls",
       "source": "tests_store_test_flux_test_search_flux_uses_raw_source_when_datasource_has_duplicate_source",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L397",
+      "source_location": "L398",
       "target": "openghg_retrieve_search_search_flux",
       "weight": 1.0
     },
@@ -107829,7 +107817,7 @@
       "relation": "uses",
       "source": "openghg_store_base_base_basestore",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L527",
+      "source_location": "L526",
       "target": "openghg_store_data_schema_dataschema",
       "weight": 0.8
     },
@@ -108721,7 +108709,7 @@
       "id": "openghg_store_obssurface_obssurface",
       "label": "ObsSurface",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L18"
+      "source_location": "L19"
     },
     {
       "_callable": true,
@@ -113284,7 +113272,7 @@
       "id": "openghg_standardise_meta_attributes_data_variable_formatter",
       "label": "data_variable_formatter()",
       "source_file": "openghg/standardise/meta/_attributes.py",
-      "source_location": "L593"
+      "source_location": "L591"
     },
     {
       "_callable": true,
@@ -113293,7 +113281,7 @@
       "id": "openghg_standardise_meta_attributes_dataset_formatter",
       "label": "dataset_formatter()",
       "source_file": "openghg/standardise/meta/_attributes.py",
-      "source_location": "L570"
+      "source_location": "L568"
     },
     {
       "_callable": true,
@@ -114427,7 +114415,7 @@
       "id": "openghg_store_base_base_basestore_add_metakeys",
       "label": ".add_metakeys()",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L722"
+      "source_location": "L721"
     },
     {
       "_callable": true,
@@ -114436,7 +114424,7 @@
       "id": "openghg_store_base_base_basestore_align_metadata_attributes",
       "label": ".align_metadata_attributes()",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L886"
+      "source_location": "L885"
     },
     {
       "_callable": true,
@@ -114445,7 +114433,7 @@
       "id": "openghg_store_base_base_basestore_assign_data",
       "label": ".assign_data()",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L915"
+      "source_location": "L896"
     },
     {
       "_callable": true,
@@ -114454,7 +114442,7 @@
       "id": "openghg_store_base_base_basestore_check_chunks",
       "label": ".check_chunks()",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L653"
+      "source_location": "L652"
     },
     {
       "_callable": true,
@@ -114463,7 +114451,7 @@
       "id": "openghg_store_base_base_basestore_check_chunks_datasource",
       "label": "._check_chunks_datasource()",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L615"
+      "source_location": "L614"
     },
     {
       "_callable": true,
@@ -114472,7 +114460,7 @@
       "id": "openghg_store_base_base_basestore_check_info_keys",
       "label": ".check_info_keys()",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L820"
+      "source_location": "L819"
     },
     {
       "_callable": true,
@@ -114481,7 +114469,7 @@
       "id": "openghg_store_base_base_basestore_chunking_schema",
       "label": ".chunking_schema()",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L612"
+      "source_location": "L611"
     },
     {
       "_callable": true,
@@ -114490,7 +114478,7 @@
       "id": "openghg_store_base_base_basestore_clear_rank",
       "label": ".clear_rank()",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1119"
+      "source_location": "L1100"
     },
     {
       "_callable": true,
@@ -114499,7 +114487,7 @@
       "id": "openghg_store_base_base_basestore_create_schema_kwargs",
       "label": ".create_schema_kwargs()",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L490"
+      "source_location": "L489"
     },
     {
       "_callable": true,
@@ -114508,7 +114496,7 @@
       "id": "openghg_store_base_base_basestore_datasource_lookup",
       "label": ".datasource_lookup()",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1022"
+      "source_location": "L1003"
     },
     {
       "_callable": true,
@@ -114517,7 +114505,7 @@
       "id": "openghg_store_base_base_basestore_datasources",
       "label": ".datasources()",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1082"
+      "source_location": "L1063"
     },
     {
       "_callable": true,
@@ -114526,7 +114514,7 @@
       "id": "openghg_store_base_base_basestore_define_loop_params",
       "label": ".define_loop_params()",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L911"
+      "source_location": "L892"
     },
     {
       "_callable": true,
@@ -114553,7 +114541,7 @@
       "id": "openghg_store_base_base_basestore_find_chunking_schema_inputs",
       "label": ".find_chunking_schema_inputs()",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L601"
+      "source_location": "L600"
     },
     {
       "_callable": true,
@@ -114562,7 +114550,7 @@
       "id": "openghg_store_base_base_basestore_find_data_schema_inputs",
       "label": ".find_data_schema_inputs()",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L590"
+      "source_location": "L589"
     },
     {
       "_callable": true,
@@ -114571,7 +114559,7 @@
       "id": "openghg_store_base_base_basestore_format_inputs",
       "label": ".format_inputs()",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L483"
+      "source_location": "L482"
     },
     {
       "_callable": true,
@@ -114580,7 +114568,7 @@
       "id": "openghg_store_base_base_basestore_get_informational_dict_keys",
       "label": ".get_informational_dict_keys()",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L739"
+      "source_location": "L738"
     },
     {
       "_callable": true,
@@ -114589,7 +114577,7 @@
       "id": "openghg_store_base_base_basestore_get_list_metakeys",
       "label": ".get_list_metakeys()",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L872"
+      "source_location": "L871"
     },
     {
       "_callable": true,
@@ -114598,7 +114586,7 @@
       "id": "openghg_store_base_base_basestore_get_lookup_keys",
       "label": ".get_lookup_keys()",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L842"
+      "source_location": "L841"
     },
     {
       "_callable": true,
@@ -114607,7 +114595,7 @@
       "id": "openghg_store_base_base_basestore_get_rank",
       "label": ".get_rank()",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1090"
+      "source_location": "L1071"
     },
     {
       "_callable": true,
@@ -114652,7 +114640,7 @@
       "id": "openghg_store_base_base_basestore_rank_data",
       "label": ".rank_data()",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1278"
+      "source_location": "L1259"
     },
     {
       "_callable": true,
@@ -114679,7 +114667,7 @@
       "id": "openghg_store_base_base_basestore_schema",
       "label": ".schema()",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L527"
+      "source_location": "L526"
     },
     {
       "_callable": true,
@@ -114688,7 +114676,7 @@
       "id": "openghg_store_base_base_basestore_set_rank",
       "label": ".set_rank()",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1134"
+      "source_location": "L1115"
     },
     {
       "_callable": true,
@@ -114697,7 +114685,7 @@
       "id": "openghg_store_base_base_basestore_standardise_and_store",
       "label": ".standardise_and_store()",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L282"
+      "source_location": "L281"
     },
     {
       "_callable": true,
@@ -114715,7 +114703,7 @@
       "id": "openghg_store_base_base_basestore_store_data",
       "label": ".store_data()",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L477"
+      "source_location": "L476"
     },
     {
       "_callable": true,
@@ -114733,7 +114721,7 @@
       "id": "openghg_store_base_base_basestore_transform_data",
       "label": ".transform_data()",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L480"
+      "source_location": "L479"
     },
     {
       "_callable": true,
@@ -114742,7 +114730,7 @@
       "id": "openghg_store_base_base_basestore_update_metadata",
       "label": ".update_metadata()",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L761"
+      "source_location": "L760"
     },
     {
       "_callable": true,
@@ -114751,7 +114739,7 @@
       "id": "openghg_store_base_base_basestore_uuid",
       "label": ".uuid()",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1074"
+      "source_location": "L1055"
     },
     {
       "_callable": true,
@@ -114760,7 +114748,7 @@
       "id": "openghg_store_base_base_basestore_validate_data",
       "label": ".validate_data()",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L572"
+      "source_location": "L571"
     },
     {
       "_callable": true,
@@ -114769,7 +114757,7 @@
       "id": "openghg_store_base_base_basestore_validate_datasources",
       "label": "._validate_datasources()",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L534"
+      "source_location": "L533"
     },
     {
       "_callable": true,
@@ -115180,10 +115168,19 @@
       "_callable": true,
       "_origin": "ast",
       "file_type": "code",
+      "id": "openghg_store_obssurface_obssurface_align_metadata_attributes",
+      "label": ".align_metadata_attributes()",
+      "source_file": "openghg/store/_obssurface.py",
+      "source_location": "L294"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "file_type": "code",
       "id": "openghg_store_obssurface_obssurface_define_loop_params",
       "label": ".define_loop_params()",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L293"
+      "source_location": "L315"
     },
     {
       "_callable": true,
@@ -115192,7 +115189,7 @@
       "id": "openghg_store_obssurface_obssurface_format_inputs",
       "label": ".format_inputs()",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L183"
+      "source_location": "L184"
     },
     {
       "_callable": true,
@@ -115201,7 +115198,7 @@
       "id": "openghg_store_obssurface_obssurface_read_multisite_aqmesh",
       "label": ".read_multisite_aqmesh()",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L106"
+      "source_location": "L107"
     },
     {
       "_callable": true,
@@ -115210,7 +115207,7 @@
       "id": "openghg_store_obssurface_obssurface_read_raw_data",
       "label": ".read_raw_data()",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L26"
+      "source_location": "L27"
     },
     {
       "_callable": true,
@@ -115219,7 +115216,7 @@
       "id": "openghg_store_obssurface_obssurface_schema",
       "label": ".schema()",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L309"
+      "source_location": "L331"
     },
     {
       "_callable": true,
@@ -115228,7 +115225,7 @@
       "id": "openghg_store_obssurface_obssurface_store_data",
       "label": ".store_data()",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L336"
+      "source_location": "L358"
     },
     {
       "_callable": true,
@@ -116146,16 +116143,7 @@
       "id": "openghg_util_download_download_data",
       "label": "download_data()",
       "source_file": "openghg/util/_download.py",
-      "source_location": "L42"
-    },
-    {
-      "_callable": true,
-      "_origin": "ast",
-      "file_type": "code",
-      "id": "openghg_util_download_find_url",
-      "label": "find_url()",
-      "source_file": "openghg/util/_download.py",
-      "source_location": "L23"
+      "source_location": "L22"
     },
     {
       "_callable": true,
@@ -116164,7 +116152,7 @@
       "id": "openghg_util_download_parse_url_filename",
       "label": "parse_url_filename()",
       "source_file": "openghg/util/_download.py",
-      "source_location": "L29"
+      "source_location": "L9"
     },
     {
       "_callable": true,
@@ -116407,7 +116395,7 @@
       "id": "openghg_util_init_dir",
       "label": "__dir__()",
       "source_file": "openghg/util/__init__.py",
-      "source_location": "L297"
+      "source_location": "L295"
     },
     {
       "_callable": true,
@@ -116416,7 +116404,7 @@
       "id": "openghg_util_init_getattr",
       "label": "__getattr__()",
       "source_file": "openghg/util/__init__.py",
-      "source_location": "L285"
+      "source_location": "L283"
     },
     {
       "_callable": true,
@@ -123886,7 +123874,7 @@
       "id": "tests_store_test_flux_load_edgar",
       "label": "load_edgar()",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L125"
+      "source_location": "L126"
     },
     {
       "_callable": true,
@@ -123895,7 +123883,7 @@
       "id": "tests_store_test_flux_test_add_edgar_database",
       "label": "test_add_edgar_database()",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L269"
+      "source_location": "L270"
     },
     {
       "_callable": true,
@@ -123904,7 +123892,7 @@
       "id": "tests_store_test_flux_test_add_edgar_v8_database",
       "label": "test_add_edgar_v8_database()",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L323"
+      "source_location": "L324"
     },
     {
       "_callable": true,
@@ -123913,7 +123901,7 @@
       "id": "tests_store_test_flux_test_edgar_v8_raises_error",
       "label": "test_edgar_v8_raises_error()",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L427"
+      "source_location": "L428"
     },
     {
       "_callable": true,
@@ -123976,7 +123964,7 @@
       "id": "tests_store_test_flux_test_read_file_additional_keys",
       "label": "test_read_file_additional_keys()",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L154"
+      "source_location": "L155"
     },
     {
       "_callable": true,
@@ -123985,7 +123973,7 @@
       "id": "tests_store_test_flux_test_read_file_align_correct_datasource",
       "label": "test_read_file_align_correct_datasource()",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L200"
+      "source_location": "L201"
     },
     {
       "_callable": true,
@@ -123994,7 +123982,7 @@
       "id": "tests_store_test_flux_test_read_file_fails_ambiguous",
       "label": "test_read_file_fails_ambiguous()",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L248"
+      "source_location": "L249"
     },
     {
       "_callable": true,
@@ -124003,7 +123991,7 @@
       "id": "tests_store_test_flux_test_search_flux_uses_raw_source_when_datasource_has_duplicate_source",
       "label": "test_search_flux_uses_raw_source_when_datasource_has_duplicate_source()",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L376"
+      "source_location": "L377"
     },
     {
       "_callable": true,
@@ -124012,7 +124000,7 @@
       "id": "tests_store_test_flux_test_transform_and_add_edgar_database",
       "label": "test_transform_and_add_edgar_database()",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L444"
+      "source_location": "L445"
     },
     {
       "_callable": true,
@@ -136411,18 +136399,18 @@
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_standardise_meta_attributes_rationale_573",
+      "id": "openghg_standardise_meta_attributes_rationale_571",
       "label": "Formats species/variables from the dataset by removing the whitespaces with…",
       "source_file": "openghg/standardise/meta/_attributes.py",
-      "source_location": "L573"
+      "source_location": "L571"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_standardise_meta_attributes_rationale_594",
+      "id": "openghg_standardise_meta_attributes_rationale_592",
       "label": "Formats variables from the dataset by removing the whitespaces with underscores…",
       "source_file": "openghg/standardise/meta/_attributes.py",
-      "source_location": "L594"
+      "source_location": "L592"
     },
     {
       "_origin": "ast",
@@ -137331,50 +137319,50 @@
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_base_base_rationale_1028",
+      "id": "openghg_store_base_base_rationale_1009",
       "label": "Search the metadata store for a Datasource UUID using the metadata in data. We…",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1028"
+      "source_location": "L1009"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_base_base_rationale_1075",
+      "id": "openghg_store_base_base_rationale_1056",
       "label": "Return the UUID of this object Returns: str: UUID of object",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1075"
+      "source_location": "L1056"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_base_base_rationale_1083",
+      "id": "openghg_store_base_base_rationale_1064",
       "label": "Return the list of Datasources UUIDs associated with this object Returns: list:…",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1083"
+      "source_location": "L1064"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_base_base_rationale_1091",
+      "id": "openghg_store_base_base_rationale_1072",
       "label": "Get the rank for the given Datasource for a given date range Args: uuid: UUID…",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1091"
+      "source_location": "L1072"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_base_base_rationale_1120",
+      "id": "openghg_store_base_base_rationale_1101",
       "label": "Clear the ranking data for a Datasource Args: uuid: UUID of Datasource Returns:…",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1120"
+      "source_location": "L1101"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_base_base_rationale_1141",
+      "id": "openghg_store_base_base_rationale_1122",
       "label": "Set the rank of a Datasource associated with this object. This function…",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1141"
+      "source_location": "L1122"
     },
     {
       "_origin": "ast",
@@ -137387,10 +137375,10 @@
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_base_base_rationale_1279",
+      "id": "openghg_store_base_base_rationale_1260",
       "label": "Return a dictionary of rank data keyed by UUID Returns: dict: Dictionary of…",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L1279"
+      "source_location": "L1260"
     },
     {
       "_origin": "ast",
@@ -137403,162 +137391,162 @@
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_base_base_rationale_299",
+      "id": "openghg_store_base_base_rationale_298",
       "label": "Process files, standardise and store in the object store. This function makes…",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L299"
+      "source_location": "L298"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_base_base_rationale_484",
+      "id": "openghg_store_base_base_rationale_483",
       "label": "Apply appropriate formatting for expected inputs. Note: This is a placeholder…",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L484"
+      "source_location": "L483"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_base_base_rationale_493",
+      "id": "openghg_store_base_base_rationale_492",
       "label": "Create the keyword arguments needed when creating a data type schema. Each…",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L493"
+      "source_location": "L492"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_base_base_rationale_528",
+      "id": "openghg_store_base_base_rationale_527",
       "label": "Defined schema for an internal Dataset. This is a placeholder and will return…",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L528"
+      "source_location": "L527"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_base_base_rationale_540",
+      "id": "openghg_store_base_base_rationale_539",
       "label": "Validate the standardise datasources against the data_type schema. Args: data:…",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L540"
+      "source_location": "L539"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_base_base_rationale_573",
+      "id": "openghg_store_base_base_rationale_572",
       "label": "Class method for validation of a dataset against the defined schema. Args: ds:…",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L573"
+      "source_location": "L572"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_base_base_rationale_591",
+      "id": "openghg_store_base_base_rationale_590",
       "label": "Extract the expected inputs for the schema method.",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L591"
+      "source_location": "L590"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_base_base_rationale_602",
+      "id": "openghg_store_base_base_rationale_601",
       "label": "Extract the expected inputs for the chunking_schema method.",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L602"
+      "source_location": "L601"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_base_base_rationale_623",
+      "id": "openghg_store_base_base_rationale_622",
       "label": "Check chunks for a datasource. Args: datasource: Produced datasource which…",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L623"
+      "source_location": "L622"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_base_base_rationale_652",
+      "id": "openghg_store_base_base_rationale_651",
       "label": "# TODO: Decide if it would be useful to make this into a @classmethod - use cls…",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L652"
+      "source_location": "L651"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_base_base_rationale_661",
+      "id": "openghg_store_base_base_rationale_660",
       "label": "Check the chunk size of a variable in a dataset and return the chunk size Args:…",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L661"
+      "source_location": "L660"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_base_base_rationale_723",
+      "id": "openghg_store_base_base_rationale_722",
       "label": "Check metakeys are included from relevant config file and add as the…",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L723"
+      "source_location": "L722"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_base_base_rationale_740",
+      "id": "openghg_store_base_base_rationale_739",
       "label": "This collects together the informational keys associated with this object. This…",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L740"
+      "source_location": "L739"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_base_base_rationale_764",
+      "id": "openghg_store_base_base_rationale_763",
       "label": "This adds additional metadata keys to the metadata within the data dictionary.…",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L764"
+      "source_location": "L763"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_base_base_rationale_821",
+      "id": "openghg_store_base_base_rationale_820",
       "label": "Check the informational metadata is not being used to set required keys. Args:…",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L821"
+      "source_location": "L820"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_base_base_rationale_843",
+      "id": "openghg_store_base_base_rationale_842",
       "label": "This creates the list of keys required to perform the Datasource lookup. If…",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L843"
+      "source_location": "L842"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_base_base_rationale_873",
+      "id": "openghg_store_base_base_rationale_872",
       "label": "This defines the metakeys which are expected to be stored as lists and so…",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L873"
+      "source_location": "L872"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_base_base_rationale_887",
-      "label": "Check values within metadata and attributes are consistent and update (in…",
+      "id": "openghg_store_base_base_rationale_886",
+      "label": "Default to returning None for cases where this method isn't defined yet within…",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L887"
+      "source_location": "L886"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_base_base_rationale_912",
+      "id": "openghg_store_base_base_rationale_893",
       "label": "Default to returning an empty dict if there are no loop parameters.",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L912"
+      "source_location": "L893"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_base_base_rationale_928",
+      "id": "openghg_store_base_base_rationale_909",
       "label": "Assign data to a Datasource. This will either create a new Datasource Create or…",
       "source_file": "openghg/store/base/_base.py",
-      "source_location": "L928"
+      "source_location": "L909"
     },
     {
       "_origin": "ast",
@@ -137995,82 +137983,90 @@
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_obssurface_rationale_117",
+      "id": "openghg_store_obssurface_rationale_118",
       "label": "Read AQMesh data for the Glasgow network NOTE - temporary function until we…",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L117"
+      "source_location": "L118"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_obssurface_rationale_184",
+      "id": "openghg_store_obssurface_rationale_185",
       "label": "Apply appropriate formatting for expected inputs for ObsColumn. Expected inputs…",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L184"
+      "source_location": "L185"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_obssurface_rationale_19",
+      "id": "openghg_store_obssurface_rationale_20",
       "label": "This class is used to process surface observation data",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L19"
+      "source_location": "L20"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_obssurface_rationale_294",
+      "id": "openghg_store_obssurface_rationale_295",
+      "label": "Check values within metadata and attributes are consistent and update (in…",
+      "source_file": "openghg/store/_obssurface.py",
+      "source_location": "L295"
+    },
+    {
+      "_origin": "ast",
+      "file_type": "rationale",
+      "id": "openghg_store_obssurface_rationale_316",
       "label": "If filepath is supplied as a list, depending on the data type this will be…",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L294"
+      "source_location": "L316"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_obssurface_rationale_310",
+      "id": "openghg_store_obssurface_rationale_332",
       "label": "Define schema for surface observations Dataset. Only includes mandatory…",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L310"
+      "source_location": "L332"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_obssurface_rationale_322",
+      "id": "openghg_store_obssurface_rationale_344",
       "label": "# TODO: Decide how to best incorporate optional variables",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L322"
+      "source_location": "L344"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_obssurface_rationale_34",
+      "id": "openghg_store_obssurface_rationale_35",
       "label": "Reads binary data passed in by serverless function. The data dictionary should…",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L34"
+      "source_location": "L35"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_obssurface_rationale_346",
+      "id": "openghg_store_obssurface_rationale_368",
       "label": "This expects already standardised data such as ICOS / CEDA Args: data:…",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L346"
+      "source_location": "L368"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_obssurface_rationale_385",
+      "id": "openghg_store_obssurface_rationale_407",
       "label": "# TODO: May need to delete",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L385"
+      "source_location": "L407"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_store_obssurface_rationale_406",
+      "id": "openghg_store_obssurface_rationale_428",
       "label": "# TODO: when zarr store updates are made, make default to combine any",
       "source_file": "openghg/store/_obssurface.py",
-      "source_location": "L406"
+      "source_location": "L428"
     },
     {
       "_origin": "ast",
@@ -139195,26 +139191,18 @@
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_util_download_rationale_24",
-      "label": "Check whether URL pattern is present and return that pattern if found (else…",
-      "source_file": "openghg/util/_download.py",
-      "source_location": "L24"
-    },
-    {
-      "_origin": "ast",
-      "file_type": "rationale",
-      "id": "openghg_util_download_rationale_30",
+      "id": "openghg_util_download_rationale_10",
       "label": "Get the filename from a (messy) URL. Args: url: URL of file Returns: str:…",
       "source_file": "openghg/util/_download.py",
-      "source_location": "L30"
+      "source_location": "L10"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_util_download_rationale_43",
+      "id": "openghg_util_download_rationale_23",
       "label": "Download data file, with progress bar. Based on…",
       "source_file": "openghg/util/_download.py",
-      "source_location": "L43"
+      "source_location": "L23"
     },
     {
       "_origin": "ast",
@@ -139435,18 +139423,18 @@
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_util_init_rationale_286",
+      "id": "openghg_util_init_rationale_284",
       "label": "Lazily import utility helpers on first access.",
       "source_file": "openghg/util/__init__.py",
-      "source_location": "L286"
+      "source_location": "L284"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "openghg_util_init_rationale_298",
+      "id": "openghg_util_init_rationale_296",
       "label": "Return the lazy public API for interactive introspection.",
       "source_file": "openghg/util/__init__.py",
-      "source_location": "L298"
+      "source_location": "L296"
     },
     {
       "_origin": "ast",
@@ -144475,18 +144463,18 @@
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_store_test_flux_rationale_121",
+      "id": "tests_store_test_flux_rationale_122",
       "label": "# TODO: Add test for adding additional years data - 2013 gpp cardomom",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L121"
+      "source_location": "L122"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_store_test_flux_rationale_155",
+      "id": "tests_store_test_flux_rationale_156",
       "label": "Test multiple files can be added using additional keywords ('database' and…",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L155"
+      "source_location": "L156"
     },
     {
       "_origin": "ast",
@@ -144499,10 +144487,10 @@
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_store_test_flux_rationale_201",
+      "id": "tests_store_test_flux_rationale_202",
       "label": "Test datasources can be correctly aligned for additional keywords. ('database'…",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L201"
+      "source_location": "L202"
     },
     {
       "_origin": "ast",
@@ -144515,74 +144503,74 @@
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_store_test_flux_rationale_249",
+      "id": "tests_store_test_flux_rationale_250",
       "label": "Test helpful error message is raised if read_file is unable to disambiguiate…",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L249"
+      "source_location": "L250"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_store_test_flux_rationale_270",
+      "id": "tests_store_test_flux_rationale_271",
       "label": "Test edgar can be added to object store (default domain)",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L270"
+      "source_location": "L271"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_store_test_flux_rationale_324",
+      "id": "tests_store_test_flux_rationale_325",
       "label": "Test edgar v8.0 can be added to object store (default domain)",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L324"
+      "source_location": "L325"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_store_test_flux_rationale_377",
+      "id": "tests_store_test_flux_rationale_378",
       "label": "Reproduce issue #1649 without allowing Datasource metadata to shadow source.",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L377"
+      "source_location": "L378"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_store_test_flux_rationale_428",
+      "id": "tests_store_test_flux_rationale_429",
       "label": "Test to check if incorrect data variable is present in processing file then it…",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L428"
+      "source_location": "L429"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_store_test_flux_rationale_445",
+      "id": "tests_store_test_flux_rationale_446",
       "label": "Test EDGAR database can be transformed (regridded) and added to the object…",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L445"
+      "source_location": "L446"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_store_test_flux_rationale_482",
+      "id": "tests_store_test_flux_rationale_483",
       "label": "# TODO: Add tests for data as well?",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L482"
+      "source_location": "L483"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_store_test_flux_rationale_506",
+      "id": "tests_store_test_flux_rationale_507",
       "label": "Check expected data variables are being included for default Flux schema",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L506"
+      "source_location": "L507"
     },
     {
       "_origin": "ast",
       "file_type": "rationale",
-      "id": "tests_store_test_flux_rationale_516",
+      "id": "tests_store_test_flux_rationale_517",
       "label": "# TODO: Could also add checks for dims and dtypes?",
       "source_file": "tests/store/test_flux.py",
-      "source_location": "L516"
+      "source_location": "L517"
     },
     {
       "_origin": "ast",
