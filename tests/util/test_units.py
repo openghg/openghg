@@ -93,7 +93,6 @@ def test_parse_unit_name_mass_uses_gram(unit):
     assert parsed[0][1] == "gram"
 
 
-<<<<<<< HEAD
 @pytest.mark.parametrize("unit", ["kg", "Mg", "mg"])
 def test_parse_unit_name_mass_uses_gram(unit):
     """Mass abbreviations should resolve to gram, not gauss."""
@@ -103,8 +102,6 @@ def test_parse_unit_name_mass_uses_gram(unit):
     assert parsed[0][1] == "gram"
 
 
-=======
->>>>>>> 950bc702d (fixing test_units.py to align with edits to units.py)
 @pytest.mark.parametrize("unit", ["hour", "hours", "Hour", "Hours", "HOUR", "HOURS"])
 def test_hour_aliases(unit):
     """Hour unit aliases should accept common case variants."""
