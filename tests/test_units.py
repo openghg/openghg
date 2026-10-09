@@ -126,7 +126,7 @@ def test_degrees_north_aliases(unit, expected):
 @pytest.mark.parametrize(
     "unit, expected",
     [
-        
+
         ("degrees_east", "degree"),
         ("Degrees_east", "degree"),
         ("Degrees_East", "degree"),

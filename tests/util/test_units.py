@@ -3,7 +3,6 @@ import xarray as xr
 
 import openghg
 
-
 def test_pint_anywhere():
     """Check that importing openghg activates custom pint units."""
     # make a data array with 1e-9 as units
@@ -22,6 +21,7 @@ def test_pint_anywhere():
 # NOTE: doing import here because previous test needs to check that just importing openghg
 # is sufficient to activate our unit registry (although maybe the test fixtures/conftest will
 # have already caused this to happen...)
+# RESPONSE: I'm not sure I understand the above note isnt't the import openghg redudant?
 from openghg.util import cf_ureg
 
 

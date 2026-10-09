@@ -312,9 +312,9 @@ def parse_icos_obspack_nc_file(data_info: dict | pd.Series) -> tuple[xr.Dataset,
 
     dataset["time"] = dataset["time"] - Timedelta(minutes=30)
 
-    dataset[f"{species} repeatability"].attrs[
-        "comment"
-    ] = "ICOS LTR as defined by Yver Kwok et al., 2015, doi:10.5194/amt-8-3867-2015"
+    dataset[f"{species} repeatability"].attrs["comment"] = (
+        "ICOS LTR as defined by Yver Kwok et al., 2015, doi:10.5194/amt-8-3867-2015"
+    )
 
     # Recast "flag" column to decode bytes and update to same dtype as other data
     dataset["flag"].data = decode(dataset["flag"].astype("bytes_"), "utf-8").astype(object)
@@ -413,7 +413,7 @@ def attributes_requiring_retrieval(
     # Currently searching for PI details and combining into one string separated by ";"
     # Could just pick first entry instead?
     pi_details = _data_parsing.retrieve_station_staff(station_meta=station_meta, role="PI")
-    data_owners = [f'{PI["firstName"]} {PI["lastName"]}' for _, PI in pi_details.iterrows()]
+    data_owners = [f"{PI['firstName']} {PI['lastName']}" for _, PI in pi_details.iterrows()]
     data_owner_emails = [PI["email"] for _, PI in pi_details.iterrows()]
 
     data_owners_dict = {}
