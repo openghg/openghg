@@ -333,6 +333,9 @@ def uncorrelated_errors_resample(
 def variability_resample(ds: xr.Dataset, averaging_period: str, fill_zero: bool = False) -> xr.Dataset:
     """Compute variability as stdev of observed mole fraction over averaging periods.
 
+    Promote samples to float64 before resampling so grouped reductions retain
+    small variability without float32 cancellation.
+
     Args:
         ds: xr.Dataset to resample
         averaging_period: period to resample to; should be a valid pandas "offset alias"
@@ -342,7 +345,7 @@ def variability_resample(ds: xr.Dataset, averaging_period: str, fill_zero: bool 
     Returns:
         xr.Dataset with all data variables resampled to standard deviation over averaging period
     """
-    result = ds.resample(time=averaging_period).std(keep_attrs=True, dtype=np.float64)
+    result = ds.astype(np.float64).resample(time=averaging_period).std(keep_attrs=True)
 
     result = rename(result, lambda x: x + "_variability")
 

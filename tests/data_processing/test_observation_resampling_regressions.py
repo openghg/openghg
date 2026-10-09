@@ -244,3 +244,18 @@ def test_direct_surface_storage_repairs_only_finite_zero_counts(monkeypatch, wit
     store.store_data([MetadataAndData(metadata={"species": "co2", "site": "tac"}, data=ds)])
     assert len(submitted) == 1
     xr.testing.assert_identical(submitted[0].data, expected)
+
+
+@pytest.mark.parametrize("resample", RESAMPLERS, ids=["surface", "column"])
+@pytest.mark.parametrize("concentration", [333.05, 333.01])
+def test_chunked_constant_float32_fallback_has_zero_variability(resample, concentration):
+    """Constant float32 records spanning Dask chunks retain their mean and zero spread."""
+    ds = _observations()
+    ds["co2"] = xr.full_like(ds.co2, concentration, dtype=np.float32)
+    ds = ds.chunk({"time": 1})
+    with xr.set_options(use_flox=True):
+        result = resample(ds, "2h", "co2").compute()
+    assert result.sizes["time"] == 1
+    np.testing.assert_array_equal(result.co2, [np.float32(concentration)])
+    np.testing.assert_array_equal(result.co2_variability, [0.0])
+    assert result.co2.attrs == ds.co2.attrs
