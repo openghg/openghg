@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Refreshed boundary-condition processing timestamps consistently in metadata and dataset attributes so previously processed inputs pass strict alignment. Conflicting source coverage still raises an error; specify an explicit period for ambiguous single-timestamp inputs. [Issue #1779](https://github.com/openghg/openghg/issues/1779)
 - Preserved mole-fraction and variability metadata when resampling surface observations weighted by observation count. [Issue #1765](https://github.com/openghg/openghg/issues/1765)
 - Added column `max_level` consistency validation to `ModelScenario` and preserved `max_level` metadata when standardising ACRG and PARIS column footprints, preventing observations and footprints with different vertical extents from being combined. [PR #1718](https://github.com/openghg/openghg/pull/1718)
 - Ensured explicitly integrated CO2 site and satellite footprints are standardised and modelled through the integrated-footprint pathway, while preserving the time-resolved default for CO2 footprints. [PR #1698](https://github.com/openghg/openghg/pull/1698)
