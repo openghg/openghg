@@ -1,3 +1,10 @@
+"""Parse AGAGE observations into inlet-specific surface datasets and metadata.
+
+Rows with missing mole fractions are excluded before dataset formatting. Finite
+observations retain missing uncertainty components for downstream handling, and
+inlets without remaining observations are skipped.
+"""
+
 import pandas as pd
 import re
 import xarray as xr
@@ -167,7 +174,9 @@ def _format_species(
     file_params: dict,
 ) -> dict:
     """Formats the dataframes and splits up by species_inlet combination to be stored within individual Datasources.
-    Note that because .nc files contain only a single species, this function is no longer called _split_species
+    Note that because .nc files contain only a single species, this function is no longer called _split_species.
+    Rows with missing mole fractions are removed while missing uncertainty values
+    are retained. Inlets with no remaining observations are omitted.
 
     Args:
         data: DataFrame of raw data
@@ -177,7 +186,11 @@ def _format_species(
         scale: calibration scale used
         file_params: dictionary of metadata/attributes
     Returns:
-        dict: Dictionary of gas data and metadata, paired by species_inlet combination (so for a single inlet this is just a single entry)
+        dict: Dictionary of gas data and metadata, paired by species_inlet combination (so for a single inlet this is just a single entry).
+
+    Raises:
+        KeyError: If the input has no inlet-height column.
+        ValueError: If all mole fractions for the species are missing.
     """
 
     # data_inlets is a list of unique inlets for this species
@@ -213,8 +226,7 @@ def _format_species(
             species_data = inlet_data[["mf", "mf_repeatability", "mf_variability"]]
         else:
             species_data = inlet_data[["mf", "mf_repeatability"]]
-        # JP 2026-05-20 - remove this dropna to deal with occasional nans in mf_repeatability
-        # species_data = species_data.dropna(axis="index", how="any")
+        species_data = species_data.dropna(subset=["mf"])
 
         # Check that the Dataframe has something in it
         if species_data.empty:

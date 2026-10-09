@@ -333,6 +333,83 @@ class ObsSurface(BaseStore):
 
         return source_format
 
+    def assign_data(
+        self,
+        data: MutableSequence[MetadataAndData],
+        required_keys: Sequence[str] | None = None,
+        sort: bool = True,
+        drop_duplicates: bool = True,
+        min_keys: int | None = None,
+        extend_keys: list | None = None,
+        if_exists: str = "auto",
+        new_version: bool = True,
+        compressor: Any | None = None,
+        filters: Any | None = None,
+    ) -> list[dict]:
+        """Store surface observations, replacing zero counts for finite mole fractions.
+
+        The repair treats a finite supplied mole fraction as one observation when
+        its count is zero. Positive counts and counts accompanying missing mole
+        fractions are preserved. This applies to both parsed and directly stored
+        surface data and updates each supplied dataset before storage.
+
+        Args:
+            data: Surface datasets and their metadata to create or update.
+            required_keys: Metadata keys used to identify existing datasources.
+            sort: Whether to sort the data by time.
+            drop_duplicates: Whether to retain only the first duplicate timestamp.
+            min_keys: Minimum number of required metadata keys for a lookup.
+            extend_keys: Metadata fields whose existing lists should be extended.
+            if_exists: Overlap policy: "auto", "new", or "combine".
+            new_version: Whether to create a new stored version.
+            compressor: Optional compressor for stored arrays.
+            filters: Optional filters for stored arrays.
+
+        Returns:
+            Details of the datasources created or updated.
+
+        Raises:
+            DataOverlapError: If the overlap policy rejects existing observations.
+            ValueError: If datasource lookup metadata is incomplete.
+
+        Warns:
+            Logs species, site, and the number of counts replaced when repairing
+            zero observation counts.
+        """
+        from openghg.standardise.meta import define_species_label
+
+        for item in data:
+            species = item.metadata.get("species", "")
+            name = define_species_label(species)[0]
+            count_name = f"{name}_number_of_observations"
+            if name not in item.data or count_name not in item.data:
+                continue
+            counts = item.data[count_name]
+            zero_counts = (counts == 0) & np.isfinite(item.data[name])
+            repaired = int(zero_counts.sum().compute().item())
+            if repaired:
+                item.data[count_name] = counts.where(~zero_counts, 1)
+                logger.warning(
+                    "Replaced %d zero observation counts with 1 for species=%s, site=%s "
+                    "where mole fractions are finite.",
+                    repaired,
+                    species,
+                    item.metadata.get("site", "unknown"),
+                )
+
+        return super().assign_data(
+            data=data,
+            required_keys=required_keys,
+            sort=sort,
+            drop_duplicates=drop_duplicates,
+            min_keys=min_keys,
+            extend_keys=extend_keys,
+            if_exists=if_exists,
+            new_version=new_version,
+            compressor=compressor,
+            filters=filters,
+        )
+
     def store_data(
         self,
         data: MutableSequence[MetadataAndData],

@@ -1,5 +1,6 @@
 import logging
 
+import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
@@ -12,7 +13,9 @@ mpl_logger.setLevel(logging.WARNING)
 
 @pytest.fixture(scope="session")
 def thd_data():
-    thd_path = get_surface_datapath(filename="agage-private_thd_cfc-11_20260113-test.nc", source_format="GC_nc")
+    thd_path = get_surface_datapath(
+        filename="agage-private_thd_cfc-11_20260113-test.nc", source_format="GC_nc"
+    )
 
     gas_data = parse_agage(
         filepath=thd_path,
@@ -50,7 +53,9 @@ def test_read_file_capegrim(cgo_data):
 
 
 def test_read_file_thd():
-    thd_path = get_surface_datapath(filename="agage-private_thd_cfc-11_20260113-test.nc", source_format="GC_nc")
+    thd_path = get_surface_datapath(
+        filename="agage-private_thd_cfc-11_20260113-test.nc", source_format="GC_nc"
+    )
 
     gas_data = parse_agage(
         filepath=thd_path,
@@ -82,7 +87,9 @@ def test_gc_thd_cf_compliance(thd_data):
 
 
 def test_read_invalid_instrument_raises():
-    thd_path = get_surface_datapath(filename="agage-private_thd_cfc-11_20260113-test.nc", source_format="GC_nc")
+    thd_path = get_surface_datapath(
+        filename="agage-private_thd_cfc-11_20260113-test.nc", source_format="GC_nc"
+    )
 
     with pytest.raises(ValueError):
         parse_agage(
@@ -125,7 +132,9 @@ def test_read_variabilities():
 
 
 def test_expected_metadata_thd_cfc11():
-    cfc11_path = get_surface_datapath(filename="agage-private_thd_cfc-11_20260113-test.nc", source_format="GC_nc")
+    cfc11_path = get_surface_datapath(
+        filename="agage-private_thd_cfc-11_20260113-test.nc", source_format="GC_nc"
+    )
 
     data = parse_agage(filepath=cfc11_path, site="THD", network="agage", instrument="gcmd")
 
@@ -155,3 +164,42 @@ def test_instrument_metadata(cgo_data):
     assert cgo_data["hcfc133a_70m"]["metadata"]["instrument_name_0"] == "agilent_5975"
     assert cgo_data["hcfc133a_70m"]["metadata"]["instrument"] == "multiple"
     assert cgo_data["hcfc133a_70m"]["metadata"]["instrument_name_1"] == "agilent_5973"
+
+
+@pytest.mark.parametrize("all_missing", [False, True], ids=["partial", "all-missing"])
+def test_missing_mole_fractions_drop_without_removing_missing_uncertainties(all_missing):
+    """Remove unavailable mole fractions while preserving finite rows with missing errors.
+
+    An inlet with no remaining mole fractions is skipped; an entirely missing
+    species retains the existing parser error rather than producing empty data.
+    """
+    dataset = xr.Dataset(
+        {
+            "mf": ("time", [np.nan, 1.0, 2.0, np.nan], {"units": "1e-12"}),
+            "mf_repeatability": ("time", [0.1, np.nan, 0.2, 0.1]),
+            "mf_variability": ("time", [0.3, 0.4, np.nan, 0.3]),
+            "inlet_height": ("time", [15.0, 15.0, 15.0, 25.0]),
+            "sampling_period": ("time", [1.0] * 4),
+        },
+        coords={"time": pd.date_range("2020-01-01", periods=4, freq="h")},
+        attrs={
+            "species": "cfc-11",
+            "instrument_type": "gcmd",
+            "instrument": "gcmd",
+            "calibration_scale": "SIO-05",
+        },
+    )
+    if all_missing:
+        dataset["mf"] = xr.full_like(dataset.mf, np.nan)
+        with pytest.raises(ValueError, match="All values for this species cfc11 is null"):
+            parse_agage(data=dataset, site="THD", network="agage")
+        return
+
+    result = parse_agage(data=dataset, site="THD", network="agage")
+
+    assert set(result) == {"cfc11_15m"}
+    observations = result["cfc11_15m"]["data"]
+    np.testing.assert_array_equal(observations.time, dataset.time.isel(time=[1, 2]))
+    np.testing.assert_array_equal(observations.cfc11, [1.0, 2.0])
+    np.testing.assert_allclose(observations.cfc11_repeatability, [np.nan, 0.2], equal_nan=True)
+    np.testing.assert_allclose(observations.cfc11_variability, [0.4, np.nan], equal_nan=True)

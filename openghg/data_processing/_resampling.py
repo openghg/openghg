@@ -136,21 +136,31 @@ def default_resample(ds: xr.Dataset, averaging_period: str) -> xr.Dataset:
 
 @register
 @add_averaging_attrs
-def weighted_resample(ds: xr.Dataset, averaging_period: str, species: str) -> xr.Dataset:
+def weighted_resample(
+    ds: xr.Dataset, averaging_period: str, species: str, add_variability: bool = False
+) -> xr.Dataset:
     """Resample concentration and variability, weighted by number of observations.
 
-    Successive applications of this method are consistent with a single equivalent application.
-    For instance, resampling to 1h then to 4h, will give the same result as resampling to 4h
-    in one step.
+    Successive applications to aligned bins are consistent with a single equivalent
+    application. Calculations use float64 centered population variance to retain
+    small supplied variability at large mole fractions. Only finite mole fractions
+    with positive finite counts contribute to any of the pooled summaries.
+
+    With ``add_variability=True``, absent variability falls back to the weighted
+    spread of input mole fractions. Missing supplied variability contributes no known
+    within-record variance; this does not reconstruct its unknown spread.
 
     Args:
         ds: xr.Dataset to resample
         averaging_period: period to resample to; should be a valid pandas "offset alias"
         species: species data applies to; a data variable with this name, as well as
             a data variable named {species}_number_of_observations must be present in `ds`.
+        add_variability: Add weighted population variability when the input lacks
+            a variability variable. Supplied variability is always resampled.
 
     Returns:
-        xr.Dataset with obs. (and variability) resampled, weighted by the number of obs.
+        Dataset with float64 weighted mole fractions and summed observation counts.
+        Population variability is included when supplied or ``add_variability=True``.
 
     Raises:
         ValueError: if obs. or number of obs. is not present in the dataset.
@@ -172,6 +182,7 @@ def weighted_resample(ds: xr.Dataset, averaging_period: str, species: str) -> xr
         averaging_period=averaging_period,
         species=species,
         mf_variability=mf_variability,
+        add_variability=add_variability,
     ).assign_attrs(ds.attrs)
 
     return result
@@ -183,11 +194,12 @@ def _weighted_resample(
     averaging_period: str,
     mf_variability: xr.DataArray | None = None,
     species: str = "mf",
+    add_variability: bool = False,
 ) -> xr.Dataset:
     """Resample concentration (and variability), weighting by number of observations.
 
-    Resampling to a frequency, say 4h, will give the same result, even if the data is first resampled
-    to an intermediate frequency.
+    Pooling supplied population summaries through aligned intermediate bins gives
+    the same result as pooling directly to the final averaging period.
 
     For example:
 
@@ -196,12 +208,13 @@ def _weighted_resample(
     >>> ds_4h_2 = _weighted_resample(mf, n_obs, "4h", mf_variability)
     >>> xr.testing.assert_all_close(ds_4h, ds_4h_2)
 
-    Note: to ensure this consistency, you must drop NaN values, or pass kwargs to `sum` to ensure that
-    a resampling period containing only NaNs is not resampled to 0.
-
-    For instance: `sum_kwargs = {"skipna": True, "min_count": 1}`
-
-    See https://github.com/pydata/xarray/issues/4291 for more discussion.
+    Finite mole fractions and positive finite counts share a common validity mask.
+    Empty bins remain missing. Float64 centered arithmetic preserves small
+    within-record variability, and the labelled operations remain lazy for Dask
+    inputs. Missing variability contributes no known within-record variance, so
+    wholly missing variability falls back to weighted between-record spread.
+    Absent variability is added only when requested. These fallbacks do not estimate
+    unknown within-record uncertainty.
 
     Args:
         mf: observations to resample by taking weighted mean
@@ -209,33 +222,45 @@ def _weighted_resample(
         averaging_period: period to resample to; should be a valid pandas "offset alias"
         mf_variability: optional "variability" to resample
         species: species the obs. apply to; this is used to name the output variables.
+        add_variability: Add weighted population variability when none is supplied.
 
     Returns:
-        xr.Dataset: with obs., number of obs., (and variability) resampled
+        Dataset with float64 weighted means and counts, plus population variability
+        when supplied or requested.
     """
-    sum_kwargs: dict[str, Any] = {"skipna": True, "min_count": 1, "keep_attrs": True}
-
     with xr.set_options(keep_attrs=True):
-        n_obs_resample_sum = n_obs.resample(time=averaging_period).sum(**sum_kwargs)
+        valid = np.isfinite(mf) & np.isfinite(n_obs) & (n_obs > 0)
+        mf_valid = mf.astype(np.float64).where(valid)
+        counts = n_obs.astype(np.float64).where(valid)
+        total = counts.resample(time=averaging_period).sum(skipna=True, min_count=1)
+        mean = (mf_valid * counts).resample(time=averaging_period).sum(skipna=True, min_count=1) / total
+        mean.attrs = mf.attrs.copy()
+        total.attrs = n_obs.attrs.copy()
+        data_vars = {species: mean, f"{species}_number_of_observations": total}
 
-        weighted_resample_mf = (mf * n_obs).resample(time=averaging_period).sum(
-            **sum_kwargs
-        ) / n_obs_resample_sum
-        weighted_resample_mf.attrs = mf.attrs.copy()
-
-        data_vars = {species: weighted_resample_mf, f"{species}_number_of_observations": n_obs_resample_sum}
-
-        if mf_variability is not None:
-            sums_of_squares = n_obs * (mf_variability**2 + mf**2)
-
-            weighted_resample_mf_variability_squared = (
-                sums_of_squares.resample(time=averaging_period).sum(**sum_kwargs) / n_obs_resample_sum
-                - weighted_resample_mf**2
-            )
-            weighted_resample_mf_variability = xr_sqrt(weighted_resample_mf_variability_squared)
-            weighted_resample_mf_variability.attrs = mf_variability.attrs.copy()
-
-            data_vars[f"{species}_variability"] = weighted_resample_mf_variability
+        if mf_variability is not None or add_variability:
+            # Expand bin means using the resampler's labels, including calendar bins.
+            # Only timestamp metadata is materialised; observations remain lazy.
+            labels = np.empty(mf_valid.sizes["time"], dtype=mean.time.dtype)
+            for label, indices in mf_valid.resample(time=averaging_period).groups.items():
+                labels[indices] = label
+            bin_mean = mean.sel(time=labels).assign_coords(time=mf_valid.time)
+            variance = (counts * (mf_valid - bin_mean) ** 2).resample(time=averaging_period).sum(
+                skipna=True, min_count=1
+            ) / total
+            if mf_variability is not None:
+                within_variance = (counts * mf_variability.astype(np.float64).where(valid) ** 2).resample(
+                    time=averaging_period
+                ).sum(skipna=True) / total
+                variance = variance + within_variance
+            variability = xr_sqrt(variance)
+            if mf_variability is not None:
+                variability.attrs = mf_variability.attrs.copy()
+            else:
+                variability.attrs = mf.attrs.copy()
+                if "long_name" in mf.attrs:
+                    variability.attrs["long_name"] += "_variability"
+            data_vars[f"{species}_variability"] = variability
 
     return xr.Dataset(data_vars=data_vars)
 
@@ -308,6 +333,9 @@ def uncorrelated_errors_resample(
 def variability_resample(ds: xr.Dataset, averaging_period: str, fill_zero: bool = False) -> xr.Dataset:
     """Compute variability as stdev of observed mole fraction over averaging periods.
 
+    Promote samples to float64 before resampling so grouped reductions retain
+    small variability without float32 cancellation.
+
     Args:
         ds: xr.Dataset to resample
         averaging_period: period to resample to; should be a valid pandas "offset alias"
@@ -317,7 +345,7 @@ def variability_resample(ds: xr.Dataset, averaging_period: str, fill_zero: bool 
     Returns:
         xr.Dataset with all data variables resampled to standard deviation over averaging period
     """
-    result = ds.resample(time=averaging_period).std(keep_attrs=True)
+    result = ds.astype(np.float64).resample(time=averaging_period).std(keep_attrs=True)
 
     result = rename(result, lambda x: x + "_variability")
 
@@ -555,7 +583,9 @@ def surface_obs_resampler(
 
     If "repeatability" is present, it is resampled using the "uncorrelated_errors" method.
 
-    If "variability" is not present, it is added by taking the standard deviation of the obs.
+    Missing or absent "variability" contributes no within-record spread. The
+    between-record population spread is still reported, using observation counts
+    when present. This does not recover unknown within-record uncertainty.
 
     Any remaining variables are mean resampled.
 
@@ -571,6 +601,7 @@ def surface_obs_resampler(
         xr.Dataset resampled according to default specification.
     """
     resampler_dict = _obs_resampler_dict(ds, species)
+    kwargs.setdefault("weighted__add_variability", True)
 
     if drop_na:
         check_any = [str(dv) for dv in ds.data_vars if str(dv) in [species, "inlet"]]
@@ -597,7 +628,9 @@ def column_obs_resampler(ds: xr.Dataset, averaging_period: str, species: str, **
 
     If "repeatability" is present, it is resampled using the "uncorrelated_errors" method.
 
-    If "variability" is not present, it is added by taking the standard deviation of the obs.
+    Missing or absent "variability" contributes no within-record spread. The
+    between-record population spread is still reported, using observation counts
+    when present. This does not recover unknown within-record uncertainty.
 
     Any remaining variables are mean resampled.
 
@@ -613,6 +646,7 @@ def column_obs_resampler(ds: xr.Dataset, averaging_period: str, species: str, **
         xr.Dataset resampled according to default specification.
     """
     resampler_dict = _obs_resampler_dict(ds, species)
+    kwargs.setdefault("weighted__add_variability", True)
 
     result = resampler(
         ds,
