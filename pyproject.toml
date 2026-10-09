@@ -29,6 +29,7 @@ dependencies = [
     "dask<2026.9",
     "filelock<=3.32.6",
     "flox<=0.10.4",
+    "gh>=0.0.4",
     "h5netcdf>=1.0.0, <=1.8.1",
     "h5py<3.17",
     "icoscp<=0.2.3",
