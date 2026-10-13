@@ -157,7 +157,7 @@ T1 = TypeVar("T1", xr.DataArray, xr.Dataset)
 T2 = TypeVar("T2", xr.DataArray, xr.Dataset)
 
 
-def reindex_time_with_climatology(source: T1, target: T2) -> T1:
+def reindex_time_to_target(source: T1, target: T2) -> T1:
     """Forward-fill time data, using a single reference year as a climatology.
 
     A source whose timestamps do not overlap the target may represent monthly
