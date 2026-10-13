@@ -9,12 +9,16 @@ from openghg.analyse._alignment import reindex_time_to_target, time_of_day_offse
 from openghg.analyse._utils import reindex_on_dims
 
 
-def fp_x_flux_integrated(footprint: xr.Dataset, flux: xr.Dataset) -> xr.DataArray:
+def fp_x_flux_integrated(
+    footprint: xr.Dataset, flux: xr.Dataset, allow_climatology: bool = True
+) -> xr.DataArray:
     """Calculate footprint times flux.
 
     Args:
         footprint: footprint data; should have `fp` data variable.
         flux: flux data; should have `flux` data variable.
+        allow_climatology: when aligning flux data to footprint data, if one year is present and outside the target
+            date range of the footprint data, allow the flux data to be treated as a climatology and reindexed based on this.
 
     Returns:
         DataArray containing footprint times flux.
@@ -23,7 +27,7 @@ def fp_x_flux_integrated(footprint: xr.Dataset, flux: xr.Dataset) -> xr.DataArra
     flux = reindex_on_dims(flux, footprint, ["lat", "lon"])
     # align separately on time
     # TODO: if method="nearest" was acceptable, then we could align all coordinates at once with reindex_like
-    flux = reindex_time_to_target(flux, footprint)
+    flux = reindex_time_to_target(flux, footprint, allow_climatology=allow_climatology)
 
     # align chunks for time after filling
     fp_time_chunks = footprint.fp.chunksizes.get("time")

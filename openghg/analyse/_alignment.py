@@ -157,13 +157,22 @@ T1 = TypeVar("T1", xr.DataArray, xr.Dataset)
 T2 = TypeVar("T2", xr.DataArray, xr.Dataset)
 
 
-def reindex_time_to_target(source: T1, target: T2) -> T1:
-    """Forward-fill time data, using a single reference year as a climatology.
+def reindex_time_to_target(source: T1, target: T2, allow_climatology: bool = True) -> T1:
+    """Reindex data using time coordinate in an appropriate way from the source to the target data.
 
-    A source whose timestamps do not overlap the target may represent monthly
-    climatological data. In that case, map each target timestamp to the latest
+    A source whose timestamps do not overlap the target may represent climatological data (often monthly).
+    If allow_climatology is True, map each target timestamp to the latest
     source year before forward-filling. Multi-year sources remain timestamped
     data and are left unmodified when they do not overlap.
+
+    Args:
+        source: data to be reindexed
+        target: data to use for reindexing
+        allow_climatology: whether to treat yearly target data outside the date range of the source
+            data as a climatology and reindex based on this.
+
+    Returns:
+        xr.DataArray | xr.Dataset: Reindexed source data
     """
     source_times = pd.DatetimeIndex(source.time.values)
     target_times = pd.DatetimeIndex(target.time.values)
@@ -171,20 +180,23 @@ def reindex_time_to_target(source: T1, target: T2) -> T1:
     if source_times.min() <= target_times.max() and target_times.min() <= source_times.max():
         return source.reindex(time=target.time, method="ffill")
 
-    if source_times.year.nunique() != 1:
-        return source.reindex(time=target.time, method="ffill")
+    if allow_climatology:
+        if source_times.year.nunique() != 1:
+            return source.reindex(time=target.time, method="ffill")
 
-    reference_year = source_times.year.max()
-    reference_times = pd.DatetimeIndex(
-        [
-            timestamp.replace(
-                year=reference_year,
-                day=min(timestamp.day, monthrange(reference_year, timestamp.month)[1]),
-            )
-            for timestamp in target_times
-        ]
-    )
-    return source.reindex(time=reference_times, method="ffill").assign_coords(time=target.time)
+        reference_year = source_times.year.max()
+        reference_times = pd.DatetimeIndex(
+            [
+                timestamp.replace(
+                    year=reference_year,
+                    day=min(timestamp.day, monthrange(reference_year, timestamp.month)[1]),
+                )
+                for timestamp in target_times
+            ]
+        )
+        return source.reindex(time=reference_times, method="ffill").assign_coords(time=target.time)
+    else:
+        return source.reindex(time=target.time, method="ffill")
 
 
 def resample_obs_and_other(
