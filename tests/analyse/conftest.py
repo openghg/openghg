@@ -18,7 +18,12 @@ Synthetic tests should not request any of these fixtures. The bundles are
 session-scoped and intended for read-only consumers, so tests that clear or
 mutate an object store must use isolated store configuration rather than
 invalidating them.
+
+The ``tac_co2_store_factory`` and ``satellite_name_store_factory`` fixtures reuse
+these file bundles in explicitly named isolated stores.
 """
+
+from collections.abc import Callable
 
 import pytest
 from helpers import (
@@ -113,7 +118,17 @@ def tac_co2_store(default_test_store: str) -> str:
     Returns:
         The populated store name.
     """
-    store = default_test_store
+    return _populate_tac_co2_store(default_test_store)
+
+
+@pytest.fixture(scope="session")
+def tac_co2_store_factory() -> Callable[[str], str]:
+    """Reuse the TAC file bundle when a test needs its own isolated store."""
+    return _populate_tac_co2_store
+
+
+def _populate_tac_co2_store(store: str) -> str:
+    """Populate a named store with the existing TAC CO2 files."""
     standardise_surface(
         store=store,
         filepath=get_surface_datapath(filename="tac.picarro.1minute.100m.201407.dat", source_format="CRDS"),
@@ -247,7 +262,17 @@ def satellite_name_store(default_test_store: str) -> str:
     Returns:
         The populated store name.
     """
-    store = default_test_store
+    return _populate_satellite_name_store(default_test_store)
+
+
+@pytest.fixture(scope="session")
+def satellite_name_store_factory() -> Callable[[str], str]:
+    """Reuse the GOSAT/NAME file bundle in an isolated named store."""
+    return _populate_satellite_name_store
+
+
+def _populate_satellite_name_store(store: str) -> str:
+    """Populate a named store with the existing GOSAT/NAME files."""
     standardise_column(
         store=store,
         filepath=get_column_datapath("gosat-fts_gosat_20160101_ch4-column.nc"),

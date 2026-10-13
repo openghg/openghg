@@ -5,6 +5,9 @@ of retrieved sensitivities makes it possible to distinguish an explicit input
 from the cached input without changing the stored data.
 """
 
+from copy import deepcopy
+from unittest.mock import patch
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -19,9 +22,57 @@ from openghg.standardise import standardise_footprint
 from openghg.standardise.footprints import parse_acrg_org, parse_paris
 
 
+_STORES = {
+    "co2": "shared-footprint-co2",
+    "integrated": "shared-footprint-integrated",
+    "satellite": "shared-footprint-satellite",
+}
+
+
+@pytest.fixture(scope="session")
+def shared_footprint_store_config(
+    tmp_path_factory, mock_configuration_paths, tac_co2_store_factory, satellite_name_store_factory
+):
+    """Populate dedicated stores that other tests cannot clear or re-standardise.
+
+    Reuse the existing file bundles, but keep their paths separate from the
+    user/group stores reset by direct-input tests. Do not modify session config.
+    """
+    config = deepcopy(mock_configuration_paths)
+    root = tmp_path_factory.mktemp("shared-footprint-stores")
+    for store in _STORES.values():
+        config["object_store"][store] = {"path": str(root / store), "permissions": "rw"}
+
+    with patch("openghg.objectstore._local_store.read_local_config", return_value=config):
+        tac_co2_store_factory(_STORES["co2"])
+        satellite_name_store_factory(_STORES["satellite"])
+        standardise_footprint(
+            filepath=get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc"),
+            site="tac",
+            model="NAME",
+            network="DECC",
+            met_model="UKV",
+            height="100m",
+            domain="TEST",
+            species="co2",
+            time_resolved=False,
+            store=_STORES["integrated"],
+        )
+    return config
+
+
 @pytest.fixture
-def stored_co2_scenario(tac_co2_store):
-    """Retrieve TAC observations, hourly footprints and two CO2 flux sources."""
+def shared_footprint_stores(shared_footprint_store_config, mocker):
+    """Expose dedicated stores only while a shared-footprint test is running."""
+    mocker.patch(
+        "openghg.objectstore._local_store.read_local_config", return_value=shared_footprint_store_config
+    )
+    return _STORES
+
+
+@pytest.fixture
+def stored_co2_scenario(shared_footprint_stores):
+    """Retrieve TAC observations, hourly footprints and both real CO2 flux sources."""
     model = ModelScenario(
         site="tac",
         species="co2",
@@ -32,8 +83,10 @@ def stored_co2_scenario(tac_co2_store):
         start_date="2014-07-01",
         end_date="2014-07-04",
         time_resolved=True,
-        store=tac_co2_store,
+        store=shared_footprint_stores["co2"],
     )
+    # A missing source would turn mixed-sector coverage into a vacuous test.
+    assert set(model.fluxes) == {"natural-rtot", "ocean"}
     # These files are already reduced test datasets. Load each retrieved object
     # once so repeated equality checks do not rebuild large lazy task graphs.
     model.obs.data.load()
@@ -43,31 +96,8 @@ def stored_co2_scenario(tac_co2_store):
     return model
 
 
-@pytest.fixture(scope="session")
-def integrated_co2_store(tac_co2_store):
-    """Ingest the existing TAC file in integrated mode into the separate group store.
-
-    Do not add an alternative representation to the user store: existing tests
-    intentionally retrieve CO2 without a time_resolved filter.
-    """
-    store = "group"
-    standardise_footprint(
-        filepath=get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc"),
-        site="tac",
-        model="NAME",
-        network="DECC",
-        met_model="UKV",
-        height="100m",
-        domain="TEST",
-        species="co2",
-        time_resolved=False,
-        store=store,
-    )
-    return store
-
-
 @pytest.fixture
-def stored_integrated_co2_scenario(stored_co2_scenario, integrated_co2_store):
+def stored_integrated_co2_scenario(stored_co2_scenario, shared_footprint_stores):
     """Use real TAC observations and CO2 fluxes with an integrated footprint search."""
     model = ModelScenario(
         obs=stored_co2_scenario.obs,
@@ -78,14 +108,14 @@ def stored_integrated_co2_scenario(stored_co2_scenario, integrated_co2_store):
         time_resolved=False,
         start_date="2014-07-01",
         end_date="2014-07-04",
-        store=integrated_co2_store,
+        store=shared_footprint_stores["integrated"],
     )
     model.footprint.data.load()
     return model
 
 
 @pytest.fixture
-def stored_satellite_scenario(satellite_name_store):
+def stored_satellite_scenario(shared_footprint_stores):
     """Retrieve the existing irregular GOSAT soundings and matching NAME data."""
     model = ModelScenario(
         obs_column=get_obs_column(
@@ -95,7 +125,7 @@ def stored_satellite_scenario(satellite_name_store):
             max_level=17,
             start_date="2016-01-01 14:59:12.500000+00:00",
             end_date="2016-01-01 18:10:16.500000+00:00",
-            store=satellite_name_store,
+            store=shared_footprint_stores["satellite"],
         ),
         footprint=get_footprint(
             satellite="gosat",
@@ -104,9 +134,11 @@ def stored_satellite_scenario(satellite_name_store):
             model="name",
             start_date="2016-01-01 14:59:12.500000+00:00",
             end_date="2016-01-01 19:10:16.500000+00:00",
-            store=satellite_name_store,
+            store=shared_footprint_stores["satellite"],
         ),
-        flux=get_flux(species="ch4", source="all", domain="southamerica", store=satellite_name_store),
+        flux=get_flux(
+            species="ch4", source="all", domain="southamerica", store=shared_footprint_stores["satellite"]
+        ),
         platform="satellite",
     )
     model.obs.data.load()
