@@ -1317,7 +1317,7 @@ class ModelScenario:
         if use_low_freq_flux:
             flux = make_integrated_low_freq_flux(flux)
 
-        flux_modelled = fp_x_flux_integrated(scenario, flux)
+        flux_modelled = fp_x_flux_integrated(scenario, flux, allow_climatology=allow_climatology)
         data = {}
 
         if output_TS:
