@@ -7,12 +7,14 @@ For carbon dioxide data, the natural diurnal cycle must be taken into
 account when comparing any expected measurements against our
 observations.
 
-In order to compare our measurements to modelled data for carbon dioxide,
-we need high frequency inputs for both the
-footprint and flux files. For NAME footprints these should contain an
-additional “H_back” dimension to store hourly footprints over an
-initial time period for each release time. For any natural flux data to
-compare against, this should have a frequency of less than 24 hours.
+Carbon dioxide calculations can use time-resolved sensitivities for fluxes
+whose sub-daily variability is important and integrated sensitivities for
+lower-frequency fluxes. For the time-resolved calculation, NAME footprints
+contain an additional ``H_back`` dimension storing hourly sensitivities over
+an initial period before each release time, and the corresponding flux data
+should have a frequency of less than 24 hours. A shared footprint dataset that
+contains both representations can use a different calculation for each flux
+source, as shown in section 4.
 
 
 .. note::
@@ -105,9 +107,9 @@ this to have an associated species and for this to be labelled as “co2”:
 3. Comparing data sources
 -------------------------
 
-Once the correct high frequency emissions and footprints have been
-linked for our carbon dioxide data, we can start to plot comparisons
-between the sources and our measurement data.
+Once suitable emissions and footprint sensitivities have been linked for our
+carbon dioxide data, we can start to plot comparisons between the sources and
+our measurement data.
 
 .. code:: ipython3
 
