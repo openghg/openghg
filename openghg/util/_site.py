@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
 from openghg.util._inlet import format_inlet
+from openghg.util._file import load_json
 
 __all__ = ["get_site_info", "sites_in_network", "_get_site_data"]
 
@@ -22,7 +22,7 @@ def get_site_info(site_filepath: str | Path | None = None) -> dict[str, Any]:
     from openghg_defs import site_info_file
 
     fpath = site_info_file if site_filepath is None else site_filepath
-    return cast(dict[str, Any], json.loads(Path(fpath).read_text()))
+    return load_json(fpath)
 
 
 def _get_site_data(site: str, network: str) -> tuple[float, float, float, list]:

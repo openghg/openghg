@@ -187,8 +187,9 @@ class BaseStore:
         Returns:
             list[dict]: List of datasources and their uuids
 
-        TODO: Consider how to apply update_mismatch (via align_metadata_attributes() methods)
-            for all data types, rather than just ObsSurface.
+        TODO: Add data_type-specific default attribute/metadata keys (via
+            attributes_default_keys() / metadata_keys_as_floats() in
+            openghg.standardise.meta._metadata) for data types other than surface.
         TODO: Apply check_chunks for all data types (currently just Footprint) but make sure
             this still works as expected.
         """
@@ -883,11 +884,29 @@ class BaseStore:
         return list_keys
 
     def align_metadata_attributes(self, data: list[MetadataAndData], update_mismatch: str) -> None:
-        """Default to returning None for cases where this method isn't
-        defined yet within the child data_type class.
         """
-        logger.warning("Align metadata attributes is not implemented for this data type")
-        return None
+        Check values within metadata and attributes are consistent and update (in place).
+        This is a wrapper for the openghg.standardise.meta.align_metadata_attributes() function.
+
+        Args:
+            data: sequence of MetadataAndData objects
+            update_mismatch: This determines how mismatches between the internal data
+                "attributes" and the supplied / derived "metadata" are handled.
+                This includes the options:
+                    - "never" - don't update mismatches and raise an AttrMismatchError
+                    - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
+                    - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
+        Returns:
+            None
+        """
+        from openghg.standardise.meta import align_metadata_attributes as _align_metadata_attributes
+        from openghg.store.spec import define_data_types
+
+        if self._data_type not in define_data_types():
+            logger.warning(f"Align metadata attributes is not implemented for data type '{self._data_type}'")
+            return None
+
+        _align_metadata_attributes(data, update_mismatch, data_type=self._data_type)
 
     def define_loop_params(self) -> dict:
         """Default to returning an empty dict if there are no loop parameters."""

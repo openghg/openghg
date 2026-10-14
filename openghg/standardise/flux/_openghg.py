@@ -2,7 +2,7 @@ from pathlib import Path
 import warnings
 import xarray as xr
 
-from openghg.util import timestamp_now, open_time_nc_fn, preprocess_nc_data
+from openghg.util import open_time_nc_fn, preprocess_nc_data, find_url
 from openghg.store import infer_date_range, update_zero_dim
 from openghg.standardise.meta import assign_flux_attributes
 
@@ -81,11 +81,30 @@ def parse_openghg(
         except AttributeError:
             attrs[key] = value
 
+    # 16/09/2026: Added to account for a bug in previously generated edgar flux data where the 'species' attribute created
+    # includes a 2-item list of [species_label, species_key] (from define_species_label) when this should just be species_label
+    # This should allow backwards compatability but shouldn't affect new data
+    species_attr = attrs.get("species")
+    if isinstance(species_attr, list) and len(species_attr) == 2:
+        em_data.attrs["species"] = species_attr[0]
+
+    # Some flux files may already contain a valid 'source' attribute which is a URL to the source of the original flux data
+    # To avoid conflict with our 'source' definition in the metadata this is renamed to 'source_url' in the attributes.
+    source_attr = attrs.get("source", "")
+    if find_url(source_attr):
+        em_data.attrs["source_url"] = source_attr
+        em_data.attrs.pop("source")
+
     author_name = "OpenGHG Cloud"
     em_data.attrs["author"] = author_name
 
     metadata = {}
     metadata.update(attrs)
+
+    # Patch for now to remove the "file_created" key which is currently present in the attributes.
+    # This value is updated in the attributes within assign_flux_attributes() and so causes a mismatch
+    # with the metadata otherwise.
+    metadata.pop("file_created", None)
 
     metadata["species"] = species
     metadata["domain"] = domain
@@ -97,7 +116,6 @@ def parse_openghg(
             metadata[key] = value
 
     metadata["author"] = author_name
-    metadata["processed"] = str(timestamp_now())
     metadata["source_format"] = "openghg"
 
     # As flux / emissions files handle things slightly differently we need to check the time values
