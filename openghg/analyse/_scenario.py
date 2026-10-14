@@ -43,9 +43,10 @@ If some input types needed for these operations are missing, the user will be al
 on which data types are missing.
 """
 
+import json
 import logging
 from typing import Any, Iterable, Union, cast
-from collections.abc import Hashable, Sequence
+from collections.abc import Hashable, Mapping, Sequence
 
 import pandas as pd
 import xarray as xr
@@ -300,6 +301,7 @@ class ModelScenario:
         self.modelled_obs: Dataset | None = None
         self.modelled_baseline: Dataset | None = None
         self.flux_stacked: Dataset | None = None
+        self._sector_modelled_obs_cache_key: tuple | None = None
 
         # TODO: Check species, site etc. values align between inputs?
 
@@ -1187,6 +1189,8 @@ class ModelScenario:
         split_by_sectors: bool = False,
         output_units: float | str | None = None,
         use_low_freq_flux: bool | None = None,
+        *,
+        time_resolved_by_sector: Mapping[str, bool] | None = None,
     ) -> Dataset:
         """Calculate the modelled observation points based on site footprint and fluxes.
 
@@ -1213,6 +1217,12 @@ class ModelScenario:
             use_low_freq_flux: For integrated footprints, use monthly-mean fluxes
               instead of the flux at the release time. Defaults to True for an
               integrated CO2 footprint and False otherwise.
+            time_resolved_by_sector: Optional flux-source name to boolean mapping.
+              True uses time-resolved sensitivities and False uses integrated ``fp``
+              from the single attached footprint dataset. Unspecified sources retain
+              the existing footprint-based default. None or an empty mapping retains
+              the existing calculation path. Configured calculations return ``mf_mod``
+              and, when requested, ``mf_mod_sectoral`` and ``fp_x_flux_sectoral``.
 
         Returns:
             xarray.Dataset: Modelled observation values along the time axis, optionally with "fp x flux".
@@ -1223,6 +1233,23 @@ class ModelScenario:
         """
         self._check_data_is_present(need=["footprint", "fluxes"])
 
+        sector_resolution = self._validate_sector_time_resolution(time_resolved_by_sector, sources)
+        if sector_resolution is not None:
+            return self._calc_modelled_obs_with_sector_resolution(
+                sector_resolution,
+                resample_to=resample_to,
+                platform=platform,
+                cache=cache,
+                recalculate=recalculate,
+                output_fp_x_flux=output_fp_x_flux,
+                split_by_sectors=split_by_sectors,
+                output_units=output_units,
+                use_low_freq_flux=use_low_freq_flux,
+            )
+
+        # Switching back from an explicitly configured calculation must not
+        # return its cached result as if it came from the legacy default path.
+        recalculate = recalculate or self._sector_modelled_obs_cache_key is not None
         param_calculate = self._param_setup(
             param="modelled_obs", resample_to=resample_to, platform=platform, recalculate=recalculate
         )
@@ -1294,7 +1321,173 @@ class ModelScenario:
             self.modelled_obs = None  # Make sure this is reset and not cached
             self.scenario = None  # Reset this to None after calculation completed
 
+        self._sector_modelled_obs_cache_key = None
         return modelled_obs
+
+    def _validate_sector_time_resolution(
+        self, selection: Mapping[str, bool] | None, sources: str | list | None
+    ) -> dict[str, bool] | None:
+        """Validated resolution choices for the requested flux sources, including defaults."""
+        if selection is None:
+            return None
+        if not isinstance(selection, Mapping):
+            raise TypeError("time_resolved_by_sector must be a mapping of flux-source names to booleans.")
+        fluxes = cast(dict[str, FluxData], self.fluxes)
+        for source, resolved in selection.items():
+            if not isinstance(source, str):
+                raise TypeError("time_resolved_by_sector keys must be flux-source names (strings).")
+            if source not in fluxes:
+                raise ValueError(f"Unknown flux source in time_resolved_by_sector: {source!r}.")
+            if not isinstance(resolved, bool):
+                raise TypeError(f"time_resolved_by_sector[{source!r}] must be True or False.")
+        if not selection:
+            return None
+
+        footprint = cast(FootprintData, self.footprint).data
+        default = self._footprint_is_time_resolved(footprint)
+        resolution = {source: selection.get(source, default) for source in self._clean_sources_input(sources)}
+        if any(resolution.values()):
+            if not default:
+                raise ValueError(
+                    "Time-resolved sectors require fp_HiTRes or fp_time_resolved in the shared footprint."
+                )
+            if "fp_HiTRes" not in footprint and "fp_residual" not in footprint:
+                raise ValueError("Time-resolved sectors using fp_time_resolved also require fp_residual.")
+            resolved_variable = "fp_HiTRes" if "fp_HiTRes" in footprint else "fp_time_resolved"
+            if "H_back" not in footprint.coords or "H_back" not in footprint[resolved_variable].dims:
+                raise ValueError(
+                    "Time-resolved sectors require an H_back coordinate on their sensitivity variable."
+                )
+        if not all(resolution.values()) and "fp" not in footprint:
+            raise ValueError("Integrated sectors require fp in the shared footprint.")
+        return resolution
+
+    def _calc_modelled_obs_with_sector_resolution(
+        self,
+        sector_resolution: Mapping[str, bool],
+        *,
+        resample_to: str | None,
+        platform: str | None,
+        cache: bool,
+        recalculate: bool,
+        output_fp_x_flux: bool,
+        split_by_sectors: bool,
+        output_units: str | float | None,
+        use_low_freq_flux: bool | None,
+        scenario: Dataset | None = None,
+    ) -> Dataset:
+        """Configured calculation state with optional aligned-footprint reuse."""
+        request_key = (
+            tuple(sector_resolution.items()),
+            resample_to,
+            platform,
+            output_fp_x_flux,
+            split_by_sectors,
+            output_units,
+            use_low_freq_flux,
+        )
+        if (
+            cache
+            and not recalculate
+            and self.modelled_obs is not None
+            and self._sector_modelled_obs_cache_key == request_key
+        ):
+            return self.modelled_obs
+
+        if scenario is None:
+            scenario = self._scenario_for_footprint(
+                cast(FootprintData, self.footprint), resample_to, platform
+            )
+        modelled_obs = self._calc_modelled_obs_by_sector(
+            scenario,
+            sector_resolution,
+            output_fp_x_flux=output_fp_x_flux,
+            split_by_sectors=split_by_sectors,
+            use_low_freq_flux=use_low_freq_flux,
+        )
+        modelled_obs.attrs["resample_to"] = str(resample_to)
+        modelled_obs.attrs["time_resolved_by_sector"] = json.dumps(sector_resolution, sort_keys=True)
+        modelled_obs = self.convert_units(modelled_obs, output_units=output_units)
+        if cache:
+            self.scenario = scenario
+            self.modelled_obs = modelled_obs
+            self._sector_modelled_obs_cache_key = request_key
+        else:
+            self.scenario = None
+            self.modelled_obs = None
+            self._sector_modelled_obs_cache_key = None
+        return modelled_obs
+
+    def _calc_modelled_obs_by_sector(
+        self,
+        scenario: Dataset,
+        sector_resolution: Mapping[str, bool],
+        *,
+        output_fp_x_flux: bool,
+        split_by_sectors: bool,
+        use_low_freq_flux: bool | None,
+    ) -> Dataset:
+        """Flux-sector contributions from one aligned footprint and existing kernels.
+
+        Each sector is calculated once and its contribution is included in the
+        total. Separate calculations avoid combining unlike flux time axes before
+        monthly averaging, so sectoral output does not alter the total.
+        """
+        total = None
+        sectoral = []
+        for source, resolved in sector_resolution.items():
+            sensitivity_names = (
+                ("fp_HiTRes",) if "fp_HiTRes" in scenario else ("fp_time_resolved", "fp_residual")
+            )
+            if not resolved:
+                sensitivity_names = ("fp",)
+            missing_units = [name for name in sensitivity_names if not scenario[name].attrs.get("units")]
+            if missing_units:
+                raise ValueError(
+                    f"Sector {source!r} requires declared sensitivity units for {missing_units}."
+                )
+
+            calculate = self._calc_modelled_obs_HiTRes if resolved else self._calc_modelled_obs_integrated
+            # Sensitivity units are retained through reductions in the existing
+            # kernel. The option applies only to this configured pathway.
+            with xr.set_options(keep_attrs=True):
+                contribution = calculate(
+                    sources=source,
+                    scenario=scenario,
+                    output_TS=False,
+                    output_fpXflux=True,
+                    use_low_freq_flux=use_low_freq_flux,
+                ).fp_x_flux.pint.quantify()
+            try:
+                contribution = contribution.pint.to("mol/mol")
+            except ValueError as exc:
+                raise ValueError(
+                    f"Sector {source!r} footprint-times-flux must have mole-fraction units."
+                ) from exc
+            data = {"mf_mod": contribution.sum(["lat", "lon"])}
+            if output_fp_x_flux:
+                data["fp_x_flux"] = contribution
+            sector = Dataset(data)
+            # Exact coordinate alignment prevents silent loss of times or grid
+            # points when source contributions have different indexes.
+            if total is None:
+                total = sector.fillna(0)
+            else:
+                total, sector = xr.align(total, sector, join="exact")
+                # Sectoral diagnostics retain their masks. Totals use additive
+                # zero, matching the existing skip-NaN spatial reductions.
+                total = total + sector.fillna(0)
+            if split_by_sectors:
+                sectoral.append(sector.expand_dims(source=[source]))
+
+        if total is None:
+            raise ValueError("At least one flux source is required for sector-level calculation.")
+        if split_by_sectors:
+            output_names = {"mf_mod": "mf_mod_sectoral"}
+            if output_fp_x_flux:
+                output_names["fp_x_flux"] = "fp_x_flux_sectoral"
+            total = total.merge(xr.concat(sectoral, dim="source", join="exact").rename(output_names))
+        return cast(Dataset, total.pint.dequantify())
 
     @staticmethod
     def _footprint_is_time_resolved(footprint: FootprintData | Dataset) -> bool:
@@ -1549,6 +1742,8 @@ class ModelScenario:
         recalculate: bool = False,
         output_units: str | float | None = None,
         use_low_freq_flux: bool | None = None,
+        *,
+        time_resolved_by_sector: Mapping[str, bool] | None = None,
     ) -> Dataset:
         """Produce combined object containing aligned footprint and observation data.
         Can also include modelled timeseries data derived from flux.
@@ -1572,27 +1767,56 @@ class ModelScenario:
             output_units: units to use for obs, or any data that should have the same units as obs (e.g. `mf_mod`).
             use_low_freq_flux: For integrated footprints, use monthly-mean fluxes instead
                 of the flux at release time. ``None`` enables this for CO2 only.
+            time_resolved_by_sector: Flux-source name to True (time-resolved) or
+                False (integrated) mapping, forwarded to ``calc_modelled_obs``.
+                All sources share the attached footprint dataset.
 
         Returns:
             xarray.Dataset: Combined dataset containing footprint and observation data
         """
+        sector_resolution = None
+        if (calc_timeseries or calc_fp_x_flux) and time_resolved_by_sector is not None:
+            self._check_data_is_present(need=["footprint", "fluxes"])
+            sector_resolution = self._validate_sector_time_resolution(time_resolved_by_sector, sources)
+        configured_path = sector_resolution is not None or self._sector_modelled_obs_cache_key is not None
         combined_dataset = self.combine_obs_footprint(
-            resample_to=resample_to, platform=platform, cache=cache, recalculate=recalculate
+            resample_to=resample_to,
+            platform=platform,
+            cache=cache,
+            recalculate=recalculate or configured_path,
         )
 
         if calc_timeseries or calc_fp_x_flux:
-            modelled_obs = self.calc_modelled_obs(
-                resample_to=resample_to,
-                sources=sources,
-                platform=platform,
-                cache=cache,
-                recalculate=recalculate,
-                output_fp_x_flux=calc_fp_x_flux,
-                split_by_sectors=split_by_sectors,
-                use_low_freq_flux=use_low_freq_flux,
-            )
+            if sector_resolution is not None:
+                modelled_obs = self._calc_modelled_obs_with_sector_resolution(
+                    sector_resolution,
+                    resample_to=resample_to,
+                    platform=platform,
+                    cache=cache,
+                    recalculate=recalculate,
+                    output_fp_x_flux=calc_fp_x_flux,
+                    split_by_sectors=split_by_sectors,
+                    output_units=output_units,
+                    use_low_freq_flux=use_low_freq_flux,
+                    scenario=combined_dataset,
+                )
+            else:
+                modelled_obs = self.calc_modelled_obs(
+                    resample_to=resample_to,
+                    sources=sources,
+                    platform=platform,
+                    cache=cache,
+                    recalculate=recalculate,
+                    output_fp_x_flux=calc_fp_x_flux,
+                    split_by_sectors=split_by_sectors,
+                    use_low_freq_flux=use_low_freq_flux,
+                )
 
             combined_dataset = combined_dataset.merge(modelled_obs)
+            if "time_resolved_by_sector" in modelled_obs.attrs:
+                combined_dataset.attrs["time_resolved_by_sector"] = modelled_obs.attrs[
+                    "time_resolved_by_sector"
+                ]
 
         if calc_bc:
             if self.bc is not None:
