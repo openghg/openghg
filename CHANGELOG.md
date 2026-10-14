@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added `time_resolved_by_sector` to `ModelScenario.calc_modelled_obs()` and `footprints_data_merge()`, allowing monthly CO2 flux sectors to use integrated sensitivities while other sectors use time-resolved sensitivities from the same footprint dataset. Configured calculations provide a consistent total and optional sectoral outputs. [PR #1783](https://github.com/openghg/openghg/pull/1783)
 - Added automatic post-merge Graphify regeneration and a focused navigation
   skill for cross-module impact analysis. [Issue #1695](https://github.com/openghg/openghg/issues/1695)
 - Added a lazy `fp_x_flux_time_resolved_numba` analysis operator that preserves source and spatial dimensions, supports single-source and regular coarse-frequency flux, and includes optional atomic ppm Zarr persistence and worker warm-up helpers.
