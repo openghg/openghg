@@ -144,8 +144,7 @@ def assemble_edgar_metadata(
                     )
                 else:
                     raise ValueError(
-                        f"Unable to infer EDGAR version."
-                        f" Please pass as an argument (one of {known_versions})"
+                        f"Unable to infer EDGAR version. Please pass as an argument (one of {known_versions})"
                     )
             else:
                 metadata["version"] = clean_string(metadata_version)
@@ -503,9 +502,9 @@ def parse_edgar(
         start_year, end_year = all_years[0], all_years[-1]
 
         if year < start_year:
-            raise ValueError(f"Files span range: {start_year}-{end_year}." f" {year} is before this period.")
+            raise ValueError(f"Files span range: {start_year}-{end_year}. {year} is before this period.")
         elif year > end_year:
-            logger.info(f"Using last available year from range:" f"{start_year}-{end_year}.")
+            logger.info(f"Using last available year from range:{start_year}-{end_year}.")
         edgar_file, edgar_file_info = files_by_year[end_year]
 
     species_label = edgar_file_info["species"]
@@ -659,9 +658,7 @@ def _check_lat_lon(
 
     if lat_out is not None or lon_out is not None:
         if domain is None:
-            raise ValueError(
-                "Please specify new 'domain' name if selecting new" " latitude, longitude values"
-            )
+            raise ValueError("Please specify new 'domain' name if selecting new latitude, longitude values")
 
     if isinstance(lat_out, xr.DataArray):
         lat_out = cast(ndarray, lat_out.values)
@@ -678,7 +675,7 @@ def _check_lat_lon(
             # If domain cannot be found and lat, lon values have not been
             # defined raise an error.
             if lat_out is None or lon_out is None:
-                raise ValueError("To create new domain please input" " 'lat_out' and 'lon_out' values.")
+                raise ValueError("To create new domain please input 'lat_out' and 'lon_out' values.")
         else:
             # Check domain latitude and longitude values against any
             # lat_out and lon_out values specified to check they match.

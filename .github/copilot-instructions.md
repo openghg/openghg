@@ -8,7 +8,6 @@ safe, and consistent with the surrounding module patterns.
 
 - Use `graphify-out/` for a quick map of the repository before broad searches:
   - `graphify-out/graph.json` Maps how modules, components, and files import one another. Data flow and impact analysis.
-  - `graphify-out/manifest.json` Defines the project name, description, version, and global entry points. API surfaces and asset paths(configs).
 - Treat `graphify-out/` as generated context. Do not edit it unless explicitly
   asked.
 - After graphify gives orientation, read the source and tests that are directly
@@ -37,7 +36,7 @@ safe, and consistent with the surrounding module patterns.
 - Prefer typed, explicit helpers over duplicating parsing or validation logic.
 - Keep package data paths relative to the package or test helper APIs. Avoid
   hard-coded absolute paths.
-- The project uses Black with `line-length = 110`.
+- The project uses Ruff for linting and formatting with `line-length = 110`.
 - Add or update focused tests next to the affected module when behaviour changes.
 
 ## Environment
@@ -67,8 +66,8 @@ full test suite.
 
 ```bash
 uv run python -m compileall -q openghg
-uv run black --check openghg
-uv run flake8 openghg
+uv run ruff format --check openghg
+uv run ruff check openghg
 uv run mypy openghg
 uv run pytest tests/path/to/test_file.py
 ```
@@ -78,8 +77,8 @@ tools directly:
 
 ```bash
 python -m compileall -q openghg
-black --check openghg
-flake8 openghg
+ruff format --check openghg
+ruff check openghg
 mypy openghg
 pytest tests/path/to/test_file.py
 ```

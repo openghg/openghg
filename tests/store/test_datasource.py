@@ -26,8 +26,6 @@ def create_attributes():
     return {"species": species, "site": site, "inlet": inlet, "sampling_period": sampling_period}
 
 
-# Disable this for long strings below - Line break occurred before a binary operator (W503)
-# flake8: noqa: W503
 def create_three_datasets(a, b, c, constant=False):
     values_a = np.zeros(len(a)) if constant else np.arange(0, len(a), 1)
     values_b = np.full(len(b), 1) if constant else np.arange(0, len(b), 1)

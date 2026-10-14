@@ -683,7 +683,6 @@ class ObsPack:
         )
         if data_grouped_repeats:
             for data_group in data_grouped_repeats:
-
                 example_data = data_group[0]
                 example_metadata = example_data.metadata
                 obs_type = example_data.obs_type

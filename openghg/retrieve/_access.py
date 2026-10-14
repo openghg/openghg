@@ -24,31 +24,6 @@ multDataTypes = Union[
 ]
 
 
-def _assign_schema_units(data: Any, data_type: str, species: str | None = None) -> None:
-    """Apply unit defaults from the schema for a retrieved internal dataset.
-
-    Unit defaults are also applied while validating new data before storage.
-    Applying them here makes older stored data behave the same way without
-    rewriting the object store.
-    """
-    from openghg.store import BoundaryConditions, Flux, Footprints, ObsColumn, ObsSurface
-
-    schemas = {
-        "surface": lambda: ObsSurface.schema(species=species or ""),
-        "column": lambda: ObsColumn.schema(species=species or ""),
-        "flux": Flux.schema,
-        "boundary_conditions": BoundaryConditions.schema,
-        "footprints": Footprints.schema,
-    }
-
-    try:
-        schema = schemas[data_type]()
-    except KeyError:
-        return
-
-    schema.assign_units(data)
-
-
 def _get_generic(
     combine_multiple_inlets: bool = False,
     ambig_check_params: list | None = None,
@@ -105,14 +80,8 @@ def _get_generic(
     else:
         result = retrieved_data
 
-    _assign_schema_units(
-        result.data,
-        data_type=str(kwargs.get("data_type", "")),
-        species=kwargs.get("species"),
-    )
-
-    # TODO: make sure lat and lon have units when standardising
-    # Keep this fallback for data types without schema coordinate defaults.
+    # TODO: make sure lat and lon have units when stadardising
+    # make sure lat and lon units are set
     if "lat" in result.data.dims and result.data.lat.attrs.get("units") is None:
         result.data.lat.attrs["units"] = "degrees_north"
     if "lon" in result.data.dims and result.data.lon.attrs.get("units") is None:
@@ -701,7 +670,7 @@ def get_footprint(
 
 #     direction = "2to1" if to_scale == converter["scale1"] else "1to2"
 
-#     # flake8: noqa: F841
+#     # ruff: noqa: F841
 #     # scale_convert file has variable X in equations, so let's create it
 #     X = 1.0
 #     scale_factor = evaluate(converter[direction])

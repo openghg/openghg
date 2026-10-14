@@ -156,7 +156,10 @@ class ModelScenario:
         network: Network name e.g. "AGAGE".
         domain: Domain name e.g. "EUROPE".
         platform: Platform name e.g "satellite", "column-insitu".
-        max_level: Maximum level for processing.
+        max_level: Maximum level for processing column observations. This is required when
+            retrieving column observations. If comparing modelled observations using a
+            footprint, it must match the footprint's ``max_level`` attribute. When supplying
+            an ``ObsColumnData`` object directly, its stored ``max_level`` is used instead.
         obs_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
         selection: For satellite only, identifier for any data selection which has been
             performed on satellite data. This can be based on any form of filtering, binning etc.
@@ -207,9 +210,10 @@ class ModelScenario:
         # For ObsColumn data processing
         if platform in accepted_column_data_types:
             # Add observation column data (directly or through keywords, column or satellite)
-            if max_level is None:
+            if max_level is None and obs_column is None:
                 raise AttributeError(
-                    f"If you are using column-based data (i.e. platform is {accepted_column_data_types}), you need to pass max_level"
+                    "Retrieving column observations for ModelScenario requires max_level. "
+                    f"Column platforms are {accepted_column_data_types}."
                 )
             self.add_obs_column(
                 site=site,
@@ -265,6 +269,9 @@ class ModelScenario:
             time_resolved=time_resolved,
         )
 
+        if self.platform in accepted_column_data_types and self.footprint is not None:
+            self._check_column_max_level(max_level=max_level)
+
         # Add flux data (directly or through keywords)
         self.add_flux(
             species=species,
@@ -295,6 +302,42 @@ class ModelScenario:
         self.flux_stacked: Dataset | None = None
 
         # TODO: Check species, site etc. values align between inputs?
+
+    def _check_column_max_level(self, max_level: int | None) -> None:
+        """Check that column observations and footprints use the same vertical extent."""
+        if self.footprint is None:
+            return
+
+        obs_max_level = max_level
+        if self.obs is not None:
+            obs_max_level = self.obs.data.attrs.get("max_level", max_level)
+
+        fp_max_level = self.footprint.data.attrs.get("max_level", self.footprint.metadata.get("max_level"))
+        if fp_max_level is None or str(fp_max_level).lower() == "unknown":
+            raise ValueError(
+                "Column footprint data must have a 'max_level' attribute before it can be used "
+                "in ModelScenario. Re-standardise the footprint from a source file containing "
+                "max_level or, for data in a writable object store, add the known footprint "
+                "value using data_manager(...).update_attributes(...). Also use "
+                "update_metadata(...) to keep the stored metadata consistent. Do not infer the "
+                "footprint value from the requested observation level."
+            )
+
+        try:
+            obs_max_level = int(obs_max_level) if obs_max_level is not None else None
+            fp_max_level = int(fp_max_level)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(
+                "The column observation and footprint 'max_level' attributes must be integers; "
+                f"received {obs_max_level!r} and {fp_max_level!r}."
+            ) from exc
+
+        if obs_max_level != fp_max_level:
+            raise ValueError(
+                "Column observations and footprints must use the same max_level in "
+                f"ModelScenario: observations use {obs_max_level}, while footprints use "
+                f"{fp_max_level}."
+            )
 
     def _get_data(self, keywords: ParamType, data_type: str) -> Any:
         """Use appropriate get function to search for data in object store."""

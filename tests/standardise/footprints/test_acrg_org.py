@@ -151,3 +151,4 @@ def test_parse_acrg_org_satellite_key():
 
     expected_key = f"{satellite}_{obs_region}_{domain}_{model}_{inlet}"
     assert expected_key in result
+    assert result[expected_key]["metadata"]["max_level"] == "17"

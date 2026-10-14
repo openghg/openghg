@@ -482,9 +482,9 @@ def _retrieve_remote(
         dataset.attrs.update(attributes)
 
         if dataset_source == "ICOS Combined":
-            dataset[spec + " repeatability"].attrs[
-                "comment"
-            ] = "ICOS LTR as defined by Yver Kwok et al., 2015, doi:10.5194/amt-8-3867-2015"
+            dataset[spec + " repeatability"].attrs["comment"] = (
+                "ICOS LTR as defined by Yver Kwok et al., 2015, doi:10.5194/amt-8-3867-2015"
+            )
 
         data_key = f"key-{n}"
         # TODO - do we need both attributes and metadata here?
