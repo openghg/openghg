@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added automatic post-merge Graphify regeneration and a focused navigation
   skill for cross-module impact analysis. [Issue #1695](https://github.com/openghg/openghg/issues/1695)
+- Added schema requirements for units on surface-observation signals, fluxes, footprints, boundary conditions, and their physical coordinates. Observation-count variables remain excluded from unit conversion. [PR #1710](https://github.com/openghg/openghg/pull/1710)
 - Added a lazy `fp_x_flux_time_resolved_numba` analysis operator that preserves source and spatial dimensions, supports single-source and regular coarse-frequency flux, and includes optional atomic ppm Zarr persistence and worker warm-up helpers.
 - Added support for passing in-memory `xarray.Dataset` objects to supported standardisation and transformation parsers, including object-store retrieval and forward `ModelScenario` coverage.
 - Added a tutorial for adding CO2 satellite data, including how integrated footprints differ from time-resolved footprints in OpenGHG. [PR #1698](https://github.com/openghg/openghg/pull/1698)
