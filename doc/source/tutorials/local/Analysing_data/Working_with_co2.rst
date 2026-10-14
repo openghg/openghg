@@ -139,7 +139,54 @@ in an appropriate way:
 
     # scenario.plot_comparison(baseline="percentile", recalculate=True)
 
-4. Cleanup
+4. Choosing the calculation pathway for each flux sector
+--------------------------------------------------------
+
+The footprint belongs to the observation site or satellite sounding, not to a
+flux sector. All flux sources therefore use the **same retrieved footprint
+dataset**. If it contains both integrated ``fp`` and time-resolved sensitivities,
+you can select which calculation to use for each flux source:
+
+.. code:: ipython3
+
+    modelled = scenario.calc_modelled_obs(
+        time_resolved_by_sector={source_natural: True, source_fossil: False},
+        split_by_sectors=True,
+        output_fp_x_flux=True,
+    )
+
+Here, ``True`` uses the existing lag-resolved calculation for natural fluxes.
+``False`` uses integrated ``fp`` for fossil-fuel fluxes, with monthly-mean fluxes
+by default for CO2. This does not retrieve another footprint, create a
+sector-specific footprint, or infer a pathway from the flux frequency.
+``use_low_freq_flux=False`` retains the existing option to use release-time
+fluxes for integrated calculations instead of monthly means.
+
+Unspecified sources follow the existing default determined by the shared
+footprint's sensitivity variables. Supplying ``None`` or an empty mapping
+preserves the original public calculation pathway and output names.
+
+For an explicitly configured calculation, the total is returned as ``mf_mod``.
+``split_by_sectors=True`` additionally returns ``mf_mod_sectoral`` with a
+``source`` dimension. ``output_fp_x_flux=True`` returns ``fp_x_flux`` and,
+when sectoral output is enabled, ``fp_x_flux_sectoral``. The total is calculated
+from the same sector contributions whether or not sectoral output is requested.
+The effective selection is recorded as a JSON string in the dataset attribute
+``time_resolved_by_sector``.
+
+The same option is available through ``scenario.footprints_data_merge(...)``.
+Surface and satellite observations retain their existing alignment rules.
+
+.. note::
+
+   Integrated sectors require ``fp``. Time-resolved sectors require either
+   legacy ``fp_HiTRes`` or both ``fp_time_resolved`` and ``fp_residual``. The
+   sensitivity variables and fluxes must have correctly declared physical
+   units. The new pathway reports missing or incompatible metadata instead of
+   silently combining contributions with inconsistent units. An integrated-only
+   footprint cannot provide missing time-resolved sensitivities.
+
+5. Cleanup
 ----------
 
 If you're finished with the data in this tutorial you can cleanup the
