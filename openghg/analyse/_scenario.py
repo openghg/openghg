@@ -1478,15 +1478,15 @@ class ModelScenario:
                 # zero, matching the existing skip-NaN spatial reductions.
                 total = total + sector.fillna(0)
             if split_by_sectors:
-                sectoral.append(sector.expand_dims(source=[source]))
+                sectoral_data = {"mf_mod_sectoral": sector["mf_mod"]}
+                if output_fp_x_flux:
+                    sectoral_data["fp_x_flux_sectoral"] = sector["fp_x_flux"]
+                sectoral.append(Dataset(sectoral_data).expand_dims(source=[source]))
 
         if total is None:
             raise ValueError("At least one flux source is required for sector-level calculation.")
         if split_by_sectors:
-            output_names = {"mf_mod": "mf_mod_sectoral"}
-            if output_fp_x_flux:
-                output_names["fp_x_flux"] = "fp_x_flux_sectoral"
-            total = total.merge(xr.concat(sectoral, dim="source", join="exact").rename(output_names))
+            total = total.merge(xr.concat(sectoral, dim="source", join="exact"))
         return cast(Dataset, total.pint.dequantify())
 
     @staticmethod
