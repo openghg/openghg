@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.19.0...HEAD)
 
+### Added
+
+- Added versioned JSON metadata and CF history helpers for xarray DataArrays and Datasets. [Issue #1682](https://github.com/openghg/openghg/issues/1682)
+
 ### Fixed
 
 - Refreshed boundary-condition processing timestamps consistently in metadata and dataset attributes so previously processed inputs pass strict alignment. Conflicting source coverage still raises an error; specify an explicit period for ambiguous single-timestamp inputs. [Issue #1779](https://github.com/openghg/openghg/issues/1779)
