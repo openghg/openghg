@@ -39,7 +39,7 @@ def plot_met_timeseries(
         title = "Met Variables"
 
     if variables is None:
-        variables = list(data.data.data_vars)
+        variables = [str(name) for name in data.data.data_vars]
     else:
         for v in variables:
             if v not in list(data.data.keys()):

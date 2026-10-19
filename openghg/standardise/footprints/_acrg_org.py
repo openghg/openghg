@@ -198,7 +198,7 @@ def parse_acrg_org(
 
     # Need to read the metadata from the footprints and then store it
     # Do we need to chunk the footprints / will a Datasource store it correctly?
-    metadata: dict[str, str | float | list[float]] = {}
+    metadata: dict[str, str | float | list[float] | list[str]] = {}
 
     default_metadata: dict = {
         "data_type": "footprints",
@@ -270,7 +270,7 @@ def parse_acrg_org(
 
     metadata["heights"] = [float(h) for h in fp_data.height.values]
     # Do we also need to save all the variables we have available in this footprints?
-    metadata["variables"] = list(fp_data.data_vars)
+    metadata["variables"] = [str(name) for name in fp_data.data_vars]
 
     # if model_params is not None:
     #     metadata["model_parameters"] = model_params

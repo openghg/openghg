@@ -15,7 +15,7 @@ from openghg.storage import (
 from openghg.storage._store import VersionedStore
 from openghg.storage._zarr_store import ZarrStore, VersionedZarrStore
 from openghg.types import DataOverlapError
-from openghg.util._versioning import SimpleVersioning, VersionError
+from openghg.util._versioning import VersionError
 
 
 # DATA FIXTURES
@@ -349,7 +349,7 @@ def test_zarr_encoding(store_name, request, ds1):
     ds = store.get()
 
     for dv in ds.data_vars:
-        assert ds[dv].encoding["compressor"] == compressor
+        assert (ds[dv].encoding.get("compressors") or (ds[dv].encoding.get("compressor"),)) == (compressor,)
 
 
 # TESTS FOR VERSIONED STORES
@@ -411,10 +411,8 @@ def test_bool(store_name, request, ds1):
     # create another (empty) version
     store.create_version("v2", checkout=True)
 
-    # check that current version evaluates to False
-    # this uses internals of SimpleVersioning
-    if isinstance(store, SimpleVersioning):
-        assert not store._versions["v2"]
+    assert not store.has_data("v2")
+    assert store.has_data("v1")
 
     # check that versioned store evaluates to True
     assert store
@@ -481,8 +479,10 @@ def test_versioned_zarr_bytes_stored_compression(tmp_path):
         store.create_version("v1", checkout=True)
         store.insert(ds)
         uncompressed_bytes = store.bytes_stored()
-        expected_uncompressed_bytes = 444382
-        np.testing.assert_allclose(uncompressed_bytes, expected_uncompressed_bytes, rtol=0.01)
+        assert uncompressed_bytes == sum(
+            path.stat().st_size for path in tmp_path.rglob("*") if path.is_file()
+        )
+        xr.testing.assert_equal(store.get(), ds)
 
     store.delete_version("v1")
 
@@ -492,8 +492,8 @@ def test_versioned_zarr_bytes_stored_compression(tmp_path):
         store.create_version("v1", checkout=True)
         store.insert(ds)
         compressed_bytes = store.bytes_stored()
-        expected_compressed_bytes = 292896
-        np.testing.assert_allclose(compressed_bytes, expected_compressed_bytes, rtol=0.01)
+        assert compressed_bytes == sum(path.stat().st_size for path in tmp_path.rglob("*") if path.is_file())
+        xr.testing.assert_equal(store.get(), ds)
         assert compressed_bytes < original_size
         assert compressed_bytes < uncompressed_bytes
 
@@ -529,3 +529,4 @@ def test_versioned_zarr_append_loop_has_no_missing_data(tmp_path):
         total_missing = sum(dict(missing).values())
 
         assert total_missing == 0.0
+        xr.testing.assert_equal(retrieved, xr.concat(datasets, dim="time"))

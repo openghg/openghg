@@ -50,9 +50,10 @@ def compare_compression(filepath: Path) -> dict:
                 encoding = get_zarr_encoding(data_vars=ds.data_vars, compressor=compressor)
 
                 start = time.perf_counter()
-                ds.to_zarr(store=store, encoding=encoding)
+                ds.to_zarr(store=store, encoding=encoding, zarr_format=2)
                 time_taken = time.perf_counter() - start
 
+                store.close()
                 compressed_size = zarr_path.stat().st_size
 
                 ratio = orig_size / compressed_size
