@@ -69,14 +69,14 @@ def retrieve_atmospheric(
         if_exists: What to do if data already exists. ``"auto"`` skips overlapping
             data, ``"new"`` creates a version containing only the retrieved data,
             and ``"combine"`` updates the current timeseries with the retrieved data.
+        retrieve_method: Option of 'icoscp_core' or 'dobj' method but should always use 'icoscp_core' method
+             unless testing against previous approach. The 'dobj' method is included for completeness but is deprecated.
+
+    Returns:
+        ObsData, list[ObsData] or None
 
     Warns:
         DeprecationWarning: If ``force`` is ``True``.
-
-        retrieve_method: Option of 'icoscp_core' or 'dobj' method but should always use 'icoscp_core' method
-             unless testing against previous approach. The 'dobj' method is included for completeness but is deprecated.
-    Returns:
-        ObsData, list[ObsData] or None
     """
     from openghg.retrieve import search_surface
     from openghg.store import ObsSurface
@@ -223,6 +223,10 @@ def parse_icos_text_file(data_info: dict | pd.Series) -> tuple[xr.Dataset, dict]
 
     else:
         usecols = [species, "Stdev", "NbPoints", "Flag", "Year", "Month", "Day", "Hour", "Minute"]
+        # Keep the Second column when the file has one, so timestamps keep their seconds
+        if "Second" in header["columns"]:
+            usecols.append("Second")
+
         dataframe = pd.read_csv(io.StringIO(icos_text), skiprows=skiprows, sep=";", usecols=usecols)
 
         # make time index
@@ -247,13 +251,13 @@ def parse_icos_text_file(data_info: dict | pd.Series) -> tuple[xr.Dataset, dict]
         dataframe["stdev"] = dataframe["stdev"].where(dataframe["stdev"] >= 0)
         rename_cols = {
             "timestamp": "time",
-            "stdev": species + " variability",
-            "nbpoints": species + " number_of_observations",
+            "stdev": species + "_variability",
+            "nbpoints": species + "_number_of_observations",
         }
     except KeyError:
         rename_cols = {
             "timestamp": "time",
-            "nbpoints": species + " number_of_observations",
+            "nbpoints": species + "_number_of_observations",
         }
 
     dataframe = dataframe.rename(columns=rename_cols)
@@ -305,28 +309,29 @@ def parse_icos_obspack_nc_file(data_info: dict | pd.Series) -> tuple[xr.Dataset,
     rename_col_names = {
         "value": species,
         "qc_flag": "flag",
-        "value_std_dev": species + " variability",
-        "icos_ltr": species + " repeatability",
+        "value_std_dev": species + "_variability",
+        "icos_ltr": species + "_repeatability",
     }
     dataset = dataset.rename(rename_col_names)
 
     dataset["time"] = dataset["time"] - Timedelta(minutes=30)
 
-    dataset[f"{species} repeatability"].attrs["comment"] = (
+    dataset[f"{species}_repeatability"].attrs["comment"] = (
         "ICOS LTR as defined by Yver Kwok et al., 2015, doi:10.5194/amt-8-3867-2015"
     )
 
     # Recast "flag" column to decode bytes and update to same dtype as other data
     dataset["flag"].data = decode(dataset["flag"].astype("bytes_"), "utf-8").astype(object)
 
+    # TODO: Add south/west normalisation such that sign flips if these are provided
     if "south" in dataset["latitude"].attrs["units"]:
         logger.warning(
-            "latitude units are in relation to south rathern than north, this may mean the sign on the latitude value should be the opposite."
+            "latitude units are in relation to south rather than north. The values have NOT been converted to the degrees north convention, so the sign of the latitude may be wrong."
         )
 
     if "west" in dataset["longitude"].attrs["units"]:
         logger.warning(
-            "longitude units are in relation to west rather than east, this may mean the sign on the longitude value should be the opposite."
+            "longitude units are in relation to west rather than east. The values have NOT been converted to the degrees east convention, so the sign of the longitude may be wrong."
         )
 
     dataset["altitude"].attrs["units_comment"] = dataset["altitude"].attrs["units"]
@@ -460,7 +465,7 @@ def create_icos_attributes(
         additional_data = {}
 
     if keep_dataset_source_names is None:
-        keep_dataset_source_names = ["ICOS FastTrack", "EYE-AVE-PAR", "ICOS Combined"]
+        keep_dataset_source_names = ["ICOS FastTrack", "EYE-AVE-PAR", "ICOS Combined", "ICOS Flask"]
 
     # if user_input:
     #     site = user_input["site"]
@@ -536,12 +541,15 @@ def create_icos_attributes(
 
     # Copy across equivalent attributes from downloaded data and apply formatting
     inlet_keys = ["sampling_height", "inlet", "inlet_height_magl", "station_height_masl"]
+    coord_keys = ["station_latitude", "station_longitude"]
 
     for new_key, current_key in attrs_mapping.items():
         value = data_attributes[current_key]
         if new_key in inlet_keys:
             value = str(value).replace(" ", "")  # could use clean_string here
             value = format_inlet(value, key_name=new_key)
+        elif new_key in coord_keys:
+            value = _data_parsing.parse_coord(value)
         else:
             value = str(value)
 
@@ -747,12 +755,24 @@ def _retrieve_remote(
         #     & ~data_pids["station"].str.contains("ATMO_")
         # ]
 
+    filename_str = None
+    project: str | list[str] | None
+
     if dataset_source == "EYE-AVE-PAR":
         project = None
         filename_str = "EYE-AVE-PAR"
-    else:
+    elif dataset_source is None or dataset_source in ("ICOS FastTrack", "ICOS Flask", "ICOS Combined"):
+        # No source requested, or a named product already narrowed down by spec_label
         project = ["icos", "euroObspack"]
-        filename_str = None
+    elif dataset_source.lower() == "icos":
+        project = "icos"
+    elif dataset_source.lower() == "european obspack":
+        project = "euroObspack"
+    else:
+        valid = ["ICOS", "European ObsPack", "ICOS FastTrack", "ICOS Flask", "ICOS Combined", "EYE-AVE-PAR"]
+        msg = f"Unrecognised dataset_source '{dataset_source}'. Should be one of {valid}."
+        logger.error(msg)
+        raise ValueError(msg)
 
     # TODO: ALSO: Do we need to / could filter by "ATMO_" station first?
     # Previous: For some reason they have separate station record pages that contain "ATMO_"
@@ -769,6 +789,10 @@ def _retrieve_remote(
         format_info=True,  # May or may not need this?
     )
 
+    if data_object_info.empty:
+        logger.info(f"No ICOS data found for site={site}, species={species}, inlet={inlet}.")
+        return None
+
     print(f"Total rows from dobj_info: {len(data_object_info)}")
     print(f"Columns: {data_object_info.columns.tolist()}")
     print(data_object_info.to_string())
@@ -780,7 +804,7 @@ def _retrieve_remote(
 
     station_meta = _stations.retrieve_station_meta(site)
 
-    keep_dataset_source_names = ["ICOS FastTrack", "EYE-AVE-PAR", "ICOS Combined"]
+    keep_dataset_source_names = ["ICOS FastTrack", "EYE-AVE-PAR", "ICOS Combined", "ICOS Flask"]
 
     # user_input = {
     #     "site": site,
@@ -1156,21 +1180,21 @@ def _retrieve_remote_dobj(
             rename_cols = {
                 "value": attributes["species"],
                 "qc_flag": "flag",
-                "value_std_dev": spec + " variability",
-                "icos_ltr": spec + " repeatability",
+                "value_std_dev": spec + "_variability",
+                "icos_ltr": spec + "_repeatability",
             }
         else:
             try:
                 dataframe["stdev"] = dataframe["stdev"].where(dataframe["stdev"] >= 0)
                 rename_cols = {
                     "timestamp": "time",
-                    "stdev": spec + " variability",
-                    "nbpoints": spec + " number_of_observations",
+                    "stdev": spec + "_variability",
+                    "nbpoints": spec + "_number_of_observations",
                 }
             except KeyError:
                 rename_cols = {
                     "timestamp": "time",
-                    "nbpoints": spec + " number_of_observations",
+                    "nbpoints": spec + "_number_of_observations",
                 }
 
         dataframe = dataframe.rename(columns=rename_cols)
@@ -1192,7 +1216,7 @@ def _retrieve_remote_dobj(
         dataset.attrs.update(attributes)
 
         if dataset_source == "ICOS Combined":
-            dataset[spec + " repeatability"].attrs["comment"] = (
+            dataset[spec + "_repeatability"].attrs["comment"] = (
                 "ICOS LTR as defined by Yver Kwok et al., 2015, doi:10.5194/amt-8-3867-2015"
             )
 

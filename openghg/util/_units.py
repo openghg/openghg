@@ -6,6 +6,8 @@ from cf_xarray.units import units as cf_ureg
 import pint_xarray  # noqa: F401  # Needed to activate xarray pint accessor
 import xarray as xr
 
+import re
+
 logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
@@ -18,12 +20,22 @@ def enable_pint_xarray() -> None:
 # convert scientific notation to volume ratios
 unit_mapping = {"1e-6": "ppm", "1e-9": "ppb", "1e-12": "ppt", "1e-15": "ppq", "1e-09": "ppb", "1e-06": "ppm"}
 
-cf_ureg.preprocessors.append(
-    lambda x: "degrees_north" if isinstance(x, str) and "degree" in x.lower() and "north" in x.lower() else x
+
+_directional_degrees = re.compile(
+    r"\b(?:degrees?|deg)[ _]*(north|east|south|west|[nesw])\b",
+    re.IGNORECASE,
 )
-cf_ureg.preprocessors.append(
-    lambda x: "degrees_east" if isinstance(x, str) and "degree" in x.lower() and "east" in x.lower() else x
-)
+_directions = {"n": "north", "e": "east", "s": "south", "w": "west"}
+
+
+def normalize_directional_degrees(text: str) -> str:
+    return _directional_degrees.sub(
+        lambda match: f"degrees_{_directions[match[1][0].lower()]}",
+        text,
+    )
+
+
+cf_ureg.preprocessors.append(normalize_directional_degrees)
 
 # TODO: Consider if degree south and degree west come up change to degrees_north and degrees_east
 # with an inverted sign on the value
@@ -46,28 +58,11 @@ cf_ureg.define("permeg = 0.001 permille = per_meg")
 cf_ureg.define("hpa = 100.0 Pa = hectopascal = hPa")
 
 # Degrees_north is not an accepted CF unit, but we encounter it
-# Add these lines before the alias definitions
+# Spelling variants are normalised by normalize_directional_degrees above
 cf_ureg.define("degrees_north = degree")
 cf_ureg.define("degrees_east = degree")
-
-# Now you can safely add aliases
-cf_ureg.define("@alias degrees_north = Degrees_north")
-cf_ureg.define("@alias degrees_east = Degrees_east")
-cf_ureg.define("@alias degrees_north = Degrees_North = DEGREES_NORTH")
-cf_ureg.define("@alias degrees_north = degree_north = Degree_north = DEGREE_NORTH")
-cf_ureg.define("@alias degrees_north = Degrees_N = DEGREES_N")
-cf_ureg.define("@alias degrees_north = Degree_N = DEGREE_N")
-cf_ureg.define("@alias degrees_east = Degrees_East = DEGREES_EAST")
-cf_ureg.define("@alias degrees_east = degree_east = Degree_east = DEGREE_EAST")
-cf_ureg.define("@alias degrees_east = Degrees_E = DEGREES_E")
-cf_ureg.define("@alias degrees_east = Degree_E = DEGREE_E")
-
-cf_ureg.define(
-    "degrees_west = degree = degrees_west = Degrees_west = degrees_W = degreesW = degree_west = degree_W = degreeW"
-)
-cf_ureg.define(
-    "degrees_south = degree = degrees_south = Degrees_south = degrees_S = degreesS = degree_south = degree_S = degreeS"
-)
+cf_ureg.define("degrees_south = degree")
+cf_ureg.define("degrees_west = degree")
 
 # Invert the unit_mapping to go from cf_xarray pint units back to original strings
 # note that `getattr(cf_ureg, v)` will get the unit corresponding to the string v,

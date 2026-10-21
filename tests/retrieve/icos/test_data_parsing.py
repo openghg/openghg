@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 from test_queries import mock_run_query_attrs
 from helpers import get_retrieval_datapath
-from openghg.retrieve.icos._data_parsing import get_data_attrs, get_icos_data
+from openghg.retrieve.icos._data_parsing import get_data_attrs, get_icos_data, get_icos_text_header, parse_coord
 
 current_text_data_dummy_filename = "text_data_lin_sf6_flask.txt"
 
@@ -113,6 +113,37 @@ def test_get_icos_flask_data(mock_sparql_query_attrs, mock_retrieve_text_data, m
 
     assert ds
     assert "time" in ds
+
+
+def test_header_coords_are_numeric():
+    """
+    Check the ICOS text-header latitude and longitude are converted to numeric coordinates
+    (i.e "52.1663 N" and "14.1226 E" to "52.1663" and "14.1226")
+    """
+    header = get_icos_text_header(mock_text_data(dobj_uri=""))
+
+    assert header["latitude"] == "52.1663 N"  # confirms the raw header format
+    assert parse_coord(header["latitude"]) == 52.1663
+    assert parse_coord(header["longitude"]) == 14.1226
+
+
+@pytest.mark.parametrize(
+    "value, expected",
+    [
+        ("52.1663 N", 52.1663),
+        ("52.1663 S", -52.1663),
+        ("14.1226 E", 14.1226),
+        ("14.1226 W", -14.1226),
+        (52.1663, 52.1663),
+        ("unknown", "unknown"),
+    ],
+)
+def test_parse_coord(value, expected):
+    """
+    Check the latitude and longitude cases are converted to numeric coordinates in the
+    expected manner (i.e "52.1663 N" and "14.1226 E" to "52.1663" and "14.1226")
+    """
+    assert parse_coord(value) == expected
 
 
 # TODO: Add get_icos_data() tests for other types of downloaded data which are supported.

@@ -421,7 +421,10 @@ class ObsSurface(BaseStore):
                 data_info = ", ".join(f"{key}={mdd.metadata.get(key)}" for key in required_metakeys)
                 logger.info(f"Skipping data that overlaps existing data:\n\t{data_info}.")
                 logger.warning(
-                    f"Include force=True in input arguments if you wish to overwrite this existing data:\n\t{data_info}. Using force_retrieval=True will not overwrite."
+                    "Set if_exists='new' to replace the stored timeseries "
+                    "with a new version containing only this data, "
+                    "or if_exists='combine' to merge it and update the current stored time series "
+                    f"into the current timeseries:\n\t{data_info}. "
                 )
                 # warning.info()
             else:
