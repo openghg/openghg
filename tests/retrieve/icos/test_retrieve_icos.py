@@ -2,6 +2,7 @@ import datetime
 import pandas as pd
 import xarray as xr
 import pytest
+import numpy as np
 
 from helpers import clear_test_stores
 from openghg.dataobjects import SearchResults
@@ -407,6 +408,22 @@ def test_retrieve_icos_standard_compare():
         data_dobj = obs_dobj.data
         data = obs.data
 
+       
+        # NRT data updates daily, so the two (old and new) retrieval methods 
+        # may pick up different versions depending on the time of day this test runs.
+        # e.g could be comparing todays dobj data with yesterday icos_scp.
+        #therefore make sure comparing data retrieved across the same time period.
+        common_times = np.intersect1d(data_dobj.time.values, data.time.values)
+        same_version = data_dobj.sizes["time"] == data.sizes["time"] == len(common_times)
+        version_specific = [] if same_version else ['icoscp_url']
+        data_dobj = data_dobj.sel(time=common_times)
+        data = data.sel(time=common_times)
+    
+        # Check time values match
+        time_org = data_dobj.time
+        time_new = data.time
+        xr.testing.assert_allclose(time_org, time_new)
+
         # Check time values match
         time_org = data_dobj.time
         time_new = data.time
@@ -425,6 +442,7 @@ def test_retrieve_icos_standard_compare():
             and "data_owner_email" in data_dobj.attrs
             and "file_created" in data_dobj.attrs
         )
+
         for at in data_dobj.attrs:
             if at not in [
                 "data_owner",
@@ -438,7 +456,7 @@ def test_retrieve_icos_standard_compare():
                 "dataset_source",
                 "file_created",
                 "instrument_data",
-            ]:
+            ] + version_specific:
                 assert data_dobj.attrs[at].lower() == data.attrs[at].lower(), (
                     f"Attribute {at} mismatch: {data_dobj.attrs[at]} != {data.attrs[at]}"
                 )
@@ -486,7 +504,7 @@ def test_retrieve_icos_standard_compare():
         metadata = obs.metadata
         assert "data_owner" in metadata_dobj and "data_owner_email" in metadata_dobj
         for md in metadata_dobj:
-            if md not in ["data_owner", "data_owner_email", "inlet", "inlet_height_magl", "dataset_source"]:
+            if md not in ["data_owner", "data_owner_email", "inlet", "inlet_height_magl", "dataset_source"] + version_specific:
                 assert metadata_dobj[md] == metadata[md], (
                     f"Metadata {md} mismatch: {metadata_dobj[md]} != {metadata[md]}"
                 )
