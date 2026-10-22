@@ -540,25 +540,3 @@ When the feature is complete, create a *pull request* on GitHub so that the
 changes can be merged back into the development branch.
 For information, see the documentation
 `here <https://help.github.com/articles/about-pull-requests>`__.
-
-Existing-store compatibility
-----------------------------
-
-OpenGHG writes Zarr format 2 so existing stores and older readers remain
-compatible when upgrading xarray and zarr-python. The existing-store CI job
-uses two environments: Zarr 2.18.3/xarray 2025.9.1 writes a TAC observation
-datasource, and the upgraded environment reads and updates it in the configured
-``user`` and ``group`` test stores. The ``shared`` test store remains read-only.
-The original environment then verifies both data versions after the update.
-
-To reproduce with an existing legacy environment, run from the repository root:
-
-.. code-block:: bash
-
-   OPENGHG_LEGACY_PYTHON=/path/to/legacy/bin/python \
-       uv run pytest -v tests/storage/test_existing_stores.py
-
-The legacy interpreter needs OpenGHG's dependencies with xarray 2025.9.1,
-Zarr 2.18.3 and numcodecs 0.15.1. The CI workflow shows how to build that
-environment from the normal development environment. These tests use the
-checked-in TAC measurements and the temporary stores from ``tests/conftest.py``.
