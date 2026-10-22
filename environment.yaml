@@ -23,8 +23,8 @@ dependencies:
   - openpyxl
   - pandas>=2.0,<=2.3.3
   - pip
-  - pint
-  - pint-xarray
+  - pint<=0.24.4
+  - pint-xarray<=0.5.1
   - plotly
   - pyvis
   - rapidfuzz
