@@ -1,3 +1,5 @@
+from typing import cast
+
 import plotly.graph_objects as go
 from openghg.dataobjects import METData
 from plotly.subplots import make_subplots
@@ -39,7 +41,7 @@ def plot_met_timeseries(
         title = "Met Variables"
 
     if variables is None:
-        variables = [str(name) for name in data.data.data_vars]
+        variables = cast(list[str], list(data.data.data_vars))
     else:
         for v in variables:
             if v not in list(data.data.keys()):
