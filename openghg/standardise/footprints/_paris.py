@@ -235,7 +235,7 @@ def parse_paris(
     if not inner_domain:
         metadata["heights"] = [float(h) for h in fp_data.height.values]
     # Do we also need to save all the variables we have available in this footprints?
-    metadata["variables"] = [str(name) for name in fp_data.data_vars]
+    metadata["variables"] = cast(list[str], list(fp_data.data_vars))
     # if model_params is not None:
     #     metadata["model_parameters"] = model_params
 
