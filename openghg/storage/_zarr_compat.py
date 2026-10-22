@@ -1,38 +1,42 @@
 """The small synchronous boundary between Zarr 2 and 3 store APIs."""
 
 from pathlib import Path
-from typing import Any, TypeAlias
+from typing import TYPE_CHECKING, Any, cast
 
 import zarr
 import zarr.storage
 
-# Zarr 2 stores are mappings; Zarr 3 stores expose asynchronous methods instead.
-ZarrStoreLike: TypeAlias = Any
+if TYPE_CHECKING:
+    from zarr.abc.store import Store as ZarrStoreBase
+else:
+    # The compatibility tests import this module with Zarr 2, where zarr.abc
+    # does not exist. Static checking uses Store; the runtime fallback is inert.
+    ZarrStoreBase = object
 
 
 def has_async_store_api() -> bool:
     return int(zarr.__version__.split(".", maxsplit=1)[0]) >= 3
 
 
-def make_local_store(path: Path) -> ZarrStoreLike:
+def make_local_store(path: Path) -> ZarrStoreBase:
     if has_async_store_api():
         return zarr.storage.LocalStore(path)
-    return getattr(zarr.storage, "DirectoryStore")(path)
+    return cast(ZarrStoreBase, getattr(zarr.storage, "DirectoryStore")(path))
 
 
-def make_memory_store() -> ZarrStoreLike:
+def make_memory_store() -> ZarrStoreBase:
     return zarr.storage.MemoryStore()
 
 
-def store_is_empty(store: ZarrStoreLike) -> bool:
+def store_is_empty(store: ZarrStoreBase) -> bool:
     if has_async_store_api():
         from zarr.core.sync import sync
 
         return bool(sync(store.is_empty("")))
-    return not bool(store)
+    return not bool(cast(Any, store))
 
 
-def clear_store(store: ZarrStoreLike) -> None:
+def clear_store(store: ZarrStoreBase) -> None:
     if has_async_store_api():
         from zarr.core.sync import sync
 
@@ -43,18 +47,10 @@ def clear_store(store: ZarrStoreLike) -> None:
         if isinstance(store, zarr.storage.LocalStore) and store.root.exists():
             store.root.rmdir()
     else:
-        store.rmdir()
+        cast(Any, store).rmdir()
 
 
-def store_byte_size(store: ZarrStoreLike) -> int:
-    if has_async_store_api():
-        from zarr.core.sync import sync
-
-        return int(sync(store.getsize_prefix("")))
-    return sum(store.getsize(key) for key in store) if hasattr(store, "getsize") else 0
-
-
-def copy_store(source: ZarrStoreLike, dest: ZarrStoreLike) -> None:
+def copy_store(source: ZarrStoreBase, dest: ZarrStoreBase) -> None:
     """Copy encoded keys between distinct stores without decoding arrays."""
     if has_async_store_api():
         from zarr.core.buffer import default_buffer_prototype
@@ -73,4 +69,4 @@ def copy_store(source: ZarrStoreLike, dest: ZarrStoreLike) -> None:
     else:
         from zarr.convenience import copy_store as copy_zarr2_store
 
-        copy_zarr2_store(source, dest)
+        copy_zarr2_store(cast(Any, source), cast(Any, dest))

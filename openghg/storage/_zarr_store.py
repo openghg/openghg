@@ -13,12 +13,12 @@ from ._encoding import get_zarr_encoding, normalise_zarr_encoding
 from ._indexing import contiguous_regions, IndexingError, OverlapDeterminer
 from ._store import Store, UpdateError, VersionedStore
 from ._zarr_compat import (
-    ZarrStoreLike,
+    ZarrStoreBase,
     clear_store,
     copy_store,
+    has_async_store_api,
     make_local_store,
     make_memory_store,
-    store_byte_size,
     store_is_empty,
 )
 
@@ -38,7 +38,7 @@ def parse_to_zarr_kwargs(to_zarr_kwargs: dict) -> dict:
     return result
 
 
-ZST = TypeVar("ZST", bound=ZarrStoreLike)
+ZST = TypeVar("ZST", bound=ZarrStoreBase)
 
 
 class ZarrStore(Store, Generic[ZST]):
@@ -102,11 +102,6 @@ class ZarrStore(Store, Generic[ZST]):
         return self._store
 
     @property
-    def _xarray_store(self) -> Any:
-        """Expose the runtime-specific store through xarray's store interface."""
-        return self.store
-
-    @property
     def index(self) -> pd.Index:
         """Index of append dimension of data.
 
@@ -126,14 +121,22 @@ class ZarrStore(Store, Generic[ZST]):
         clear_store(self.store)
 
     def bytes_stored(self) -> int:
-        return store_byte_size(self.store)
+        if has_async_store_api():
+            from zarr.core.sync import sync
+
+            return int(sync(self.store.getsize_prefix("")))
+
+        legacy_store = cast(Any, self.store)
+        return (
+            sum(legacy_store.getsize(key) for key in legacy_store) if hasattr(legacy_store, "getsize") else 0
+        )
 
     def _get(self, sort: bool = True) -> xr.Dataset:
         if not bool(self):
             return xr.Dataset()
 
         # need to sort to be consistent with MemoryStore
-        result = xr.open_zarr(self._xarray_store, consolidated=True)
+        result = xr.open_zarr(self.store, consolidated=True)
 
         if sort:
             result = result.sortby(self.append_dim)
@@ -148,7 +151,7 @@ class ZarrStore(Store, Generic[ZST]):
             encoding = get_zarr_encoding(data.data_vars, self.compressor, self.filters)
             encoding.update(self.encoding)
             data.to_zarr(
-                store=self._xarray_store,
+                store=self.store,
                 mode="w",
                 consolidated=True,
                 compute=True,
@@ -167,7 +170,7 @@ class ZarrStore(Store, Generic[ZST]):
                     return None
 
             data.to_zarr(
-                store=self._xarray_store,
+                store=self.store,
                 mode="a",
                 append_dim=self.append_dim,
                 consolidated=True,
@@ -194,7 +197,7 @@ class ZarrStore(Store, Generic[ZST]):
 
             try:
                 data.to_zarr(
-                    store=self._xarray_store,
+                    store=self.store,
                     mode="r+",
                     region="auto",
                     consolidated=True,
@@ -226,7 +229,7 @@ class ZarrStore(Store, Generic[ZST]):
 
                 # don't catch any errors here, since these errors are unrelated to alignment
                 data[non_region_vars].to_zarr(
-                    store=self._xarray_store,
+                    store=self.store,
                     mode="r+",
                     region="auto",
                     consolidated=True,
@@ -242,7 +245,7 @@ class ZarrStore(Store, Generic[ZST]):
                 for sregion, tregion in zip(source_regions, target_regions):
                     region = {self.append_dim: slice(tregion[0], tregion[-1] + 1)}
                     data.isel({self.append_dim: sregion}).to_zarr(
-                        store=self._xarray_store,
+                        store=self.store,
                         mode="r+",
                         region=region,
                         consolidated=True,
@@ -253,7 +256,7 @@ class ZarrStore(Store, Generic[ZST]):
 
 def get_zarr_directory_store(
     path: Path, append_dim: str = "time", index_options: dict | None = None, **kwargs: Any
-) -> ZarrStore[ZarrStoreLike]:
+) -> ZarrStore[ZarrStoreBase]:
     """Factory function to create ZarrStore objects based on a local Zarr store.
 
     Args:
@@ -269,12 +272,12 @@ def get_zarr_directory_store(
 
     """
     store = make_local_store(path)
-    return ZarrStore[ZarrStoreLike](store, append_dim=append_dim, index_options=index_options, **kwargs)
+    return ZarrStore[ZarrStoreBase](store, append_dim=append_dim, index_options=index_options, **kwargs)
 
 
 def get_zarr_memory_store(
     append_dim: str = "time", index_options: dict | None = None, **kwargs: Any
-) -> ZarrStore[ZarrStoreLike]:
+) -> ZarrStore[ZarrStoreBase]:
     """Factory function to create ZarrStore objects based on an in-memory Zarr store.
 
     Args:
@@ -289,7 +292,7 @@ def get_zarr_memory_store(
 
     """
     store = make_memory_store()
-    return ZarrStore[ZarrStoreLike](store, append_dim=append_dim, index_options=index_options, **kwargs)
+    return ZarrStore[ZarrStoreBase](store, append_dim=append_dim, index_options=index_options, **kwargs)
 
 
 class VersionedZarrStore(VersionedStore, SimpleVersioning[ZST], ZarrStore[ZST]):
@@ -403,7 +406,7 @@ def get_versioned_zarr_directory_store(
     index_options: dict | None = None,
     version_pat: str = r"v\d+",
     **kwargs: Any,
-) -> VersionedZarrStore[ZarrStoreLike]:
+) -> VersionedZarrStore[ZarrStoreBase]:
     """Factory function to create VersionedZarrStore objects based on a local Zarr store.
 
     Args:
@@ -434,11 +437,11 @@ def get_versioned_zarr_directory_store(
                 versions.add(f.name)
 
     # factory function to create a Directory Stores corresponding to versions
-    def factory(v: str) -> ZarrStoreLike:
+    def factory(v: str) -> ZarrStoreBase:
         """Factory function to create a Directory Store corresponding to version."""
         return make_local_store(path / v)
 
-    return VersionedZarrStore[ZarrStoreLike](
+    return VersionedZarrStore[ZarrStoreBase](
         factory=factory,
         versions=versions,
         append_dim=append_dim,
@@ -452,7 +455,7 @@ def get_versioned_zarr_memory_store(
     append_dim: str = "time",
     index_options: dict | None = None,
     **kwargs: Any,
-) -> VersionedZarrStore[ZarrStoreLike]:
+) -> VersionedZarrStore[ZarrStoreBase]:
     """Factory function to create VersionedZarrStore objects based on an in-memory Zarr store.
 
     Args:
@@ -469,11 +472,11 @@ def get_versioned_zarr_memory_store(
 
     """
 
-    def factory(_: str) -> ZarrStoreLike:
+    def factory(_: str) -> ZarrStoreBase:
         """Factory for versioning."""
         return make_memory_store()
 
-    return VersionedZarrStore[ZarrStoreLike](
+    return VersionedZarrStore[ZarrStoreBase](
         factory=factory,
         versions=versions,
         append_dim=append_dim,
