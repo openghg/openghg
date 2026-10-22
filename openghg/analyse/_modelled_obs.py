@@ -130,6 +130,8 @@ def _padded_flux_slice_start_and_end(fp: xr.DataArray | xr.Dataset) -> tuple[np.
 
 def _make_low_freq_flux(flux: xr.DataArray, fp: xr.DataArray | xr.Dataset) -> xr.DataArray:
     start, end = _padded_flux_slice_start_and_end(fp)
+    # Monthly means are labelled at month start, including for mid-month releases.
+    start = pd.Timestamp(start).to_period("M").start_time
 
     flux_low_freq = (
         flux.resample({"time": "1MS"})
