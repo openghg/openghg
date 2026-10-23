@@ -44,16 +44,14 @@ def compare_compression(filepath: Path) -> dict:
                 codec_str = f"blosc_codec_{codec}_complevel_{comp_level}_shuffle_{shuffle}"
 
                 zarr_path = Path(tmpdir, f"zarr_store_{codec_str}.zip")
-                store = zarr.storage.ZipStore(zarr_path)
-
                 compressor = Blosc(cname=codec, clevel=comp_level, shuffle=shuffle)
                 encoding = get_zarr_encoding(data_vars=ds.data_vars, compressor=compressor)
 
-                start = time.perf_counter()
-                ds.to_zarr(store=store, encoding=encoding, zarr_format=2)
-                time_taken = time.perf_counter() - start
+                with zarr.storage.ZipStore(zarr_path, mode="w") as store:
+                    start = time.perf_counter()
+                    ds.to_zarr(store=store, encoding=encoding, zarr_format=2)
+                    time_taken = time.perf_counter() - start
 
-                store.close()
                 compressed_size = zarr_path.stat().st_size
 
                 ratio = orig_size / compressed_size

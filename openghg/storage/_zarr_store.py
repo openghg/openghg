@@ -221,6 +221,10 @@ class ZarrStore(Store, Generic[ZST]):
                         f"Multiple input values map to the same stored value with index options {self.index_options}."
                     ) from e
 
+                # Corrections may lazily read this store. Evaluate them before any
+                # fallback write changes values needed by another region.
+                data = data.compute()
+
                 # can only write to specified region if data vars have dimension in common with that region
                 # so we will first write the variables without the append dimension (since this is the dim
                 # where we specify regions), then we will write the variables that have the append dim as
@@ -424,6 +428,7 @@ def get_versioned_zarr_directory_store(
         storage.
 
     """
+    path = path.absolute()
     versions = set([]) if versions is None else set(versions)
 
     # make path or look for versions if it already exists

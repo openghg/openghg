@@ -19,6 +19,7 @@ def has_async_store_api() -> bool:
 
 
 def make_local_store(path: Path) -> ZarrStoreBase:
+    path = path.absolute()
     if has_async_store_api():
         return zarr.storage.LocalStore(path)
     return cast(ZarrStoreBase, getattr(zarr.storage, "DirectoryStore")(path))

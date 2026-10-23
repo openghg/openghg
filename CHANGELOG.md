@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Preserve lazy corrections derived from stored data, anchor local Zarr store paths, and keep compression benchmarks writable with Zarr 3. Legacy high-resolution footprints inherit missing units from `fp` during analysis. [PR #1786](https://github.com/openghg/openghg/pull/1786)
 - Refreshed boundary-condition processing timestamps consistently in metadata and dataset attributes so previously processed inputs pass strict alignment. Conflicting source coverage still raises an error; specify an explicit period for ambiguous single-timestamp inputs. [Issue #1779](https://github.com/openghg/openghg/issues/1779)
 - Preserved mole-fraction and variability metadata when resampling surface observations weighted by observation count. [Issue #1765](https://github.com/openghg/openghg/issues/1765)
 - Added column `max_level` consistency validation to `ModelScenario` and preserved `max_level` metadata when standardising ACRG and PARIS column footprints, preventing observations and footprints with different vertical extents from being combined. [PR #1718](https://github.com/openghg/openghg/pull/1718)
