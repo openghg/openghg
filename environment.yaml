@@ -11,7 +11,7 @@ dependencies:
   - dask<2025.10
   - h5netcdf>=1.0.0,<=1.6.4
   - h5py<3.15
-  - filelock
+  - filelock<=3.32.6
   - matplotlib>=3.5,<=3.10.6
   - msgpack-python>=1.0,<=1.1.1
   - netcdf4>=1.6.0,<=1.7.2
@@ -23,8 +23,8 @@ dependencies:
   - openpyxl
   - pandas>=2.0,<=2.3.3
   - pip
-  - pint
-  - pint-xarray
+  - pint<=0.24.4
+  - pint-xarray<=0.5.1
   - plotly
   - pyvis
   - rapidfuzz
