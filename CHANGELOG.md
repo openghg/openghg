@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Retained the first month's mean flux in time-resolved `fp_x_flux` calculations when the footprint look-back window starts mid-month. Previously, date selection dropped this monthly value and could leave the residual contribution missing. Recomputing affected `ModelScenario` outputs and downstream inversions can therefore change their results. [PR #1790](https://github.com/openghg/openghg/pull/1790)
+- Aligned Conda's Filelock, Pint and Pint-xarray upper bounds with the supported versions in `pyproject.toml`, avoiding unit-parsing and file-lock permission failures with unsupported versions. [PR #1790](https://github.com/openghg/openghg/pull/1790)
 - Refreshed boundary-condition processing timestamps consistently in metadata and dataset attributes so previously processed inputs pass strict alignment. Conflicting source coverage still raises an error; specify an explicit period for ambiguous single-timestamp inputs. [Issue #1779](https://github.com/openghg/openghg/issues/1779)
 - Preserved mole-fraction and variability metadata when resampling surface observations weighted by observation count. [Issue #1765](https://github.com/openghg/openghg/issues/1765)
 - Added column `max_level` consistency validation to `ModelScenario` and preserved `max_level` metadata when standardising ACRG and PARIS column footprints, preventing observations and footprints with different vertical extents from being combined. [PR #1718](https://github.com/openghg/openghg/pull/1718)
