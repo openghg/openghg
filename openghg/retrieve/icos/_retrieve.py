@@ -243,6 +243,17 @@ def parse_icos_text_file(data_info: dict | pd.Series) -> tuple[xr.Dataset, dict]
 
     #     df = df.astype(dtypes)
 
+    # Convert columns to the dtypes declared by ICOS, to match the previous (dobj) method
+    attrs = _data_parsing.get_data_attrs(dobj_uri, species)
+    dtypes = _data_parsing.dtypes_dict(dataframe.columns.to_list(), attrs)
+    # Times are already parsed above, so don't convert the TIMESTAMP column
+    # If it's passed test_icos_retrieve_skips_obspack_globalview fails
+    dtypes.pop("TIMESTAMP", None)
+    # if Stdev dtype not specified, make it the same as the mole fraction column
+    if species in dtypes and "Stdev" not in dtypes:
+        dtypes["Stdev"] = dtypes[species]
+    dataframe = dataframe.astype(dtypes)
+
     dataframe.columns = [x.lower() for x in dataframe.columns]
 
     # If there is a stdev column, replace missing values with nans
@@ -456,7 +467,40 @@ def create_icos_attributes(
     keep_dataset_source_names: list | None = None,
 ) -> dict:
     """
-    Create attributes for ICOS dataset
+      Create attributes for ICOS dataset by combining the attributes from the downloaded data
+      with details retrieved from the ICOS Carbon Portal
+
+      This includes:
+      - Recording the data object URL, species, site and data sources.
+      - Converting the data frequenry into a sampling period in seconds.
+      - Maps ICOS attribute names (e.g "sampling_heights") to
+      OpenGHG names (e.g "inlet") and formats inlet heighs and coordinates.
+      The names used depend on whether dataset_source is "ICOS_combined".
+      -Adds data owner, citation, licence, from the ICOS CP data
+      object and station metadata (see attribute_requiring_retrieval).
+      -Sets "instruments" from the unique instrument IDs in the dataset: "icos_id_<n>" for
+      one ID, "combined" for several, or "unknown" for none. If the dataset has no
+    instrument variable, the instrument retrieved from ICOS CP is used instead.
+
+
+      Args:
+          dataset: Parsed ICOS data.
+          data_info: Details of the ICOS data object. Must include "dobj_uri", "site"
+              and "species". "project_name" is used if dataset_source is not kept.
+          data_attributes: Attributes extracted from the downloaded data
+              (e.g. from retrieve_and_parse_icos_data).
+          species: Species name, passed on to attributes_requiring_retrieval.
+          additional_data: Extra attributes to add (e.g. network, data_type, data_level).
+          station_meta: ICOS Station metadata. Retrieved from the site if not given.
+          dataset_source:  Name of the ICOS product the data was retrieved from (e.g. "ICOS Combined",
+             "ICOS FastTrack"). If it isn't in keep_dataset_source_names, it is replaced by the
+              project name in data_info (e.g. "icos", "euroObspack"). "ICOS Combined" (ObsPack netCDF)
+              data uses different ICOS attribute names, which are mapped accordingly.
+          keep_dataset_source_names: dataset_source values that are not replaced by the project
+              name.Defaults to ["ICOS FastTrack", "EYE-AVE-PAR", "ICOS Combined", "ICOS Flask"].
+
+      Returns:
+          dict: Attributes for the dataset
     """
 
     from openghg.util import format_inlet
@@ -549,7 +593,7 @@ def create_icos_attributes(
             value = str(value).replace(" ", "")  # could use clean_string here
             value = format_inlet(value, key_name=new_key)
         elif new_key in coord_keys:
-            value = _data_parsing.parse_coord(value)
+            value = _data_parsing.format_icos_coord(value)
         else:
             value = str(value)
 
@@ -617,6 +661,27 @@ def create_metadata(
 ) -> dict:
     """
     Create metadata to be stored in the metastore for ICOS data
+
+    This includes:
+    - Adds the station long name, latitude and longitude from the OpenGHG site
+        information (openghg_defs), if it has an entry for this site under this
+        network. Otherwise these keys are left out.
+    - Records the site code and copies the dataset source, species, instrument, calibration scale and
+        sampling period from the attributes.
+    - Adds the OpenGHG-specific values passed in additional_data (e.g. network,
+        data_type, data_source, source_format, data_level).
+
+    Args:
+        site: Site code
+        network: Network name (e.g. "ICOS"), used to look up the site information
+        attributes: Attributes created by create_icos_attributes. Must include
+            "dataset_source", "species", "instrument", "dataset_calibration_scale"
+            and "sampling_period".
+        additional_data: OpenGHG-specific values to add to the metadata.
+        openghg_site_metadata: OpenGHG site information, keyed by site code and then
+            network. Loaded from the openghg_defs site_info file if not provided.
+    Returns:
+        dict: Metadata for the dataset
     """
 
     if additional_data is None:

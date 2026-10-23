@@ -102,8 +102,12 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
     )
 
     data1 = data_first_retrieval[0].data
-    # for some reason dataset source now icos for 2nd metadata element and euroobspack for 1st element
-    # meta1 = data_first_retrieval[0].metadata
+
+    # This test retrieves live data from the ICOS Carbon Portal, which returns two results
+    # for WAO: one from the ICOS project and one from the European ObsPack. Their order
+    # depends on the Carbon Portal search and has swapped before, so if the dataset_source
+    # check below fails, check whether the two results have changed places.
+    # Currently the European ObsPack result is the second element, so only that one is checked.
     meta2 = data_first_retrieval[1].metadata
 
     # Previous results from ICOS (pre-07/08/2024) contained
@@ -134,10 +138,8 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
         "dataset_source": "euroObspack",  # UPDATED to icos 12/03/2026 then updated to euroObspack 7/08/2026
     }
 
-    # assert expected_metadata.items() <= meta1.items()
     assert expected_metadata.items() <= meta2.items()
 
-    # assert "data_owner" in meta1 and "data_owner_email" in meta1
     assert "data_owner" in meta2 and "data_owner_email" in meta2
 
     assert retrieve_all.call_count == 0
@@ -408,17 +410,16 @@ def test_retrieve_icos_standard_compare():
         data_dobj = obs_dobj.data
         data = obs.data
 
-       
-        # NRT data updates daily, so the two (old and new) retrieval methods 
+        # NRT data updates daily, so the two (old and new) retrieval methods
         # may pick up different versions depending on the time of day this test runs.
         # e.g could be comparing todays dobj data with yesterday icos_scp.
-        #therefore make sure comparing data retrieved across the same time period.
+        # therefore make sure comparing data retrieved across the same time period.
         common_times = np.intersect1d(data_dobj.time.values, data.time.values)
         same_version = data_dobj.sizes["time"] == data.sizes["time"] == len(common_times)
         version_specific = [] if same_version else ['icoscp_url']
         data_dobj = data_dobj.sel(time=common_times)
         data = data.sel(time=common_times)
-    
+
         # Check time values match
         time_org = data_dobj.time
         time_new = data.time

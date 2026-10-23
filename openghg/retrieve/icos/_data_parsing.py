@@ -742,7 +742,7 @@ def get_icos_data(data_info: dict | pd.Series) -> xr.Dataset:
     raise NotImplementedError(f"Cannot parse ICOS format {fmt}.")
 
 
-def parse_coord(value: Any) -> float | str:
+def format_icos_coord(value: Any) -> float | str:
     """
     Convert ICOS text-header latitude and longitude to numeric coordinates
     (i.e "52.1663 N" and "14.1226 E" to "52.1663" and "14.1226")
