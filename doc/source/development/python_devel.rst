@@ -234,6 +234,61 @@ To pass arguments to ``pytest``, you can append them after the ``tox`` command a
    tox run -e py313 -- tests/analyse/test_scenario.py
 
 
+Testing Zarr storage compatibility
+----------------------------------
+
+The normal installation uses zarr-python 3 (currently ``>=3.1.6,<=3.4.1``),
+while newly created OpenGHG stores default to Zarr format 2. The
+``zarr-storage.yaml`` workflow tests zarr-python 2.18.3 with format 2, and
+zarr-python 3.1.6 and 3.4.1 with formats 2 and 3. It covers memory and local
+stores, version copying, appends, overlaps, updates, clearing, deletion and
+storage accounting, together with datasource tests.
+
+Pass ``zarr_format=3`` to a Zarr storage factory to create format 3 data:
+
+.. code-block:: python
+
+   from pathlib import Path
+
+   from openghg.storage import get_zarr_directory_store
+   from zarr.codecs import BloscCodec
+
+   store = get_zarr_directory_store(
+       Path("observations.zarr"),
+       zarr_format=3,
+       compressor=BloscCodec(cname="zstd", clevel=5),
+   )
+
+Format 3 requires a zarr-python 3 runtime and native Zarr codecs, such as
+``BloscCodec``. Per-variable encoding uses ``compressors``, for example
+``encoding={"mf": {"compressors": (BloscCodec(cname="zstd"),)}}``.
+Format 2 continues to accept ``numcodecs`` compressors. See the
+`xarray compressor and filter documentation
+<https://docs.xarray.dev/en/stable/user-guide/io.html#zarr-compressors-and-filters>`__.
+Format 3 stores use unconsolidated metadata. Reopening, appending, updating or
+copying an existing store retains its stored format; choosing a format for new
+stores does not convert existing data.
+
+To reproduce the legacy baseline, use a separate checkout with Python 3.12 and
+``uv``:
+
+.. code-block:: bash
+
+   uv sync --locked --extra dev
+   uv pip install "zarr==2.18.3" "numcodecs==0.15.1" "xarray==2025.9.1"
+   uv run --no-sync pytest -v tests/storage tests/store/test_datasource.py
+
+For the minimum supported Zarr 3 runtime, replace the override command with:
+
+.. code-block:: bash
+
+   uv pip install "zarr==3.1.6" "numcodecs==0.16.5" "xarray==2026.9.0"
+
+Use ``zarr==3.4.1`` with the same numcodecs and xarray versions for the current
+lane. ``--no-sync`` keeps ``uv run`` from restoring the project's normal
+dependency versions after an override. Use these overrides only in the separate
+``uv`` checkout; leave Pixi environments unchanged.
+
 Coding Style
 ============
 

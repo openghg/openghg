@@ -6,6 +6,7 @@ from typing import Any, cast, Generic, Literal, TypeVar
 
 import pandas as pd
 import xarray as xr
+import zarr
 
 from openghg.types import DataOverlapError
 from openghg.util._versioning import SimpleVersioning
@@ -31,9 +32,8 @@ def parse_to_zarr_kwargs(to_zarr_kwargs: dict) -> dict:
     for k, v in to_zarr_kwargs.items():
         if k in accepted_keys:
             result[k] = v
-    if result["zarr_format"] not in (None, 2):
-        raise ValueError("OpenGHG stores use Zarr format 2 for compatibility with existing installations.")
-    result["zarr_format"] = 2
+    if result["zarr_format"] not in (None, 2, 3):
+        raise ValueError("zarr_format must be None, 2, or 3.")
     return result
 
 
@@ -62,8 +62,9 @@ class ZarrStore(Store, Generic[ZST]):
             zarr_store: instantiated Zarr Store.
             append_dim: dimension to insert new data along.
             index_options: options for index, such as `method = "nearest"`
-            compressor: compressor to use, see https://zarr.readthedocs.io/en/stable/tutorial.html#compressors
-            filters: filters to use, see https://zarr.readthedocs.io/en/stable/tutorial.html#filters
+            compressor: numcodecs compressor for format 2, or a native
+                ``zarr.codecs`` codec for format 3. Codecs are not converted between formats.
+            filters: filters compatible with the selected format.
             encoding: dictionary mapping data variables to encoding dictionary
             to_zarr_kwargs: arguments that could be passed to `xr.Dataset.to_zarr`.
               Not all parameters will be passed on. See here for the full description
@@ -71,7 +72,8 @@ class ZarrStore(Store, Generic[ZST]):
 
               Accepted arguments are:
               - `write_empty_chunks`
-              - `zarr_format`: 2, preserving compatibility with existing stores.
+              - `zarr_format`: None, 2, or 3. New stores default to format 2;
+                format 3 requires Zarr 3. Existing stores retain their stored format.
               - `align_chunks`: True by default to prevent overlapping Dask writes.
               - `storage_options`: only relevant to cloud storage, see
                  https://github.com/pydata/xarray/pull/5615
@@ -99,6 +101,25 @@ class ZarrStore(Store, Generic[ZST]):
     def store(self) -> ZST:
         """Underlying Zarr storage."""
         return self._store
+
+    @property
+    def _zarr_format(self) -> int:
+        """Retain an existing store's format; default new stores to format 2."""
+        if not self._is_empty():
+            if not has_async_store_api():
+                return 2
+            return int(zarr.open_group(self.store, mode="r", use_consolidated=False).metadata.zarr_format)
+        return int(self.to_zarr_kwargs.get("zarr_format") or 2)
+
+    @property
+    def _write_kwargs(self) -> dict[str, Any]:
+        """Choose metadata handling from the actual storage format."""
+        result = self.to_zarr_kwargs.copy()
+        result["zarr_format"] = self._zarr_format
+        if result["zarr_format"] == 3 and not has_async_store_api():
+            raise ValueError("Writing Zarr format 3 requires the Zarr 3 package.")
+        result["consolidated"] = result["zarr_format"] == 2
+        return result
 
     @property
     def index(self) -> pd.Index:
@@ -143,7 +164,7 @@ class ZarrStore(Store, Generic[ZST]):
             return xr.Dataset()
 
         # need to sort to be consistent with MemoryStore
-        result = xr.open_zarr(self.store, consolidated=True)
+        result = xr.open_zarr(self.store, consolidated=self._zarr_format == 2)
 
         if sort:
             result = result.sortby(self.append_dim)
@@ -160,10 +181,9 @@ class ZarrStore(Store, Generic[ZST]):
             data.to_zarr(
                 store=self.store,
                 mode="w",
-                consolidated=True,
                 compute=True,
                 encoding=normalise_zarr_encoding(encoding),
-                **self.to_zarr_kwargs,
+                **self._write_kwargs,
             )
         else:
             if self._overlap_determiner.has_overlaps(data.get_index(self.append_dim)):
@@ -180,9 +200,8 @@ class ZarrStore(Store, Generic[ZST]):
                 store=self.store,
                 mode="a",
                 append_dim=self.append_dim,
-                consolidated=True,
                 compute=True,
-                **self.to_zarr_kwargs,
+                **self._write_kwargs,
             )
 
     def update(self, data: xr.Dataset, on_nonoverlap: Literal["error", "ignore"] = "error") -> None:
@@ -207,9 +226,8 @@ class ZarrStore(Store, Generic[ZST]):
                     store=self.store,
                     mode="r+",
                     region="auto",
-                    consolidated=True,
                     compute=True,
-                    **self.to_zarr_kwargs,
+                    **self._write_kwargs,
                 )
             except (ValueError, IndexError):
                 kwargs = self.index_options.copy()
@@ -243,9 +261,8 @@ class ZarrStore(Store, Generic[ZST]):
                     store=self.store,
                     mode="r+",
                     region="auto",
-                    consolidated=True,
                     compute=True,
-                    **self.to_zarr_kwargs,
+                    **self._write_kwargs,
                 )
 
                 # now proceed with variables that contain the append dim
@@ -259,9 +276,8 @@ class ZarrStore(Store, Generic[ZST]):
                         store=self.store,
                         mode="r+",
                         region=region,
-                        consolidated=True,
                         compute=True,
-                        **self.to_zarr_kwargs,
+                        **self._write_kwargs,
                     )
 
 
@@ -276,7 +292,9 @@ def get_zarr_directory_store(
         index_options: options for index along append dimension; for instance
           `method = "nearest"`.
         kwargs: `compressor`, `filters`, `encoding`, or arguments that could be
-          passed to `xr.Dataset.to_zarr`.
+          passed to `xr.Dataset.to_zarr`. New stores default to format 2; format 3
+          requires Zarr 3 and native ``zarr.codecs`` codecs. Existing stores retain
+          their stored format, even when a different format is requested.
 
     Returns:
         ZarrStore backed by the installed Zarr storage API.
@@ -296,7 +314,9 @@ def get_zarr_memory_store(
         index_options: options for index along append dimension; for instance
           `method = "nearest"`.
         kwargs: `compressor`, `filters`, `encoding`, or arguments that could be
-          passed to `xr.Dataset.to_zarr`.
+          passed to `xr.Dataset.to_zarr`. New stores default to format 2; format 3
+          requires Zarr 3 and native ``zarr.codecs`` codecs. Existing stores retain
+          their stored format, even when a different format is requested.
 
     Returns:
         ZarrStore backed by the installed Zarr storage API.
@@ -340,8 +360,9 @@ class VersionedZarrStore(VersionedStore, SimpleVersioning[ZST], ZarrStore[ZST]):
             append_dim: dimension to append new data along.
             index_options: options for the index used to resolve overlaps/conflicts when
               adding data to the store.
-            compressor: compressor to use, see https://zarr.readthedocs.io/en/stable/tutorial.html#compressors
-            filters: filters to use, see https://zarr.readthedocs.io/en/stable/tutorial.html#filters
+            compressor: numcodecs compressor for format 2, or a native
+                ``zarr.codecs`` codec for format 3. Codecs are not converted between formats.
+            filters: filters compatible with the selected format.
             encoding: dictionary mapping data variables to encoding dictionary
             to_zarr_kwargs: arguments that could be passed to `xr.Dataset.to_zarr`.
               Not all parameters will be passed on. See here for the full description
@@ -349,7 +370,8 @@ class VersionedZarrStore(VersionedStore, SimpleVersioning[ZST], ZarrStore[ZST]):
 
               Accepted arguments are:
               - `write_empty_chunks`
-              - `zarr_format`: 2, preserving compatibility with existing stores.
+              - `zarr_format`: None, 2, or 3. New stores default to format 2;
+                format 3 requires Zarr 3. Existing stores retain their stored format.
               - `align_chunks`: True by default to prevent overlapping Dask writes.
               - `storage_options`: only relevant to cloud storage, see
                  https://github.com/pydata/xarray/pull/5615
@@ -428,7 +450,9 @@ def get_versioned_zarr_directory_store(
             adding data to the store.
         version_pat: regex pattern to match existing versions
         kwargs: `compressor`, `filters`, `encoding`, or arguments that could be
-          passed to `xr.Dataset.to_zarr`.
+          passed to `xr.Dataset.to_zarr`. New stores default to format 2; format 3
+          requires Zarr 3 and native ``zarr.codecs`` codecs. Existing stores retain
+          their stored format, even when a different format is requested.
 
     Returns:
         VersionedZarrStore object with a local Zarr store as the underlying
@@ -476,7 +500,9 @@ def get_versioned_zarr_memory_store(
         index_options: options for the index used to resolve overlaps/conflicts when
           adding data to the store.
         kwargs: `compressor`, `filters`, `encoding`, or arguments that could be
-          passed to `xr.Dataset.to_zarr`.
+          passed to `xr.Dataset.to_zarr`. New stores default to format 2; format 3
+          requires Zarr 3 and native ``zarr.codecs`` codecs. Existing stores retain
+          their stored format, even when a different format is requested.
 
     Returns:
         VersionedZarrStore object with an in-memory Zarr store as the underlying

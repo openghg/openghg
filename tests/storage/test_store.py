@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
+import zarr
 
 from openghg.storage import (
     MemoryStore,
@@ -16,6 +17,7 @@ from openghg.storage import (
     get_versioned_zarr_memory_store,
 )
 from openghg.storage._store import VersionedStore
+from openghg.storage._zarr_compat import has_async_store_api
 from openghg.storage._zarr_store import ZarrStore, VersionedZarrStore
 from openghg.types import DataOverlapError
 from openghg.util._versioning import VersionError
@@ -103,28 +105,9 @@ def versioned_memory_store():
     return VersionedMemoryStore()
 
 
-@pytest.fixture()
-def zarr_memory_store():
-    """Test ZarrStore with zarr.MemoryStore as underlying storage."""
-    return get_zarr_memory_store()
-
-
-@pytest.fixture()
-def zarr_directory_store(tmp_path):
-    """Test ZarrStore with zarr.DirectoryStore as underlying storage."""
-    return get_zarr_directory_store(path=tmp_path)
-
-
-@pytest.fixture()
-def versioned_zarr_memory_store():
-    """Test VersionedZarrStore with zarr.MemoryStore as underlying storage."""
-    return get_versioned_zarr_memory_store()
-
-
-@pytest.fixture()
-def versioned_zarr_directory_store(tmp_path):
-    """Test VersionedZarrStore with zarr.DirectoryStore as underlying storage."""
-    return get_versioned_zarr_directory_store(path=tmp_path)
+@pytest.fixture(params=(2, 3) if has_async_store_api() else (2,))
+def zarr_format(request):
+    return request.param
 
 
 # names of fixtures to use in parametrize
@@ -138,20 +121,43 @@ store_names = [
 ]
 
 
+def store_cases(names):
+    formats = (2, 3) if has_async_store_api() else (2,)
+    return [
+        pytest.param((name, fmt), id=f"{name}-format{fmt}" if fmt else name)
+        for name in names
+        for fmt in (formats if "zarr" in name else (None,))
+    ]
+
+
+@pytest.fixture
+def store(request, tmp_path):
+    name, zarr_format = request.param
+    if zarr_format is None:
+        return request.getfixturevalue(name)
+    factories = {
+        "zarr_memory_store": get_zarr_memory_store,
+        "zarr_directory_store": get_zarr_directory_store,
+        "versioned_zarr_memory_store": get_versioned_zarr_memory_store,
+        "versioned_zarr_directory_store": get_versioned_zarr_directory_store,
+    }
+    kwargs = {"zarr_format": zarr_format}
+    if "directory" in name:
+        kwargs["path"] = tmp_path
+    return factories[name](**kwargs)
+
+
 # ------------------------------
 # TESTS
 # ------------------------------
 
 
-# To use fixtures in parametrize, use the "request" fixture, as detailed here:
-# https://stackoverflow.com/questions/42014484/pytest-using-fixtures-as-arguments-in-parametrize
-@pytest.mark.parametrize("store_name", store_names)
-def test_insert_creates(store_name, request, ds1):
+@pytest.mark.parametrize("store", store_cases(store_names), indirect=True)
+def test_insert_creates(store, ds1):
     """Test that a store registers as False until data is added.
 
     After data is added, we check that we can retrieve the data added.
     """
-    store = request.getfixturevalue(store_name)
 
     if isinstance(store, VersionedStore):
         store.create_version("v1", checkout=True)
@@ -164,11 +170,15 @@ def test_insert_creates(store_name, request, ds1):
 
     xr.testing.assert_equal(store.get(), ds1)
 
+    if isinstance(store, ZarrStore) and has_async_store_api():
+        assert (
+            zarr.open_group(store.store, mode="r").metadata.zarr_format == store.to_zarr_kwargs["zarr_format"]
+        )
 
-@pytest.mark.parametrize("store_name", store_names)
-def test_clear(store_name, request, ds1):
+
+@pytest.mark.parametrize("store", store_cases(store_names), indirect=True)
+def test_clear(store, ds1):
     """Test clearing data from the store."""
-    store = request.getfixturevalue(store_name)
 
     if isinstance(store, VersionedStore):
         store.create_version("v1", checkout=True)
@@ -185,15 +195,14 @@ def test_clear(store_name, request, ds1):
     xr.testing.assert_identical(store.get(), xr.Dataset())
 
 
-@pytest.mark.parametrize("store_name", store_names)
-def test_insert_twice(store_name, request, ds1, ds5):
+@pytest.mark.parametrize("store", store_cases(store_names), indirect=True)
+def test_insert_twice(store, ds1, ds5):
     """Test inserting data twice.
 
     The datasets `ds1` and `ds5` do not overlap, so after
     inserting both datasets, the data stored should just be
     a concatenation of the values of each dataset.
     """
-    store = request.getfixturevalue(store_name)
 
     if isinstance(store, VersionedStore):
         store.create_version("v1", checkout=True)
@@ -206,10 +215,9 @@ def test_insert_twice(store_name, request, ds1, ds5):
     np.testing.assert_equal(store.get().x.values, expected)
 
 
-@pytest.mark.parametrize("store_name", store_names)
-def test_error_on_insert_overlap(store_name, request, ds1):
+@pytest.mark.parametrize("store", store_cases(store_names), indirect=True)
+def test_error_on_insert_overlap(store, ds1):
     """Test an error is raised on overlap."""
-    store = request.getfixturevalue(store_name)
 
     if isinstance(store, VersionedStore):
         store.create_version("v1", checkout=True)
@@ -220,10 +228,9 @@ def test_error_on_insert_overlap(store_name, request, ds1):
         store.insert(ds1)
 
 
-@pytest.mark.parametrize("store_name", store_names)
-def test_insert_ignore_overlap(store_name, request, ds1, ds4):
+@pytest.mark.parametrize("store", store_cases(store_names), indirect=True)
+def test_insert_ignore_overlap(store, ds1, ds4):
     """Test that insert with `on_overlap = 'ignore'` inserts non-overlaping values."""
-    store = request.getfixturevalue(store_name)
 
     if isinstance(store, VersionedStore):
         store.create_version("v1", checkout=True)
@@ -242,19 +249,19 @@ def test_insert_ignore_overlap(store_name, request, ds1, ds4):
     np.testing.assert_equal(store.get().x.values, expected)
 
 
-def test_zarr_insert_ignore_exact_overlap_skips_append(zarr_memory_store, ds1, mocker):
+@pytest.mark.parametrize("store", store_cases(["zarr_memory_store"]), indirect=True)
+def test_zarr_insert_ignore_exact_overlap_skips_append(store, ds1, mocker):
     """Test that ignoring an exact overlap does not attempt an empty Zarr append."""
-    zarr_memory_store.insert(ds1)
+    store.insert(ds1)
     to_zarr = mocker.spy(xr.Dataset, "to_zarr")
 
-    zarr_memory_store.insert(ds1, on_overlap="ignore")
+    store.insert(ds1, on_overlap="ignore")
 
     to_zarr.assert_not_called()
 
 
-@pytest.mark.parametrize("store_name", store_names)
-def test_update(store_name, request, ds1, twice_ds1):
-    store = request.getfixturevalue(store_name)
+@pytest.mark.parametrize("store", store_cases(store_names), indirect=True)
+def test_update(store, ds1, twice_ds1):
 
     if isinstance(store, VersionedStore):
         store.create_version("v1", checkout=True)
@@ -269,10 +276,9 @@ def test_update(store_name, request, ds1, twice_ds1):
     xr.testing.assert_equal(store.get(), twice_ds1)
 
 
-@pytest.mark.parametrize("store_name", store_names)
-def test_update_ignore_nonoverlaps(store_name, request, ds1, ds4):
+@pytest.mark.parametrize("store", store_cases(store_names), indirect=True)
+def test_update_ignore_nonoverlaps(store, ds1, ds4):
     """Test `update` with non-overlaps ignored."""
-    store = request.getfixturevalue(store_name)
 
     if isinstance(store, VersionedStore):
         store.create_version("v1", checkout=True)
@@ -288,14 +294,13 @@ def test_update_ignore_nonoverlaps(store_name, request, ds1, ds4):
     np.testing.assert_equal(store.get().x.values, expected)
 
 
-@pytest.mark.parametrize("store_name", store_names)
-def test_non_contiguous_update(store_name, request, ds1, twice_ds2):
+@pytest.mark.parametrize("store", store_cases(store_names), indirect=True)
+def test_non_contiguous_update(store, ds1, twice_ds2):
     """Test `update` when only some of the values are updated.
 
     This raises an error with Zarr stores because the region to update is non-contiguous.
     We will fix this later.
     """
-    store = request.getfixturevalue(store_name)
 
     if isinstance(store, VersionedStore):
         store.create_version("v1", checkout=True)
@@ -312,10 +317,9 @@ def test_non_contiguous_update(store_name, request, ds1, twice_ds2):
     np.testing.assert_equal(store.get().x.values, expected)
 
 
-@pytest.mark.parametrize("store_name", store_names)
-def test_contiguous_update(store_name, request, ds1, twice_ds1, ds5):
+@pytest.mark.parametrize("store", store_cases(store_names), indirect=True)
+def test_contiguous_update(store, ds1, twice_ds1, ds5):
     """Test `update` on contiguous region of times."""
-    store = request.getfixturevalue(store_name)
 
     if isinstance(store, VersionedStore):
         store.create_version("v1", checkout=True)
@@ -333,11 +337,10 @@ def test_contiguous_update(store_name, request, ds1, twice_ds1, ds5):
 
 
 # ZARR SPECIFIC TESTS
-@pytest.mark.parametrize("store_name", ["zarr_memory_store", "zarr_directory_store"])
-def test_zarr_update_lazy_correction_from_same_store(store_name, request):
+@pytest.mark.parametrize("store", store_cases(["zarr_memory_store", "zarr_directory_store"]), indirect=True)
+def test_zarr_update_lazy_correction_from_same_store(store):
     """Separated correction regions use the original values, even within a shared chunk."""
     data = dummy_dataset(pd.date_range("2000", periods=20, freq="h"), np.arange(20.0))
-    store = request.getfixturevalue(store_name)
     store.encoding = {"x": {"chunks": (7,)}}
     store.insert(data)
 
@@ -353,18 +356,18 @@ def test_zarr_update_lazy_correction_from_same_store(store_name, request):
     xr.testing.assert_allclose(store.get(), expected)
 
 
-def test_zarr_directory_store_retains_root_after_chdir(tmp_path, monkeypatch, ds1, ds5):
+def test_zarr_directory_store_retains_root_after_chdir(tmp_path, monkeypatch, ds1, ds5, zarr_format):
     """Reads, appends and deletion keep using the directory chosen at construction."""
     original = tmp_path / "original"
     other = tmp_path / "other"
     original.mkdir()
     other.mkdir()
     monkeypatch.chdir(original)
-    store = get_zarr_directory_store(Path("store"))
+    store = get_zarr_directory_store(Path("store"), zarr_format=zarr_format)
     store.insert(ds1)
 
     monkeypatch.chdir(other)
-    unrelated = get_zarr_directory_store(Path("store"))
+    unrelated = get_zarr_directory_store(Path("store"), zarr_format=zarr_format)
     unrelated.insert(ds5)
     xr.testing.assert_equal(store.get(), ds1)
     store.insert(ds5)
@@ -377,7 +380,7 @@ def test_zarr_directory_store_retains_root_after_chdir(tmp_path, monkeypatch, ds
 
 @pytest.mark.parametrize("create_before_chdir", [True, False])
 def test_versioned_zarr_directory_store_retains_root_after_chdir(
-    tmp_path, monkeypatch, ds1, create_before_chdir
+    tmp_path, monkeypatch, ds1, create_before_chdir, zarr_format
 ):
     """Both existing and future versions stay under the factory's original root."""
     original = tmp_path / "original"
@@ -385,7 +388,7 @@ def test_versioned_zarr_directory_store_retains_root_after_chdir(
     original.mkdir()
     other.mkdir()
     monkeypatch.chdir(original)
-    store = get_versioned_zarr_directory_store(Path("store"))
+    store = get_versioned_zarr_directory_store(Path("store"), zarr_format=zarr_format)
     if create_before_chdir:
         store.create_version("v1", checkout=True)
         store.insert(ds1)
@@ -402,13 +405,19 @@ def test_versioned_zarr_directory_store_retains_root_after_chdir(
     assert not (other / "store").exists()
 
 
-@pytest.mark.parametrize("store_name", [name for name in store_names if "zarr" in name])
-def test_zarr_encoding(store_name, request, ds1):
+@pytest.mark.parametrize(
+    "store", store_cases([name for name in store_names if "zarr" in name]), indirect=True
+)
+def test_zarr_encoding(store, ds1):
     """Check that data can be compressed with a specified encoding."""
-    store: ZarrStore = request.getfixturevalue(store_name)
 
-    compressor = Blosc(cname="zstd", clevel=5, shuffle=1)
-    encoding = {dv: {"compressor": compressor} for dv in ds1.data_vars}
+    if store.to_zarr_kwargs["zarr_format"] == 3:
+        compressor = zarr.codecs.BloscCodec(cname="zstd", clevel=5, shuffle="shuffle", typesize=8)
+        codec_encoding = {"compressors": (compressor,)}
+    else:
+        compressor = Blosc(cname="zstd", clevel=5, shuffle=1)
+        codec_encoding = {"compressor": compressor}
+    encoding = {dv: codec_encoding for dv in ds1.data_vars}
 
     # set `to_zarr_kwargs` here since it wasn't passed to init
     store.encoding = encoding
@@ -428,10 +437,9 @@ def test_zarr_encoding(store_name, request, ds1):
 versioned_store_names = [name for name in store_names if "versioned" in name]
 
 
-@pytest.mark.parametrize("store_name", versioned_store_names)
-def test_add_data_to_new_version(store_name, request, ds1, ds5):
+@pytest.mark.parametrize("store", store_cases(versioned_store_names), indirect=True)
+def test_add_data_to_new_version(store, ds1, ds5):
     """Check that data can be added to a new version without affecting an old version."""
-    store = request.getfixturevalue(store_name)
 
     # create a version and add some data
     store.create_version("v1", checkout=True)
@@ -451,10 +459,9 @@ def test_add_data_to_new_version(store_name, request, ds1, ds5):
     np.testing.assert_equal(store.get().x.values, expected1)
 
 
-@pytest.mark.parametrize("store_name", versioned_store_names)
-def test_nbytes_stored(store_name, request, ds1):
+@pytest.mark.parametrize("store", store_cases(versioned_store_names), indirect=True)
+def test_nbytes_stored(store, ds1):
     """Check that for subclasses of VersionedStore, `bytes_stored` sums over versions."""
-    store = request.getfixturevalue(store_name)
 
     # create a version and add some data
     store.create_version("v1", checkout=True)
@@ -471,10 +478,9 @@ def test_nbytes_stored(store_name, request, ds1):
     assert nbytes2 == 2 * nbytes1
 
 
-@pytest.mark.parametrize("store_name", versioned_store_names)
-def test_bool(store_name, request, ds1):
+@pytest.mark.parametrize("store", store_cases(versioned_store_names), indirect=True)
+def test_bool(store, ds1):
     """Check that for subclasses of VersionedStore, ``bool`` looks to see if any version is non-empty."""
-    store = request.getfixturevalue(store_name)
 
     # create a version and add some data
     store.create_version("v1", checkout=True)
@@ -490,10 +496,9 @@ def test_bool(store_name, request, ds1):
     assert store
 
 
-@pytest.mark.parametrize("store_name", versioned_store_names)
-def test_clear_data_from_old_version(store_name, request, ds1):
+@pytest.mark.parametrize("store", store_cases(versioned_store_names), indirect=True)
+def test_clear_data_from_old_version(store, ds1):
     """Check that data can be cleared from an old version without affecting a new version."""
-    store = request.getfixturevalue(store_name)
 
     # create a version and add some data
     store.create_version("v1", checkout=True)
@@ -513,10 +518,9 @@ def test_clear_data_from_old_version(store_name, request, ds1):
     assert store  # since at least one version has data, store evaluates to True
 
 
-@pytest.mark.parametrize("store_name", versioned_store_names)
-def test_delete_data_from_old_version(store_name, request, ds1):
+@pytest.mark.parametrize("store", store_cases(versioned_store_names), indirect=True)
+def test_delete_data_from_old_version(store, ds1):
     """Check that an old version can be deleted without affecting a new version."""
-    store = request.getfixturevalue(store_name)
 
     # create a version and add some data
     store.create_version("v1", checkout=True)
@@ -538,16 +542,18 @@ def test_delete_data_from_old_version(store_name, request, ds1):
     assert store
 
 
-def test_versioned_zarr_bytes_stored_compression(tmp_path):
+def test_versioned_zarr_bytes_stored_compression(tmp_path, zarr_format):
     """Test bytes stored with different compression settings."""
     from helpers import get_footprint_datapath
 
     datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
     original_size = datapath.stat().st_size
 
-    store = get_versioned_zarr_directory_store(path=tmp_path)
+    store = get_versioned_zarr_directory_store(path=tmp_path, zarr_format=zarr_format)
 
     with xr.open_dataset(datapath) as ds:
+        codec_key = "compressors" if has_async_store_api() else "compressor"
+        store.encoding = {name: {codec_key: None} for name in ds.data_vars}
         store.create_version("v1", checkout=True)
         store.insert(ds)
         uncompressed_bytes = store.bytes_stored()
@@ -557,8 +563,12 @@ def test_versioned_zarr_bytes_stored_compression(tmp_path):
         xr.testing.assert_equal(store.get(), ds)
 
     store.delete_version("v1")
+    store.encoding = {}
 
-    compressor = Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)
+    if zarr_format == 3:
+        compressor = zarr.codecs.BloscCodec(cname="zstd", clevel=5, shuffle="shuffle")
+    else:
+        compressor = Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)
     store.compressor = compressor
     with xr.open_dataset(datapath) as ds:
         store.create_version("v1", checkout=True)
@@ -570,7 +580,7 @@ def test_versioned_zarr_bytes_stored_compression(tmp_path):
         assert compressed_bytes < uncompressed_bytes
 
 
-def test_versioned_zarr_append_loop_has_no_missing_data(tmp_path):
+def test_versioned_zarr_append_loop_has_no_missing_data(tmp_path, zarr_format):
     """Check repeated appends do not lose values when source chunks share target chunks."""
     duration = 820
     chunk_size = 403
@@ -590,7 +600,7 @@ def test_versioned_zarr_append_loop_has_no_missing_data(tmp_path):
         datasets.append(ds.chunk({"time": chunk_size}))
 
     for i in range(10):
-        store = get_versioned_zarr_directory_store(path=tmp_path / f"test-store-{i}")
+        store = get_versioned_zarr_directory_store(path=tmp_path / f"test-store-{i}", zarr_format=zarr_format)
         store.create_version("v1", checkout=True)
 
         for ds in datasets:

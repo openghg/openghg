@@ -21,10 +21,20 @@ def store_keys(store):
 
 
 @pytest.fixture(params=["memory", "local"])
-def store(request, tmp_path):
+def store(request, tmp_path, zarr_format):
     if request.param == "memory":
-        return get_versioned_zarr_memory_store()
-    return get_versioned_zarr_directory_store(tmp_path / "versions")
+        return get_versioned_zarr_memory_store(zarr_format=zarr_format)
+    return get_versioned_zarr_directory_store(tmp_path / "versions", zarr_format=zarr_format)
+
+
+@pytest.fixture(params=(2, 3) if has_async_store_api() else (2,))
+def zarr_format(request):
+    return request.param
+
+
+@pytest.fixture
+def write_kwargs(zarr_format):
+    return {"mode": "w", "consolidated": zarr_format == 2, "zarr_format": zarr_format}
 
 
 @pytest.fixture
@@ -32,17 +42,18 @@ def dataset():
     return xr.Dataset({"x": ("time", np.arange(6))}, coords={"time": np.arange(6)})
 
 
-def test_copy_replaces_existing_version_exactly(store, dataset):
+def test_copy_replaces_existing_version_exactly(store, dataset, write_kwargs, zarr_format):
     store.create_version("v1", checkout=True)
-    dataset.to_zarr(store.store, mode="w", consolidated=True, zarr_format=2, encoding={"x": {"chunks": (2,)}})
+    dataset.to_zarr(store.store, **write_kwargs, encoding={"x": {"chunks": (2,)}})
     source_keys = store_keys(store.store)
     store.create_version("v2", checkout=True)
     stale = xr.Dataset(
         {"x": ("time", np.arange(10)), "stale": ("time", np.ones(10))},
         coords={"time": np.arange(10)},
     )
-    stale.to_zarr(store.store, mode="w", consolidated=True, zarr_format=2, encoding={"x": {"chunks": (2,)}})
-    assert {"x/3", "stale/.zarray"} <= store_keys(store.store)
+    stale.to_zarr(store.store, **write_kwargs, encoding={"x": {"chunks": (2,)}})
+    stale_keys = {"x/3", "stale/.zarray"} if zarr_format == 2 else {"x/c/3", "stale/zarr.json"}
+    assert stale_keys <= store_keys(store.store)
 
     store.checkout_version("v1")
     store.copy_to_version("v2")
@@ -54,15 +65,15 @@ def test_copy_replaces_existing_version_exactly(store, dataset):
     xr.testing.assert_identical(store.get().compute(), dataset)
 
 
-def test_failed_new_version_copy_cleans_up_and_can_retry(store, dataset, monkeypatch, tmp_path):
+def test_failed_new_version_copy_cleans_up_and_can_retry(store, dataset, monkeypatch, tmp_path, write_kwargs):
     store.create_version("v1", checkout=True)
-    dataset.to_zarr(store.store, mode="w", consolidated=True, zarr_format=2)
+    dataset.to_zarr(store.store, **write_kwargs)
     source_keys = store_keys(store.store)
     destinations = []
 
     def fail_after_write(source, dest):
         destinations.append(dest)
-        dataset.isel(time=slice(0, 2)).to_zarr(dest, mode="w", consolidated=True, zarr_format=2)
+        dataset.isel(time=slice(0, 2)).to_zarr(dest, **write_kwargs)
         assert store_keys(dest)
         raise RuntimeError("copy failed")
 
@@ -82,14 +93,14 @@ def test_failed_new_version_copy_cleans_up_and_can_retry(store, dataset, monkeyp
 
     store.create_version("v2", checkout=True, copy_current=True)
     xr.testing.assert_identical(store.get().compute(), dataset)
-    dataset.assign(x=dataset.x + 10).to_zarr(store.store, mode="w", consolidated=True, zarr_format=2)
+    dataset.assign(x=dataset.x + 10).to_zarr(store.store, **write_kwargs)
     store.checkout_version("v1")
     xr.testing.assert_identical(store.get().compute(), dataset)
 
 
-def test_copy_current_version_does_not_clear_or_copy(store, dataset, monkeypatch):
+def test_copy_current_version_does_not_clear_or_copy(store, dataset, monkeypatch, write_kwargs):
     store.create_version("v1", checkout=True)
-    dataset.to_zarr(store.store, mode="w", consolidated=True, zarr_format=2)
+    dataset.to_zarr(store.store, **write_kwargs)
 
     def unexpected_operation(*args, **kwargs):
         pytest.fail("Copying to the current version must not clear or copy its data.")

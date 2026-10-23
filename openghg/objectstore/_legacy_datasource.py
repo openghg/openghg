@@ -650,7 +650,6 @@ class Datasource(AbstractDatasource[XrDataset]):
             None
         """
         from pandas import Timedelta
-        import xarray as xr
         from openghg.util._time import split_daterange_str, timestamp_tzaware
 
         for version, dateranges in self._data_keys.items():
@@ -661,7 +660,7 @@ class Datasource(AbstractDatasource[XrDataset]):
                 raise ObjectStoreError(f"{version} not found in object store.")
 
             self._store.checkout_version(version)
-            with xr.open_zarr(self._store.store, consolidated=True) as ds:
+            with self._store.get() as ds:
                 if ds.time.size == 1:
                     start_keys = timestamp_tzaware(start_date)
                     start_data = timestamp_tzaware(ds.time[0].values)

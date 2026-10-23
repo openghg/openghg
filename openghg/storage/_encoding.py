@@ -7,7 +7,7 @@ from ._zarr_compat import has_async_store_api
 
 
 def normalise_zarr_encoding(encoding: dict) -> dict:
-    """Retain legacy compressor options with xarray's Zarr 3 backend."""
+    """Normalize compressor keys without changing codec objects."""
     result = {name: options.copy() for name, options in encoding.items()}
     if has_async_store_api():
         for options in result.values():
@@ -22,8 +22,9 @@ def get_zarr_encoding(data_vars: Iterable, compressor: Any | None = None, filter
 
     Args:
         data_vars: Data variables to encode
-        compressor: Compressor to use, see https://zarr.readthedocs.io/en/stable/tutorial.html#compressors
-        filters: Filters to use, see https://zarr.readthedocs.io/en/stable/tutorial.html#filters
+        compressor: numcodecs compressor for format 2, or a native ``zarr.codecs``
+            codec for format 3. Codecs are not converted between formats.
+        filters: Filters compatible with the selected format.
     Returns:
         dict: Dictionary of encoding settings for zarr store
     """
