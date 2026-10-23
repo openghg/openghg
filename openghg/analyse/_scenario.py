@@ -1385,6 +1385,12 @@ class ModelScenario:
 
         if "fp_HiTRes" in self.scenario:
             fp = self.scenario.fp_HiTRes
+            if not fp.attrs.get("units") and "fp" in self.scenario:
+                units = self.scenario.fp.attrs.get("units")
+                if units:
+                    # Legacy files and stores may only declare units on fp.
+                    # assign_attrs leaves the caller's footprint metadata unchanged.
+                    fp = fp.assign_attrs(units=units)
         elif "fp_time_resolved" in self.scenario.data_vars:
             fp = self.scenario[["fp_time_resolved", "fp_residual"]]
         else:

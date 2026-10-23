@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Retained the first month's mean flux in time-resolved `fp_x_flux` calculations when the footprint look-back window starts mid-month. Previously, date selection dropped this monthly value and could leave the residual contribution missing. Recomputing affected `ModelScenario` outputs and downstream inversions can therefore change their results. [PR #1790](https://github.com/openghg/openghg/pull/1790)
 - Aligned Conda's Filelock, Pint and Pint-xarray upper bounds with the supported versions in `pyproject.toml`, avoiding unit-parsing and file-lock permission failures with unsupported versions. [PR #1790](https://github.com/openghg/openghg/pull/1790)
+- Preserve lazy corrections derived from stored data, anchor local Zarr store paths, and keep compression benchmarks writable with Zarr 3. Legacy high-resolution footprints inherit missing units from `fp` during analysis. [PR #1786](https://github.com/openghg/openghg/pull/1786)
 - Refreshed boundary-condition processing timestamps consistently in metadata and dataset attributes so previously processed inputs pass strict alignment. Conflicting source coverage still raises an error; specify an explicit period for ambiguous single-timestamp inputs. [Issue #1779](https://github.com/openghg/openghg/issues/1779)
 - Preserved mole-fraction and variability metadata when resampling surface observations weighted by observation count. [Issue #1765](https://github.com/openghg/openghg/issues/1765)
 - Added column `max_level` consistency validation to `ModelScenario` and preserved `max_level` metadata when standardising ACRG and PARIS column footprints, preventing observations and footprints with different vertical extents from being combined. [PR #1718](https://github.com/openghg/openghg/pull/1718)
@@ -20,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Updated
 
+- Support current xarray and Zarr 3 packages while retaining format 2 stores, existing data versions, compression and read-only shared-store access.[PR #1786](https://github.com/openghg/openghg/pull/1786).
 - Added Python 3.13 to the CI test matrices, dropped Python 3.10 support, and restricted OpenGHG to Python 3.11-3.13. [PR #1741](https://github.com/openghg/openghg/pull/1741).
 - Removed file and retrieved-data hashing from standardisation. Repeated inputs now follow the normal `if_exists` overlap policy, and data can be standardised again after its datasource is deleted. The deprecated `force` argument remains accepted but is ignored; passing `force=True` emits a `DeprecationWarning`, and callers should use `if_exists` to choose update behaviour. [Issue #1676](https://github.com/openghg/openghg/issues/1676)
 - Updated the standardisation of AGAGE format data so that rows containing nans are no longer dropped. [PR #1634](https://github.com/openghg/openghg/pull/1634)
