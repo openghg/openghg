@@ -7,20 +7,35 @@ from typing import Any, cast, Generic, Literal, TypeVar
 import pandas as pd
 import xarray as xr
 import zarr
-import zarr.convenience
-from zarr._storage.store import Store as AbstractZarrStore
 
 from openghg.types import DataOverlapError
 from openghg.util._versioning import SimpleVersioning
 from ._encoding import get_zarr_encoding
 from ._indexing import contiguous_regions, IndexingError, OverlapDeterminer
 from ._store import Store, UpdateError, VersionedStore
+from ._zarr_compat import (
+    ZarrStoreLike,
+    clear_store,
+    copy_store,
+    make_local_store,
+    make_memory_store,
+    store_byte_size,
+    store_is_empty,
+)
 
 logger = logging.getLogger("openghg.storage")
 logger.setLevel(logging.DEBUG)
 
 
 def parse_to_zarr_kwargs(to_zarr_kwargs: dict) -> dict:
+    """Filter keyword arguments accepted by xarray's zarr writer.
+
+    Args:
+        to_zarr_kwargs: Candidate keyword arguments for ``xr.Dataset.to_zarr``.
+
+    Returns:
+        Dictionary containing supported zarr writer keyword arguments.
+    """
     accepted_keys = ["write_empty_chunks", "zarr_format", "storage_options"]
     result = {}
     for k, v in to_zarr_kwargs.items():
@@ -29,7 +44,7 @@ def parse_to_zarr_kwargs(to_zarr_kwargs: dict) -> dict:
     return result
 
 
-ZST = TypeVar("ZST", bound=AbstractZarrStore)
+ZST = TypeVar("ZST", bound=ZarrStoreLike)
 
 
 class ZarrStore(Store, Generic[ZST]):
@@ -92,6 +107,11 @@ class ZarrStore(Store, Generic[ZST]):
         return self._store
 
     @property
+    def _xarray_store(self) -> Any:
+        """Return the store using xarray's broader runtime store typing."""
+        return self.store
+
+    @property
     def index(self) -> pd.Index:
         """Index of append dimension of data.
 
@@ -105,26 +125,23 @@ class ZarrStore(Store, Generic[ZST]):
         return OverlapDeterminer(index=self.index, **self.index_options)
 
     def __bool__(self) -> bool:
-        return bool(self.store)
+        """Return True if the current underlying zarr store contains data."""
+        return not store_is_empty(self.store)
 
     def clear(self) -> None:
-        self.store.rmdir()
+        """Clear all keys from the current underlying zarr store."""
+        clear_store(self.store)
 
     def bytes_stored(self) -> int:
-        if not hasattr(self.store, "getsize"):
-            return 0
-
-        nbytes = 0
-        for key in self.store:
-            nbytes += self.store.getsize(key)  # type: ignore
-        return nbytes
+        """Return the number of bytes stored in the current zarr store."""
+        return store_byte_size(self.store)
 
     def _get(self, sort: bool = True) -> xr.Dataset:
         if not bool(self):
             return xr.Dataset()
 
         # need to sort to be consistent with MemoryStore
-        result = xr.open_zarr(self.store, consolidated=True)
+        result = xr.open_zarr(self._xarray_store, consolidated=True)
 
         if sort:
             result = result.sortby(self.append_dim)
@@ -132,14 +149,26 @@ class ZarrStore(Store, Generic[ZST]):
         return cast(xr.Dataset, result)
 
     def get(self) -> xr.Dataset:
+        """Return the stored dataset sorted by the append dimension."""
         return self._get(sort=True)
 
     def insert(self, data: xr.Dataset, on_overlap: Literal["error", "ignore"] = "error") -> None:
-        if not self.store:
+        """Insert data into the zarr store.
+
+        Args:
+            data: Dataset to write or append to the store.
+            on_overlap: If "error", raise when new append-dimension values overlap
+                stored values. If "ignore", only non-overlapping values are appended.
+
+        Raises:
+            DataOverlapError: If overlapping values are found and ``on_overlap`` is
+                "error".
+        """
+        if store_is_empty(self.store):
             encoding = get_zarr_encoding(data.data_vars, self.compressor, self.filters)
             encoding.update(self.encoding)
             data.to_zarr(
-                store=self.store,
+                store=self._xarray_store,
                 mode="w",
                 consolidated=True,
                 compute=True,
@@ -159,7 +188,7 @@ class ZarrStore(Store, Generic[ZST]):
                     return None
 
             data.to_zarr(
-                store=self.store,
+                store=self._xarray_store,
                 mode="a",
                 append_dim=self.append_dim,
                 consolidated=True,
@@ -170,8 +199,21 @@ class ZarrStore(Store, Generic[ZST]):
             )
 
     def update(self, data: xr.Dataset, on_nonoverlap: Literal["error", "ignore"] = "error") -> None:
+        """Update existing data in the zarr store.
 
-        if not self.store:
+        Args:
+            data: Dataset containing replacement values.
+            on_nonoverlap: If "error", raise when input append-dimension values do
+                not overlap stored values. If "ignore", only overlapping values are
+                updated.
+
+        Raises:
+            UpdateError: If the store is empty, if non-overlapping values are found
+                and ``on_nonoverlap`` is "error", or if index options map multiple
+                input values to the same stored value.
+        """
+
+        if store_is_empty(self.store):
             raise UpdateError("Cannot update empty Store.")
         else:
             if self._overlap_determiner.has_nonoverlaps(data.get_index(self.append_dim)):
@@ -188,7 +230,7 @@ class ZarrStore(Store, Generic[ZST]):
 
             try:
                 data.to_zarr(
-                    store=self.store,
+                    store=self._xarray_store,
                     mode="r+",
                     region="auto",
                     consolidated=True,
@@ -223,7 +265,7 @@ class ZarrStore(Store, Generic[ZST]):
 
                 # don't catch any errors here, since these errors are unrelated to alignment
                 data[non_region_vars].to_zarr(
-                    store=self.store,
+                    store=self._xarray_store,
                     mode="r+",
                     region="auto",
                     consolidated=True,
@@ -247,7 +289,7 @@ class ZarrStore(Store, Generic[ZST]):
                 for sregion, tregion in zip(source_regions, target_regions):
                     region = {self.append_dim: slice(tregion[0], tregion[-1] + 1)}
                     res = data.isel({self.append_dim: sregion}).to_zarr(
-                        store=self.store,
+                        store=self._xarray_store,
                         mode="r+",
                         region=region,
                         consolidated=True,
@@ -262,8 +304,8 @@ class ZarrStore(Store, Generic[ZST]):
 
 def get_zarr_directory_store(
     path: Path, append_dim: str = "time", index_options: dict | None = None, **kwargs: Any
-) -> ZarrStore[zarr.DirectoryStore]:
-    """Factory function to create ZarrStore objects based on a zarr.DirectoryStore.
+) -> ZarrStore[ZarrStoreLike]:
+    """Factory function to create ZarrStore objects based on a local zarr store.
 
     Args:
         path: path to Zarr store location.
@@ -274,17 +316,17 @@ def get_zarr_directory_store(
           passed to `xr.Dataset.to_zarr`.
 
     Returns:
-        ZarrStore based on zarr.DirectoryStore.
+        ZarrStore based on a local filesystem store.
 
     """
-    store = zarr.DirectoryStore(path)
-    return ZarrStore[zarr.DirectoryStore](store, append_dim=append_dim, index_options=index_options, **kwargs)
+    store = make_local_store(path)
+    return ZarrStore[ZarrStoreLike](store, append_dim=append_dim, index_options=index_options, **kwargs)
 
 
 def get_zarr_memory_store(
     append_dim: str = "time", index_options: dict | None = None, **kwargs: Any
-) -> ZarrStore[zarr.MemoryStore]:
-    """Factory function to create ZarrStore objects based on a zarr.MemoryStore.
+) -> ZarrStore[ZarrStoreLike]:
+    """Factory function to create ZarrStore objects based on a zarr memory store.
 
     Args:
         append_dim: dimension to append new data along.
@@ -294,11 +336,11 @@ def get_zarr_memory_store(
           passed to `xr.Dataset.to_zarr`.
 
     Returns:
-        ZarrStore based on zarr.MemoryStore.
+        ZarrStore based on a memory store.
 
     """
-    store = zarr.MemoryStore()
-    return ZarrStore[zarr.MemoryStore](store, append_dim=append_dim, index_options=index_options, **kwargs)
+    store = make_memory_store()
+    return ZarrStore[ZarrStoreLike](store, append_dim=append_dim, index_options=index_options, **kwargs)
 
 
 class VersionedZarrStore(VersionedStore, SimpleVersioning[ZST], ZarrStore[ZST]):
@@ -392,7 +434,7 @@ class VersionedZarrStore(VersionedStore, SimpleVersioning[ZST], ZarrStore[ZST]):
         if v not in self.versions:
             self._versions[v] = self.factory(v)
         dest = self._versions[v]
-        zarr.convenience.copy_store(source, dest)
+        copy_store(source, dest)
 
 
 def get_versioned_zarr_directory_store(
@@ -402,8 +444,8 @@ def get_versioned_zarr_directory_store(
     index_options: dict | None = None,
     version_pat: str = r"v\d+",
     **kwargs: Any,
-) -> VersionedZarrStore[zarr.DirectoryStore]:
-    """Factory function to create VersionedZarrStore objects based on a zarr.DirectoryStore.
+) -> VersionedZarrStore[ZarrStoreLike]:
+    """Factory function to create VersionedZarrStore objects based on local zarr stores.
 
     Args:
         path: root path where zarr `DirectoryStore`s will be based.
@@ -416,8 +458,7 @@ def get_versioned_zarr_directory_store(
           passed to `xr.Dataset.to_zarr`.
 
     Returns:
-        VersionedZarrStore object with zarr.DirectoryStore as the underlying
-        storage.
+        VersionedZarrStore object with local filesystem stores as the underlying storage.
 
     """
     versions = set([]) if versions is None else set(versions)
@@ -433,11 +474,11 @@ def get_versioned_zarr_directory_store(
                 versions.add(f.name)
 
     # factory function to create a Directory Stores corresponding to versions
-    def factory(v: str) -> zarr.DirectoryStore:
-        """Factory function to create a Directory Store corresponding to version."""
-        return zarr.DirectoryStore(path / v)
+    def factory(v: str) -> ZarrStoreLike:
+        """Factory function to create a local store corresponding to version."""
+        return make_local_store(path / v)
 
-    return VersionedZarrStore[zarr.DirectoryStore](
+    return VersionedZarrStore[ZarrStoreLike](
         factory=factory,
         versions=versions,
         append_dim=append_dim,
@@ -451,8 +492,8 @@ def get_versioned_zarr_memory_store(
     append_dim: str = "time",
     index_options: dict | None = None,
     **kwargs: Any,
-) -> VersionedZarrStore[zarr.MemoryStore]:
-    """Factory function to create VersionedZarrStore objects based on a zarr.MemoryStore.
+) -> VersionedZarrStore[ZarrStoreLike]:
+    """Factory function to create VersionedZarrStore objects based on zarr memory stores.
 
     Args:
         versions: list of versions to load.
@@ -463,16 +504,15 @@ def get_versioned_zarr_memory_store(
           passed to `xr.Dataset.to_zarr`.
 
     Returns:
-        VersionedZarrStore object with zarr.MemoryStore as the underlying
-        storage.
+        VersionedZarrStore object with memory stores as the underlying storage.
 
     """
 
-    def factory(_: str) -> zarr.MemoryStore:
+    def factory(_: str) -> ZarrStoreLike:
         """Factory for versioning."""
-        return zarr.MemoryStore()
+        return make_memory_store()
 
-    return VersionedZarrStore[zarr.MemoryStore](
+    return VersionedZarrStore[ZarrStoreLike](
         factory=factory,
         versions=versions,
         append_dim=append_dim,
