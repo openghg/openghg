@@ -38,5 +38,11 @@ jobs:
           EOF
           uv venv .venv-legacy
           uv pip install --python "$OPENGHG_LEGACY_PYTHON" -r /tmp/legacy-requirements.txt --overrides /tmp/legacy-overrides.txt
+      - name: Verify storage regressions with the pre-upgrade dependencies
+        run: >-
+          "$OPENGHG_LEGACY_PYTHON" -m pytest -v
+          tests/storage/test_zarr_compat.py
+          tests/storage/test_versioned_zarr_copy.py
+          tests/storage/test_zarr_write_safety.py
       - name: Verify existing user, group and shared stores across the upgrade
         run: uv run --no-sync pytest -v tests/storage/test_existing_stores.py
