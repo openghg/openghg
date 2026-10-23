@@ -29,14 +29,6 @@ def make_memory_store() -> ZarrStoreBase:
     return zarr.storage.MemoryStore()
 
 
-def store_is_empty(store: ZarrStoreBase) -> bool:
-    if has_async_store_api():
-        from zarr.core.sync import sync
-
-        return bool(sync(store.is_empty("")))
-    return not bool(cast(Any, store))
-
-
 def clear_store(store: ZarrStoreBase) -> None:
     if has_async_store_api():
         from zarr.core.sync import sync

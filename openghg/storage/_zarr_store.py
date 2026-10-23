@@ -19,7 +19,6 @@ from ._zarr_compat import (
     has_async_store_api,
     make_local_store,
     make_memory_store,
-    store_is_empty,
 )
 
 logger = logging.getLogger("openghg.storage")
@@ -114,8 +113,16 @@ class ZarrStore(Store, Generic[ZST]):
     def _overlap_determiner(self) -> OverlapDeterminer:
         return OverlapDeterminer(index=self.index, **self.index_options)
 
+    def _is_empty(self) -> bool:
+        """Return whether the current underlying Zarr store contains no keys."""
+        if has_async_store_api():
+            from zarr.core.sync import sync
+
+            return bool(sync(self.store.is_empty("")))
+        return not bool(cast(Any, self.store))
+
     def __bool__(self) -> bool:
-        return not store_is_empty(self.store)
+        return not self._is_empty()
 
     def clear(self) -> None:
         clear_store(self.store)
@@ -147,7 +154,7 @@ class ZarrStore(Store, Generic[ZST]):
         return self._get(sort=True)
 
     def insert(self, data: xr.Dataset, on_overlap: Literal["error", "ignore"] = "error") -> None:
-        if store_is_empty(self.store):
+        if self._is_empty():
             encoding = get_zarr_encoding(data.data_vars, self.compressor, self.filters)
             encoding.update(self.encoding)
             data.to_zarr(
@@ -180,7 +187,7 @@ class ZarrStore(Store, Generic[ZST]):
 
     def update(self, data: xr.Dataset, on_nonoverlap: Literal["error", "ignore"] = "error") -> None:
 
-        if store_is_empty(self.store):
+        if self._is_empty():
             raise UpdateError("Cannot update empty Store.")
         else:
             if self._overlap_determiner.has_nonoverlaps(data.get_index(self.append_dim)):
