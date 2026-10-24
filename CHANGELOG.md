@@ -33,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added opt-in native Zarr format 3 storage, retaining format 2 as the default and preserving the format of existing stores. Added storage and datasource CI coverage for legacy, minimum and current Zarr runtimes.
+- Added opt-in native Zarr format 3 storage, retaining format 2 as the default and preserving the format of existing stores, including when overwriting after reopening. Added storage and datasource CI coverage for legacy, minimum and current Zarr runtimes. [PR #1793](https://github.com/openghg/openghg/pull/1793)
 - Added automatic post-merge Graphify regeneration and a focused navigation
   skill for cross-module impact analysis. [Issue #1695](https://github.com/openghg/openghg/issues/1695)
 - Added a lazy `fp_x_flux_time_resolved_numba` analysis operator that preserves source and spatial dimensions, supports single-source and regular coarse-frequency flux, and includes optional atomic ppm Zarr persistence and worker warm-up helpers.

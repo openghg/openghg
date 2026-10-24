@@ -148,6 +148,16 @@ class ZarrStore(Store, Generic[ZST]):
     def clear(self) -> None:
         clear_store(self.store)
 
+    def overwrite(self, data: xr.Dataset) -> None:
+        """Replace the stored data while preserving its existing Zarr format."""
+        zarr_format = self._write_kwargs["zarr_format"]
+        configured_kwargs = self.to_zarr_kwargs
+        self.to_zarr_kwargs = {**configured_kwargs, "zarr_format": zarr_format}
+        try:
+            super().overwrite(data)
+        finally:
+            self.to_zarr_kwargs = configured_kwargs
+
     def bytes_stored(self) -> int:
         if has_async_store_api():
             from zarr.core.sync import sync

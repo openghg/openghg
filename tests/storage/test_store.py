@@ -123,11 +123,13 @@ store_names = [
 
 def store_cases(names):
     formats = (2, 3) if has_async_store_api() else (2,)
-    return [
-        pytest.param((name, fmt), id=f"{name}-format{fmt}" if fmt else name)
-        for name in names
-        for fmt in (formats if "zarr" in name else (None,))
-    ]
+    cases = []
+    for name in names:
+        case_formats = formats if "zarr" in name else (None,)
+        for fmt in case_formats:
+            case_id = f"{name}-format{fmt}" if fmt is not None else name
+            cases.append(pytest.param((name, fmt), id=case_id))
+    return cases
 
 
 @pytest.fixture

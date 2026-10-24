@@ -265,9 +265,9 @@ Format 3 requires a zarr-python 3 runtime and native Zarr codecs, such as
 Format 2 continues to accept ``numcodecs`` compressors. See the
 `xarray compressor and filter documentation
 <https://docs.xarray.dev/en/stable/user-guide/io.html#zarr-compressors-and-filters>`__.
-Format 3 stores use unconsolidated metadata. Reopening, appending, updating or
-copying an existing store retains its stored format; choosing a format for new
-stores does not convert existing data.
+Format 3 stores use unconsolidated metadata. Reopening, appending, updating,
+overwriting or copying an existing store retains its stored format; choosing a
+format for new stores does not convert existing data.
 
 To reproduce the legacy baseline, use a separate checkout with Python 3.12 and
 ``uv``:

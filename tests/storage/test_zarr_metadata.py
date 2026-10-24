@@ -8,7 +8,7 @@ import pytest
 import xarray as xr
 import zarr
 
-from openghg.storage import get_zarr_directory_store
+from openghg.storage import get_zarr_directory_store, get_versioned_zarr_directory_store
 from openghg.storage._zarr_store import parse_to_zarr_kwargs
 from openghg.storage._zarr_compat import has_async_store_api
 
@@ -81,10 +81,68 @@ def test_parser_rejects_unsupported_formats(zarr_format):
         parse_to_zarr_kwargs({"zarr_format": zarr_format})
 
 
-def test_format_three_requires_zarr_three_before_writing(tmp_path):
+@pytest.mark.parametrize("operation", ["insert", "overwrite"])
+def test_format_three_requires_zarr_three_before_writing(tmp_path, operation):
     if has_async_store_api():
         pytest.skip("Exercises the Zarr 2 runtime guard")
     store = get_zarr_directory_store(tmp_path, zarr_format=3)
     with pytest.raises(ValueError, match="requires the Zarr 3 package"):
-        store.insert(xr.Dataset({"x": ("time", [1.0])}, coords={"time": [0]}))
+        getattr(store, operation)(xr.Dataset({"x": ("time", [1.0])}, coords={"time": [0]}))
     assert not list(tmp_path.iterdir())
+
+
+@pytest.mark.parametrize("zarr_format", [2, 3])
+@pytest.mark.parametrize("reopen_format", ["omitted", None, "conflicting"])
+@pytest.mark.parametrize("compressed", [False, True])
+def test_overwrite_preserves_reopened_format(tmp_path, zarr_format, reopen_format, compressed):
+    if zarr_format == 3 and not has_async_store_api():
+        pytest.skip("Format 3 requires the Zarr 3 package")
+    original = xr.Dataset({"x": ("time", [1.0, 2.0])}, coords={"time": [0, 1]})
+    get_zarr_directory_store(tmp_path, zarr_format=zarr_format).insert(original)
+    kwargs = {}
+    if reopen_format == "conflicting":
+        kwargs["zarr_format"] = 3 if zarr_format == 2 else 2
+    elif reopen_format is None:
+        kwargs["zarr_format"] = None
+    if compressed:
+        kwargs["compressor"] = zarr.codecs.BloscCodec() if zarr_format == 3 else Blosc()
+    reopened = get_zarr_directory_store(tmp_path, **kwargs)
+    configured_kwargs = reopened.to_zarr_kwargs.copy()
+    replacement = original.assign(x=original.x + 10).isel(time=slice(0, 1))
+
+    reopened.overwrite(replacement)
+
+    xr.testing.assert_identical(reopened.get(), replacement)
+    assert (tmp_path / "zarr.json").exists() == (zarr_format == 3)
+    assert (tmp_path / ".zmetadata").exists() == (zarr_format == 2)
+    assert reopened.to_zarr_kwargs == configured_kwargs
+
+
+@pytest.mark.parametrize("fail", [False, True])
+def test_overwrite_restores_format_setting_for_new_versions(tmp_path, monkeypatch, fail):
+    if not has_async_store_api():
+        pytest.skip("Mixed storage formats require the Zarr 3 package")
+    data = xr.Dataset({"x": ("time", [1.0, 2.0])}, coords={"time": [0, 1]})
+    original = get_versioned_zarr_directory_store(tmp_path, zarr_format=3)
+    original.create_version("v1", checkout=True)
+    original.insert(data)
+    reopened = get_versioned_zarr_directory_store(tmp_path)
+    configured_kwargs = reopened.to_zarr_kwargs.copy()
+
+    if fail:
+
+        def failed_insert(*args, **kwargs):
+            raise RuntimeError("insert failed")
+
+        with monkeypatch.context() as patch:
+            patch.setattr(reopened, "insert", failed_insert)
+            with pytest.raises(RuntimeError, match="insert failed"):
+                reopened.overwrite(data)
+    else:
+        reopened.overwrite(data)
+        assert (tmp_path / "v1" / "zarr.json").is_file()
+
+    assert reopened.to_zarr_kwargs == configured_kwargs
+    reopened.create_version("v2", checkout=True)
+    reopened.insert(data)
+    assert (tmp_path / "v2" / ".zmetadata").is_file()
