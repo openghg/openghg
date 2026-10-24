@@ -1,0 +1,47 @@
+name: Zarr storage runtime and format compatibility
+
+on:
+  pull_request:
+  push:
+    branches: [master, devel]
+  workflow_dispatch:
+
+jobs:
+  storage:
+    name: Storage with zarr-python ${{ matrix.zarr }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - zarr: "2.18.3"
+            numcodecs: "0.15.1"
+            xarray: "2025.9.1"
+          - zarr: "3.1.6"
+            numcodecs: "0.16.5"
+            xarray: "2026.9.0"
+          - zarr: "3.4.1"
+            numcodecs: "0.16.5"
+            xarray: "2026.9.0"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+      - name: Install the normal development environment
+        run: uv sync --locked --extra dev
+      - name: Check storage code before compatibility overrides
+        run: |
+          uv run --no-sync ruff check openghg/storage tests/storage
+          uv run --no-sync ruff format --check openghg/storage tests/storage
+      - name: Select the runtime and compatible dependencies
+        run: >-
+          uv pip install
+          "zarr==${{ matrix.zarr }}"
+          "numcodecs==${{ matrix.numcodecs }}"
+          "xarray==${{ matrix.xarray }}"
+      - name: Test storage without restoring the normal environment
+        run: uv run --no-sync pytest -v tests/storage tests/store/test_datasource.py

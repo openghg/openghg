@@ -400,6 +400,59 @@ def test_integrity_check(data, bucket, datasource):
         d.integrity_check()
 
 
+def test_native_format_integrity_check(data, bucket, datasource):
+    from openghg.storage._zarr_compat import has_async_store_api
+
+    if not has_async_store_api():
+        pytest.skip("Format 3 requires the Zarr 3 package")
+
+    observations = data["ch4"]["data"].isel(time=slice(0, 12))
+    datasource._store.to_zarr_kwargs = {"zarr_format": 3}
+    datasource.add_data(metadata=data["ch4"]["metadata"], data=observations, data_type="surface")
+    datasource._store.create_version("v2", checkout=True, copy_current=True)
+    datasource.save()
+
+    reopened = Datasource.load(bucket=bucket, uuid=datasource.uuid)
+    reopened.integrity_check()
+    for version in ("v1", "v2"):
+        xr.testing.assert_equal(reopened.get_data(version), observations)
+        assert (reopened._stores_path / version / "zarr.json").is_file()
+        assert not (reopened._stores_path / version / ".zmetadata").exists()
+
+
+@pytest.mark.parametrize("compressed", [False, True])
+def test_native_format_datasource_replacement(data, bucket, datasource, compressed):
+    from openghg.storage._zarr_compat import has_async_store_api
+
+    if not has_async_store_api():
+        pytest.skip("Format 3 requires the Zarr 3 package")
+    from zarr.codecs import BloscCodec
+
+    compressor = BloscCodec() if compressed else None
+    observations = data["ch4"]["data"].isel(time=slice(0, 12))
+    metadata = data["ch4"]["metadata"]
+    datasource._store.to_zarr_kwargs = {"zarr_format": 3}
+    datasource.add_data(metadata=metadata, data=observations, data_type="surface")
+    datasource.save()
+    reopened = Datasource.load(bucket=bucket, uuid=datasource.uuid)
+    replacement = observations.isel(time=slice(0, 6))
+
+    reopened.add_data(
+        metadata=metadata,
+        data=replacement,
+        data_type="surface",
+        new_version=False,
+        if_exists="new",
+        compressor=compressor,
+    )
+
+    assert reopened._store.versions == ["v1"]
+    xr.testing.assert_equal(reopened.get_data("v1"), replacement)
+    assert (reopened._stores_path / "v1" / "zarr.json").is_file()
+    assert not (reopened._stores_path / "v1" / ".zmetadata").exists()
+    reopened.integrity_check()
+
+
 def test_data_version_deletion(data, datasource):
     d = datasource
 
