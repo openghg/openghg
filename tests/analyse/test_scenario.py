@@ -999,6 +999,43 @@ def test_model_modelled_obs_ch4(model_scenario_ch4_dummy, footprint_dummy, flux_
     assert np.allclose(modelled_mf, expected_modelled_mf)
 
 
+def test_footprints_data_merge_without_obs(footprint_dummy, flux_ch4_dummy, bc_ch4_dummy):
+    """footprints_data_merge should still calculate modelled outputs without obs data."""
+    model_scenario = ModelScenario(obs=None, footprint=footprint_dummy, flux=flux_ch4_dummy, bc=bc_ch4_dummy)
+
+    combined_dataset = model_scenario.footprints_data_merge(resample_to="coarsest")
+
+    assert "mf" not in combined_dataset
+    assert all(dv in combined_dataset for dv in ("fp", "mf_mod", "bc_mod"))
+    assert combined_dataset.attrs["resample_to"] == "coarsest"
+    assert combined_dataset["mf_mod"].attrs["units"] == "1"
+    assert combined_dataset["bc_mod"].attrs["units"] == "1"
+    assert combined_dataset.time[0] == footprint_dummy.data.time[0]
+    assert combined_dataset.time[-1] == footprint_dummy.data.time[-1]
+    assert model_scenario.modelled_obs is not None
+    assert model_scenario.modelled_baseline is not None
+    xr.testing.assert_equal(combined_dataset["mf_mod"], model_scenario.modelled_obs["mf_mod"])
+    xr.testing.assert_equal(combined_dataset["bc_mod"], model_scenario.modelled_baseline["bc_mod"])
+
+
+def test_footprints_data_merge_without_obs_resample_invalidates_cache(
+    footprint_dummy, flux_ch4_dummy, bc_ch4_dummy
+):
+    """Changing resample_to without obs should recalculate cached modelled outputs."""
+    model_scenario = ModelScenario(obs=None, footprint=footprint_dummy, flux=flux_ch4_dummy, bc=bc_ch4_dummy)
+
+    model_scenario.footprints_data_merge(resample_to="coarsest")
+    resampled_dataset = model_scenario.footprints_data_merge(resample_to="12H")
+    expected_dataset = model_scenario.footprints_data_merge(resample_to="12H", recalculate=True)
+
+    assert model_scenario.modelled_obs is not None
+    assert model_scenario.modelled_baseline is not None
+    assert model_scenario.modelled_obs.attrs["resample_to"] == "12H"
+    assert model_scenario.modelled_baseline["bc_mod"].attrs["resample_to"] == "12H"
+    xr.testing.assert_equal(resampled_dataset["mf_mod"], expected_dataset["mf_mod"])
+    xr.testing.assert_equal(resampled_dataset["bc_mod"], expected_dataset["bc_mod"])
+
+
 def test_disjoint_time_obs_footprint(footprint_dummy, flux_ch4_dummy, bc_ch4_dummy):
     """Tests if disjoint timeseries are existing in obs and footprint data
     It raises error"""
