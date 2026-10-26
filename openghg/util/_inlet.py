@@ -12,7 +12,7 @@ logger.setLevel(logging.INFO)  # Have to set level for logger as well as handler
 
 @overload
 def format_inlet(
-    inlet: str,
+    inlet: str | int | float,
     units: str = "m",
     key_name: str | None = None,
     special_keywords: list | None = None,
@@ -39,7 +39,7 @@ def format_inlet(
 
 @overload
 def format_inlet(
-    inlet: list[str | slice | None],
+    inlet: list[str | int | float | slice | None],
     units: str = "m",
     key_name: str | None = None,
     special_keywords: list | None = None,
@@ -47,7 +47,7 @@ def format_inlet(
 
 
 def format_inlet(
-    inlet: str | slice | None | list[str | slice | None],
+    inlet: str | int | float | slice | None | list[str | int | float | slice | None],
     units: str = "m",
     key_name: str | None = None,
     special_keywords: list | None = None,
@@ -64,10 +64,13 @@ def format_inlet(
 
     Other considerations:
      - For units of "m", we will also look for "magl" and "masl" (metres above ground and sea level)
-     - If the input string just contains numbers, it is assumed this is already within the correct unit.
+     - Numerical inputs (int, float or a string containing only a number) are assumed to
+       already be in the specified units. Values are rounded to 1 decimal place, and whole
+       numbers are written without a decimal point.
 
     Args:
-        inlet: Inlet / Height value in the specified units
+        inlet: Inlet / Height value in the specified units. Can be a string (e.g. "10m",
+            "10magl", "10"), a number (int or float), None, a slice, or a list of these.
         units: Units for the inlet value ("m" by default)
         key_name: Name of the associated key. This is optional but will be used to
             determine whether the unit value should be added to the output string.
@@ -75,11 +78,17 @@ def format_inlet(
             If so do not apply any formatting.
             If this is not set a special keyword of "multiple" and "column" will still be allowed.
     Returns:
-        same type as input, with all strings formatted
+        str: formatted inlet for str, int or float input
+        None / slice: returned unchanged
+        list: list with each item formatted as above
 
     Usage:
         >>> format_inlet("10")
             "10m"
+        >>> format_inlet(10)
+            "10m"
+        >>> format_inlet(20.23456)
+            "20.2m"
         >>> format_inlet("10m")
             "10m"
         >>> format_inlet("10magl")
@@ -104,6 +113,9 @@ def format_inlet(
     # pass through None and slice
     if inlet is None or isinstance(inlet, slice):
         return inlet
+
+    # convert any other input into a string - for float/int this will be recast to float when checked
+    inlet = str(inlet)
 
     # By default the special keyword is "multiple" for data containing multiple inlets.
     # This will be included if data is a combined object from the object store.

@@ -276,8 +276,8 @@ def search_footprints(
 def search_surface(
     species: str | list[str] | None = None,
     site: str | list[str] | None = None,
-    inlet: str | slice | None | list[str | slice | None] = None,
-    height: str | slice | None | list[str | slice | None] = None,
+    inlet: str | int | float | slice | None | list[str | int | float | slice | None] = None,
+    height: str | int | float | slice | None | list[str | int | float | slice | None] = None,
     instrument: str | list[str] | None = None,
     data_level: str | list[str] | dict | None = None,
     data_sublevel: str | list[str] | None = None,
@@ -334,7 +334,7 @@ def search_surface(
     # to be within the metadata (for now)
     if inlet is None and height is not None:
         inlet = height
-    inlet = format_inlet(inlet)
+    inlet_formatted = format_inlet(inlet)
 
     # Ensure data_level input is formatted
     if isinstance(data_level, list):
@@ -357,7 +357,7 @@ def search_surface(
     results = search(
         species=species,
         site=site,
-        inlet=inlet,
+        inlet=inlet_formatted,
         instrument=instrument,
         data_level=data_level,
         data_sublevel=data_sublevel,
