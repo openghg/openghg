@@ -158,7 +158,7 @@ def parse_paris(
 
     # Need to read the metadata from the footprints and then store it
     # Do we need to chunk the footprints / will a Datasource store it correctly?
-    metadata: dict[str, str | float | list[float]] = {}
+    metadata: dict[str, str | float | list[float] | list[str]] = {}
 
     default_metadata: dict = {
         "data_type": "footprints",
@@ -181,8 +181,10 @@ def parse_paris(
     if network is not None:
         metadata["network"] = network
 
-    if site is not None and inlet == "column":
+    if inlet == "column":
         metadata["max_level"] = str(fp_data.attrs.get("max_level", "unknown"))
+
+    if site is not None and inlet == "column":
         metadata["obs_openghg_uuid"] = fp_data.attrs.get("obs_openghg_uuid", None)
 
     # Check if time has 0-dimensions and, if so, expand this so time is 1D
@@ -233,7 +235,7 @@ def parse_paris(
     if not inner_domain:
         metadata["heights"] = [float(h) for h in fp_data.height.values]
     # Do we also need to save all the variables we have available in this footprints?
-    metadata["variables"] = list(fp_data.data_vars)
+    metadata["variables"] = cast(list[str], list(fp_data.data_vars))
     # if model_params is not None:
     #     metadata["model_parameters"] = model_params
 

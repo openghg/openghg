@@ -670,7 +670,7 @@ def get_footprint(
 
 #     direction = "2to1" if to_scale == converter["scale1"] else "1to2"
 
-#     # flake8: noqa: F841
+#     # ruff: noqa: F841
 #     # scale_convert file has variable X in equations, so let's create it
 #     X = 1.0
 #     scale_factor = evaluate(converter[direction])

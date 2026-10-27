@@ -26,8 +26,6 @@ def create_attributes():
     return {"species": species, "site": site, "inlet": inlet, "sampling_period": sampling_period}
 
 
-# Disable this for long strings below - Line break occurred before a binary operator (W503)
-# flake8: noqa: W503
 def create_three_datasets(a, b, c, constant=False):
     values_a = np.zeros(len(a)) if constant else np.arange(0, len(a), 1)
     values_b = np.full(len(b), 1) if constant else np.arange(0, len(b), 1)
@@ -411,16 +409,8 @@ def test_data_version_deletion(data, datasource):
     d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
 
     d._store.checkout_version("v1")
-    zarr_keys = set(d._store.store.keys())
-
-    partial_expected_keys = {
-        "ch4/.zarray",
-        "ch4/.zattrs",
-        "ch4/0",
-        "ch4_variability/.zarray",
-    }
-
-    assert partial_expected_keys.issubset(zarr_keys)
+    xr.testing.assert_equal(d.get_data(version="v1"), ch4_data)
+    assert d._store.has_data("v1")
 
     d.delete_version(version="v1")
 

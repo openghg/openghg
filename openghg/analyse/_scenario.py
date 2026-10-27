@@ -156,7 +156,10 @@ class ModelScenario:
         network: Network name e.g. "AGAGE".
         domain: Domain name e.g. "EUROPE".
         platform: Platform name e.g "satellite", "column-insitu".
-        max_level: Maximum level for processing.
+        max_level: Maximum level for processing column observations. This is required when
+            retrieving column observations. If comparing modelled observations using a
+            footprint, it must match the footprint's ``max_level`` attribute. When supplying
+            an ``ObsColumnData`` object directly, its stored ``max_level`` is used instead.
         obs_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
         selection: For satellite only, identifier for any data selection which has been
             performed on satellite data. This can be based on any form of filtering, binning etc.
@@ -207,9 +210,10 @@ class ModelScenario:
         # For ObsColumn data processing
         if platform in accepted_column_data_types:
             # Add observation column data (directly or through keywords, column or satellite)
-            if max_level is None:
+            if max_level is None and obs_column is None:
                 raise AttributeError(
-                    f"If you are using column-based data (i.e. platform is {accepted_column_data_types}), you need to pass max_level"
+                    "Retrieving column observations for ModelScenario requires max_level. "
+                    f"Column platforms are {accepted_column_data_types}."
                 )
             self.add_obs_column(
                 site=site,
@@ -265,6 +269,9 @@ class ModelScenario:
             time_resolved=time_resolved,
         )
 
+        if self.platform in accepted_column_data_types and self.footprint is not None:
+            self._check_column_max_level(max_level=max_level)
+
         # Add flux data (directly or through keywords)
         self.add_flux(
             species=species,
@@ -295,6 +302,42 @@ class ModelScenario:
         self.flux_stacked: Dataset | None = None
 
         # TODO: Check species, site etc. values align between inputs?
+
+    def _check_column_max_level(self, max_level: int | None) -> None:
+        """Check that column observations and footprints use the same vertical extent."""
+        if self.footprint is None:
+            return
+
+        obs_max_level = max_level
+        if self.obs is not None:
+            obs_max_level = self.obs.data.attrs.get("max_level", max_level)
+
+        fp_max_level = self.footprint.data.attrs.get("max_level", self.footprint.metadata.get("max_level"))
+        if fp_max_level is None or str(fp_max_level).lower() == "unknown":
+            raise ValueError(
+                "Column footprint data must have a 'max_level' attribute before it can be used "
+                "in ModelScenario. Re-standardise the footprint from a source file containing "
+                "max_level or, for data in a writable object store, add the known footprint "
+                "value using data_manager(...).update_attributes(...). Also use "
+                "update_metadata(...) to keep the stored metadata consistent. Do not infer the "
+                "footprint value from the requested observation level."
+            )
+
+        try:
+            obs_max_level = int(obs_max_level) if obs_max_level is not None else None
+            fp_max_level = int(fp_max_level)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(
+                "The column observation and footprint 'max_level' attributes must be integers; "
+                f"received {obs_max_level!r} and {fp_max_level!r}."
+            ) from exc
+
+        if obs_max_level != fp_max_level:
+            raise ValueError(
+                "Column observations and footprints must use the same max_level in "
+                f"ModelScenario: observations use {obs_max_level}, while footprints use "
+                f"{fp_max_level}."
+            )
 
     def _get_data(self, keywords: ParamType, data_type: str) -> Any:
         """Use appropriate get function to search for data in object store."""
@@ -1114,6 +1157,7 @@ class ModelScenario:
         split_by_sectors: bool = False,
         output_units: float | str | None = None,
         use_low_freq_flux: bool | None = None,
+        allow_climatology: bool = True,
     ) -> Dataset:
         """Calculate the modelled observation points based on site footprint and fluxes.
 
@@ -1140,6 +1184,9 @@ class ModelScenario:
             use_low_freq_flux: For integrated footprints, use monthly-mean fluxes
               instead of the flux at the release time. Defaults to True for an
               integrated CO2 footprint and False otherwise.
+            allow_climatology: When aligning datasets, allow any datasets which represent a year of data
+                to be treated as a climatology and reindexed accordingly. Note this isn't currently used in te
+                HiTRes pathway.
 
         Returns:
             xarray.Dataset: Modelled observation values along the time axis, optionally with "fp x flux".
@@ -1178,6 +1225,7 @@ class ModelScenario:
                 output_TS=True,
                 output_fpXflux=output_fp_x_flux,
                 use_low_freq_flux=use_low_freq_flux,
+                allow_climatology=allow_climatology,
             )
 
         # calculate sectoral modelled mf and fp_x_flux
@@ -1233,6 +1281,7 @@ class ModelScenario:
         output_fpXflux: bool = False,
         fp_x_flux_name: str = "fp_x_flux",
         use_low_freq_flux: bool | None = None,
+        allow_climatology: bool = True,
     ) -> Dataset:
         """Calculate modelled mole fraction timeseries using integrated footprints data.
 
@@ -1242,6 +1291,8 @@ class ModelScenario:
                        Default = True
             output_fpXflux : Whether to output the modelled flux map DataArray used to create
                             the timeseries. Default = False
+            allow_climatology: When aligning datasets, allow any datasets which represent a year of data
+                to be treated as a climatology and reindexed accordingly.
 
         Returns:
             DataArray / DataArray :
@@ -1266,7 +1317,7 @@ class ModelScenario:
         if use_low_freq_flux:
             flux = make_integrated_low_freq_flux(flux)
 
-        flux_modelled = fp_x_flux_integrated(scenario, flux)
+        flux_modelled = fp_x_flux_integrated(scenario, flux, allow_climatology=allow_climatology)
         data = {}
 
         if output_TS:
@@ -1334,6 +1385,12 @@ class ModelScenario:
 
         if "fp_HiTRes" in self.scenario:
             fp = self.scenario.fp_HiTRes
+            if not fp.attrs.get("units") and "fp" in self.scenario:
+                units = self.scenario.fp.attrs.get("units")
+                if units:
+                    # Legacy files and stores may only declare units on fp.
+                    # assign_attrs leaves the caller's footprint metadata unchanged.
+                    fp = fp.assign_attrs(units=units)
         elif "fp_time_resolved" in self.scenario.data_vars:
             fp = self.scenario[["fp_time_resolved", "fp_residual"]]
         else:
@@ -1368,6 +1425,7 @@ class ModelScenario:
         recalculate: bool = False,
         output_sensitivity: bool = False,
         output_units: float | str | None = None,
+        allow_climatology: bool = True,
     ) -> Dataset:
         """Calculate the modelled baseline points based on site footprint and boundary conditions.
         Boundary conditions are multipled by any loss (exp(-t/lifetime)) for the species.
@@ -1387,6 +1445,8 @@ class ModelScenario:
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
             output_units: target units; if None, then obs. units will be used,
               or "mol/mol" if these are not present.
+            allow_climatology: When aligning datasets, allow any datasets which represent a year of data
+                to be treated as a climatology and reindexed accordingly.
 
         Returns:
             xarray.Dataset containing modelled baseline values along the time axis and baseline sensitivities
@@ -1414,7 +1474,9 @@ class ModelScenario:
         except AttributeError:
             species = None
 
-        sensitivities = baseline_sensitivities(bc=bc_data, fp=scenario, species=species)
+        sensitivities = baseline_sensitivities(
+            bc=bc_data, fp=scenario, species=species, allow_climatology=allow_climatology
+        )
 
         result = sensitivities if output_sensitivity else xr.Dataset()
 
@@ -1459,6 +1521,7 @@ class ModelScenario:
         recalculate: bool = False,
         output_units: str | float | None = None,
         use_low_freq_flux: bool | None = None,
+        allow_climatology: bool = True,
     ) -> Dataset:
         """Produce combined object containing aligned footprint and observation data.
         Can also include modelled timeseries data derived from flux.
@@ -1482,6 +1545,8 @@ class ModelScenario:
             output_units: units to use for obs, or any data that should have the same units as obs (e.g. `mf_mod`).
             use_low_freq_flux: For integrated footprints, use monthly-mean fluxes instead
                 of the flux at release time. ``None`` enables this for CO2 only.
+            allow_climatology: When aligning datasets, allow any datasets which represent a year of data
+                to be treated as a climatology and reindexed accordingly.
 
         Returns:
             xarray.Dataset: Combined dataset containing footprint and observation data
@@ -1500,6 +1565,7 @@ class ModelScenario:
                 output_fp_x_flux=calc_fp_x_flux,
                 split_by_sectors=split_by_sectors,
                 use_low_freq_flux=use_low_freq_flux,
+                allow_climatology=allow_climatology,
             )
 
             combined_dataset = combined_dataset.merge(modelled_obs)
@@ -1512,6 +1578,7 @@ class ModelScenario:
                     cache=cache,
                     recalculate=recalculate,
                     output_sensitivity=calc_bc_sensitivity,
+                    allow_climatology=allow_climatology,
                 )
 
                 combined_dataset = combined_dataset.merge(modelled_baseline)
@@ -1555,6 +1622,7 @@ class ModelScenario:
         sources: str | list | None = None,
         resample_to: str | None = "coarsest",
         platform: str | None = None,
+        allow_climatology: bool = True,
         cache: bool = True,
         recalculate: bool = False,
         save_path: str | None = None,
@@ -1574,6 +1642,8 @@ class ModelScenario:
                           - None to not resample and to just "ffill" footprint to obs
                          Default = "coarsest".
             platform: Observation platform used to decide whether to resample e.g. "satellite", "insitu", "flask"
+            allow_climatology: When aligning datasets, allow any datasets which represent a year of data
+                to be treated as a climatology and reindexed accordingly.
             cache: Cache this data after calculation. Default = True.
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
             save_path: Path to save the figure. If None, the figure will not be saved.

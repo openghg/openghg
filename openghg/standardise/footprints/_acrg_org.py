@@ -147,9 +147,9 @@ def parse_acrg_org(
     dv_attribute_updates["fp"]["long_name"] = "source_receptor_relationship"
     dv_attribute_updates["air_temperature"]["long_name"] = "air temperature at release"
     dv_attribute_updates["air_pressure"]["long_name"] = "air pressure at release"
-    dv_attribute_updates["atmosphere_boundary_layer_thickness"][
-        "long_name"
-    ] = "atmospheric boundary layer thickness at release"
+    dv_attribute_updates["atmosphere_boundary_layer_thickness"]["long_name"] = (
+        "atmospheric boundary layer thickness at release"
+    )
 
     dv_attribute_updates["wind_speed"]["units"] = "m s-1"
     dv_attribute_updates["wind_speed"]["long_name"] = "wind speed at release"
@@ -164,7 +164,6 @@ def parse_acrg_org(
 
     # create 'release_heigt' variable for compatibility between different footprints
     if inlet != "column":
-
         inlet_int = int(inlet.replace("magl", "").replace("m", ""))
         fp_data["release_height"] = inlet_int * ones_like(fp_data["time"].astype(int))
 
@@ -199,7 +198,7 @@ def parse_acrg_org(
 
     # Need to read the metadata from the footprints and then store it
     # Do we need to chunk the footprints / will a Datasource store it correctly?
-    metadata: dict[str, str | float | list[float]] = {}
+    metadata: dict[str, str | float | list[float] | list[str]] = {}
 
     default_metadata: dict = {
         "data_type": "footprints",
@@ -220,6 +219,9 @@ def parse_acrg_org(
 
     if network is not None:
         metadata["network"] = network
+
+    if inlet == "column":
+        metadata["max_level"] = str(fp_data.attrs.get("max_level", "unknown"))
 
     # Check if time has 0-dimensions and, if so, expand this so time is 1D
     if "time" in fp_data.coords:
@@ -268,7 +270,7 @@ def parse_acrg_org(
 
     metadata["heights"] = [float(h) for h in fp_data.height.values]
     # Do we also need to save all the variables we have available in this footprints?
-    metadata["variables"] = list(fp_data.data_vars)
+    metadata["variables"] = cast(list[str], list(fp_data.data_vars))
 
     # if model_params is not None:
     #     metadata["model_parameters"] = model_params

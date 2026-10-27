@@ -387,7 +387,7 @@ def _validate_flux_coverage(
     flux_end = flux["time"].values[-1] + np.timedelta64(step_hours, "h")
     if flux_start > start or flux_end <= end:
         raise ValueError(
-            "Flux time coverage must include the complete footprint lag halo " f"from {start} through {end}."
+            f"Flux time coverage must include the complete footprint lag halo from {start} through {end}."
         )
 
 
@@ -604,7 +604,7 @@ def _flux_with_halo(flux: xr.DataArray, fp_time_resolved: xr.DataArray) -> xr.Da
     start, end = _padded_flux_bounds(fp_time_resolved)
     if flux["time"].values[0] > start or flux["time"].values[-1] < end:
         raise ValueError(
-            "Flux time coverage must include the complete footprint lag halo " f"from {start} through {end}."
+            f"Flux time coverage must include the complete footprint lag halo from {start} through {end}."
         )
     flux_pad = flux.sel(time=slice(start, end)).transpose("time", "lat", "lon", "source")
 
@@ -1220,7 +1220,7 @@ def write_fp_x_flux_zarr(  # noqa: PLR0913
         "provenance": dict(provenance),
     }
     try:
-        dataset.to_zarr(temporary, mode="w", consolidated=True)
+        dataset.to_zarr(temporary, mode="w", consolidated=True, zarr_format=2)
         temporary_manifest.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
         if overwrite and path.exists():
             backup = path.with_name(f".{path.name}.old-{uuid4().hex}")

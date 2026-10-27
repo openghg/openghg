@@ -1,3 +1,6 @@
+from pathlib import Path
+
+import dask
 from numcodecs import Blosc
 import numpy as np
 import pandas as pd
@@ -15,7 +18,7 @@ from openghg.storage import (
 from openghg.storage._store import VersionedStore
 from openghg.storage._zarr_store import ZarrStore, VersionedZarrStore
 from openghg.types import DataOverlapError
-from openghg.util._versioning import SimpleVersioning, VersionError
+from openghg.util._versioning import VersionError
 
 
 # DATA FIXTURES
@@ -330,6 +333,75 @@ def test_contiguous_update(store_name, request, ds1, twice_ds1, ds5):
 
 
 # ZARR SPECIFIC TESTS
+@pytest.mark.parametrize("store_name", ["zarr_memory_store", "zarr_directory_store"])
+def test_zarr_update_lazy_correction_from_same_store(store_name, request):
+    """Separated correction regions use the original values, even within a shared chunk."""
+    data = dummy_dataset(pd.date_range("2000", periods=20, freq="h"), np.arange(20.0))
+    store = request.getfixturevalue(store_name)
+    store.encoding = {"x": {"chunks": (7,)}}
+    store.insert(data)
+
+    indices = [1, 2, 4, 5]
+    correction = store.get().rolling(time=3, min_periods=1).mean().isel(time=indices)
+    assert correction.x.chunks is not None
+    expected = data.copy(deep=True)
+    expected.x[dict(time=indices)] = data.x.rolling(time=3, min_periods=1).mean().isel(time=indices)
+
+    with dask.config.set(scheduler="threads", num_workers=4):
+        store.update(correction)
+
+    xr.testing.assert_allclose(store.get(), expected)
+
+
+def test_zarr_directory_store_retains_root_after_chdir(tmp_path, monkeypatch, ds1, ds5):
+    """Reads, appends and deletion keep using the directory chosen at construction."""
+    original = tmp_path / "original"
+    other = tmp_path / "other"
+    original.mkdir()
+    other.mkdir()
+    monkeypatch.chdir(original)
+    store = get_zarr_directory_store(Path("store"))
+    store.insert(ds1)
+
+    monkeypatch.chdir(other)
+    unrelated = get_zarr_directory_store(Path("store"))
+    unrelated.insert(ds5)
+    xr.testing.assert_equal(store.get(), ds1)
+    store.insert(ds5)
+    xr.testing.assert_equal(store.get(), xr.concat([ds1, ds5], dim="time"))
+    store.clear()
+
+    assert not (original / "store").exists()
+    xr.testing.assert_equal(unrelated.get(), ds5)
+
+
+@pytest.mark.parametrize("create_before_chdir", [True, False])
+def test_versioned_zarr_directory_store_retains_root_after_chdir(
+    tmp_path, monkeypatch, ds1, create_before_chdir
+):
+    """Both existing and future versions stay under the factory's original root."""
+    original = tmp_path / "original"
+    other = tmp_path / "other"
+    original.mkdir()
+    other.mkdir()
+    monkeypatch.chdir(original)
+    store = get_versioned_zarr_directory_store(Path("store"))
+    if create_before_chdir:
+        store.create_version("v1", checkout=True)
+        store.insert(ds1)
+
+    monkeypatch.chdir(other)
+    if not create_before_chdir:
+        store.create_version("v1", checkout=True)
+        store.insert(ds1)
+
+    store.create_version("v2", checkout=True, copy_current=True)
+    xr.testing.assert_equal(store.get(), ds1)
+    assert (original / "store" / "v1").is_dir()
+    assert (original / "store" / "v2").is_dir()
+    assert not (other / "store").exists()
+
+
 @pytest.mark.parametrize("store_name", [name for name in store_names if "zarr" in name])
 def test_zarr_encoding(store_name, request, ds1):
     """Check that data can be compressed with a specified encoding."""
@@ -349,7 +421,7 @@ def test_zarr_encoding(store_name, request, ds1):
     ds = store.get()
 
     for dv in ds.data_vars:
-        assert ds[dv].encoding["compressor"] == compressor
+        assert (ds[dv].encoding.get("compressors") or (ds[dv].encoding.get("compressor"),)) == (compressor,)
 
 
 # TESTS FOR VERSIONED STORES
@@ -411,10 +483,8 @@ def test_bool(store_name, request, ds1):
     # create another (empty) version
     store.create_version("v2", checkout=True)
 
-    # check that current version evaluates to False
-    # this uses internals of SimpleVersioning
-    if isinstance(store, SimpleVersioning):
-        assert not store._versions["v2"]
+    assert not store.has_data("v2")
+    assert store.has_data("v1")
 
     # check that versioned store evaluates to True
     assert store
@@ -481,8 +551,10 @@ def test_versioned_zarr_bytes_stored_compression(tmp_path):
         store.create_version("v1", checkout=True)
         store.insert(ds)
         uncompressed_bytes = store.bytes_stored()
-        expected_uncompressed_bytes = 444382
-        np.testing.assert_allclose(uncompressed_bytes, expected_uncompressed_bytes, rtol=0.01)
+        assert uncompressed_bytes == sum(
+            path.stat().st_size for path in tmp_path.rglob("*") if path.is_file()
+        )
+        xr.testing.assert_equal(store.get(), ds)
 
     store.delete_version("v1")
 
@@ -492,8 +564,8 @@ def test_versioned_zarr_bytes_stored_compression(tmp_path):
         store.create_version("v1", checkout=True)
         store.insert(ds)
         compressed_bytes = store.bytes_stored()
-        expected_compressed_bytes = 292896
-        np.testing.assert_allclose(compressed_bytes, expected_compressed_bytes, rtol=0.01)
+        assert compressed_bytes == sum(path.stat().st_size for path in tmp_path.rglob("*") if path.is_file())
+        xr.testing.assert_equal(store.get(), ds)
         assert compressed_bytes < original_size
         assert compressed_bytes < uncompressed_bytes
 
@@ -529,3 +601,4 @@ def test_versioned_zarr_append_loop_has_no_missing_data(tmp_path):
         total_missing = sum(dict(missing).values())
 
         assert total_missing == 0.0
+        xr.testing.assert_equal(retrieved, xr.concat(datasets, dim="time"))
