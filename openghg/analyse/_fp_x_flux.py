@@ -233,8 +233,7 @@ def _validate_interval_start_time(time: xr.DataArray, *, label: str) -> int:
     time_label = str(time.attrs.get("label", "left")).lower()
     if time_label not in {"left", "start", "beginning"}:
         raise ValueError(
-            f"{label} timestamps must label the start of each averaging interval; "
-            f"found label={time_label!r}."
+            f"{label} timestamps must label the start of each averaging interval; found label={time_label!r}."
         )
     return _regular_time_step_hours(time, label=label)
 
