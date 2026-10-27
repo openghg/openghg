@@ -14,6 +14,10 @@ import dask.array as da
 import numpy as np
 import pandas as pd
 import xarray as xr
+from pint.errors import PintError
+
+from openghg.analyse._utils import reindex_on_dims
+from openghg.util import cf_ureg
 
 try:
     from numba import njit  # type: ignore[import-not-found]
@@ -97,16 +101,26 @@ def _reindex_space(data: xr.DataArray, footprint: xr.Dataset) -> xr.DataArray:
         footprint: Footprint providing the target spatial coordinates.
 
     Returns:
-        The original field when its indexes already match, otherwise an
-        interpolated or nearest-neighbour reindexed field.
+        A nearest-neighbour reindexed field within a tolerance of 1e-5.
     """
-    indexers = {dim: footprint.coords[dim] for dim in SPATIAL_DIMS}
-    if all(data.coords[dim].equals(indexers[dim]) for dim in SPATIAL_DIMS):
-        return data
+    return reindex_on_dims(data, footprint, SPATIAL_DIMS, method="nearest", tolerance=1e-5)
+
+
+def _unit_scale(data: xr.DataArray, canonical_units: str, *, label: str) -> float:
+    """Validate physical units and return their conversion to canonical units."""
+    units = data.attrs.get("units", canonical_units)
     try:
-        return data.interp(indexers)
-    except (TypeError, ValueError):
-        return data.reindex(indexers, method="nearest")
+        return float(cf_ureg.Quantity(1, units).to(canonical_units).magnitude)
+    except (PintError, TypeError, ValueError) as exc:
+        raise ValueError(f"{label} units {units!r} must be compatible with {canonical_units!r}.") from exc
+
+
+def _normalise_units(data: xr.DataArray, canonical_units: str, *, label: str) -> xr.DataArray:
+    """Lazily scale values without changing the borrowed input or its attributes."""
+    scale = _unit_scale(data, canonical_units, label=label)
+    result = data * scale if scale != 1 else data.copy(deep=False)
+    result.attrs = {**data.attrs, "units": canonical_units}
+    return result
 
 
 def _prepare_inputs(
@@ -152,10 +166,23 @@ def _prepare_inputs(
     if flux_da.sizes["time"] == 0:
         raise ValueError("Flux time coordinate must not be empty.")
 
+    arrays = (fp_ds["fp_time_resolved"], fp_ds["fp_residual"], flux_da)
+    if any(array.dtype.kind not in "iuf" or array.dtype.itemsize > 8 for array in arrays):
+        raise ValueError("Footprint and flux values must be real numeric types of at most 64 bits.")
+    work_dtype = np.result_type(*(array.dtype for array in arrays), np.float32)
+    fp_ds = fp_ds.astype(work_dtype)
+    flux_da = flux_da.astype(work_dtype)
+    fp_ds = xr.Dataset(
+        {
+            name: _normalise_units(fp_ds[name], "m2 s mol-1", label=name)
+            for name in ("fp_time_resolved", "fp_residual")
+        }
+    )
+    flux_da = _normalise_units(flux_da, "mol m-2 s-1", label="Flux")
     flux_da = _reindex_space(flux_da, fp_ds)
-    if cast_float32:
-        fp_ds = fp_ds.astype(np.float32)
-        flux_da = flux_da.astype(np.float32)
+    dtype = np.dtype("float32") if cast_float32 else work_dtype
+    fp_ds = fp_ds.astype(dtype)
+    flux_da = flux_da.astype(dtype)
     if fillna_zero:
         fp_ds = fp_ds.fillna(0.0)
         flux_da = flux_da.fillna(0.0)
@@ -179,14 +206,16 @@ def _hourly_lags(fp_time_resolved: xr.DataArray) -> np.ndarray:
         Lag values as an int64 NumPy array measured in hours.
 
     Raises:
-        ValueError: If the coordinate uses unsupported units or contains
-            negative or fractional hours.
+        ValueError: If the coordinate is empty, uses unsupported units, or
+            contains non-finite, negative or fractional hours.
     """
     lag_coord = fp_time_resolved["H_back"]
     units = str(lag_coord.attrs.get("units", "hours")).lower()
     if units not in {"h", "hr", "hour", "hours"}:
         raise ValueError(f"H_back must be expressed in hours, found {units!r}.")
     values = np.asarray(lag_coord.values, dtype=float)
+    if values.size == 0 or not np.all(np.isfinite(values)):
+        raise ValueError("H_back must contain at least one finite, non-negative whole-hour lag.")
     rounded = np.rint(values)
     if not np.allclose(values, rounded) or np.any(rounded < 0):
         raise ValueError("H_back values must be non-negative whole hours.")
@@ -233,8 +262,7 @@ def _validate_interval_start_time(time: xr.DataArray, *, label: str) -> int:
     time_label = str(time.attrs.get("label", "left")).lower()
     if time_label not in {"left", "start", "beginning"}:
         raise ValueError(
-            f"{label} timestamps must label the start of each averaging interval; "
-            f"found label={time_label!r}."
+            f"{label} timestamps must label the start of each averaging interval; found label={time_label!r}."
         )
     return _regular_time_step_hours(time, label=label)
 
@@ -325,16 +353,12 @@ def _h_back_window_hours(fp_time_resolved: xr.DataArray) -> int:
         fp_time_resolved: Footprint containing whole-hour ``H_back`` values.
 
     Returns:
-        Window length in hours, including the width of the final lag bin.
+        Window length in hours, with each lag interpreted as an hourly offset.
 
     Raises:
         ValueError: If the lag coordinate is invalid.
     """
-    lags = np.sort(_hourly_lags(fp_time_resolved))
-    if lags.size < 2:
-        return int(lags.max(initial=0)) + 1
-    lag_step = int(np.gcd.reduce(np.diff(lags)))
-    return int(lags.max()) + max(1, lag_step)
+    return int(_hourly_lags(fp_time_resolved).max(initial=0)) + 1
 
 
 def _forward_fill_flux_hourly(flux: xr.DataArray, *, step_hours: int) -> xr.DataArray:
@@ -360,8 +384,8 @@ def _forward_fill_flux_hourly(flux: xr.DataArray, *, step_hours: int) -> xr.Data
 def _padded_flux_bounds(fp_time_resolved: xr.DataArray) -> tuple[np.datetime64, np.datetime64]:
     """Return inclusive flux bounds covering releases and their lag halo."""
     max_lag = int(_hourly_lags(fp_time_resolved).max(initial=0))
-    start = fp_time_resolved["time"].values[0] - np.timedelta64(max_lag, "h")
-    end = fp_time_resolved["time"].values[-1]
+    start = fp_time_resolved["time"].values.min() - np.timedelta64(max_lag, "h")
+    end = fp_time_resolved["time"].values.max()
     return start, end
 
 
@@ -391,25 +415,40 @@ def _validate_flux_coverage(
         )
 
 
+def _validate_monthly_flux_coverage(flux: xr.DataArray, fp: xr.DataArray | xr.Dataset) -> None:
+    """Require native flux labels in every footprint release calendar month."""
+    release_months = pd.DatetimeIndex(fp["time"].values).to_period("M").unique()
+    flux_months = pd.DatetimeIndex(flux["time"].values).to_period("M").unique()
+    missing = release_months.difference(flux_months)
+    if len(missing):
+        raise ValueError(
+            "Flux must supply at least one native value in every footprint release calendar month; "
+            f"missing months: {list(missing.astype(str))}."
+        )
+
+
 def _low_frequency_flux(flux: xr.DataArray, fp_ds: xr.Dataset) -> xr.DataArray:
-    """Align calendar-month mean flux to footprint release timestamps.
+    """Align means of supplied flux values in each release's calendar month.
 
     Args:
         flux: Spatially aligned source-resolved flux.
         fp_ds: Footprint Dataset providing release times and compute chunks.
 
     Returns:
-        Float32 monthly mean flux aligned to every footprint release, with time
+        Monthly mean flux aligned to every footprint release, with time
         chunks matching the resolved footprint when it is Dask-backed.
+
+    Raises:
+        ValueError: If a release calendar month has no native flux labels.
     """
-    # Include complete calendar months so boundary releases use a full-month
-    # mean without reading unrelated years from a long flux record.
+    _validate_monthly_flux_coverage(flux, fp_ds)
+    # Retain all supplied values in release months before trimming the lag halo.
     release_index = pd.DatetimeIndex(fp_ds["time"].values)
     first_month = release_index.min().to_period("M").start_time
     month_after_last = (release_index.max().to_period("M") + 1).start_time
     final_instant = month_after_last.to_datetime64() - np.timedelta64(1, "ns")
     monthly = flux.sel(time=slice(first_month, final_instant)).resample(time="1MS").mean()
-    result = monthly.reindex(time=fp_ds["time"], method="ffill").astype(np.float32)
+    result = monthly.reindex(time=fp_ds["time"], method="ffill")
     resolved = fp_ds["fp_time_resolved"]
     if hasattr(resolved.data, "chunks"):
         result = result.chunk({"time": resolved.chunksizes["time"]})
@@ -827,6 +866,19 @@ def _validate_core_inputs(
         ValueError: If dimensions, coordinates, monotonicity, or chunks violate
             the core contract.
     """
+    arrays = (fp_time_resolved, fp_residual, flux)
+    if len({array.dtype for array in arrays}) != 1 or fp_time_resolved.dtype not in (
+        np.dtype("float32"),
+        np.dtype("float64"),
+    ):
+        raise ValueError("Core inputs must share one float32 or float64 dtype.")
+    for array, units, label in (
+        (fp_time_resolved, "m2 s mol-1", "Resolved footprint"),
+        (fp_residual, "m2 s mol-1", "Residual footprint"),
+        (flux, "mol m-2 s-1", "Flux"),
+    ):
+        if _unit_scale(array, units, label=label) != 1:
+            raise ValueError(f"Core {label.lower()} units must already have canonical scale ({units}).")
     required_resolved = {"time", "lat", "lon", "H_back"}
     missing_resolved = required_resolved - set(fp_time_resolved.dims)
     if missing_resolved:
@@ -871,7 +923,10 @@ def fp_x_flux_time_resolved_numba_core(
     does not sort, spatially align, cast, fill missing values, select sources,
     or rechunk. Footprint time must be monotonic non-decreasing; footprint and
     flux spatial coordinates and chunks must match; ``H_back`` must be one
-    chunk; and flux must already contain a ``source`` dimension.
+    chunk; and flux must already contain a ``source`` dimension. All values
+    must share a float32 or float64 dtype and use canonical physical units
+    (footprints ``m2 s mol-1``; flux ``mol m-2 s-1``). Missing unit attributes
+    assume canonical units; scaled units must be normalized by the wrapper.
 
     Use :func:`fp_x_flux_time_resolved_numba` for arbitrary user inputs. That wrapper
     establishes this contract, restores non-monotonic input order, and applies
@@ -889,8 +944,8 @@ def fp_x_flux_time_resolved_numba_core(
 
     Raises:
         ImportError: If OpenGHG was installed without the ``fp-x-flux`` extra.
-        ValueError: If prepared dimensions, coordinates, chunks, time labels,
-            lag values, or flux coverage violate the core contract.
+        ValueError: If prepared dimensions, coordinates, chunks, dtypes, units,
+            time labels, lag values, or flux coverage violate the core contract.
     """
     _require_numba()
     fp_ds = _split_footprint(footprint)
@@ -906,12 +961,15 @@ def fp_x_flux_time_resolved_numba_core(
         resolved = fp_time_resolved.sum("H_back") * low_frequency_flux
     else:
         flux_hourly = _forward_fill_flux_hourly(flux, step_hours=flux_step_hours)
-        if _uses_regular_halo_kernel(fp_time_resolved["time"], flux_hourly["time"]):
+        lags = _hourly_lags(fp_time_resolved)
+        max_lag = int(lags.max(initial=0))
+        chunks_fit_halo = all(chunk >= max_lag for chunk in fp_time_resolved.chunksizes["time"][1:])
+        if _uses_regular_halo_kernel(fp_time_resolved["time"], flux_hourly["time"]) and chunks_fit_halo:
             kernel_name = "numba_block"
-            lags = _hourly_lags(fp_time_resolved)
-            max_lag = int(lags.max(initial=0))
             flux_halo = _flux_with_halo(flux_hourly, fp_time_resolved)
-            fp_padded = _pad_footprint_left(fp_time_resolved, pad_hours=max_lag)
+            fp_padded = _pad_footprint_left(fp_time_resolved, pad_hours=max_lag).transpose(
+                "time", "lat", "lon", "H_back"
+            )
             resolved_data = da.blockwise(
                 _resolved_block,
                 "tyxs",
@@ -989,16 +1047,28 @@ def fp_x_flux_time_resolved_numba(  # noqa: PLR0913
     The lazy result contains ``(source, lat, lon, time)`` and is suitable for
     later basis-function projection. The resolved term uses the flux interval
     containing each footprint release time minus ``H_back``; flux timestamps
-    are interpreted as interval starts. The residual term uses monthly mean
-    flux. Regular coarse flux is forward-filled to an hourly grid; flux coarser
-    than the full ``H_back`` window uses its monthly mean for the resolved and
-    residual terms. Inputs must include the full lag halo before the first
-    footprint time. Irregular release times retain their exact order and values
-    and use a chunk-indexed Numba kernel.
+    are interpreted as starts of half-open averaging intervals with a positive
+    whole-hour cadence; a singleton flux timestamp represents one hour. The
+    residual term uses means of all supplied flux values in each release's calendar
+    month, before trimming to the lag halo. Every release month must have at
+    least one supplied native flux value. Regular coarse flux is forward-filled
+    to an hourly grid; a flux cadence strictly greater than ``max(H_back) + 1``
+    hours uses monthly means for both resolved and residual terms. Inputs must
+    include the full lag halo before the earliest footprint release. Irregular
+    release times retain their exact order and values and use a chunk-indexed
+    Numba kernel.
+
+    Declared footprint units (including residual units) are converted to
+    ``m2 s mol-1`` and flux units to ``mol m-2 s-1`` before multiplication.
+    Missing units assume these canonical units. Incompatible units raise an
+    error. The result uses canonical dimensionless mol/mol values.
 
     If ``time_selector`` is supplied, it is applied only after the full lazy
     operator graph has been constructed. This preserves the lag calculation
     while allowing callers to retain only actual observation timestamps.
+    Duplicate releases are retained when no selector is supplied; selection
+    requires unique result timestamps and unique non-missing selector values.
+    Input values, attributes and chunks are unchanged through computation.
 
     Args:
         footprint: Dataset containing ``fp_time_resolved`` and ``fp_residual``,
@@ -1007,15 +1077,22 @@ def fp_x_flux_time_resolved_numba(  # noqa: PLR0913
             ``source`` dimension is treated as a single source.
         sources: Optional source-coordinate values to select.
         source_labels: Optional replacement labels for the selected sources.
-        time_selector: Observation timestamps to retain after calculation.
+        time_selector: Observation timestamps to retain in selector order after
+            calculation. Missing values are discarded; other values must be
+            unique and present in a result with unique timestamps.
         time_chunk: Requested compute and output time chunk size. Irregular
             release times default to compute chunks of 32 observations; the
-            regular kernel retains its existing full-time default.
+            regular kernel defaults to the full time axis and uses compute
+            chunks at least as large as the maximum lag, before applying the
+            requested output chunks.
         lat_chunk: Requested latitude chunk size; defaults to the full grid.
         lon_chunk: Requested longitude chunk size; defaults to the full grid.
         source_chunk: Requested source chunk size; defaults to all sources.
-        cast_float32: Cast inputs and output to float32.
-        fillna_zero: Replace missing footprint and flux values with zero.
+        cast_float32: Cast inputs to common float32 after unit normalization.
+            If false, use a common float32 or float64 dtype, preserving float64
+            inputs and safely promoting integer inputs.
+        fillna_zero: Replace missing footprint and flux values with zero,
+            including spatial cells unmatched by nearest reindexing within 1e-5.
 
     Returns:
         A lazy, dimensionless DataArray ordered as ``source, lat, lon, time``.
@@ -1067,7 +1144,11 @@ def fp_x_flux_time_resolved_numba(  # noqa: PLR0913
         fp_time_resolved["time"], hourly_flux["time"]
     )
     compute_time_chunk = time_chunk or fp_time_resolved.sizes["time"]
-    if not use_regular_kernel:
+    if use_regular_kernel:
+        if compute_time_chunk <= 0:
+            raise ValueError("Chunk sizes must be positive.")
+        compute_time_chunk = max(compute_time_chunk, int(_hourly_lags(fp_time_resolved).max()))
+    else:
         compute_time_chunk = time_chunk or min(
             DEFAULT_IRREGULAR_TIME_CHUNK,
             fp_time_resolved.sizes["time"],
