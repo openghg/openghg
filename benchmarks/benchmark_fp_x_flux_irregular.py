@@ -297,7 +297,7 @@ def _repair_footprint(
     output_path.parent.mkdir(parents=True, exist_ok=True)
     write_started = time.perf_counter()
     with dask.config.set(scheduler="threads", num_workers=workers):
-        repaired.to_zarr(temporary, mode="w", consolidated=True, encoding=encoding)
+        repaired.to_zarr(temporary, mode="w", consolidated=True, encoding=encoding, zarr_format=2)
     temporary.replace(output_path)
     write_seconds = time.perf_counter() - write_started
     cached = xr.open_zarr(output_path, consolidated=True)
