@@ -1040,6 +1040,7 @@ class ModelScenario:
                 )
             else:
                 self.scenario = self._check_footprint_resample(resample_to)
+        # TODO: Add check for matching sources and recalculate otherwise
         else:
             return False
 
