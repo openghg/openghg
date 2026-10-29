@@ -912,10 +912,10 @@ def test_footprints_data_merge_without_obs(footprint_dummy, flux_ch4_dummy, bc_c
     xr.testing.assert_equal(combined_dataset["bc_mod"], model_scenario.modelled_baseline["bc_mod"])
 
 
-def test_footprints_data_merge_without_obs_resample_invalidates_cache(
+def test_footprints_data_merge_without_obs_resample_updates_data(
     footprint_dummy, flux_ch4_dummy, bc_ch4_dummy
 ):
-    """Changing resample_to without obs should recalculate cached modelled outputs."""
+    """Check that changing resample_to for a ModelScenario without obs successfully recalculates the modelled outputs."""
     model_scenario = ModelScenario(obs=None, footprint=footprint_dummy, flux=flux_ch4_dummy, bc=bc_ch4_dummy)
 
     # Running footprints_data_merge with different `resample_to` values should produce different results even when obs is not present
