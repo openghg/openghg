@@ -1031,8 +1031,9 @@ class ModelScenario:
         else:
             prev_resample_to = None
 
+        # Check if parameter (e.g. modelled_obs or modelled_baseline) exists, the resample_to input is different than the current value or explicit recalculation is requested.
+        # - Note that if obs is not present, can resample the footprint directly as we don't have an obs data variable to store within self.scenario
         if parameter is None or recalculate:
-            # Check if observations are present and use these for resampling
             if self.obs is not None or self.obs_column is not None:
                 self.combine_obs_footprint(
                     resample_to, platform=platform, recalculate=recalculate, cache=True
@@ -1045,8 +1046,6 @@ class ModelScenario:
             else:
                 self.scenario = self._check_footprint_resample(resample_to)
         else:
-            # Return cached modelled observations if explicit recalculation not requested
-            # return self.modelled_obs
             return False
 
         return True
