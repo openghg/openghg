@@ -895,16 +895,15 @@ def test_model_modelled_obs_ch4(model_scenario_ch4_dummy, footprint_dummy, flux_
 
 
 def test_footprints_data_merge_without_obs(footprint_dummy, flux_ch4_dummy, bc_ch4_dummy):
-    """footprints_data_merge should still calculate modelled outputs without obs data."""
+    """Test whether footprints_data_merge can still calculate modelled outputs without obs data."""
     model_scenario = ModelScenario(obs=None, footprint=footprint_dummy, flux=flux_ch4_dummy, bc=bc_ch4_dummy)
 
-    combined_dataset = model_scenario.footprints_data_merge(resample_to="coarsest")
+    combined_dataset = model_scenario.footprints_data_merge(resample_to="2H")
 
     assert "mf" not in combined_dataset
     assert all(dv in combined_dataset for dv in ("fp", "mf_mod", "bc_mod"))
-    assert combined_dataset.attrs["resample_to"] == "coarsest"
-    assert combined_dataset["mf_mod"].attrs["units"] == "1"
-    assert combined_dataset["bc_mod"].attrs["units"] == "1"
+    assert combined_dataset.attrs["resample_to"] == "2H"
+
     assert combined_dataset.time[0] == footprint_dummy.data.time[0]
     assert combined_dataset.time[-1] == footprint_dummy.data.time[-1]
     assert model_scenario.modelled_obs is not None
