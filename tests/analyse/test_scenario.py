@@ -918,14 +918,24 @@ def test_footprints_data_merge_without_obs_resample_invalidates_cache(
     """Changing resample_to without obs should recalculate cached modelled outputs."""
     model_scenario = ModelScenario(obs=None, footprint=footprint_dummy, flux=flux_ch4_dummy, bc=bc_ch4_dummy)
 
-    model_scenario.footprints_data_merge(resample_to="coarsest")
+    # Running footprints_data_merge with different `resample_to` values should produce different results even when obs is not present
+    initial_dataset = model_scenario.footprints_data_merge(resample_to="2H")
     resampled_dataset = model_scenario.footprints_data_merge(resample_to="12H")
+    
+    # Note: This is creating an expected_dataset which relies on recalculate=True correctly triggering this to be recalculated
     expected_dataset = model_scenario.footprints_data_merge(resample_to="12H", recalculate=True)
 
     assert model_scenario.modelled_obs is not None
     assert model_scenario.modelled_baseline is not None
     assert model_scenario.modelled_obs.attrs["resample_to"] == "12H"
     assert model_scenario.modelled_baseline["bc_mod"].attrs["resample_to"] == "12H"
+
+    # We expect the initial_dataset and resampled_dataset to be different if the resample_to has been used correctly.
+    with pytest.raises(AssertionError):
+        xr.testing.assert_equal(initial_dataset["mf_mod"], resampled_dataset["mf_mod"])
+        xr.testing.assert_equal(initial_dataset["bc_mod"], resampled_dataset["bc_mod"])
+
+    # Double check the reampled_dataset values are as we expect (resampled to "12H" rather than "2H")
     xr.testing.assert_equal(resampled_dataset["mf_mod"], expected_dataset["mf_mod"])
     xr.testing.assert_equal(resampled_dataset["bc_mod"], expected_dataset["bc_mod"])
 
