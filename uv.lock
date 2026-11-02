@@ -1225,6 +1225,18 @@ wheels = [
 ]
 
 [[package]]
+name = "jsonpatch"
+version = "1.34"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "jsonpointer" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/2c/29/8f7262f848569fe374b34a0f09e6d366bdd5ac82081edbecd5fd104fe9fc/jsonpatch-1.34.tar.gz", hash = "sha256:e60c9f2d903d261d6eddcbd12cf3193efdb58cd9376a36ccc4db2e29d6cc88e3", size = 25118, upload-time = "2026-10-09T11:25:37.07Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c8/d2/fdb9bbd0e86dad9d8ce1353fe477fb67b4901daf9dec79558876ebeb9877/jsonpatch-1.34-py3-none-any.whl", hash = "sha256:be7726e7fa0969bc4100b3d9f4259f16aadda68a244c6e9e1066157a0c524ec3", size = 14155, upload-time = "2026-10-09T11:25:35.64Z" },
+]
+
+[[package]]
 name = "jsonpickle"
 version = "4.1.1"
 source = { registry = "https://pypi.org/simple" }
@@ -2395,6 +2407,9 @@ doc = [
 fp-x-flux = [
     { name = "numba" },
 ]
+irods = [
+    { name = "python-irodsclient" },
+]
 
 [package.metadata]
 requires-dist = [
@@ -2451,6 +2466,7 @@ requires-dist = [
     { name = "pytest-mock", marker = "extra == 'dev'", specifier = "<=3.15.1" },
     { name = "pytest-timeout", marker = "extra == 'dev'", specifier = ">=2.4.0,<3.0.0" },
     { name = "pytest-tornasync", marker = "extra == 'dev'", specifier = "<=0.6.0.post2" },
+    { name = "python-irodsclient", marker = "extra == 'irods'", specifier = ">=3.3,<4" },
     { name = "pyvis", specifier = "<=0.3.2" },
     { name = "rapidfuzz", specifier = "<=3.14.5" },
     { name = "requests", specifier = "<=2.34.2" },
@@ -2482,7 +2498,7 @@ requires-dist = [
     { name = "xarray-validate", specifier = "==0.0.5" },
     { name = "zarr", specifier = ">=3.1.6,<=3.4.1" },
 ]
-provides-extras = ["dev", "doc", "fp-x-flux"]
+provides-extras = ["dev", "doc", "fp-x-flux", "irods"]
 
 [[package]]
 name = "openghg-calscales"
@@ -2824,6 +2840,18 @@ wheels = [
 ]
 
 [[package]]
+name = "prettytable"
+version = "3.18.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "wcwidth" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/81/74/ba08d81e668ccfe8658d7520a307e63c19862c08eb4ccb26f356c5239a7a/prettytable-3.18.0.tar.gz", hash = "sha256:439217116152244369caf3d9f1caf2f9fe29b03bd79e88d2928c8e718c95d680", size = 76373, upload-time = "2026-06-22T16:07:50.174Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fe/be/2e6798ace5cc036f5d05d36b7b2fd85346f1a708c87060890b070d0ec607/prettytable-3.18.0-py3-none-any.whl", hash = "sha256:b3346e0e6f79180833aebaac088ae926340586cf6d7d991b9eb125b65f72313a", size = 37357, upload-time = "2026-06-22T16:07:48.595Z" },
+]
+
+[[package]]
 name = "prometheus-client"
 version = "0.24.1"
 source = { registry = "https://pypi.org/simple" }
@@ -3078,6 +3106,21 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/4c/81/58c70036dffeccb7fe7d79d6260c69f7a28272bbd3909c29a01ea9422744/python_discovery-1.4.4.tar.gz", hash = "sha256:5cad33982d412c1f3ffb8f9ca4ea292c9680bca3942451d30b69c37fce53a4a3", size = 72212, upload-time = "2026-07-08T23:06:50.691Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/9d/ae/84bc0d2440c95772272bb6f4b3d09ccf08b2898fce89b3d4f969a9fc74e9/python_discovery-1.4.4-py3-none-any.whl", hash = "sha256:abebe9120b43453b68c908acfb1e72a19d1a959ed2cb620ad38fc57d08056dbe", size = 34181, upload-time = "2026-07-08T23:06:49.402Z" },
+]
+
+[[package]]
+name = "python-irodsclient"
+version = "3.3.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "defusedxml" },
+    { name = "jsonpatch" },
+    { name = "jsonpointer" },
+    { name = "prettytable" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f5/2a/950bafc2953657193d1c08239c310c4b8661191b29ff4911722b2d95631c/python_irodsclient-3.3.0.tar.gz", hash = "sha256:dfab1ad8cc01bedef1b4e29e26a6f02b00ab4c64d520295e9ab35c4de26e2d32", size = 334833, upload-time = "2026-03-18T15:43:13.384Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b3/81/b79197f87b09a3b11bb56417ce32c03ee18b6cf9c1b43b74139dd43e30bc/python_irodsclient-3.3.0-py3-none-any.whl", hash = "sha256:3016c36f26bd2d5edd64533f492b56a892432e9d3504ef6827eea1ec0acaeb0d", size = 584280, upload-time = "2026-03-18T15:43:11.517Z" },
 ]
 
 [[package]]

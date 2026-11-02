@@ -34,6 +34,8 @@ Configure and implement alternative persistence for OpenGHG object stores.
    :maxdepth: 1
 
    objectstore_backends
+   irods_prototype
+   irods_administration
 
 Packaging & Release
 -------------------
