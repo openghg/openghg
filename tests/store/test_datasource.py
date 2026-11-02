@@ -412,7 +412,13 @@ def test_native_format_integrity_check(data, bucket, datasource):
     observations = data["ch4"]["data"].isel(time=slice(0, 12))
     datasource._store.to_zarr_kwargs = {"zarr_format": 3}
     datasource.add_data(metadata=data["ch4"]["metadata"], data=observations, data_type="surface")
-    datasource._store.create_version("v2", checkout=True, copy_current=True)
+    datasource.add_data(
+        metadata=data["ch4"]["metadata"],
+        data=observations,
+        data_type="surface",
+        new_version=True,
+        if_exists="combine",
+    )
     datasource.save()
 
     reopened = Datasource.load(bucket=bucket, uuid=datasource.uuid)

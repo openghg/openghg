@@ -37,6 +37,7 @@ Configure and implement alternative persistence for OpenGHG object stores.
    irods_prototype
    irods_publication
    irods_administration
+   datasource_versioning
 
 Packaging & Release
 -------------------

@@ -44,4 +44,7 @@ jobs:
           "numcodecs==${{ matrix.numcodecs }}"
           "xarray==${{ matrix.xarray }}"
       - name: Test storage without restoring the normal environment
-        run: uv run --no-sync pytest -v tests/storage tests/store/test_datasource.py
+        run: >-
+          uv run --no-sync pytest -v tests/storage tests/store/test_datasource.py
+          tests/store/test_datasource_edit.py tests/store/test_datasource_edit_backend.py
+          tests/dataobjects/test_datasource_handle.py tests/objectstore/test_immutable_catalogue.py
