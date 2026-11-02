@@ -14,7 +14,6 @@ from pandas import Timestamp
 import xarray as xr
 from xarray import Dataset
 
-from openghg.objectstore import get_object_from_json, exists, set_object_from_json
 from openghg.objectstore import locking_object_store
 from openghg.store._data_schema import DataSchema
 from openghg.storage import ChunkingSchema, chunk_size_in_megabytes
@@ -48,22 +47,23 @@ class BaseStore:
     _metakey: str = ""
 
     def __init__(self, bucket: str) -> None:
-        # from openghg.objectstore import get_object_from_json, exists
-
         self._creation_datetime = str(timestamp_now())
         self._stored = False
+        objectstore = locking_object_store(bucket=bucket, data_type=self._data_type)
+        try:
+            data = objectstore.read_document(self.key() + "._data")
+            if data is not None:
+                # Update myself
+                self.__dict__.update(data)
+                self.__dict__.pop("_file_hashes", None)
+                self.__dict__.pop("_retrieved_hashes", None)
 
-        if exists(bucket=bucket, key=self.key()):
-            data = get_object_from_json(bucket=bucket, key=self.key())
-            # Update myself
-            self.__dict__.update(data)
-            self.__dict__.pop("_file_hashes", None)
-            self.__dict__.pop("_retrieved_hashes", None)
-
-        # self._metastore = DataClassMetaStore(bucket=bucket, data_type=self._data_type)
-        self._objectstore = locking_object_store(bucket=bucket, data_type=self._data_type)
-        self._bucket = bucket
-        self._datasource_uuids = cast(list[str], self._objectstore.get_uuids())
+            self._objectstore = objectstore
+            self._bucket = bucket
+            self._datasource_uuids = cast(list[str], objectstore.get_uuids())
+        except BaseException:
+            objectstore.close()
+            raise
 
     def __init_subclass__(cls) -> None:
         if cls._data_type == "":
@@ -100,6 +100,7 @@ class BaseStore:
     ) -> None:
         if exc_type is not None:
             logger.error(msg="", exc_info=exc_val)
+            self._objectstore.close()
         else:
             self.save()
 
@@ -112,10 +113,9 @@ class BaseStore:
         return f"{cls._root}/uuid/{cls._uuid}"
 
     def save(self) -> None:
-        # from openghg.objectstore import set_object_from_json
-
-        self._objectstore.close()
-        set_object_from_json(bucket=self._bucket, key=self.key(), data=self.to_data())
+        """Persist store state through the configured backend and release resources."""
+        with self._objectstore as objectstore:
+            objectstore.write_document(self.key() + "._data", self.to_data())
 
     def to_data(self) -> dict:
         """Return serialisable store state without runtime or legacy hash fields."""

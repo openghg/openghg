@@ -140,6 +140,30 @@ def test_create_and_retrieve(objectstore, fake_metadata, fake_data):
     assert data == [0]
 
 
+@pytest.mark.parametrize("failure", ["save", "insert"])
+def test_failed_create_does_not_publish_or_mutate_metadata(objectstore, fake_metadata, monkeypatch, failure):
+    metadata = fake_metadata[0]
+    original = metadata.copy()
+
+    def fail_save(self):
+        raise ObjectStoreError("datasource save failed")
+
+    def fail_insert(record):
+        assert record["uuid"] in InMemoryDatasource.datasources
+        assert metadata == original
+        raise ObjectStoreError("metastore insert failed")
+
+    if failure == "save":
+        monkeypatch.setattr(InMemoryDatasource, "save", fail_save)
+    else:
+        monkeypatch.setattr(objectstore.metastore, "insert", fail_insert)
+    with pytest.raises(ObjectStoreError, match="failed"):
+        objectstore.create(metadata, 1)
+
+    assert objectstore.uuids == []
+    assert metadata == original
+
+
 def test_create_twice_raises_error(objectstore, fake_metadata, fake_data):
     objectstore.create(fake_metadata[0], fake_data[0])
 
@@ -214,6 +238,29 @@ def test_delete(objectstore, fake_metadata, fake_data):
     with pytest.raises(LookupError):
         # LookupError from trying to load data from UUID not found in InMemoryDatasource
         objectstore.get_datasource(uuid)
+
+
+@pytest.mark.parametrize("failure", ["metastore", "datasource"])
+def test_failed_delete_never_leaves_a_record_pointing_to_deleted_data(objectstore, monkeypatch, failure):
+    uuid = objectstore.create({"site": "TAC"}, 1)
+
+    def fail_metadata_delete(metadata):
+        assert InMemoryDatasource.datasources[uuid] == [1]
+        raise ObjectStoreError("metastore delete failed")
+
+    def fail_data_delete(self):
+        assert objectstore.uuids == []
+        raise ObjectStoreError("datasource delete failed")
+
+    if failure == "metastore":
+        monkeypatch.setattr(objectstore.metastore, "delete", fail_metadata_delete)
+    else:
+        monkeypatch.setattr(InMemoryDatasource, "delete", fail_data_delete)
+    with pytest.raises(ObjectStoreError, match="failed"):
+        objectstore.delete(uuid)
+
+    assert InMemoryDatasource.datasources[uuid] == [1]
+    assert objectstore.uuids == ([uuid] if failure == "metastore" else [])
 
 
 def test_search_uses_datasource_only_metadata_when_metastore_index_lacks_key(merged_objectstore, fake_data):

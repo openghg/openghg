@@ -7915,6 +7915,7 @@ packages:
   - sphinxcontrib-mermaid<=2.1.1 ; extra == 'doc'
   - sphinxcontrib-programoutput ; extra == 'doc'
   - numba>=0.59 ; extra == 'fp-x-flux'
+  - python-irodsclient>=3.3,<4 ; extra == 'irods'
   requires_python: '>=3.11,<3.14'
 - pypi: git+https://github.com/openghg/cf-checker?rev=master#0830fd52f9cc401f15518b4e16853f7be77e27c2
   name: cfchecker

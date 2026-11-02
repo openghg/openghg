@@ -144,18 +144,7 @@ def create_custom_config(bucket: str) -> None:
     Returns:
         None
     """
-    config_folderpath = _get_custom_config_folderpath(bucket=bucket)
-
-    config_folderpath.mkdir(parents=True, exist_ok=True)
-
-    # Make the expected folder structure
-    db_config_folderpath = config_folderpath.joinpath("config")
-    db_config_folderpath.mkdir(exist_ok=True)
-
-    default_keys = get_metakey_defaults()
-
-    # Now we create the default metadata keys file and write out the defaults
-    _write_metakey_config(bucket=bucket, metakeys=default_keys)
+    _write_metakey_config(bucket=bucket, metakeys=get_metakey_defaults())
 
 
 def _write_metakey_config(bucket: str, metakeys: dict) -> None:
@@ -178,6 +167,14 @@ def _write_metakey_config(bucket: str, metakeys: dict) -> None:
         "date_written": str(timestamp_now()),
         "metakeys": metakeys,
     }
+
+    from openghg.objectstore._factory import configured_object_store
+
+    custom_store = configured_object_store(bucket=str(bucket), data_type="", mode="rw")
+    if custom_store is not None:
+        with custom_store:
+            custom_store.write_document("config/metadata_keys_v2.json", config_data)
+        return
 
     metakey_path = _get_custom_metakeys_filepath(bucket=bucket)
     config_folder = metakey_path.parent
@@ -222,6 +219,18 @@ def get_metakeys(bucket: str | None = None) -> dict[str, dict]:
         dict: Configuration data
     """
     if bucket is not None:
+        from openghg.objectstore._factory import configured_object_store
+
+        custom_store = configured_object_store(bucket=str(bucket), data_type="", mode="r")
+        if custom_store is not None:
+            with custom_store:
+                config_data = custom_store.read_document("config/metadata_keys_v2.json")
+            if config_data is None:
+                return get_metakey_defaults()
+            metakeys = config_data.get("metakeys", config_data)
+            if not isinstance(metakeys, dict):
+                raise ValueError("The backend metadata-key document must contain a dictionary.")
+            return cast(dict[str, dict], metakeys)
         metakey_path: Path | None = _get_custom_metakeys_filepath(bucket=bucket)
     else:
         metakey_path = None

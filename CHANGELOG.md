@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Allocate new datasource version numbers above the highest remaining version after older versions are deleted, preserving retained versions.
+
 - Retained the first month's mean flux in time-resolved `fp_x_flux` calculations when the footprint look-back window starts mid-month. Previously, date selection dropped this monthly value and could leave the residual contribution missing. Recomputing affected `ModelScenario` outputs and downstream inversions can therefore change their results. [PR #1790](https://github.com/openghg/openghg/pull/1790)
 - Aligned Conda's Filelock, Pint and Pint-xarray upper bounds with the supported versions in `pyproject.toml`, avoiding unit-parsing and file-lock permission failures with unsupported versions. [PR #1790](https://github.com/openghg/openghg/pull/1790)
 - Preserve lazy corrections derived from stored data, anchor local Zarr store paths, and keep compression benchmarks writable with Zarr 3. Legacy high-resolution footprints inherit missing units from `fp` during analysis. [PR #1786](https://github.com/openghg/openghg/pull/1786)
@@ -20,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added config-driven metadata key handling for transformed flux and boundary condition data: removed hard-coded required-key lookups.[PR #1686](https://github.com/openghg/openghg/pull/1686)
 
 ### Updated
+
+- Publish iRODS datasources atomically with immutable Zarr generations, stable lazy-reader snapshots, explicit stale-writer conflicts, and logical deletion that retains generations until deliberate storage reclamation.
 
 - Support current xarray and Zarr 3 packages while retaining format 2 stores, existing data versions, compression and read-only shared-store access.[PR #1786](https://github.com/openghg/openghg/pull/1786).
 - Added Python 3.13 to the CI test matrices, dropped Python 3.10 support, and restricted OpenGHG to Python 3.11-3.13. [PR #1741](https://github.com/openghg/openghg/pull/1741).
@@ -34,6 +38,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added opt-in native Zarr format 3 storage, retaining format 2 as the default and preserving the format of existing stores, including when overwriting after reopening. Added storage and datasource CI coverage for legacy, minimum and current Zarr runtimes. [PR #1793](https://github.com/openghg/openghg/pull/1793)
+- Added a configurable iRODS ObjectStore with catalog-backed metadata and store documents, the existing datasource version/overlap behaviour over Zarr objects, lazy checksum-verified reads, a shared writer lock, and managed-resource replication. Persistent client data caching and provenance receipts require an explicit `cache_dir`; downloaded data stays in memory by default. The optional backend supports standardisation, search, retrieval, and DataManager through the configured factory.
+- Added iRODS shared-store administration commands for named accounts, reader/writer groups, inherited permissions, and access inspection, with opt-in tests using distinct authenticated users.
+- Added per-store ObjectStore factory configuration, backend options, and environment-based credential references. Backend factories can provide store documents and datasource persistence while existing local stores retain their defaults.
 - Added automatic post-merge Graphify regeneration and a focused navigation
   skill for cross-module impact analysis. [Issue #1695](https://github.com/openghg/openghg/issues/1695)
 - Added a lazy `fp_x_flux_time_resolved_numba` analysis operator that preserves source and spatial dimensions, supports single-source and regular coarse-frequency flux, and includes optional atomic ppm Zarr persistence and worker warm-up helpers.

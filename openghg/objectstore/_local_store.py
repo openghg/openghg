@@ -106,13 +106,20 @@ def get_tutorial_store_path() -> Path:
 
 # @lru_cache
 def get_user_objectstore_path() -> Path:
-    """Returns the path of the user's local object store
+    """Return the path of the user's local object store.
 
     Returns:
-        pathlib.Path: Path of object store
+        pathlib.Path: Path of object store.
+
+    Raises:
+        ObjectStoreError: If the user store uses a custom factory. Tutorial and
+            local filesystem helpers require a local user store.
     """
     config = read_local_config()
-    return Path(config["object_store"]["user"]["path"])
+    user_store = config["object_store"]["user"]
+    if "factory" in user_store:
+        raise ObjectStoreError("This helper requires a local user object store without a custom factory.")
+    return Path(user_store["path"])
 
 
 def get_objectstore_info() -> dict:
@@ -390,13 +397,15 @@ def exists(bucket: str, key: str) -> bool:
 
 
 def get_bucket(name: str | None = None) -> str:
-    """Find and return the local object store path. This will return
-    the path to the user's local object store if no name is given.
+    """Return the configured object store location.
+
+    If no name is given, return the user store location, or the local tutorial
+    store when tutorial mode is active. Custom backend locations are unchanged.
 
     Args:
         name: Object store name in config file
     Returns:
-        str: Path to object store
+        str: Path or backend-specific location of the object store.
     """
     config = read_local_config()
 
@@ -411,9 +420,7 @@ def get_bucket(name: str | None = None) -> str:
     if tutorial_store is not None:
         return str(get_tutorial_store_path())
 
-    local_store = get_user_objectstore_path()
-
-    return str(local_store)
+    return str(config["object_store"]["user"]["path"])
 
 
 def clear_object_store() -> None:
