@@ -600,6 +600,14 @@ class ObjectStore(Generic[DatasourceT, T]):
         if metadata is not None and "uuid" in metadata:
             raise ValueError("Cannot update UUID.")
 
+        if data:
+            datasource = self.get_datasource(uuid)
+            if getattr(datasource, "_mode", None) == "r":
+                raise PermissionError("Cannot modify a read-only datasource")
+            check_legacy_mutation = getattr(datasource, "_check_legacy_mutation", None)
+            if check_legacy_mutation is not None:
+                check_legacy_mutation()
+
         if metadata or keys_to_delete:
             to_extend = None
             if extend_keys and metadata is not None:
@@ -613,7 +621,6 @@ class ObjectStore(Generic[DatasourceT, T]):
             )
 
         if data:
-            datasource = self.get_datasource(uuid)
             datasource.add(data, **kwargs)
             datasource.save()
 
@@ -623,6 +630,11 @@ class ObjectStore(Generic[DatasourceT, T]):
         Failed data cleanup may leave unindexed data for backend-specific recovery.
         """
         data = self.get_datasource(uuid)
+        if getattr(data, "_mode", None) == "r":
+            raise PermissionError("Cannot modify a read-only datasource")
+        check_legacy_mutation = getattr(data, "_check_legacy_mutation", None)
+        if check_legacy_mutation is not None:
+            check_legacy_mutation()
         self.metastore.delete({"uuid": uuid})
         data.delete()
 

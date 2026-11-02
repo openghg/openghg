@@ -37,6 +37,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added `DataManager.datasource(uuid)` and explicit `Datasource.begin_edit()` / `commit()` workflows for batching changes into immutable versions. Existing ingestion flags retain their behavior until a datasource's first explicit commit. Editors preserve saved lazy readers, reject stale publication, and discard uncommitted changes. This establishes the versioning API prerequisite for the Icechunk prototype. [Issue #1755](https://github.com/openghg/openghg/issues/1755)
+
 - Added opt-in native Zarr format 3 storage, retaining format 2 as the default and preserving the format of existing stores, including when overwriting after reopening. Added storage and datasource CI coverage for legacy, minimum and current Zarr runtimes. [PR #1793](https://github.com/openghg/openghg/pull/1793)
 - Added a configurable iRODS ObjectStore with catalog-backed metadata and store documents, the existing datasource version/overlap behaviour over Zarr objects, lazy checksum-verified reads, a shared writer lock, and managed-resource replication. Persistent client data caching and provenance receipts require an explicit `cache_dir`; downloaded data stays in memory by default. The optional backend supports standardisation, search, retrieval, and DataManager through the configured factory.
 - Added iRODS shared-store administration commands for named accounts, reader/writer groups, inherited permissions, and access inspection, with opt-in tests using distinct authenticated users.
