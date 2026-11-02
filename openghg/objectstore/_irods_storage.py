@@ -7,8 +7,9 @@ sessions. Callers using a borrowed session may supply ``lambda: nullcontext(s)``
 
 from __future__ import annotations
 
+import asyncio
 import base64
-from collections.abc import Callable, Iterator, MutableMapping
+from collections.abc import AsyncIterator, Callable, Iterable, Iterator, MutableMapping
 from contextlib import AbstractContextManager
 from datetime import datetime, timezone
 import hashlib
@@ -18,7 +19,8 @@ import tempfile
 from typing import Any
 
 from filelock import FileLock
-from zarr.storage import KVStore
+from zarr.abc.store import Store, ByteRequest, OffsetByteRequest, RangeByteRequest, SuffixByteRequest
+from zarr.core.buffer import Buffer, BufferPrototype
 
 from openghg.types import ObjectStoreError
 
@@ -483,15 +485,95 @@ class IRODSZarrMapping(MutableMapping[str, bytes]):
         return 0
 
 
-class IRODSKVStore(KVStore):
-    """Adapt an iRODS mapping to Zarr with catalog-only sizing and subtree removal."""
+class IRODSKVStore(Store):
+    """Adapt verified iRODS keys to Zarr 3 without blocking its event loop.
+
+    Each operation owns its session through the mapping's factory. Zarr format 2
+    remains the on-disk format; the async store interface does not change it.
+    """
 
     def __init__(self, mapping: IRODSZarrMapping) -> None:
-        super().__init__(mapping)
-        self._writeable = self._erasable = not mapping.read_only
+        super().__init__(read_only=mapping.read_only)
+        self._mapping = mapping
 
-    def rmdir(self, path: str | None = None) -> None:
-        self._mutable_mapping.rmdir(path)
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, IRODSKVStore) and self._mapping is other._mapping
 
-    def getsize(self, path: str | None = None) -> int:
-        return self._mutable_mapping.getsize(path)
+    def with_read_only(self, read_only: bool = False) -> IRODSKVStore:
+        result = type(self)(self._mapping)
+        result._read_only = read_only or self._mapping.read_only
+        return result
+
+    @property
+    def supports_writes(self) -> bool:
+        return not self.read_only
+
+    @property
+    def supports_deletes(self) -> bool:
+        return not self.read_only
+
+    @property
+    def supports_listing(self) -> bool:
+        return True
+
+    async def get(
+        self, key: str, prototype: BufferPrototype, byte_range: ByteRequest | None = None
+    ) -> Buffer | None:
+        try:
+            value = await asyncio.to_thread(self._mapping.__getitem__, key)
+        except KeyError:
+            return None
+        if isinstance(byte_range, RangeByteRequest):
+            value = value[byte_range.start : byte_range.end]
+        elif isinstance(byte_range, OffsetByteRequest):
+            value = value[byte_range.offset :]
+        elif isinstance(byte_range, SuffixByteRequest):
+            value = value[max(0, len(value) - byte_range.suffix) :]
+        elif byte_range is not None:
+            raise TypeError(f"Unsupported byte range: {byte_range!r}")
+        return prototype.buffer.from_bytes(value)
+
+    async def get_partial_values(
+        self, prototype: BufferPrototype, key_ranges: Iterable[tuple[str, ByteRequest | None]]
+    ) -> list[Buffer | None]:
+        return [await self.get(key, prototype, byte_range) for key, byte_range in key_ranges]
+
+    async def exists(self, key: str) -> bool:
+        return await asyncio.to_thread(self._mapping.__contains__, key)
+
+    async def set(self, key: str, value: Buffer) -> None:
+        self._check_writable()
+        await asyncio.to_thread(self._mapping.__setitem__, key, value.to_bytes())
+
+    async def delete(self, key: str) -> None:
+        self._check_writable()
+        try:
+            await asyncio.to_thread(self._mapping.__delitem__, key)
+        except KeyError:
+            pass
+
+    async def delete_dir(self, prefix: str) -> None:
+        self._check_writable()
+        await asyncio.to_thread(self._mapping.rmdir, prefix.rstrip("/"))
+
+    async def getsize(self, key: str) -> int:
+        size = await asyncio.to_thread(self._mapping.getsize, key)
+        if size == 0 and not await self.exists(key):
+            raise FileNotFoundError(key)
+        return size
+
+    async def list(self) -> AsyncIterator[str]:
+        for key in await asyncio.to_thread(list, self._mapping):
+            yield key
+
+    async def list_prefix(self, prefix: str) -> AsyncIterator[str]:
+        async for key in self.list():
+            if key.startswith(prefix):
+                yield key
+
+    async def list_dir(self, prefix: str) -> AsyncIterator[str]:
+        prefix = prefix.rstrip("/")
+        prefix = prefix + "/" if prefix else ""
+        children = {key[len(prefix) :].split("/")[0] async for key in self.list_prefix(prefix)}
+        for child in sorted(children):
+            yield child

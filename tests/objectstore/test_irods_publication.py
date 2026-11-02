@@ -5,7 +5,9 @@ from copy import deepcopy
 
 import pytest
 import xarray as xr
-import zarr
+from zarr.core.sync import sync
+from zarr.core.buffer import default_buffer_prototype
+from openghg.storage._zarr_compat import copy_store
 
 pytest.importorskip("irods")
 
@@ -146,7 +148,7 @@ def test_retained_mapping_cannot_modify_a_committed_generation(backend):
         staged = source._store.store
         source.save()
         with pytest.raises(PermissionError, match="immutable"):
-            staged["unsafe"] = b"bad"
+            sync(staged.set("unsafe", default_buffer_prototype().buffer.from_bytes(b"bad")))
         with pytest.raises(PermissionError, match="read-only"):
             source.mapping()["unsafe"] = b"bad"
 
@@ -198,7 +200,7 @@ def test_legacy_layout_migrates_without_overwriting_legacy_generation(backend, r
         manifest = backend.metastore.publication(uuid)
         path = backend.metastore.path(uuid)
         legacy = IRODSZarrMapping(remote.factory, path + "/v1", remote.cache)
-        zarr.copy_store(backend.get_datasource(uuid)._store.store, IRODSKVStore(legacy))
+        copy_store(backend.get_datasource(uuid)._store.store, IRODSKVStore(legacy))
         write_document(remote.factory, path, "record", manifest["record"])
         write_document(remote.factory, path, "datasource", manifest["datasource"])
         delete_document(remote.factory, path, "publication")
@@ -239,7 +241,7 @@ def test_lost_publication_acknowledgement_still_freezes_uploaded_generation(back
         with pytest.raises(RuntimeError, match="acknowledgement"):
             source.save()
         with pytest.raises(PermissionError, match="immutable"):
-            staged["unsafe"] = b"bad"
+            sync(staged.set("unsafe", default_buffer_prototype().buffer.from_bytes(b"bad")))
         with pytest.raises(ObjectStoreError, match="reload"):
             source.save()
     xr.testing.assert_equal(backend.get_datasource(uuid).get_data().load(), dataset("2020-01-02"))

@@ -95,7 +95,8 @@ def _get_coord_data(coord: str, data: dict[str, Any], domain: str) -> ndarray:
     filename_str = f"{coord}_file"
     if filename_str in data:
         full_filename = data_path / data[filename_str]
-        coord_data: ndarray = np.loadtxt(full_filename)
+        with full_filename.open() as file:
+            coord_data: ndarray = np.loadtxt(file)
         return coord_data
 
     # If no explicit file name defined, look within known location to see
@@ -103,7 +104,8 @@ def _get_coord_data(coord: str, data: dict[str, Any], domain: str) -> ndarray:
     # e.g. "domain/EUROPE_latitude.csv" (within "openghg/openghg/data" folder)
     try:
         full_filename = data_path / "domain" / f"{domain}_{coord}.dat"
-        coord_data = np.loadtxt(full_filename)
+        with full_filename.open() as file:
+            coord_data = np.loadtxt(file)
     except OSError:
         pass
     else:

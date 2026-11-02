@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Allocate new datasource version numbers above the highest remaining version after older versions are deleted, preserving retained versions.
 
+- Retained the first month's mean flux in time-resolved `fp_x_flux` calculations when the footprint look-back window starts mid-month. Previously, date selection dropped this monthly value and could leave the residual contribution missing. Recomputing affected `ModelScenario` outputs and downstream inversions can therefore change their results. [PR #1790](https://github.com/openghg/openghg/pull/1790)
+- Aligned Conda's Filelock, Pint and Pint-xarray upper bounds with the supported versions in `pyproject.toml`, avoiding unit-parsing and file-lock permission failures with unsupported versions. [PR #1790](https://github.com/openghg/openghg/pull/1790)
+- Preserve lazy corrections derived from stored data, anchor local Zarr store paths, and keep compression benchmarks writable with Zarr 3. Legacy high-resolution footprints inherit missing units from `fp` during analysis. [PR #1786](https://github.com/openghg/openghg/pull/1786)
+- Refreshed boundary-condition processing timestamps consistently in metadata and dataset attributes so previously processed inputs pass strict alignment. Conflicting source coverage still raises an error; specify an explicit period for ambiguous single-timestamp inputs. [Issue #1779](https://github.com/openghg/openghg/issues/1779)
+- Preserved mole-fraction and variability metadata when resampling surface observations weighted by observation count. [Issue #1765](https://github.com/openghg/openghg/issues/1765)
 - Added column `max_level` consistency validation to `ModelScenario` and preserved `max_level` metadata when standardising ACRG and PARIS column footprints, preventing observations and footprints with different vertical extents from being combined. [PR #1718](https://github.com/openghg/openghg/pull/1718)
 - Ensured explicitly integrated CO2 site and satellite footprints are standardised and modelled through the integrated-footprint pathway, while preserving the time-resolved default for CO2 footprints. [PR #1698](https://github.com/openghg/openghg/pull/1698)
 - Added a dimension dtype checker for H_back dimension to "timedelta64[ns]". Bug occured for dimension "resolution" and dtype "resolution".[PR #1671](https://github.com/openghg/openghg/pull/1671)
@@ -20,9 +25,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Publish iRODS datasources atomically with immutable Zarr generations, stable lazy-reader snapshots, explicit stale-writer conflicts, and logical deletion that retains generations until deliberate storage reclamation.
 
+- Support current xarray and Zarr 3 packages while retaining format 2 stores, existing data versions, compression and read-only shared-store access.[PR #1786](https://github.com/openghg/openghg/pull/1786).
+- Added Python 3.13 to the CI test matrices, dropped Python 3.10 support, and restricted OpenGHG to Python 3.11-3.13. [PR #1741](https://github.com/openghg/openghg/pull/1741).
 - Removed file and retrieved-data hashing from standardisation. Repeated inputs now follow the normal `if_exists` overlap policy, and data can be standardised again after its datasource is deleted. The deprecated `force` argument remains accepted but is ignored; passing `force=True` emits a `DeprecationWarning`, and callers should use `if_exists` to choose update behaviour. [Issue #1676](https://github.com/openghg/openghg/issues/1676)
 - Updated the standardisation of AGAGE format data so that rows containing nans are no longer dropped. [PR #1634](https://github.com/openghg/openghg/pull/1634)
 - Updated copilot instructions and added repo graph using graphify.[PR #1684](https://github.com/openghg/openghg/pull/1684)
+- Made small tidy up changes to the attribute and metadata details associated with the Flux data object class. For the input attribute details from file this updates the `source` attribute to be `source_url`, moves details from `file_created` to `original_file_created`, updates `processed_by` to always be "OpenGHG Cloud" (to align with other data types) and corrects the `species` value to contain the correct string rather than the incorrect tuple. For the metadata, the `processed` keyword is removed. [PR #1746](https://github.com/openghg/openghg/pull/1746) and [PR #1769](https://github.com/openghg/openghg/pull/1769)
+- The order of assignment for the internally created flux attributes when storing the flux dataset has been clarified. This order of preference is now global_attributes passed to the assignment function, attributes on the original dataset and defaults set within the function. This may result in some small differences from previous attribute creation. [PR #1771](https://github.com/openghg/openghg/pull/1771)
+- Aligning attribute and metadata details for all data type classes (previously just surface) using the underlying openghg.standardise.meta.align_metadata_attributes function [PR #1743](https://github.com/openghg/openghg/pull/1743)
+- Updated the way flux and boundary condition data is aligned with the scenario data when calculating the modelled observations and baselines. This now treats one year of data fully outside the scenario date range as a climatology and aligns the months accordingly. This behaviour is now the default but the `allow_climatology` flag has been included to allow this to revert to previous behaviour. [PR #750](https://github.com/openghg/openghg/pull/750)
 
 ### Added
 
@@ -31,13 +42,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a configurable iRODS ObjectStore with catalog-backed metadata and store documents, the existing datasource version/overlap behaviour over Zarr objects, lazy checksum-verified reads, a shared writer lock, and managed-resource replication. Persistent client data caching and provenance receipts require an explicit `cache_dir`; downloaded data stays in memory by default. The optional backend supports standardisation, search, retrieval, and DataManager through the configured factory.
 - Added iRODS shared-store administration commands for named accounts, reader/writer groups, inherited permissions, and access inspection, with opt-in tests using distinct authenticated users.
 - Added per-store ObjectStore factory configuration, backend options, and environment-based credential references. Backend factories can provide store documents and datasource persistence while existing local stores retain their defaults.
-- Added reproducible Graphify regeneration, CI freshness checking, and a focused navigation
+- Added automatic post-merge Graphify regeneration and a focused navigation
   skill for cross-module impact analysis. [Issue #1695](https://github.com/openghg/openghg/issues/1695)
 - Added a lazy `fp_x_flux_time_resolved_numba` analysis operator that preserves source and spatial dimensions, supports single-source and regular coarse-frequency flux, and includes optional atomic ppm Zarr persistence and worker warm-up helpers.
 - Added support for passing in-memory `xarray.Dataset` objects to supported standardisation and transformation parsers, including object-store retrieval and forward `ModelScenario` coverage.
 - Added a tutorial for adding CO2 satellite data, including how integrated footprints differ from time-resolved footprints in OpenGHG. [PR #1698](https://github.com/openghg/openghg/pull/1698)
 - Added ability to save output of plot_comparison using save_path and ability to pass additional figure modifications.[PR #1672](https://github.com/openghg/openghg/pull/1672)
 - Added more tests and explanation in the tutorial regarding if_exists behaviour.[PR #1693](https://github.com/openghg/openghg/pull/1693)
+- Added find_url function which checks whether a string contains a valid URL using regular expressions. [PR #1746](https://github.com/openghg/openghg/pull/1746)
 
 ## [0.19.0] - 2026-06-11
 

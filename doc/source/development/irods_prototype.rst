@@ -18,6 +18,12 @@ Operators creating a shared collection and assigning named readers and writers
 should follow :doc:`irods_administration`. For registered replicas on a second
 server shared by multiple readers, see :doc:`irods_mirroring`.
 
+The backend uses the supported zarr-python 3 runtime while retaining Zarr format 2
+for stored arrays. Its asynchronous store adapter performs blocking iRODS work
+in worker threads; deferred reads own their sessions rather than borrowing a
+writer connection that may close. Closing a returned dataset does not close the
+ObjectStore or another reader.
+
 Prepare a service and configure a store
 =======================================
 
