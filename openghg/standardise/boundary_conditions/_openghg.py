@@ -73,6 +73,7 @@ def parse_openghg(
         metadata["bc_input"] = bc_input
         metadata["author"] = author_name
         metadata["processed"] = str(timestamp_now())
+        bc_data.attrs["processed"] = metadata["processed"]
 
         # Check if time has 0-dimensions and, if so, expand this so time is 1D
         if "time" in bc_data.coords:

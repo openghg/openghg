@@ -412,16 +412,8 @@ def test_data_version_deletion(data, datasource):
     d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
 
     d._store.checkout_version("v1")
-    zarr_keys = set(d._store.store.keys())
-
-    partial_expected_keys = {
-        "ch4/.zarray",
-        "ch4/.zattrs",
-        "ch4/0",
-        "ch4_variability/.zarray",
-    }
-
-    assert partial_expected_keys.issubset(zarr_keys)
+    xr.testing.assert_equal(d.get_data(version="v1"), ch4_data)
+    assert d._store.has_data("v1")
 
     d.delete_version(version="v1")
 
@@ -726,7 +718,7 @@ def test_bytes_stored(data, bucket, datasource):
 def test_datasource_persistence_hooks_reuse_versioning(tmp_path, datasets_with_gaps):
     """A different persistence layer uses the same update planner without local files."""
     from copy import deepcopy
-    import zarr
+    from openghg.storage._zarr_compat import make_memory_store
     from openghg.storage._zarr_store import VersionedZarrStore
 
     states = {}
@@ -740,7 +732,7 @@ def test_datasource_persistence_hooks_reuse_versioning(tmp_path, datasets_with_g
             versions = stores.setdefault(self.uuid, {})
 
             def factory(version):
-                return versions.setdefault(version, zarr.MemoryStore())
+                return versions.setdefault(version, make_memory_store())
 
             return VersionedZarrStore(factory=factory, versions=list(versions))
 
