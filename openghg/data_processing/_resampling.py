@@ -221,6 +221,7 @@ def _weighted_resample(
         weighted_resample_mf = (mf * n_obs).resample(time=averaging_period).sum(
             **sum_kwargs
         ) / n_obs_resample_sum
+        weighted_resample_mf.attrs = mf.attrs.copy()
 
         data_vars = {species: weighted_resample_mf, f"{species}_number_of_observations": n_obs_resample_sum}
 
@@ -232,6 +233,7 @@ def _weighted_resample(
                 - weighted_resample_mf**2
             )
             weighted_resample_mf_variability = xr_sqrt(weighted_resample_mf_variability_squared)
+            weighted_resample_mf_variability.attrs = mf_variability.attrs.copy()
 
             data_vars[f"{species}_variability"] = weighted_resample_mf_variability
 

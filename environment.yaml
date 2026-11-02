@@ -4,13 +4,14 @@ channels:
   - conda-forge
   - anaconda
 dependencies:
-  - python>=3.10
+  - python>=3.11,<3.14
   - addict
+  - attrs>=22
   - cf_xarray
   - dask<2025.10
-  - h5netcdf>=1.0.0,<=1.6.4
+  - h5netcdf>=1.8.0,<=1.8.1
   - h5py<3.15
-  - filelock
+  - filelock<=3.32.6
   - matplotlib>=3.5,<=3.10.6
   - msgpack-python>=1.0,<=1.1.1
   - netcdf4>=1.6.0,<=1.7.2
@@ -18,12 +19,12 @@ dependencies:
   - numexpr
   - numpy  # Note numpy >= 2.0 is currently included as a pip requirement below
   - nc-time-axis
-  - openghg_defs>=0.0.10
+  - openghg_defs>=0.0.14
   - openpyxl
   - pandas>=2.0,<=2.3.3
   - pip
-  - pint
-  - pint-xarray
+  - pint<=0.24.4
+  - pint-xarray<=0.5.1
   - plotly
   - pyvis
   - rapidfuzz
@@ -34,17 +35,18 @@ dependencies:
   - toml>=0.10,<=0.10.2
   - rich>=12.0,<=14.1.0
   - ipywidgets
-  - xarray>=2025.04.0,<=2025.9.1
+  - xarray>=2025.9.1,<=2026.9.0
   - flox
   - urllib3>=1.26.3
   - xesmf>=0.7
-  - zarr==2.18.3
-  - numcodecs<0.16
+  - zarr>=3.1.6,<=3.4.1
+  - numcodecs>=0.16,<0.17
   - sympy
   - networkx
   - openghg_calscales
   - pip:
     - icoscp
     - numpy>=2.0,<=2.3.3
+    - xarray-validate==0.0.5
 # numpy >= 2.0 is included in pip requirements because icoscp will try and downgrade numpy to <2.0
 # - can remove and use definition above again when https://github.com/ICOS-Carbon-Portal/data/issues/391 is resolved.

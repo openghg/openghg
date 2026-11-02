@@ -11,7 +11,9 @@ from unittest.mock import Mock
 import numpy as np
 import pytest
 import xarray as xr
-import zarr
+from zarr.core.sync import sync
+from zarr.core.buffer import default_buffer_prototype
+from openghg.storage._zarr_compat import copy_store
 
 pytest.importorskip("irods")
 from irods.exception import CollectionDoesNotExist, DataObjectDoesNotExist
@@ -280,8 +282,8 @@ def test_key_paths_are_confined(remote, key):
 def test_read_only_blocks_all_mutations(remote):
     store = mapping(remote, read_only=True)
     wrapper = IRODSKVStore(store)
-    assert not wrapper.is_writeable()
-    assert not wrapper.is_erasable()
+    assert not wrapper.supports_writes
+    assert not wrapper.supports_deletes
     for operation in (lambda: store.__setitem__("a", b"x"), lambda: store.__delitem__("a"), store.rmdir):
         with pytest.raises(PermissionError, match="read-only"):
             operation()
@@ -351,12 +353,12 @@ def test_root_validation_rejects_hidden_ancestor(remote):
 
 def test_zarr_adapter_sizes_and_removes_without_reading_payloads(remote):
     store = IRODSKVStore(mapping(remote))
-    store["array/0"] = b"first"
-    store["array/1"] = b"second"
-    assert store.getsize("array") == 11
-    assert store.getsize("array/0") == 5
-    store.rmdir("array")
-    assert len(store) == 0
+    sync(store.set("array/0", default_buffer_prototype().buffer.from_bytes(b"first")))
+    sync(store.set("array/1", default_buffer_prototype().buffer.from_bytes(b"second")))
+    assert sync(store.getsize("array")) == 11
+    assert sync(store.getsize("array/0")) == 5
+    sync(store.delete_dir("array"))
+    assert sync(store.is_empty(""))
     assert remote.state.downloads == 0
     remote.session.collections.remove.assert_called_once_with(
         remote.root + "/v1/array", recurse=True, force=False
@@ -367,20 +369,21 @@ def test_xarray_lazy_chunks_reopen_sessions_and_copy_versions(remote):
     store = mapping(remote)
     original = xr.Dataset({"mf": ("time", np.arange(8.0))}, coords={"time": np.arange(8)})
     original.to_zarr(
-        zarr.storage.KVStore(store),
+        IRODSKVStore(store),
         encoding={"mf": {"chunks": (2,)}, "time": {"chunks": (2,)}},
         consolidated=True,
+        zarr_format=2,
     )
     remote.state.downloads = 0
-    lazy = xr.open_zarr(zarr.storage.KVStore(mapping(remote, read_only=True)), consolidated=True)
+    lazy = xr.open_zarr(IRODSKVStore(mapping(remote, read_only=True)), consolidated=True)
     assert remote.state.active == 0
     initial_downloads = remote.state.downloads
     xr.testing.assert_equal(lazy.isel(time=slice(0, 2)).load(), original.isel(time=slice(0, 2)))
     assert remote.state.downloads == initial_downloads + 1
     assert remote.state.opened == remote.state.closed
     second = IRODSZarrMapping(remote.factory, remote.root + "/v2", remote.cache)
-    zarr.copy_store(zarr.storage.KVStore(store), zarr.storage.KVStore(second))
-    xr.testing.assert_equal(xr.open_zarr(zarr.storage.KVStore(second), consolidated=True).load(), original)
+    copy_store(IRODSKVStore(store), IRODSKVStore(second))
+    xr.testing.assert_equal(xr.open_zarr(IRODSKVStore(second), consolidated=True).load(), original)
     assert list_collections(remote.factory, remote.root) == [remote.root + "/v1", remote.root + "/v2"]
 
 
@@ -405,3 +408,50 @@ def test_existing_versioned_store_append_update_and_delete(remote):
     xr.testing.assert_equal(store.get().load(), original)
     store.delete_version("v2")
     assert list_collections(remote.factory, remote.root) == [remote.root + "/v1"]
+
+
+def test_zarr3_adapter_ranges_listing_and_read_only_views(remote):
+    from zarr.abc.store import OffsetByteRequest, RangeByteRequest, SuffixByteRequest
+
+    transport = mapping(remote)
+    transport["a/0"] = b"abcdef"
+    transport["a/1"] = b"second"
+    transport["b/0"] = b"third"
+    store = IRODSKVStore(transport)
+    prototype = default_buffer_prototype()
+    values = sync(
+        store.get_partial_values(
+            prototype,
+            [
+                ("a/0", RangeByteRequest(1, 4)),
+                ("a/0", OffsetByteRequest(3)),
+                ("a/0", SuffixByteRequest(2)),
+                ("a/0", SuffixByteRequest(0)),
+                ("absent", None),
+            ],
+        )
+    )
+    assert [value.to_bytes() if value is not None else None for value in values] == [
+        b"bcd",
+        b"def",
+        b"ef",
+        b"",
+        None,
+    ]
+
+    async def collect(iterator):
+        return [item async for item in iterator]
+
+    assert sync(collect(store.list_dir(""))) == ["a", "b"]
+    assert sync(collect(store.list_dir("a/"))) == ["0", "1"]
+    assert sync(collect(store.list_prefix("a/"))) == ["a/0", "a/1"]
+    readonly = store.with_read_only(True)
+    with pytest.raises(FileNotFoundError):
+        sync(store.getsize("absent"))
+    with pytest.raises(ValueError, match="read.only"):
+        sync(readonly.set("a/0", prototype.buffer.from_bytes(b"bad")))
+    with pytest.raises(ValueError, match="read.only"):
+        sync(readonly.delete_dir("a"))
+    assert transport["a/0"] == b"abcdef"
+    assert IRODSKVStore(mapping(remote, read_only=True)).with_read_only(False).read_only
+    assert remote.state.opened == remote.state.closed
