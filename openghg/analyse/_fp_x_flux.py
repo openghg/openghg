@@ -738,7 +738,7 @@ def write_fp_x_flux_zarr(  # noqa: PLR0913
         "provenance": dict(provenance),
     }
     try:
-        dataset.to_zarr(temporary, mode="w", consolidated=True)
+        dataset.to_zarr(temporary, mode="w", consolidated=True, zarr_format=2)
         temporary_manifest.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
         if overwrite and path.exists():
             backup = path.with_name(f".{path.name}.old-{uuid4().hex}")

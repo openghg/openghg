@@ -6,6 +6,7 @@ from openghg.retrieve import search
 from openghg.standardise import standardise_bc, standardise_from_binary_data
 from openghg.store import BoundaryConditions
 from openghg.transform import transform_bc_data
+from openghg.types import AttrMismatchError
 from xarray import concat, open_dataset
 
 
@@ -133,6 +134,73 @@ def test_read_file_monthly():
     }
 
     assert expected_metadata.items() <= bc_data.metadata.items()
+
+
+@pytest.mark.parametrize("input_type", ["file", "dataset"])
+@pytest.mark.parametrize("already_processed", [False, True])
+def test_read_boundary_conditions_with_processing_timestamp(tmp_path, input_type, already_processed):
+    """Ingestion refreshes processing timestamps without changing monthly coverage."""
+    with open_dataset(get_bc_datapath("ch4_EUROPE_201208.nc")) as original:
+        dataset = original.load()
+
+    coverage = {
+        "start_date": "2012-08-01 00:00:00+00:00",
+        "end_date": "2012-08-31 23:59:59+00:00",
+        "time_period": "1 month",
+    }
+    old_processed = "2022-11-29 10:29:21.277335+00:00"
+    dataset.attrs.update(coverage)
+    if already_processed:
+        dataset.attrs["processed"] = old_processed
+
+    if input_type == "file":
+        filepath = tmp_path / "bc_ch4_europe_mozart_2012-08-01_2012-08-31.nc"
+        dataset.to_netcdf(filepath)
+        input_kwargs = {"filepath": filepath}
+    else:
+        input_kwargs = {"data": dataset}
+
+    results = standardise_bc(
+        **input_kwargs,
+        store="user",
+        species="ch4",
+        bc_input="MOZART",
+        domain="EUROPE",
+        period="monthly",
+    )
+    assert len(results) == 1
+
+    retrieved = search(
+        species="ch4", bc_input="mozart", domain="europe", data_type="boundary_conditions", store="user"
+    ).retrieve_all()
+    assert retrieved.metadata["processed"] != old_processed
+    assert retrieved.data.attrs["processed"] == retrieved.metadata["processed"]
+    for key, value in coverage.items():
+        assert retrieved.metadata[key] == value
+        assert retrieved.data.attrs[key] == value
+    for data_var in ["vmr_n", "vmr_e", "vmr_s", "vmr_w"]:
+        assert retrieved.data[data_var].equals(dataset[data_var])
+
+
+def test_boundary_conditions_reject_conflicting_coverage():
+    """Strict alignment still rejects source coverage inconsistent with the period."""
+    with open_dataset(get_bc_datapath("ch4_EUROPE_201208.nc")) as original:
+        dataset = original.load()
+    dataset.attrs.update(
+        processed="2022-11-29 10:29:21.277335+00:00",
+        end_date="2012-08-31 23:59:59+00:00",
+        time_period="1 month",
+    )
+
+    with pytest.raises(AttrMismatchError, match="time_period"):
+        standardise_bc(
+            data=dataset,
+            store="user",
+            species="ch4",
+            bc_input="MOZART",
+            domain="EUROPE",
+            period="yearly",
+        )
 
 
 def test_restandardise_boundary_conditions_after_datasource_deletion():
