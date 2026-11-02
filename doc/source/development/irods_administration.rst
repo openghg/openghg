@@ -95,15 +95,14 @@ The roles use the following server permissions:
      - Read, create, update, and delete store data and metadata, including
        material created by another writer; also change ACLs on the shared tree.
 
-The current backend moves deleted payloads to iRODS trash. On the tested iRODS
-5.0.2 server this operation requires ``own``; the weaker ``delete_object``
-permission permits some removals but does not provide the complete lifecycle.
-Writers therefore receive ownership permission throughout this store, including
-permission to grant or revoke other users' access. They are trusted
-collaborators. Limiting writers to data changes without ACL administration
-requires additional server policy or a different deletion workflow. See the
-`iRODS permission model
-<https://github.com/irods/irods_docs/blob/main/docs/system_overview/users_and_permissions.md>`__.
+The helper gives trusted collaborators ``own`` throughout this store, including
+permission to maintain ACLs and perform deliberate physical cleanup. This also
+supports the earlier mutable backend, whose trash-based deletion required
+ownership on the tested iRODS 5.0.2 server. The current backend's logical deletion
+publishes a tombstone and retains generations for existing readers; it does not
+move payloads to trash. See :doc:`irods_publication` for retention boundaries.
+A less privileged ingestion role requires a separately tested server policy;
+this helper does not configure that role.
 
 Configure and verify each client
 ================================

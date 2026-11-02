@@ -170,7 +170,8 @@ def test_live_irods_round_trip(live_irods):
 
     manager.delete_datasource(uuid)
     assert not search_surface(**selected)
-    assert not live.session.collections.exists(writer.metastore.path(uuid))
+    assert live.session.collections.exists(writer.metastore.path(uuid))
+    assert writer.metastore.publication(uuid)["record"] is None
     assert integrity_check() is None
 
 
@@ -192,7 +193,7 @@ def test_live_irods_update_policies_and_large_metadata(live_irods):
         uuid = writer.create(metadata.copy(), first, period="60s")
     assert writer.metastore.record(uuid)["history"] == large_value
     record_avus = live.session.collections.get(writer.metastore.path(uuid)).metadata.get_all(
-        document_attribute("record")
+        document_attribute("publication")
     )
     assert len(record_avus) > 2
 
@@ -238,14 +239,16 @@ def test_live_irods_update_policies_and_large_metadata(live_irods):
                 if_exists="combine",
                 new_version=False,
             )
-            overwritten = live.session.data_objects.get(path)
-            assert overwritten.id == original_id
-            assert any(
-                r.resource_name == target_resource and str(r.status) != "1" for r in overwritten.replicas
-            )
+            original_object = live.session.data_objects.get(path)
+            assert original_object.id == original_id
+            assert all(str(r.status) == "1" for r in original_object.replicas)
+            new_path = writer.get_datasource(uuid).mapping().collection + "/" + key
+            assert new_path != path
+            replacement_id = live.session.data_objects.get(new_path).id
+            assert replacement_id != original_id
             writer.replicate(uuid, target_resource)
-        refreshed = live.session.data_objects.get(path)
-        assert refreshed.id == original_id
+        refreshed = live.session.data_objects.get(new_path)
+        assert refreshed.id == replacement_id
         good_replicas = [r for r in refreshed.replicas if str(r.status) == "1"]
         assert len(good_replicas) >= 2
         assert any(r.resource_name == target_resource for r in good_replicas)
@@ -277,4 +280,46 @@ def test_live_irods_update_policies_and_large_metadata(live_irods):
     with writer:
         writer.delete(uuid)
     assert writer.search() == []
-    assert not live.session.collections.exists(writer.metastore.path(uuid))
+    assert live.session.collections.exists(writer.metastore.path(uuid))
+    assert writer.metastore.publication(uuid)["record"] is None
+
+
+def test_live_irods_atomic_publication_and_retained_readers(live_irods, monkeypatch):
+    """Actual AVU publication preserves lazy readers and rejects stale saves."""
+    from openghg.objectstore import PublicationConflictError, _irods_metastore
+
+    live = live_irods
+    writer = IRODSObjectStore(live.session, live.collection, live.cache, mode="rw")
+    original = xr.Dataset(
+        {"mf": ("time", [1.0, 2.0])},
+        coords={"time": np.array(["2020-01-01", "2020-01-02"], dtype="datetime64[ns]")},
+    )
+    replacement = original.assign(mf=original.mf * 10)
+    with writer:
+        uuid = writer.create({"species": "ch4", "comment": "before"}, original, period="1D")
+    pinned = writer.get_datasource(uuid)
+    lazy = pinned.get_data()
+    write = _irods_metastore.write_document
+    seen = []
+
+    def before_commit(factory, collection, key, value):
+        if key == "publication" and value["record"] is not None:
+            assert writer.get_datasource(uuid).revision == pinned.revision
+            assert writer.search(uuid=uuid)[0]["comment"] == "before"
+            xr.testing.assert_equal(writer.get_datasource(uuid).get_data().compute(), original)
+            seen.append(True)
+        write(factory, collection, key, value)
+
+    monkeypatch.setattr(_irods_metastore, "write_document", before_commit)
+    with writer:
+        writer.update(uuid, {"comment": "after"}, replacement, if_exists="new", new_version=False)
+        with pytest.raises(PublicationConflictError):
+            pinned.save()
+    assert seen
+    monkeypatch.setattr(_irods_metastore, "write_document", write)
+    xr.testing.assert_equal(writer.get_datasource(uuid).get_data().compute(), replacement)
+    with writer:
+        writer.delete(uuid)
+    assert writer.search() == []
+    xr.testing.assert_equal(lazy.compute(), original)
+    xr.testing.assert_equal(pinned.get_data().compute(), original)

@@ -42,17 +42,12 @@ def catalog(monkeypatch):
             raise RuntimeError("catalog rejected atomic metadata update")
         documents[(collection, key)] = deepcopy(value)
 
-    def delete(session_factory, collection, key):
-        assert session_factory is factory
-        documents.pop((collection, key), None)
-
     def children(session_factory, collection):
         assert session_factory is factory
         return sorted(path for path in collections if path.rsplit("/", 1)[0] == collection)
 
     monkeypatch.setattr(_irods_metastore, "read_document", read)
     monkeypatch.setattr(_irods_metastore, "write_document", write)
-    monkeypatch.setattr(_irods_metastore, "delete_document", delete)
     monkeypatch.setattr(_irods_metastore, "list_collections", children)
     state.factory = factory
     state.metastore = IRODSMetaStore(factory, "/testZone/home/alice/openghg/surface", "rw")
@@ -61,7 +56,7 @@ def catalog(monkeypatch):
 
 def publish(metastore, metadata):
     uuid = str(uuid4())
-    metastore.insert({"uuid": uuid, **metadata})
+    metastore.publish(uuid, {"uuid": uuid, **metadata}, {"_uuid": uuid, "_data_keys": {}}, {}, None)
     return uuid
 
 
@@ -78,7 +73,7 @@ def test_published_scope_typed_metadata_and_no_payload_access(catalog):
     expected = {"uuid": uuid, "site": "TAC", "levels": [1, 2], "info": {"Flag": True}}
     assert metastore.search({"SITE": "TAC"}) == [expected]
     assert metastore.search() == [expected]
-    assert all(key == "record" for _, key in catalog.reads)
+    assert all(key in {"publication", "record", "datasource"} for _, key in catalog.reads)
     with pytest.raises(ObjectStoreError, match="published"):
         metastore.record(unpublished)
 
@@ -206,7 +201,10 @@ def test_record_and_search_reject_corruption_instead_of_hiding_it(catalog, corru
     uuid = publish(metastore, {"site": "TAC"})
     if isinstance(corruption, dict) and "uuid" not in corruption:
         corruption["uuid"] = uuid
-    catalog.documents[(metastore.path(uuid), "record")] = corruption
+    if isinstance(corruption, Exception):
+        catalog.documents[(metastore.path(uuid), "publication")] = corruption
+    else:
+        catalog.documents[(metastore.path(uuid), "publication")]["record"] = corruption
     with pytest.raises(MetastoreError, match="Invalid"):
         metastore.record(uuid)
     with pytest.raises(MetastoreError, match="Invalid"):

@@ -1,20 +1,20 @@
 """Searchable metadata stored as chunked JSON documents in the iRODS catalog.
 
-A ``record`` document publishes its UUID collection to searches. Datasource
-state and Zarr payloads are independent: searching and editing records never
+One ``publication`` document contains search metadata, datasource state, and
+immutable generation references: searching and editing records never
 downloads scientific data. Writers are serialized by the ObjectStore context.
 """
 
 from __future__ import annotations
 
 from collections.abc import Callable
+import hashlib
 import json
 from typing import Any, Literal
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from openghg.objectstore._irods_storage import (
     SessionFactory,
-    delete_document,
     list_collections,
     read_document,
     validate_collection,
@@ -61,6 +61,10 @@ def encode_metadata(metadata: dict[str, Any]) -> str:
     return json.dumps(normalized, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False)
 
 
+class PublicationConflictError(ObjectStoreError):
+    """The stored revision changed since this client read it; reload before retrying."""
+
+
 class IRODSMetaStore(MetaStore):
     """Store one catalog record on each direct UUID child collection.
 
@@ -74,7 +78,7 @@ class IRODSMetaStore(MetaStore):
         Publication and updates replace one chunked catalog document atomically.
         The enclosing ObjectStore must serialize writers; this is not a
         compare-and-swap transaction. Removing a record leaves its collection,
-        datasource state, and payloads intact.
+        datasource state, and payloads intact as an explicit tombstone.
     """
 
     def __init__(
@@ -102,26 +106,100 @@ class IRODSMetaStore(MetaStore):
             raise ValueError("Datasource UUID must be a canonical lowercase UUID")
         return f"{self.collection}/{uuid}"
 
-    def record(self, uuid: str) -> dict[str, Any]:
-        """Read one published record without reading datasource state or data.
+    def publication(self, uuid: str) -> dict[str, Any] | None:
+        """Read one authoritative record, datasource state, and generation manifest.
 
-        Raises:
-            ObjectStoreError: If the record is absent.
-            MetastoreError: If its contents are invalid or identify another UUID.
+        Legacy records are visible only when their datasource state also exists.
+        Their content hash serves as a revision until the first locked update.
         """
+        path = self.path(uuid)
         try:
-            record = read_document(self.session_factory, self.path(uuid), "record")
-        except KeyError as exc:
-            raise ObjectStoreError(f"No published iRODS datasource with UUID {uuid}") from exc
-        except ObjectStoreError as exc:
-            raise MetastoreError(f"Invalid catalog record for iRODS datasource {uuid}") from exc
-        try:
-            if not isinstance(record, dict) or record.get("uuid") != uuid:
-                raise ValueError("Datasource UUID does not match catalog record")
+            try:
+                result = read_document(self.session_factory, path, "publication")
+            except KeyError:
+                try:
+                    record = read_document(self.session_factory, path, "record")
+                    state = read_document(self.session_factory, path, "datasource")
+                except KeyError:
+                    return None
+                revision = hashlib.sha256(
+                    json.dumps([record, state], sort_keys=True, allow_nan=False).encode()
+                ).hexdigest()
+                result = {
+                    "schema_version": 1,
+                    "revision": "legacy:" + revision,
+                    "record": record,
+                    "datasource": state,
+                    "versions": {version: path + "/" + version for version in state["_data_keys"]},
+                }
+            self._validate_publication(uuid, result)
+            return result
+        except (ObjectStoreError, TypeError, ValueError, KeyError, AttributeError) as exc:
+            raise MetastoreError(f"Invalid catalog publication for iRODS datasource {uuid}") from exc
+
+    def _validate_publication(self, uuid: str, result: dict[str, Any]) -> None:
+        path = self.path(uuid)
+        if result["schema_version"] != 1 or not isinstance(result["revision"], str):
+            raise ValueError("Invalid publication revision")
+        record, state, versions = result["record"], result["datasource"], result["versions"]
+        if state.get("_uuid") != uuid:
+            raise ValueError("Datasource UUID does not match publication")
+        if record is not None:
+            if record.get("uuid") != uuid:
+                raise ValueError("Datasource UUID does not match publication")
             encode_metadata(record)
-        except (TypeError, ValueError) as exc:
-            raise MetastoreError(f"Invalid catalog record for iRODS datasource {uuid}") from exc
-        return record
+        if not isinstance(versions, dict) or set(versions) != set(state["_data_keys"]):
+            raise ValueError("Generation references do not match datasource versions")
+        for version, generation in versions.items():
+            if not version.startswith("v") or not version[1:].isdigit():
+                raise ValueError("Invalid logical version")
+            if not validate_collection(generation).startswith(path + "/"):
+                raise ValueError("Generation must belong to the datasource collection")
+
+    def publish(
+        self,
+        uuid: str,
+        record: dict[str, Any] | None,
+        state: dict[str, Any],
+        versions: dict[str, str],
+        expected_revision: str | None,
+    ) -> dict[str, Any]:
+        """Replace one publication after checking its revision under the writer lock.
+
+        The enclosing ObjectStore's native mutex is required: iRODS atomic AVU
+        replacement alone is not a conditional compare-and-swap operation.
+        None as the expected revision requires an unpublished UUID.
+        """
+        self._require_write()
+        current = self.publication(uuid)
+        if (current["revision"] if current else None) != expected_revision:
+            raise PublicationConflictError(f"iRODS datasource {uuid} changed; reload before retrying.")
+        normalized = json.loads(encode_metadata(record)) if record is not None else None
+        if (normalized is not None and normalized.get("uuid") != uuid) or state.get("_uuid") != uuid:
+            raise ValueError("Datasource UUID does not match publication")
+        if set(versions) != set(state["_data_keys"]):
+            raise ValueError("Generation references do not match datasource versions")
+        publication = {
+            "schema_version": 1,
+            "revision": str(uuid4()),
+            "record": normalized,
+            "datasource": state,
+            "versions": dict(versions),
+        }
+        # Validate the entire value before creating anything in the catalog.
+        self._validate_publication(uuid, publication)
+        json.dumps(publication, allow_nan=False)
+        with self.session_factory() as session:
+            session.collections.create(self.path(uuid), recurse=True)
+        write_document(self.session_factory, self.path(uuid), "publication", publication)
+        return publication
+
+    def record(self, uuid: str) -> dict[str, Any]:
+        """Read published search metadata without transferring scientific payloads."""
+        publication = self.publication(uuid)
+        if publication is None or publication["record"] is None:
+            raise ObjectStoreError(f"No published iRODS datasource with UUID {uuid}")
+        return publication["record"]
 
     def search(
         self,
@@ -179,16 +257,15 @@ class IRODSMetaStore(MetaStore):
         """
         self._require_write()
         record = json.loads(encode_metadata(metadata))
-        path = self.path(record["uuid"])
+        uuid = record["uuid"]
+        if self.publication(uuid) is not None:
+            raise MetastoreError(f"iRODS datasource {uuid} is already published")
         try:
-            self.record(record["uuid"])
-        except ObjectStoreError:
-            pass
-        else:
-            raise MetastoreError(f"iRODS datasource {record['uuid']} is already published")
-        with self.session_factory() as session:
-            session.collections.create(path, recurse=True)
-        write_document(self.session_factory, path, "record", record)
+            state = read_document(self.session_factory, self.path(uuid), "datasource")
+        except KeyError as exc:
+            raise ObjectStoreError("Persist datasource state before publishing its record") from exc
+        versions = {version: self.path(uuid) + "/" + version for version in state["_data_keys"]}
+        self.publish(uuid, record, state, versions, expected_revision=None)
 
     def update(
         self,
@@ -214,13 +291,18 @@ class IRODSMetaStore(MetaStore):
 
         self._require_write()
         records = self.search(where)
+        snapshots = {r["uuid"]: self.publication(r["uuid"]) for r in records}
         with _memory_metastore(records) as metastore:
             metastore.update(where, to_update, to_delete, to_extend)
             updated = metastore.search()[0]
         if updated.get("uuid") != records[0]["uuid"]:
             raise ValueError("Cannot change or delete a datasource UUID")
         encode_metadata(updated)
-        write_document(self.session_factory, self.path(updated["uuid"]), "record", updated)
+        snapshot = snapshots[updated["uuid"]]
+        assert snapshot is not None
+        self.publish(
+            updated["uuid"], updated, snapshot["datasource"], snapshot["versions"], snapshot["revision"]
+        )
 
     def delete(self, metadata: dict[str, Any], delete_one: bool = True) -> None:
         """Unpublish matching records while retaining their collections and payloads.
@@ -238,7 +320,11 @@ class IRODSMetaStore(MetaStore):
         if delete_one and len(records) != 1:
             raise MetastoreError("Metadata must identify exactly one iRODS datasource")
         for record in records:
-            delete_document(self.session_factory, self.path(record["uuid"]), "record")
+            snapshot = self.publication(record["uuid"])
+            assert snapshot is not None
+            self.publish(
+                record["uuid"], None, snapshot["datasource"], snapshot["versions"], snapshot["revision"]
+            )
 
     def close(self) -> None:
         """Do nothing; each transport operation manages its own session context."""
