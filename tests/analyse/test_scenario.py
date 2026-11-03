@@ -933,6 +933,8 @@ def test_footprints_data_merge_without_obs_resample_updates_data(
     # We expect the initial_dataset and resampled_dataset to be different if the resample_to has been used correctly.
     with pytest.raises(AssertionError):
         xr.testing.assert_equal(initial_dataset["mf_mod"], resampled_dataset["mf_mod"])
+
+    with pytest.raises(AssertionError):
         xr.testing.assert_equal(initial_dataset["bc_mod"], resampled_dataset["bc_mod"])
 
     # Double check the reampled_dataset values are as we expect (resampled to "12H" rather than "2H")
