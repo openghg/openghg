@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
 from typing import TypeAlias, TypeVar, cast, overload
 import logging
 from pathlib import Path
@@ -20,7 +19,7 @@ def format_inlet(
     inlet: str | int | float,
     units: str = "m",
     key_name: str | None = None,
-    special_keywords: Sequence[str] | None = None,
+    special_keywords: list | None = None,
 ) -> str: ...
 
 
@@ -29,7 +28,7 @@ def format_inlet(
     inlet: None,
     units: str = "m",
     key_name: str | None = None,
-    special_keywords: Sequence[str] | None = None,
+    special_keywords: list | None = None,
 ) -> None: ...
 
 
@@ -38,7 +37,7 @@ def format_inlet(
     inlet: slice,
     units: str = "m",
     key_name: str | None = None,
-    special_keywords: Sequence[str] | None = None,
+    special_keywords: list | None = None,
 ) -> slice: ...
 
 
@@ -47,7 +46,7 @@ def format_inlet(
     inlet: list[_InletT] | tuple[InletValue, ...],
     units: str = "m",
     key_name: str | None = None,
-    special_keywords: Sequence[str] | None = None,
+    special_keywords: list | None = None,
 ) -> list[FormattedInlet]: ...
 
 
@@ -55,7 +54,7 @@ def format_inlet(
     inlet: InletValue | list[_InletT] | tuple[InletValue, ...],
     units: str = "m",
     key_name: str | None = None,
-    special_keywords: Sequence[str] | None = None,
+    special_keywords: list | None = None,
 ) -> FormattedInlet | list[FormattedInlet]:
     """
     Make sure inlet / height name conforms to standard. The standard
