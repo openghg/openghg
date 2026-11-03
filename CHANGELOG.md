@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Updated inlet type hints to accept numeric values, lists and tuples, and preserved units, key names and special keywords when formatting inlet collections. [PR #1796](https://github.com/openghg/openghg/pull/1796)
 - Retained the first month's mean flux in time-resolved `fp_x_flux` calculations when the footprint look-back window starts mid-month. Previously, date selection dropped this monthly value and could leave the residual contribution missing. Recomputing affected `ModelScenario` outputs and downstream inversions can therefore change their results. [PR #1790](https://github.com/openghg/openghg/pull/1790)
 - Aligned Conda's Filelock, Pint and Pint-xarray upper bounds with the supported versions in `pyproject.toml`, avoiding unit-parsing and file-lock permission failures with unsupported versions. [PR #1790](https://github.com/openghg/openghg/pull/1790)
 - Preserve lazy corrections derived from stored data, anchor local Zarr store paths, and keep compression benchmarks writable with Zarr 3. Legacy high-resolution footprints inherit missing units from `fp` during analysis. [PR #1786](https://github.com/openghg/openghg/pull/1786)

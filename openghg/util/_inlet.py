@@ -1,10 +1,15 @@
 from __future__ import annotations
 
-from typing import cast, overload
+from collections.abc import Sequence
+from typing import TypeAlias, TypeVar, cast, overload
 import logging
 from pathlib import Path
 
 __all__ = ["format_inlet", "extract_height_name"]
+
+InletValue: TypeAlias = str | int | float | slice | None
+FormattedInlet: TypeAlias = str | slice | None
+_InletT = TypeVar("_InletT", bound=InletValue)
 
 logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.INFO)  # Have to set level for logger as well as handler
@@ -15,7 +20,7 @@ def format_inlet(
     inlet: str | int | float,
     units: str = "m",
     key_name: str | None = None,
-    special_keywords: list | None = None,
+    special_keywords: Sequence[str] | None = None,
 ) -> str: ...
 
 
@@ -24,7 +29,7 @@ def format_inlet(
     inlet: None,
     units: str = "m",
     key_name: str | None = None,
-    special_keywords: list | None = None,
+    special_keywords: Sequence[str] | None = None,
 ) -> None: ...
 
 
@@ -33,25 +38,25 @@ def format_inlet(
     inlet: slice,
     units: str = "m",
     key_name: str | None = None,
-    special_keywords: list | None = None,
+    special_keywords: Sequence[str] | None = None,
 ) -> slice: ...
 
 
 @overload
 def format_inlet(
-    inlet: list[str | int | float | slice | None],
+    inlet: list[_InletT] | tuple[InletValue, ...],
     units: str = "m",
     key_name: str | None = None,
-    special_keywords: list | None = None,
-) -> list[str | slice | None]: ...
+    special_keywords: Sequence[str] | None = None,
+) -> list[FormattedInlet]: ...
 
 
 def format_inlet(
-    inlet: str | int | float | slice | None | list[str | int | float | slice | None],
+    inlet: InletValue | list[_InletT] | tuple[InletValue, ...],
     units: str = "m",
     key_name: str | None = None,
-    special_keywords: list | None = None,
-) -> str | slice | None | list[str | slice | None]:
+    special_keywords: Sequence[str] | None = None,
+) -> FormattedInlet | list[FormattedInlet]:
     """
     Make sure inlet / height name conforms to standard. The standard
     imposed can depend on the associated key_name itself (can
@@ -59,8 +64,8 @@ def format_inlet(
 
     This standard is as follows:
      - number followed by unit
-     - number alone if unit / derviative is specified at the end of key_name (e.g. station_height_masl)
-     - unchanged if this is one of the special keywords (by default "multiple" or "various")
+     - number alone if unit / derivative is specified at the end of key_name (e.g. station_height_masl)
+     - unchanged if this is one of the special keywords (by default "multiple" or "column")
 
     Other considerations:
      - For units of "m", we will also look for "magl" and "masl" (metres above ground and sea level)
@@ -70,7 +75,7 @@ def format_inlet(
 
     Args:
         inlet: Inlet / Height value in the specified units. Can be a string (e.g. "10m",
-            "10magl", "10"), a number (int or float), None, a slice, or a list of these.
+            "10magl", "10"), a number (int or float), None, a slice, or a list or tuple of these.
         units: Units for the inlet value ("m" by default)
         key_name: Name of the associated key. This is optional but will be used to
             determine whether the unit value should be added to the output string.
@@ -78,9 +83,8 @@ def format_inlet(
             If so do not apply any formatting.
             If this is not set a special keyword of "multiple" and "column" will still be allowed.
     Returns:
-        str: formatted inlet for str, int or float input
-        None / slice: returned unchanged
-        list: list with each item formatted as above
+        Formatted string for str, int or float input. None and slices are returned unchanged.
+        Lists and tuples return a list with each item formatted using the same options.
 
     Usage:
         >>> format_inlet("10")
@@ -106,15 +110,14 @@ def format_inlet(
         >>> format_inlet("10m", key_name="station_height_masl")
             "10"
     """
-    # process list recursively
-    if isinstance(inlet, list):
-        return [format_inlet(x) for x in inlet]
+    # Process lists and tuples recursively.
+    if isinstance(inlet, (list, tuple)):
+        return [format_inlet(value, units, key_name, special_keywords) for value in inlet]
 
     # pass through None and slice
     if inlet is None or isinstance(inlet, slice):
         return inlet
 
-    # convert any other input into a string - for float/int this will be recast to float when checked
     inlet = str(inlet)
 
     # By default the special keyword is "multiple" for data containing multiple inlets.
