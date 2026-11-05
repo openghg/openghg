@@ -39,8 +39,8 @@ def test_icos_retrieve_skips_datalevel_1_csv_files():
         "source_format": "icos",
         "data_level": "1",
         "site": "bir",
-        "inlet": "10.0m",  # UPDATED
-        "inlet_height_magl": "10.0",  # UPDATED
+        "inlet": "10m",  # UPDATED
+        "inlet_height_magl": "10",  # UPDATED
         "instrument": "co2-ch4-co-h2o picarro analyzer",
         "sampling_period": "not_set",
         "calibration_scale": "unknown",
@@ -127,8 +127,8 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
         "source_format": "icos",
         "data_level": "2",
         "site": "wao",
-        "inlet": "10.0m",  # UPDATED 12/03/2026
-        "inlet_height_magl": "10.0",  # UPDATED 12/03/2026 then updated again 17/08/26
+        "inlet": "10m",  # UPDATED 12/03/2026
+        "inlet_height_magl": "10",  # UPDATED 12/03/2026 then updated again 17/08/26
         "instrument": "multiple",
         "sampling_period": "not_set",
         "calibration_scale": "unknown",
@@ -312,8 +312,8 @@ def test_retrieve_icos_fast_track():
         "data_source": "icoscp",
         "source_format": "icos",
         "data_level": "1",
-        "inlet": "15.0m",
-        "inlet_height_magl": "15.0",
+        "inlet": "15m",
+        "inlet_height_magl": "15",
         "instrument": "co2-ch4-co-h2o picarro analyzer",
         "sampling_period": "not_set",
         "calibration_scale": "unknown",
@@ -449,9 +449,6 @@ def test_retrieve_icos_standard_compare():
                 "data_owner",
                 "data_owner_email",
                 "units",
-                "sampling_height",
-                "inlet",
-                "inlet_height_magl",
                 "station_latitude",
                 "station_longitude",
                 "dataset_source",
@@ -466,21 +463,6 @@ def test_retrieve_icos_standard_compare():
             if at in ["units"]:
                 assert data_dobj.attrs[at].replace("µ", "u").replace(" mol-1", ".mol-¹") == data.attrs[at], (
                     f"Attribute {at} mismatch: {data_dobj.attrs[at].replace('µ', 'u').replace(' mol-1', '.mol-¹')} != {data.attrs[at]}"
-                )
-
-            if at in ["sampling_height"]:
-                assert data_dobj.attrs[at].replace("m", ".0m") == data.attrs[at], (
-                    f"Attribute {at} mismatch: {data_dobj.attrs[at].replace('m', '.0m')} != {data.attrs[at]}"
-                )
-
-            if at in ["inlet"]:
-                assert data_dobj.attrs[at].replace("m", ".0m") == data.attrs[at], (
-                    f"Attribute {at} mismatch: {data_dobj.attrs[at].replace('m', '.0m')} != {data.attrs[at]}"
-                )
-
-            if at in ["inlet_height_magl"]:
-                assert data_dobj.attrs[at] + ".0" == data.attrs[at], (
-                    f"Attribute {at} mismatch: {data_dobj.attrs[at] + '.0'} != {data.attrs[at]}"
                 )
 
             if at in ["station_latitude"]:
@@ -505,19 +487,9 @@ def test_retrieve_icos_standard_compare():
         metadata = obs.metadata
         assert "data_owner" in metadata_dobj and "data_owner_email" in metadata_dobj
         for md in metadata_dobj:
-            if md not in ["data_owner", "data_owner_email", "inlet", "inlet_height_magl", "dataset_source"] + version_specific:
+            if md not in ["data_owner", "data_owner_email", "dataset_source"] + version_specific:
                 assert metadata_dobj[md] == metadata[md], (
                     f"Metadata {md} mismatch: {metadata_dobj[md]} != {metadata[md]}"
-                )
-
-            if md in ["inlet"]:
-                assert metadata_dobj[md].replace("m", ".0m") == metadata[md], (
-                    f"Metadata {md} mismatch: {metadata_dobj[md].replace('m', '.0m')} != {metadata[md]}"
-                )
-
-            if md in ["inlet_height_magl"]:
-                assert metadata_dobj[md] + ".0" == metadata[md], (
-                    f"Metadata {md} mismatch: {metadata_dobj[md] + '.0'} != {metadata[md]}"
                 )
 
             if md in ["dataset_source"]:
@@ -659,9 +631,6 @@ def test_retrieve_fast_track_compare():
             "data_owner_email",
             "station_long_name",
             "units",
-            "sampling_height",
-            "inlet",
-            "inlet_height_magl",
             "station_latitude",
             "station_longitude",
             "file_created",
@@ -674,21 +643,6 @@ def test_retrieve_fast_track_compare():
         if at in ["units"]:
             assert data_dobj.attrs[at].replace(" mol-1", ".mol-¹") == data.attrs[at], (
                 f"Attribute {at} mismatch: {data_dobj.attrs[at].replace(' mol-1', '.mol-¹')} != {data.attrs[at]}"
-            )
-
-        if at in ["sampling_height"]:
-            assert data_dobj.attrs[at].replace("m", ".0m") == data.attrs[at], (
-                f"Attribute {at} mismatch: {data_dobj.attrs[at].replace('m', '.0m')} != {data.attrs[at]}"
-            )
-
-        if at in ["inlet"]:
-            assert data_dobj.attrs[at].replace("m", ".0m") == data.attrs[at], (
-                f"Attribute {at} mismatch: {data_dobj.attrs[at].replace('m', '.0m')} != {data.attrs[at]}"
-            )
-
-        if at in ["inlet_height_magl"]:
-            assert data_dobj.attrs[at] + ".0" == data.attrs[at], (
-                f"Attribute {at} mismatch: {data_dobj.attrs[at] + '.0'} != {data.attrs[at]}"
             )
 
         if at in ["station_latitude", "station_longitude"]:
@@ -707,23 +661,11 @@ def test_retrieve_fast_track_compare():
             "data_owner",
             "data_owner_email",
             "station_long_name",
-            "inlet",
-            "inlet_height_magl",
             "station_latitude",
             "station_longitude",
         ]:
             assert retrieved_data_dobj_co.metadata[md] == retrieved_data.metadata[md], (
                 f"Metadata {md} mismatch: {retrieved_data_dobj_co.metadata[md]} != {retrieved_data.metadata[md]}"
-            )
-
-        if md in ["inlet"]:
-            assert retrieved_data_dobj_co.metadata[md].replace("m", ".0m") == retrieved_data.metadata[md], (
-                f"Metadata {md} mismatch: {retrieved_data_dobj_co.metadata[md].replace('m', '.0m')} != {retrieved_data.metadata[md]}"
-            )
-
-        if md in ["inlet_height_magl"]:
-            assert retrieved_data_dobj_co.metadata[md] + ".0" == retrieved_data.metadata[md], (
-                f"Metadata {md} mismatch: {retrieved_data_dobj_co.metadata[md] + '.0'} != {retrieved_data.metadata[md]}"
             )
 
         if md in ["station_latitude", "station_longitude"]:

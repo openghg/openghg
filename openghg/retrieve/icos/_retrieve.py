@@ -503,7 +503,7 @@ def create_icos_attributes(
           dict: Attributes for the dataset
     """
 
-    from openghg.util import format_inlet
+    from openghg.util import extract_float, format_inlet
 
     if additional_data is None:
         additional_data = {}
@@ -590,8 +590,12 @@ def create_icos_attributes(
     for new_key, current_key in attrs_mapping.items():
         value = data_attributes[current_key]
         if new_key in inlet_keys:
-            value = str(value).replace(" ", "")  # could use clean_string here
-            value = format_inlet(value, key_name=new_key)
+            try:
+                # ICOS headers give e.g. "75.0 m" - format the number so "75.0" -> "75m" / "75"
+                value = format_inlet(extract_float(str(value)), key_name=new_key)
+            except ValueError:
+                # Non-numeric value (e.g. "unknown" default) - keep previous behaviour
+                value = format_inlet(str(value).replace(" ", ""), key_name=new_key)
         elif new_key in coord_keys:
             value = _data_parsing.format_icos_coord(value)
         else:
