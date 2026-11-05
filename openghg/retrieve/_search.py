@@ -3,11 +3,16 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 import warnings
 
 if TYPE_CHECKING:
     from openghg.dataobjects import SearchResults
+
+from openghg.util._inlet import InletValue
+
+_InletT = TypeVar("_InletT", bound=InletValue)
+_HeightT = TypeVar("_HeightT", bound=InletValue)
 
 logger = logging.getLogger("openghg.retrieve")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -276,8 +281,8 @@ def search_footprints(
 def search_surface(
     species: str | list[str] | None = None,
     site: str | list[str] | None = None,
-    inlet: str | slice | None | list[str | slice | None] = None,
-    height: str | slice | None | list[str | slice | None] = None,
+    inlet: InletValue | list[_InletT] | tuple[InletValue, ...] = None,
+    height: InletValue | list[_HeightT] | tuple[InletValue, ...] = None,
     instrument: str | list[str] | None = None,
     data_level: str | list[str] | dict | None = None,
     data_sublevel: str | list[str] | None = None,
@@ -300,7 +305,7 @@ def search_surface(
         site: Three letter site code
         inlet: Inlet height above ground level in metres; use `slice(lower, upper)` to
             search for a range of values. `lower` and `upper` can be int, float, or strings
-            such as '100m'.
+            such as '100m'. A list or tuple searches for any of its values.
         height: Alias for inlet
         instrument: Instrument name
         data_level: Data quality assurance level (0-3)
@@ -332,9 +337,7 @@ def search_surface(
 
     # Allow height to be an alias for inlet but we do not expect height
     # to be within the metadata (for now)
-    if inlet is None and height is not None:
-        inlet = height
-    inlet = format_inlet(inlet)
+    inlet_formatted = format_inlet(height if inlet is None else inlet)
 
     # Ensure data_level input is formatted
     if isinstance(data_level, list):
@@ -357,7 +360,7 @@ def search_surface(
     results = search(
         species=species,
         site=site,
-        inlet=inlet,
+        inlet=inlet_formatted,
         instrument=instrument,
         data_level=data_level,
         data_sublevel=data_sublevel,
