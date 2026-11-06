@@ -234,6 +234,46 @@ be calculated in a similar way:
     modelled_baseline = scenario.calc_modelled_baseline()
     modelled_baseline.bc_mod.plot.scatter(x="time", y="bc_mod")  # Can plot using xarray plotting methods
 
+By default, boundary concentrations are selected at footprint release time.
+To select them at release time minus each curtain cell's mean particle age,
+use ``bc_time_method="mean_age"``. Positive-weight curtain cells require
+``mean_age_particles_n``, ``mean_age_particles_e``, ``mean_age_particles_s``
+and ``mean_age_particles_w`` in the footprints, with time units and valid
+nonnegative ages.
+
+Retrieve boundary history covering the earliest lagged target as well as
+the release period. For example, for a daily product whose timestamps label
+interval starts, and targets all on or after 2016-06-01:
+
+.. code-block:: python
+
+    bc_history = get_bc(species=species,
+                        domain=domain,
+                        bc_input="CAMS",
+                        start_date="2016-06-01",
+                        end_date=end_date)
+    scenario.add_bc(bc=bc_history)
+    lagged_baseline = scenario.calc_modelled_baseline(
+        bc_time_method="mean_age", recalculate=True
+    )
+    lagged_combined = scenario.footprints_data_merge(
+        bc_time_method="mean_age",
+        calc_bc_sensitivity=True, recalculate=True
+    )
+
+The lookup holds each concentration over its interval. Interval support is
+normally read automatically from CF time bounds or the boundary object's
+``metadata["time_period"]``. Without bounds, timestamps are treated as
+interval starts. If the stored duration is unavailable or incorrect, supply
+``bc_time_period="1D"`` for this daily example; CF bounds take precedence.
+Confirm the product's time convention: cadence alone does not identify an
+interval mean versus an instantaneous sample, or the timestamp's position
+within an interval. Missing history and gaps at
+positive-weight target cells raise an error. The calculation retains
+fractional cell ages, applies the existing lifetime loss once, and forms
+contributions before observation averaging. See :ref:`boundary-contributions`
+for the full input and output contract.
+
 To compare these modelled observations to the observations
 themselves, the ``ModelScenario.plot_comparison()`` method can be used.
 This will stack the modelled observations and the modelled baseline by
@@ -265,6 +305,8 @@ When the same calculation is being performed for multiple methods, the
 last calculation is cached to allow the outputs to be produced more
 efficiently. This can be disabled for large datasets by using
 ``cache=False``.
+Use ``recalculate=True`` when changing boundary timing options, linked data,
+output units or requested sensitivities after a calculation.
 
 For a ``ModelScenario`` object, different analyses can be performed on
 this linked data. For example if a daily average for the modelled
@@ -338,12 +380,18 @@ The corresponding calculation for baseline sensitivities from boundary condition
 
 .. jupyter-execute::
 
-   from openghg.analyse._modelled_baseline import baseline_sensitivities
+   from openghg.analyse import baseline_sensitivities
 
-   bc_sensitivity = scenario.calc_modelled_baseline(output_sensitivity=True)
+   bc_sensitivity = scenario.calc_modelled_baseline(output_sensitivity=True, recalculate=True)
    bc_sensitivity
 
-All of this data (except the baseline sensitivities) can be produced at once using ``footprints_data_merge``:
+The public ``baseline_sensitivities`` helper can also be called directly with
+boundary and native footprint datasets. Its unreduced curtain arrays retain
+native release times. ``ModelScenario`` returns contributions aligned to the
+requested observation or resampling grid; in mean-age mode it calculates
+the native products before this alignment.
+
+All of this data, including the baseline sensitivities, can be produced at once using ``footprints_data_merge``:
 
 .. jupyter-execute::
 

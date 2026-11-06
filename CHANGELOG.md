@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Corrected boundary lifetime attenuation for footprints with declared particle-age units and aligned monthly lifetimes by release time across curtain dimension orders. [Issue #1805](https://github.com/openghg/openghg/issues/1805)
 - Updated inlet type hints to accept numeric values, lists and tuples, and preserved units, key names and special keywords when formatting inlet collections. [PR #1796](https://github.com/openghg/openghg/pull/1796)
 - Retained the first month's mean flux in time-resolved `fp_x_flux` calculations when the footprint look-back window starts mid-month. Previously, date selection dropped this monthly value and could leave the residual contribution missing. Recomputing affected `ModelScenario` outputs and downstream inversions can therefore change their results. [PR #1790](https://github.com/openghg/openghg/pull/1790)
 - Aligned Conda's Filelock, Pint and Pint-xarray upper bounds with the supported versions in `pyproject.toml`, avoiding unit-parsing and file-lock permission failures with unsupported versions. [PR #1790](https://github.com/openghg/openghg/pull/1790)
@@ -34,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added opt-in per-cell mean-age lagging through the public `baseline_sensitivities` helper and both `ModelScenario` baseline entry points, with native-interval support checks and contributions calculated before observation averaging. Release-time selection remains the default; use `recalculate=True` when changing cached scenario options. [Issue #1805](https://github.com/openghg/openghg/issues/1805)
 - Added automatic post-merge Graphify regeneration and a focused navigation
   skill for cross-module impact analysis. [Issue #1695](https://github.com/openghg/openghg/issues/1695)
 - Added a lazy `fp_x_flux_time_resolved_numba` analysis operator that preserves source and spatial dimensions, supports single-source and regular coarse-frequency flux, and includes optional atomic ppm Zarr persistence and worker warm-up helpers.

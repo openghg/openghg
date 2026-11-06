@@ -863,32 +863,34 @@ class ModelScenario:
 
         return platform
 
-    def _resample_obs_footprint(self, resample_to: str | None = "coarsest") -> tuple:
-        """Slice and resample obs and footprint data to align along time
+    def _resample_obs_footprint(self, footprint_data: Dataset, resample_to: str | None = "coarsest") -> tuple:
+        """Slice and mean-resample observations and supplied native footprint variables.
 
-        This slices the date to the smallest time frame
-        spanned by both the footprint and obs, using the sliced start date
-        The time dimension is resampled based on the resample_to input using the mean.
-        The resample_to options are:
-         - "coarsest" - resample to the coarsest resolution between obs and footprints
-         - "obs" - resample to observation data frequency
-         - "footprint" - resample to footprint data frequency
-         - a valid resample period e.g. "2H"
-         - None to not resample and just return original values
+        Additional variables, such as completed boundary contributions, follow the same
+        overlap selection and averaging as the footprints. Reindexing and merging happen
+        separately in :meth:`_combine_obs_footprint_data`. Frequency estimation may add
+        ``sampling_period_estimate`` to the linked observation attributes.
 
         Args:
-            resample_to: Resample option to use: either data based or using a valid pandas resample period.
+            footprint_data: Data on native footprint release times, optionally including
+                contributions already calculated at those releases.
+            resample_to: ``"coarsest"``, ``"obs"`` or ``"footprint"`` to choose a dataset's
+                frequency, or a pandas frequency such as ``"2h"``. ``None`` skips both overlap
+                slicing and resampling and returns the original datasets.
 
         Returns:
-            tuple: Two xarray.Dataset with aligned time dimensions
+            Observation and footprint datasets after the requested overlap selection and
+            mean resampling. Their time coordinates have not yet been reindexed to match.
+
+        Raises:
+            ValueError: If observations or footprints are missing, their resampling support
+                does not overlap, or the required sampling frequency cannot be determined.
         """
         # Check data is present (not None) and cast to correct type
         self._check_data_is_present(need=["obs", "footprint"])
         obs = cast(ObsData, self.obs)
-        footprint = cast(FootprintData, self.footprint)
 
         obs_data = obs.data
-        footprint_data = footprint.data
 
         if resample_to is None:
             return obs_data, footprint_data
@@ -930,13 +932,53 @@ class ModelScenario:
                 This data will be also be cached as the ModelScenario.scenario attribute.
         """
         self._check_data_is_present(need=["obs", "footprint"])
-        obs = cast(ObsData, self.obs)
         footprint = cast(FootprintData, self.footprint)
 
         # Return any matching cached data
         if self.scenario is not None and not recalculate:
             if self.scenario.attrs["resample_to"] == resample_to:
                 return self.scenario
+
+        combined_dataset = self._combine_obs_footprint_data(
+            footprint.data, resample_to=resample_to, platform=platform
+        )
+
+        if cache:
+            self.scenario = combined_dataset
+
+        return combined_dataset
+
+    def _combine_obs_footprint_data(
+        self, footprint_data: Dataset, resample_to: str | None, platform: str | None
+    ) -> Dataset:
+        """Align native footprint variables to observations without using scenario caches.
+
+        Observations and footprints must already be linked to the scenario. Completed
+        contributions supplied alongside the footprint variables use the same
+        time support and averaging. Satellite data use nearest alignment within 1 ms;
+        flask data skip averaging and use forward filling. Other platforms use the
+        requested mean resampling followed by forward filling.
+
+        Args:
+            footprint_data: Native footprint dataset, optionally augmented with contributions
+                calculated before averaging. The ``fp`` variable supplies the spatial-validity
+                mask used when removing unsupported output times.
+            resample_to: Dataset frequency, pandas averaging frequency or ``None``, as accepted
+                by :meth:`combine_obs_footprint`.
+            platform: Observation platform controlling resampling and alignment. ``None`` uses
+                the linked observation metadata and site information.
+
+        Returns:
+            Merged data on the selected observation time coordinate, with ``time`` last where
+            present. Observation attributes take precedence over footprint
+            attributes, and ``resample_to`` records the effective choice. No scenario cache is
+            read or written.
+
+        Raises:
+            ValueError: If the datasets' resampling support does not overlap or the required
+                sampling frequency is invalid.
+        """
+        obs = cast(ObsData, self.obs)
 
         # Extract platform
         if platform is None:
@@ -970,7 +1012,9 @@ class ModelScenario:
                 )
 
         # Resample, align and merge the observation and footprint Datasets
-        resampled_obs, resampled_footprint = self._resample_obs_footprint(resample_to=resample_to)
+        resampled_obs, resampled_footprint = self._resample_obs_footprint(
+            footprint_data, resample_to=resample_to
+        )
 
         combined_dataset = combine_datasets(
             dataset_A=resampled_obs, dataset_B=resampled_footprint, tolerance=tolerance, method=merge_method
@@ -981,16 +1025,13 @@ class ModelScenario:
 
         attributes = {}
         attributes_obs = obs.data.attrs
-        attributes_footprint = footprint.data.attrs
+        attributes_footprint = footprint_data.attrs
         attributes.update(attributes_footprint)
         attributes.update(attributes_obs)
 
         attributes["resample_to"] = str(resample_to)
 
         combined_dataset.attrs.update(attributes)
-
-        if cache:
-            self.scenario = combined_dataset
 
         return combined_dataset
 
@@ -1057,17 +1098,34 @@ class ModelScenario:
 
         return flux_stacked
 
-    def _check_footprint_resample(self, resample_to: str | None) -> Dataset:
-        """Check whether footprint needs resampling based on resample_to input.
-        Ignores resample_to keywords of ("coarsest", "obs", "footprint") as this is
-        for comparison with observation data but uses pandas frequencies to resample.
+    def _check_footprint_resample(
+        self, resample_to: str | None, footprint_data: Dataset | None = None
+    ) -> Dataset:
+        """Mean-resample native footprint variables without observation alignment.
+
+        Explicit averaging frequencies use the first native release's time of day as
+        the bin offset. Additional variables, including completed boundary contributions,
+        follow the same averaging as the footprint.
+
+        Args:
+            resample_to: Pandas averaging frequency, such as ``"2h"``. ``None`` and the
+                dataset-relative choices ``"coarsest"``, ``"obs"`` and ``"footprint"`` leave
+                native releases unchanged because no observation comparison is made here.
+            footprint_data: Native dataset to resample. ``None`` uses ``self.footprint.data``.
+
+        Returns:
+            The supplied dataset unchanged for dataset-relative choices or ``None``;
+            otherwise, a dataset of means on the requested bins. No scenario cache is updated.
+
+        Raises:
+            ValueError: If an explicit pandas averaging frequency is invalid.
         """
-        footprint = cast(FootprintData, self.footprint)
+        if footprint_data is None:
+            footprint_data = cast(FootprintData, self.footprint).data
 
         if resample_to in ("coarsest", "obs", "footprint") or resample_to is None:
-            return footprint.data
+            return footprint_data
         else:
-            footprint_data = footprint.data
             time = footprint_data["time"].values
             start_date = Timestamp(time[0])
             offset = pd.Timedelta(
@@ -1173,8 +1231,10 @@ class ModelScenario:
                           - None to not resample and to just "ffill" footprint to obs
                          Default = "coarsest".
             platform: Observation platform used to decide whether to resample e.g. "satellite", "insitu", "flask"
-            cache: Cache this data after calculation. Default = True.
-            recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
+            cache: Store newly calculated results in ``self.modelled_baseline``. A calculation
+                with ``False`` clears the baseline and scenario caches. Defaults to ``True``.
+            recalculate: Rebuild cached inputs and results. Set ``True`` when changing timing,
+                linked data, resampling, requested sensitivities or output units. Defaults to ``False``.
             output_fp_x_flux: If true, include "fp x flux" data variable in output.
             split_by_sectors: If true, compute separate timeseries (and fp_x_flux) for each flux sector; these are stored
               under the `mf_mod_sectoral` and `fp_x_flux_sectoral` data variables, and have a `source` dimension for the
@@ -1426,35 +1486,58 @@ class ModelScenario:
         output_sensitivity: bool = False,
         output_units: float | str | None = None,
         allow_climatology: bool = True,
+        bc_time_method: str = "release_time",
+        bc_time_period: str | None = None,
     ) -> Dataset:
-        """Calculate the modelled baseline points based on site footprint and boundary conditions.
-        Boundary conditions are multipled by any loss (exp(-t/lifetime)) for the species.
+        """Calculate the modelled baseline and optional boundary curtain contributions.
+
+        Particle weights multiply the selected boundary concentrations and the existing
+        species-lifetime loss, ``exp(-age/lifetime)``. Mean-age mode forms these products
+        at native releases before observation alignment or averaging.
 
         The time points returned are dependent on the resample_to option chosen.
         If obs data is also linked to the ModelScenario instance, this will be used
-        to derive the time points where appropriate.
+        to derive the time points where appropriate. Without observations, an explicit
+        pandas frequency averages native releases; other choices keep native times.
 
         Args:
-            resample_to: Resample option to use for averaging:
-                          - either one of ["coarsest", "obs", "footprint"] to match to the datasets
-                          - or using a valid pandas resample period e.g. "2H".
-                          - None to not resample and to just "ffill" footprint to obs
-                         Default = "coarsest".
+            resample_to: Averaging period: ``"coarsest"``, ``"obs"``, ``"footprint"``, a valid
+                pandas frequency, or ``None`` to forward-fill footprints to observation times.
+                Defaults to ``"coarsest"``.
             platform: Observation platform used to decide whether to resample e.g. "satellite", "insitu", "flask"
             cache: Cache this data after calculation. Default = True.
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
+            output_sensitivity: Include the unreduced ``bc_n``, ``bc_e``, ``bc_s`` and ``bc_w``
+                spatial contributions alongside ``bc_mod``, on the same output time coordinate.
             output_units: target units; if None, then obs. units will be used,
               or "mol/mol" if these are not present.
-            allow_climatology: When aligning datasets, allow any datasets which represent a year of data
-                to be treated as a climatology and reindexed accordingly.
+            allow_climatology: Allow reference-year boundary fields to be calendar-mapped
+                to scenario times, as described by :func:`openghg.analyse.baseline_sensitivities`.
+            bc_time_method: Select concentrations at footprint release time (``"release_time"``)
+                or at each curtain cell's release time minus its mean particle age (``"mean_age"``).
+                The mean-age products are calculated before observation averaging. Supply sufficient
+                boundary history through ``bc=`` or ``add_bc(bc=history)``. Set
+                ``recalculate=True`` when changing this option or other baseline inputs.
+            bc_time_period: Usually read automatically from CF time bounds or stored ``time_period``
+                metadata. An explicit native interval width, such as ``"3h"`` or ``"1D"``, overrides
+                the boundary object's metadata and then the dataset-attribute fallback; CF bounds
+                take precedence. Used only for mean-age selection. Without bounds, timestamps mark
+                interval starts. Concentrations are held constant from each interval's start
+                (inclusive) to its end (exclusive). Timestamp spacing alone does not establish
+                whether the supplied field contains interval means or instantaneous values, or
+                whether its labels mark interval starts, centres or ends.
 
         Returns:
-            xarray.Dataset containing modelled baseline values along the time axis and baseline sensitivities
-                for the NESW boundary regions.
+            xarray.Dataset containing ``bc_mod`` along the output time axis and, when
+                ``output_sensitivity=True``, the unreduced NESW ``bc_*`` contributions.
 
             If cache is True:
                 This data will also be cached as the ModelScenario.modelled_baseline attribute.
                 The associated scenario data will be cached as the ModelScenario.scenario attribute.
+
+        Raises:
+            ValueError: If mean-age inputs have invalid units or ages, or boundary intervals do not
+                support a requested positive-weight target cell.
         """
         self._check_data_is_present(need=["footprint", "bc"])
         bc = cast(BoundaryConditionsData, self.bc)
@@ -1474,12 +1557,42 @@ class ModelScenario:
         except AttributeError:
             species = None
 
+        footprint = cast(FootprintData, self.footprint)
+        mean_age = bc_time_method == "mean_age"
+
+        # Native BC intervals are independent of the observation averaging period.
+        if mean_age and bc_time_period is None:
+            bc_time_period = bc.metadata.get("time_period")
+
+        # Lagging averaged ages and weights would give different products from native releases.
         sensitivities = baseline_sensitivities(
-            bc=bc_data, fp=scenario, species=species, allow_climatology=allow_climatology
+            bc=bc_data,
+            fp=footprint.data if mean_age else scenario,
+            species=species,
+            allow_climatology=allow_climatology,
+            bc_time_method=bc_time_method,
+            bc_time_period=bc_time_period,
         )
 
-        result = sensitivities if output_sensitivity else xr.Dataset()
+        if mean_age:
+            # Completed products follow the footprint's existing bins and platform alignment.
+            contribution_attrs = sensitivities.attrs
+            contribution_vars = list(sensitivities.data_vars)
+            native_data = footprint.data.assign(sensitivities)
+            if self.obs is not None or self.obs_column is not None:
+                aligned_data = self._combine_obs_footprint_data(
+                    native_data, resample_to=resample_to, platform=platform
+                )
+            else:
+                aligned_data = self._check_footprint_resample(resample_to, native_data)
 
+            sensitivities = aligned_data[contribution_vars]
+            # Alignment merges dataset attrs; retain the helper's concentration-time provenance.
+            sensitivities.attrs = contribution_attrs
+
+        result = sensitivities if output_sensitivity else xr.Dataset(attrs=sensitivities.attrs)
+
+        # Reduce spatial curtain cells and directions after aligning their contributions in time.
         modelled_baseline = (
             sensitivities.sum(["height", "lat", "lon"]).to_dataarray(dim="bc_curtain").sum("bc_curtain")
         )
@@ -1522,16 +1635,17 @@ class ModelScenario:
         output_units: str | float | None = None,
         use_low_freq_flux: bool | None = None,
         allow_climatology: bool = True,
+        bc_time_method: str = "release_time",
+        bc_time_period: str | None = None,
     ) -> Dataset:
-        """Produce combined object containing aligned footprint and observation data.
+        """Produce combined data containing aligned footprints and observations.
+
         Can also include modelled timeseries data derived from flux.
 
         Args:
-            resample_to: Resample option to use for averaging:
-                          - either one of ["coarsest", "obs", "footprint"] to match to the datasets
-                          - or using a valid pandas resample period e.g. "2H".
-                          - None to not resample and to just "ffill" footprint to obs
-                         Default = "coarsest".
+            resample_to: Averaging period: ``"coarsest"``, ``"obs"``, ``"footprint"``, a valid
+                pandas frequency, or ``None`` to forward-fill footprints to observation times.
+                Defaults to ``"coarsest"``.
             platform: Observation platform used to decide whether to resample.
             calc_timeseries: Calculate modelled timeseries based on flux sources.
             calc_fp_x_flux: Calculate "fp x flux" matrix
@@ -1539,7 +1653,8 @@ class ModelScenario:
                      All will be used and stacked if not specified.
             split_by_sectors: if True, separate modelled obs (and footprint x flux) will be calculated
                 for each flux source ("sector").
-            calc_baseline: Calculate modelled baseline.
+            calc_bc: Calculate the modelled baseline from boundary conditions.
+            calc_bc_sensitivity: Include the unreduced NESW boundary contributions.
             cache: Cache this data after calculation. Default = True.
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
             output_units: units to use for obs, or any data that should have the same units as obs (e.g. `mf_mod`).
@@ -1547,9 +1662,21 @@ class ModelScenario:
                 of the flux at release time. ``None`` enables this for CO2 only.
             allow_climatology: When aligning datasets, allow any datasets which represent a year of data
                 to be treated as a climatology and reindexed accordingly.
+            bc_time_method: Boundary concentration timing, ``"release_time"`` or ``"mean_age"``.
+                Mean-age contributions are calculated on native releases before averaging. Supply
+                earlier boundary history through ``bc=`` or ``add_bc(bc=history)`` and use
+                ``recalculate=True`` when changing baseline inputs or calculation options.
+            bc_time_period: Usually read automatically from CF time bounds or stored ``time_period``
+                metadata. An explicit native interval width for ``"mean_age"`` overrides metadata;
+                CF bounds take precedence. See :meth:`calc_modelled_baseline` for the fallback
+                order, interval support and distinction from the field's averaging convention.
 
         Returns:
             xarray.Dataset: Combined dataset containing footprint and observation data
+
+        Raises:
+            ValueError: If mean-age inputs have invalid units or ages, or boundary intervals do not
+                support a requested positive-weight target cell.
         """
         combined_dataset = self.combine_obs_footprint(
             resample_to=resample_to, platform=platform, cache=cache, recalculate=recalculate
@@ -1579,9 +1706,13 @@ class ModelScenario:
                     recalculate=recalculate,
                     output_sensitivity=calc_bc_sensitivity,
                     allow_climatology=allow_climatology,
+                    bc_time_method=bc_time_method,
+                    bc_time_period=bc_time_period,
                 )
 
                 combined_dataset = combined_dataset.merge(modelled_baseline)
+                # Expose the boundary concentration timing policy on the combined product.
+                combined_dataset.attrs.update(modelled_baseline.attrs)
             else:
                 logger.warning(
                     "Unable to calculate baseline data. Add boundary conditions using ModelScenarion.add_bc(...) to do this."
