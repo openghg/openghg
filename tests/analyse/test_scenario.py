@@ -1102,6 +1102,139 @@ def test_bc_sensitivity_ch4(model_scenario_ch4_dummy):
         assert f"bc_{d}" in bc_sensitivity
 
 
+@pytest.fixture
+def mean_age_scenario():
+    """Four native releases with earlier hourly boundary intervals and two observations."""
+    from openghg.dataobjects import BoundaryConditionsData, FootprintData
+
+    releases = pd.date_range("2021-01-01T00:30", periods=4, freq="h")
+    coords = {"time": releases, "lat": [1.0], "lon": [10.0], "height": [500.0]}
+    footprint = xr.Dataset({"fp": (("time", "lat", "lon"), np.ones((4, 1, 1)))}, coords=coords)
+    boundary = xr.Dataset(coords={**coords, "time": pd.date_range("2020-12-31T22:00", periods=6, freq="h")})
+    for direction in "nesw":
+        dims = ("time", "lon" if direction in "ns" else "lat", "height")
+        weights = [0.1, 0.3, 0.2, 0.4] if direction == "n" else [0.0] * 4
+        footprint[f"particle_locations_{direction}"] = (dims, np.array(weights).reshape(4, 1, 1))
+        footprint[f"particle_locations_{direction}"].attrs["units"] = "1"
+        footprint[f"mean_age_particles_{direction}"] = (
+            dims,
+            np.array([1.0, 0.0, 1.0, 0.0]).reshape(4, 1, 1),
+        )
+        footprint[f"mean_age_particles_{direction}"].attrs["units"] = "hours"
+        boundary[f"vmr_{direction}"] = (dims, np.arange(10.0, 70.0, 10.0).reshape(6, 1, 1))
+        boundary[f"vmr_{direction}"].attrs["units"] = "ppm"
+    footprint.fp.attrs["units"] = "m2 s mol-1"
+    metadata = {"site": "TESTSITE", "species": "co2", "inlet": "10m", "platform": "surface"}
+    obs = xr.Dataset(
+        {"mf": ("time", [0.0, 0.0])},
+        coords={"time": releases[::2]},
+        attrs={**metadata, "sampling_period": "7200"},
+    )
+    obs.mf.attrs["units"] = "ppb"
+    return ModelScenario(
+        obs=ObsData(data=obs, metadata=metadata),
+        footprint=FootprintData(data=footprint, metadata=metadata.copy()),
+        flux={},
+        bc=BoundaryConditionsData(data=boundary, metadata={"time_period": "1h"}),
+    )
+
+
+@pytest.mark.parametrize("output_units,scale", [(None, 1000.0), ("ppm", 1.0)])
+def test_mean_age_baseline_before_averaging(mean_age_scenario, output_units, scale):
+    """Average completed native products, including the half-hour resampling offset."""
+    from openghg.analyse import baseline_sensitivities
+
+    scenario = mean_age_scenario
+    native = baseline_sensitivities(
+        scenario.bc.data,
+        scenario.footprint.data,
+        species="co2",
+        bc_time_method="mean_age",
+        bc_time_period="1h",
+    )
+    np.testing.assert_allclose(native.bc_n.values.ravel(), [2.0, 12.0, 8.0, 24.0])
+    result = scenario.calc_modelled_baseline(
+        bc_time_method="mean_age", output_sensitivity=True, output_units=output_units
+    )
+    np.testing.assert_allclose(result.bc_mod, np.array([7.0, 16.0]) * scale)
+    np.testing.assert_allclose(result.bc_n.values.ravel(), np.array([7.0, 16.0]) * scale)
+    assert result.attrs == native.attrs
+    # Averaging weights and ages first would instead give [6, 15] ppm.
+    assert not np.allclose(result.bc_mod, np.array([6.0, 15.0]) * scale)
+    merged = scenario.footprints_data_merge(
+        calc_timeseries=False,
+        calc_bc_sensitivity=True,
+        bc_time_method="mean_age",
+        output_units=output_units,
+        recalculate=True,
+    )
+    for name in ["bc_mod", "bc_n", "bc_e", "bc_s", "bc_w"]:
+        xr.testing.assert_allclose(merged[name], result[name])
+    for name, value in native.attrs.items():
+        assert merged.attrs[name] == value
+
+
+def test_mean_age_recalculate_switches_methods(mean_age_scenario):
+    """The existing explicit recalculation route rebuilds cached merged sensitivities."""
+    scenario = mean_age_scenario
+    options = {"calc_timeseries": False, "calc_bc_sensitivity": True, "recalculate": True}
+    release = scenario.footprints_data_merge(**options)
+    scenario.bc.metadata["time_period"] = "invalid"
+    lagged = scenario.footprints_data_merge(**options, bc_time_method="mean_age", bc_time_period="1h")
+    restored = scenario.footprints_data_merge(**options)
+    np.testing.assert_allclose(release.bc_mod, [6000.0, 15000.0])
+    np.testing.assert_allclose(lagged.bc_mod, [7000.0, 16000.0])
+    for name in ["bc_mod", "bc_n", "bc_e", "bc_s", "bc_w"]:
+        xr.testing.assert_allclose(restored[name], release[name])
+
+
+def test_mean_age_history_through_add_bc(mean_age_scenario, mocker):
+    """A separate earlier boundary retrieval replaces insufficient constructor-window history."""
+    from openghg.dataobjects import BoundaryConditionsData
+
+    scenario = mean_age_scenario
+    history = scenario.bc
+    scenario.bc = BoundaryConditionsData(
+        data=history.data.sel(time=slice("2021-01-01", None)), metadata=history.metadata.copy()
+    )
+    with pytest.raises(ValueError):
+        scenario.calc_modelled_baseline(bc_time_method="mean_age", allow_climatology=False)
+    retrieve = mocker.patch("openghg.analyse._scenario.get_bc", return_value=history)
+    scenario.add_bc(
+        species="co2", domain="TESTDOMAIN", start_date="2020-12-31T22:00", end_date="2021-01-01T04:00"
+    )
+    assert retrieve.call_args.kwargs["start_date"] == "2020-12-31T22:00"
+    result = scenario.calc_modelled_baseline(bc_time_method="mean_age", recalculate=True)
+    np.testing.assert_allclose(result.bc_mod, [7000.0, 16000.0])
+
+
+def test_mean_age_without_observations(mean_age_scenario):
+    """Footprint-only calculation resamples products with the native release offset."""
+    scenario = ModelScenario(footprint=mean_age_scenario.footprint, bc=mean_age_scenario.bc)
+    native = scenario.calc_modelled_baseline(bc_time_method="mean_age", output_units="ppm")
+    np.testing.assert_allclose(native.bc_mod, [2.0, 12.0, 8.0, 24.0])
+    averaged = scenario.calc_modelled_baseline(
+        bc_time_method="mean_age", resample_to="2h", output_units="ppm", recalculate=True
+    )
+    np.testing.assert_allclose(averaged.bc_mod, [7.0, 16.0])
+
+
+@pytest.mark.parametrize("platform", [None, "surface-flask", "satellite"])
+def test_mean_age_platform_support(mean_age_scenario, platform):
+    """Unresampled, flask and satellite support select completed native products."""
+    scenario = mean_age_scenario
+    scenario.bc.metadata["time_period"] = "invalid"
+    if platform == "satellite":
+        scenario.obs.data = scenario.obs.data.assign_coords(
+            time=scenario.obs.data.time + pd.Timedelta("500us")
+        )
+    result = scenario.calc_modelled_baseline(
+        bc_time_method="mean_age", resample_to=None, platform=platform, bc_time_period="1h"
+    )
+    xr.testing.assert_equal(result.time, scenario.obs.data.time)
+    np.testing.assert_allclose(result.bc_mod, [2000.0, 8000.0])
+
+
 # %% Test climatological (single reference year) flux and boundary conditions with dummy data (CH4)
 
 
