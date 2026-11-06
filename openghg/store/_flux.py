@@ -250,7 +250,12 @@ class Flux(BaseStore):
         data_vars: dict[str, tuple[str, ...]] = {"flux": ("time", "lat", "lon")}
         dtypes = {"lat": np.floating, "lon": np.floating, "time": np.datetime64, "flux": np.floating}
 
-        data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
+        data_format = DataSchema(
+            data_vars=data_vars,
+            dtypes=dtypes,
+            units={"lat": "degrees_north", "lon": "degrees_east"},
+            units_compatible={"flux": "mol m-2 s-1"},
+        )
 
         return data_format
 

@@ -4,6 +4,7 @@ import xarray as xr
 
 from openghg.util import clean_string, timestamp_now, synonyms, get_data
 from openghg.store import infer_date_range, update_zero_dim
+from openghg.standardise.boundary_conditions._units import normalise_boundary_condition_units
 
 logger = logging.getLogger("openghg.standardise.boundary_conditions")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -64,6 +65,7 @@ def parse_openghg(
 
         author_name = "OpenGHG Cloud"
         bc_data.attrs["author"] = author_name
+        normalise_boundary_condition_units(bc_data, vmr_units=bc_data.attrs.get("units", "mol/mol"))
 
         metadata = {}
         metadata.update(attrs)
