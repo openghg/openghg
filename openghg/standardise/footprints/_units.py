@@ -1,5 +1,11 @@
 from xarray import Dataset
 
+from openghg.store._footprints import (
+    FOOTPRINT_COORD_UNITS,
+    MEAN_AGE_PARTICLES_UNIT,
+    PARTICLE_LOCATIONS_UNIT,
+)
+
 _FOOTPRINT_SIGNALS = (
     "fp",
     "fp_low",
@@ -12,14 +18,7 @@ _FOOTPRINT_SIGNALS = (
 
 def normalise_footprint_units(data: Dataset) -> None:
     """Apply known internal units without inventing a footprint signal unit."""
-    for name, unit in {
-        "lat": "degrees_north",
-        "lon": "degrees_east",
-        "lat_high": "degrees_north",
-        "lon_high": "degrees_east",
-        "height": "m",
-        "H_back": "hour",
-    }.items():
+    for name, unit in FOOTPRINT_COORD_UNITS.items():
         if name in data.coords:
             data[name].attrs["units"] = unit
 
@@ -38,6 +37,6 @@ def normalise_footprint_units(data: Dataset) -> None:
 
     for data_var in data.data_vars:
         if isinstance(data_var, str) and data_var.startswith("particle_locations_"):
-            data[data_var].attrs["units"] = "1"
+            data[data_var].attrs["units"] = PARTICLE_LOCATIONS_UNIT
         elif isinstance(data_var, str) and data_var.startswith("mean_age_particles_"):
-            data[data_var].attrs["units"] = "hour"
+            data[data_var].attrs["units"] = MEAN_AGE_PARTICLES_UNIT

@@ -799,19 +799,20 @@ def test_obs_schema(species, obs_variable):
 
 
 def test_obs_schema_requires_main_units_but_not_observation_count_units():
-    data = xr.Dataset(
-        {
-            "ch4": ("time", [1900.0], {"units": "ppb"}),
-            "number_of_observations": ("time", [3]),
-        },
-        coords={"time": np.array(["2020-01-01"], dtype="datetime64[ns]")},
-    )
-    schema = ObsSurface.schema(species="ch4")
+    """ObsSurface schema requires non-blank units on the main species variable
+    but not on its paired observation-count variable (e.g. "co2_number_of_observations"),
+    using a real standardised OPENGHG-format file rather than synthetic data.
+    """
+    data = xr.open_dataset(get_surface_datapath(filename="tac_co2_openghg.nc", source_format="OPENGHG"))
+    assert "co2_number_of_observations" in data.data_vars
+    assert "units" not in data["co2_number_of_observations"].attrs
+
+    schema = ObsSurface.schema(species="co2")
 
     schema.validate_data(data)
 
     missing_units = data.copy()
-    del missing_units["ch4"].attrs["units"]
+    del missing_units["co2"].attrs["units"]
     with pytest.raises(ValidationError, match="units"):
         schema.validate_data(missing_units)
 

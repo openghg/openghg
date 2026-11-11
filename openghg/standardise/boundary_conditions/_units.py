@@ -1,14 +1,11 @@
 from xarray import Dataset
 
+from openghg.store._boundary_conditions import BOUNDARY_CONDITION_COORD_UNITS, DEFAULT_VMR_UNIT
 
-def normalise_boundary_condition_units(data: Dataset, vmr_units: str = "mol/mol") -> None:
+
+def normalise_boundary_condition_units(data: Dataset, vmr_units: str = DEFAULT_VMR_UNIT) -> None:
     """Fill the known units of the OpenGHG boundary-condition format."""
-    for name, unit in {
-        "lat": "degrees_north",
-        "lon": "degrees_east",
-        "level": "m",
-        "height": "m",
-    }.items():
+    for name, unit in BOUNDARY_CONDITION_COORD_UNITS.items():
         if name in data.coords:
             data[name].attrs["units"] = unit
 
