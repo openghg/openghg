@@ -25,6 +25,16 @@ Covers how we develop OpenGHG and the standards we adhere to
 
    python_devel
 
+ObjectStore backends
+--------------------
+
+Configure and implement alternative persistence for OpenGHG object stores.
+
+.. toctree::
+   :maxdepth: 1
+
+   objectstore_backends
+
 Packaging & Release
 -------------------
 
