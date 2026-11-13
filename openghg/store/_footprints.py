@@ -14,6 +14,20 @@ __all__ = ["Footprints"]
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
+# Canonical units for footprint coordinates. Shared with
+# openghg.standardise.footprints._units so that the units applied during
+# standardisation and the units required by the schema cannot drift apart.
+FOOTPRINT_COORD_UNITS: dict[str, str] = {
+    "lat": "degrees_north",
+    "lon": "degrees_east",
+    "lat_high": "degrees_north",
+    "lon_high": "degrees_east",
+    "height": "m",
+    "H_back": "hour",
+}
+PARTICLE_LOCATIONS_UNIT = "1"
+MEAN_AGE_PARTICLES_UNIT = "hour"
+
 
 class Footprints(BaseStore):
     """This class is used to process footprints model output"""
@@ -321,6 +335,10 @@ class Footprints(BaseStore):
 
         # Names of data variables and associated dimensions (as a tuple)
         data_vars: dict[str, tuple[str, ...]] = {}
+        units: dict[str, str | None] = {
+            "lat": FOOTPRINT_COORD_UNITS["lat"],
+            "lon": FOOTPRINT_COORD_UNITS["lon"],
+        }
         # Internal data types of data variables and coordinates
         dtypes = {
             "lat": np.floating,  # Covers np.float16, np.float32, np.float64 types
@@ -343,6 +361,7 @@ class Footprints(BaseStore):
             # Includes standard footprint variable
             data_vars["fp"] = ("time", "lat", "lon")
             dtypes["fp"] = np.floating
+            units["fp"] = "m2 s mol-1"
 
         if high_spatial_resolution:
             # Include options for high spatial resolution footprint
@@ -353,6 +372,10 @@ class Footprints(BaseStore):
 
             dtypes["fp_low"] = np.floating
             dtypes["fp_high"] = np.floating
+            units["fp_low"] = "m2 s mol-1"
+            units["fp_high"] = "m2 s mol-1"
+            units["lat_high"] = FOOTPRINT_COORD_UNITS["lat_high"]
+            units["lon_high"] = FOOTPRINT_COORD_UNITS["lon_high"]
 
         if time_resolved:
             # Include options for high time resolution footprint (usually co2)
@@ -362,11 +385,15 @@ class Footprints(BaseStore):
                 data_vars["fp_residual"] = ("time", "lat", "lon")
                 dtypes["fp_time_resolved"] = np.floating
                 dtypes["fp_residual"] = np.floating
+                units["fp_time_resolved"] = "m2 s mol-1"
+                units["fp_residual"] = "m2 s mol-1"
             else:
                 data_vars["fp_HiTRes"] = ("time", "lat", "lon", "H_back")
                 dtypes["fp_HiTRes"] = np.floating
+                units["fp_HiTRes"] = "m2 s mol-1"
 
             dtypes["H_back"] = np.number  # float or integer
+            units["H_back"] = FOOTPRINT_COORD_UNITS["H_back"]
 
         # Includes particle location directions - one for each regional boundary
         if particle_locations:
@@ -380,6 +407,14 @@ class Footprints(BaseStore):
             dtypes["particle_locations_e"] = np.floating
             dtypes["particle_locations_s"] = np.floating
             dtypes["particle_locations_w"] = np.floating
+            units["height"] = FOOTPRINT_COORD_UNITS["height"]
+            units.update(
+                {
+                    name: PARTICLE_LOCATIONS_UNIT
+                    for name in data_vars
+                    if name.startswith("particle_locations_")
+                }
+            )
 
         # TODO: Could also add check for meteorological + other data
         # "air_temperature", "air_pressure", "wind_speed", "wind_from_direction",
@@ -397,8 +432,16 @@ class Footprints(BaseStore):
             dtypes["mean_age_particles_e"] = np.floating
             dtypes["mean_age_particles_s"] = np.floating
             dtypes["mean_age_particles_w"] = np.floating
+            units["height"] = FOOTPRINT_COORD_UNITS["height"]
+            units.update(
+                {
+                    name: MEAN_AGE_PARTICLES_UNIT
+                    for name in data_vars
+                    if name.startswith("mean_age_particles_")
+                }
+            )
 
-        data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
+        data_format = DataSchema(data_vars=data_vars, dtypes=dtypes, units=units)
 
         return data_format
 

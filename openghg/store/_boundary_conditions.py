@@ -18,6 +18,18 @@ __all__ = ["BoundaryConditions"]
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
+# Canonical units for boundary-condition coordinates and volume mole fractions.
+# Shared with openghg.standardise.boundary_conditions._units so that the units
+# applied during standardisation and the units required by the schema cannot
+# drift apart.
+BOUNDARY_CONDITION_COORD_UNITS: dict[str, str] = {
+    "lat": "degrees_north",
+    "lon": "degrees_east",
+    "level": "m",
+    "height": "m",
+}
+DEFAULT_VMR_UNIT = "mol/mol"
+
 
 class BoundaryConditions(BaseStore):
     """This class is used to process boundary condition data"""
@@ -125,7 +137,16 @@ class BoundaryConditions(BaseStore):
             "vmr_w": np.floating,
         }
 
-        data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
+        data_format = DataSchema(
+            data_vars=data_vars,
+            dtypes=dtypes,
+            units={
+                "lat": BOUNDARY_CONDITION_COORD_UNITS["lat"],
+                "lon": BOUNDARY_CONDITION_COORD_UNITS["lon"],
+                "height": BOUNDARY_CONDITION_COORD_UNITS["height"],
+            },
+            units_compatible={name: DEFAULT_VMR_UNIT for name in data_vars},
+        )
 
         return data_format
 
