@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.19.0...HEAD)
 
+### Added
+
+- Added versioned JSON metadata and CF history helpers for xarray DataArrays and Datasets. [Issue #1682](https://github.com/openghg/openghg/issues/1682)
+
 ### Fixed
 
 - Updated inlet type hints to accept numeric values, lists and tuples, and preserved units, key names and special keywords when formatting inlet collections. [PR #1796](https://github.com/openghg/openghg/pull/1796)
