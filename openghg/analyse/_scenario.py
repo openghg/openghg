@@ -58,6 +58,7 @@ from openghg.analyse._modelled_obs import (
     fp_x_flux_integrated,
     fp_x_flux_time_resolved,
     make_integrated_low_freq_flux,
+    time_resolved_and_residual_footprints,
 )
 from openghg.dataobjects import BoundaryConditionsData, FluxData, FootprintData, ObsData, ObsColumnData
 from openghg.retrieve import (
@@ -74,6 +75,7 @@ from openghg.retrieve import (
 )
 from openghg.util import synonyms, clean_string, format_inlet, verify_site_with_satellite, define_platform
 from openghg.types import SearchError, ReindexMethod
+from . import _fp_x_flux
 from ._alignment import combine_datasets, resample_obs_and_other
 from ._modelled_baseline import baseline_sensitivities
 from ._utils import match_dataset_dims, stack_datasets
@@ -1648,7 +1650,31 @@ class ModelScenario:
 
         flux_ds = self.combine_flux_sources(sources)
 
-        fp_x_flux = fp_x_flux_time_resolved(fp, flux_ds, averaging=averaging)
+        if averaging is not None:
+            fp = fp.resample(time=averaging).ffill()
+
+        if output_fpXflux and _fp_x_flux.njit is not None:
+            if isinstance(fp, xr.DataArray):
+                fp = time_resolved_and_residual_footprints(fp)
+            resolved = fp["fp_time_resolved"]
+            compute_chunks = {
+                dim: max(resolved.chunksizes.get(dim, (resolved.sizes[dim],)))
+                for dim in ("time", "lat", "lon")
+            }
+            compute_chunks["time"] = min(compute_chunks["time"], 32)
+            # Sources are combined above; sectoral calculations call this method per source.
+            fp_x_flux = _fp_x_flux.fp_x_flux_time_resolved_numba(
+                fp.transpose("time", "lat", "lon", "H_back", missing_dims="ignore"),
+                flux_ds,
+                cast_float32=False,
+                time_chunk=compute_chunks["time"],
+                lat_chunk=compute_chunks["lat"],
+                lon_chunk=compute_chunks["lon"],
+            ).sum("source", keep_attrs=True)
+            # The kernel's boolean option cannot be stored as a NetCDF attribute.
+            fp_x_flux.attrs.pop("fillna_zero", None)
+        else:
+            fp_x_flux = fp_x_flux_time_resolved(fp, flux_ds)
 
         data = {}
 
