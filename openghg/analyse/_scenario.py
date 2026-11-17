@@ -1092,6 +1092,7 @@ class ModelScenario:
         for comparison with observation data but uses pandas frequencies to resample.
         """
         if footprint is None:
+            self._check_data_is_present(need="footprint")
             footprint = cast(FootprintData, self.footprint)
 
         if resample_to in ("coarsest", "obs", "footprint") or resample_to is None:
@@ -1141,37 +1142,22 @@ class ModelScenario:
         except AttributeError:
             raise ValueError(f"Did not recognise input for {param}")
 
-        # Check if cached modelled observations exist
-        # if self.modelled_obs is None or recalculate:
-        if parameter is None or recalculate:
-            # Check if observations are present and use these for resampling
+        if parameter is not None:
+            prev_resample_to = parameter.attrs.get("resample_to")
+        else:
+            prev_resample_to = None
+
+        # Check if parameter (e.g. modelled_obs or modelled_baseline) exists, the resample_to input is different than the current value or explicit recalculation is requested.
+        # - Note that if obs is not present, can resample the footprint directly as we don't have an obs data variable to store within self.scenario
+        if parameter is None or recalculate or str(prev_resample_to) != str(resample_to):
             if self.obs is not None or self.obs_column is not None:
                 self.combine_obs_footprint(
                     resample_to, platform=platform, recalculate=recalculate, cache=True
                 )
             else:
                 self.scenario = self._check_footprint_resample(resample_to)
-        elif self.obs is not None:
-            # Check previous resample_to input for cached data
-            # prev_resample_to = self.modelled_obs.attrs.get("resample_to")
-            prev_resample_to = parameter.attrs.get("resample_to")
-
-            # Check if this previous resample period matches input value
-            # - if not (or explicit recalculation requested), recreate scenario
-            # - if so return cached modelled observations
-            if prev_resample_to != str(resample_to) or recalculate:
-                self.combine_obs_footprint(resample_to, platform=platform, cache=True)
-            else:
-                # return self.modelled_obs
-                return False
-        elif recalculate:
-            # Recalculate based on footprint data if obs not present
-            self.scenario = self._check_footprint_resample(resample_to)
-
         # TODO: Add check for matching sources and recalculate otherwise
         else:
-            # Return cached modelled observations if explicit recalculation not requested
-            # return self.modelled_obs
             return False
 
         return True
@@ -1187,6 +1173,7 @@ class ModelScenario:
         split_by_sectors: bool = False,
         output_units: float | str | None = None,
         use_low_freq_flux: bool | None = None,
+        allow_climatology: bool = True,
     ) -> Dataset:
         """Calculate the modelled observation points based on site footprint and fluxes.
 
@@ -1213,6 +1200,9 @@ class ModelScenario:
             use_low_freq_flux: For integrated footprints, use monthly-mean fluxes
               instead of the flux at the release time. Defaults to True for an
               integrated CO2 footprint and False otherwise.
+            allow_climatology: When aligning datasets, allow any datasets which represent a year of data
+                to be treated as a climatology and reindexed accordingly. Note this isn't currently used in te
+                HiTRes pathway.
 
         Returns:
             xarray.Dataset: Modelled observation values along the time axis, optionally with "fp x flux".
@@ -1249,6 +1239,7 @@ class ModelScenario:
                 output_TS=True,
                 output_fpXflux=output_fp_x_flux,
                 use_low_freq_flux=use_low_freq_flux,
+                allow_climatology=allow_climatology,
             )
 
         # calculate sectoral modelled mf and fp_x_flux
@@ -1314,6 +1305,7 @@ class ModelScenario:
         output_fpXflux: bool = False,
         fp_x_flux_name: str = "fp_x_flux",
         use_low_freq_flux: bool | None = None,
+        allow_climatology: bool = True,
         *,
         scenario: Dataset | None = None,
     ) -> Dataset:
@@ -1325,6 +1317,8 @@ class ModelScenario:
                        Default = True
             output_fpXflux : Whether to output the modelled flux map DataArray used to create
                             the timeseries. Default = False
+            allow_climatology: When aligning datasets, allow any datasets which represent a year of data
+                to be treated as a climatology and reindexed accordingly.
             scenario: Aligned observation/footprint data. Defaults to the cached scenario.
 
         Returns:
@@ -1350,7 +1344,7 @@ class ModelScenario:
         if use_low_freq_flux:
             flux = make_integrated_low_freq_flux(flux)
 
-        flux_modelled = fp_x_flux_integrated(scenario, flux)
+        flux_modelled = fp_x_flux_integrated(scenario, flux, allow_climatology=allow_climatology)
         data = {}
 
         if output_TS:
@@ -1423,6 +1417,12 @@ class ModelScenario:
 
         if "fp_HiTRes" in scenario:
             fp = scenario.fp_HiTRes
+            if not fp.attrs.get("units") and "fp" in scenario:
+                units = scenario.fp.attrs.get("units")
+                if units:
+                    # Legacy files and stores may only declare units on fp.
+                    # assign_attrs leaves the caller's footprint metadata unchanged.
+                    fp = fp.assign_attrs(units=units)
         elif "fp_time_resolved" in scenario.data_vars:
             fp = scenario[["fp_time_resolved", "fp_residual"]]
         else:
@@ -1458,6 +1458,7 @@ class ModelScenario:
         recalculate: bool = False,
         output_sensitivity: bool = False,
         output_units: float | str | None = None,
+        allow_climatology: bool = True,
     ) -> Dataset:
         """Calculate the modelled baseline points based on site footprint and boundary conditions.
         Boundary conditions are multipled by any loss (exp(-t/lifetime)) for the species.
@@ -1477,6 +1478,8 @@ class ModelScenario:
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
             output_units: target units; if None, then obs. units will be used,
               or "mol/mol" if these are not present.
+            allow_climatology: When aligning datasets, allow any datasets which represent a year of data
+                to be treated as a climatology and reindexed accordingly.
 
         Returns:
             xarray.Dataset containing modelled baseline values along the time axis and baseline sensitivities
@@ -1504,7 +1507,9 @@ class ModelScenario:
         except AttributeError:
             species = None
 
-        sensitivities = baseline_sensitivities(bc=bc_data, fp=scenario, species=species)
+        sensitivities = baseline_sensitivities(
+            bc=bc_data, fp=scenario, species=species, allow_climatology=allow_climatology
+        )
 
         result = sensitivities if output_sensitivity else xr.Dataset()
 
@@ -1549,6 +1554,7 @@ class ModelScenario:
         recalculate: bool = False,
         output_units: str | float | None = None,
         use_low_freq_flux: bool | None = None,
+        allow_climatology: bool = True,
     ) -> Dataset:
         """Produce combined object containing aligned footprint and observation data.
         Can also include modelled timeseries data derived from flux.
@@ -1572,13 +1578,20 @@ class ModelScenario:
             output_units: units to use for obs, or any data that should have the same units as obs (e.g. `mf_mod`).
             use_low_freq_flux: For integrated footprints, use monthly-mean fluxes instead
                 of the flux at release time. ``None`` enables this for CO2 only.
+            allow_climatology: When aligning datasets, allow any datasets which represent a year of data
+                to be treated as a climatology and reindexed accordingly.
 
         Returns:
             xarray.Dataset: Combined dataset containing footprint and observation data
         """
-        combined_dataset = self.combine_obs_footprint(
-            resample_to=resample_to, platform=platform, cache=cache, recalculate=recalculate
-        )
+        if self.obs is not None:
+            combined_dataset = self.combine_obs_footprint(
+                resample_to=resample_to, platform=platform, cache=cache, recalculate=recalculate
+            )
+        else:
+            combined_dataset = self._check_footprint_resample(resample_to).assign_attrs(
+                resample_to=str(resample_to)
+            )
 
         if calc_timeseries or calc_fp_x_flux:
             modelled_obs = self.calc_modelled_obs(
@@ -1590,6 +1603,7 @@ class ModelScenario:
                 output_fp_x_flux=calc_fp_x_flux,
                 split_by_sectors=split_by_sectors,
                 use_low_freq_flux=use_low_freq_flux,
+                allow_climatology=allow_climatology,
             )
 
             combined_dataset = combined_dataset.merge(modelled_obs)
@@ -1602,6 +1616,7 @@ class ModelScenario:
                     cache=cache,
                     recalculate=recalculate,
                     output_sensitivity=calc_bc_sensitivity,
+                    allow_climatology=allow_climatology,
                 )
 
                 combined_dataset = combined_dataset.merge(modelled_baseline)
@@ -1645,6 +1660,7 @@ class ModelScenario:
         sources: str | list | None = None,
         resample_to: str | None = "coarsest",
         platform: str | None = None,
+        allow_climatology: bool = True,
         cache: bool = True,
         recalculate: bool = False,
         save_path: str | None = None,
@@ -1664,6 +1680,8 @@ class ModelScenario:
                           - None to not resample and to just "ffill" footprint to obs
                          Default = "coarsest".
             platform: Observation platform used to decide whether to resample e.g. "satellite", "insitu", "flask"
+            allow_climatology: When aligning datasets, allow any datasets which represent a year of data
+                to be treated as a climatology and reindexed accordingly.
             cache: Cache this data after calculation. Default = True.
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
             save_path: Path to save the figure. If None, the figure will not be saved.

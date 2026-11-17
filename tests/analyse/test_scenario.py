@@ -999,6 +999,54 @@ def test_model_modelled_obs_ch4(model_scenario_ch4_dummy, footprint_dummy, flux_
     assert np.allclose(modelled_mf, expected_modelled_mf)
 
 
+def test_footprints_data_merge_without_obs(footprint_dummy, flux_ch4_dummy, bc_ch4_dummy):
+    """Test whether footprints_data_merge can still calculate modelled outputs without obs data."""
+    model_scenario = ModelScenario(obs=None, footprint=footprint_dummy, flux=flux_ch4_dummy, bc=bc_ch4_dummy)
+
+    combined_dataset = model_scenario.footprints_data_merge(resample_to="2H")
+
+    assert "mf" not in combined_dataset
+    assert all(dv in combined_dataset for dv in ("fp", "mf_mod", "bc_mod"))
+    assert combined_dataset.attrs["resample_to"] == "2H"
+
+    assert combined_dataset.time[0] == footprint_dummy.data.time[0]
+    assert combined_dataset.time[-1] == footprint_dummy.data.time[-1]
+    assert model_scenario.modelled_obs is not None
+    assert model_scenario.modelled_baseline is not None
+    xr.testing.assert_equal(combined_dataset["mf_mod"], model_scenario.modelled_obs["mf_mod"])
+    xr.testing.assert_equal(combined_dataset["bc_mod"], model_scenario.modelled_baseline["bc_mod"])
+
+
+def test_footprints_data_merge_without_obs_resample_updates_data(
+    footprint_dummy, flux_ch4_dummy, bc_ch4_dummy
+):
+    """Check that changing resample_to for a ModelScenario without obs successfully recalculates the modelled outputs."""
+    model_scenario = ModelScenario(obs=None, footprint=footprint_dummy, flux=flux_ch4_dummy, bc=bc_ch4_dummy)
+
+    # Running footprints_data_merge with different `resample_to` values should produce different results even when obs is not present
+    initial_dataset = model_scenario.footprints_data_merge(resample_to="2H")
+    resampled_dataset = model_scenario.footprints_data_merge(resample_to="12H")
+    
+    # Note: This is creating an expected_dataset which relies on recalculate=True correctly triggering this to be recalculated
+    expected_dataset = model_scenario.footprints_data_merge(resample_to="12H", recalculate=True)
+
+    assert model_scenario.modelled_obs is not None
+    assert model_scenario.modelled_baseline is not None
+    assert model_scenario.modelled_obs.attrs["resample_to"] == "12H"
+    assert model_scenario.modelled_baseline["bc_mod"].attrs["resample_to"] == "12H"
+
+    # We expect the initial_dataset and resampled_dataset to be different if the resample_to has been used correctly.
+    with pytest.raises(AssertionError):
+        xr.testing.assert_equal(initial_dataset["mf_mod"], resampled_dataset["mf_mod"])
+
+    with pytest.raises(AssertionError):
+        xr.testing.assert_equal(initial_dataset["bc_mod"], resampled_dataset["bc_mod"])
+
+    # Double check the reampled_dataset values are as we expect (resampled to "12H" rather than "2H")
+    xr.testing.assert_equal(resampled_dataset["mf_mod"], expected_dataset["mf_mod"])
+    xr.testing.assert_equal(resampled_dataset["bc_mod"], expected_dataset["bc_mod"])
+
+
 def test_disjoint_time_obs_footprint(footprint_dummy, flux_ch4_dummy, bc_ch4_dummy):
     """Tests if disjoint timeseries are existing in obs and footprint data
     It raises error"""
@@ -1100,6 +1148,156 @@ def test_bc_sensitivity_ch4(model_scenario_ch4_dummy):
 
     for d in "nesw":
         assert f"bc_{d}" in bc_sensitivity
+
+
+# %% Test climatological (single reference year) flux and boundary conditions with dummy data (CH4)
+
+
+@pytest.fixture
+def flux_ch4_climatology_dummy():
+    """
+    Create example FluxData object representing a monthly climatology
+     - Monthly frequency for a single reference year (2016), outside the footprint date range
+     - "flux" values are the month number (January = 1, ..., December = 12)
+    """
+    from openghg.dataobjects import FluxData
+
+    time = pd.date_range("2009-01-01", "2009-12-01", freq="MS")
+    lat = [1.0, 2.0]
+    lon = [10.0, 20.0]
+
+    values = np.ones((len(time), len(lat), len(lon))) * time.month.values[:, np.newaxis, np.newaxis]
+
+    flux = xr.Dataset(
+        {"flux": (("time", "lat", "lon"), values)}, coords={"lat": lat, "lon": lon, "time": time}
+    )
+    flux.flux.attrs["units"] = "mol m-2 s-1"
+    flux.lat.attrs["units"] = "degrees_north"
+    flux.lon.attrs["units"] = "degrees_east"
+
+    metadata = {"species": "ch4", "source": "TESTSOURCE", "domain": "TESTDOMAIN"}
+
+    return FluxData(data=flux, metadata=metadata)
+
+
+@pytest.fixture
+def bc_ch4_climatology_dummy():
+    """
+    Create example BoundaryConditionsData object representing a monthly climatology
+     - Monthly frequency for a single reference year (2016), outside the footprint date range
+     - 'vmr_X' values for all of 'n', 'e', 's', 'w' are the month number (January = 1, ..., December = 12)
+    """
+    from openghg.dataobjects import BoundaryConditionsData
+
+    time = pd.date_range("2010-01-01", "2010-12-01", freq="MS")
+    lat = [1.0, 2.0]
+    lon = [10.0, 20.0]
+    height = [500, 1500]
+
+    months = time.month.values[:, np.newaxis, np.newaxis]
+    data_vars = {
+        "vmr_n": (("time", "lon", "height"), np.ones((len(time), len(lon), len(height))) * months),
+        "vmr_e": (("time", "lat", "height"), np.ones((len(time), len(lat), len(height))) * months),
+        "vmr_s": (("time", "lon", "height"), np.ones((len(time), len(lon), len(height))) * months),
+        "vmr_w": (("time", "lat", "height"), np.ones((len(time), len(lat), len(height))) * months),
+    }
+
+    bc = xr.Dataset(data_vars, coords={"lat": lat, "lon": lon, "time": time, "height": height})
+    for d in "nesw":
+        bc[f"vmr_{d}"].attrs["units"] = "1"
+    bc.lat.attrs["units"] = "degrees_north"
+    bc.lon.attrs["units"] = "degrees_east"
+
+    metadata = {"species": "ch4", "bc_input": "TESTINPUT", "domain": "TESTDOMAIN"}
+
+    return BoundaryConditionsData(data=bc, metadata=metadata)
+
+
+@pytest.fixture
+def model_scenario_ch4_climatology_dummy(
+    obs_ch4_dummy, footprint_dummy, flux_ch4_climatology_dummy, bc_ch4_climatology_dummy
+):
+    """Create ModelScenario with obs crossing a year boundary and climatological flux and bc."""
+    return ModelScenario(
+        obs=obs_ch4_dummy,
+        footprint=footprint_dummy,
+        flux=flux_ch4_climatology_dummy,
+        bc=bc_ch4_climatology_dummy,
+    )
+
+
+def test_footprints_data_merge_climatology(model_scenario_ch4_climatology_dummy, footprint_dummy):
+    """Check single-year monthly flux and bc are used as a climatology by footprints_data_merge.
+
+    The flux and bc data are only for 2009 and 2010 respectively but the obs/footprint data covers 2012-01-31 to 2012-02-01,
+    so each aligned time point should use the flux and bc values for the matching calendar month.
+    """
+    combined_dataset = model_scenario_ch4_climatology_dummy.footprints_data_merge(allow_climatology=True)
+
+    aligned_time = combined_dataset["time"]
+    assert aligned_time[0] == Timestamp("2012-01-01T00:00:00")
+    assert aligned_time[-1] == Timestamp("2012-01-02T00:00:00")
+
+    # Both flux and bc (vmr_* values) are monthly and equal to the month number: January = 1, December = 12
+    # - See: flux_ch4_climatology_dummy and bc_ch4_climatology_dummy fixtures
+    months = xr.DataArray(aligned_time.dt.month.values, coords={"time": aligned_time})
+
+    # Ensure expected_modelled_mf is using expected value flux value from January (1)
+    # - just using simplified flattened values rather than full (lat, lon) grid
+    footprint = footprint_dummy.data.sel(time=aligned_time)
+    flux_flat_values = months
+
+    expected_modelled_mf = (footprint["fp"] * flux_flat_values).sum(dim=("lat", "lon")).values
+    expected_modelled_mf *= 1e9  # fp x flux in mol/mol but output converted to obs units of ppb
+
+    np.testing.assert_allclose(combined_dataset["mf_mod"].values, expected_modelled_mf)
+
+    # Ensure expected_modelled_baseline is using expected vmr_* values from January (1)
+    # - just using simplified flattened values rather than full (lat, lon, height) grid 
+    bc_flat_values = months
+    bc = xr.Dataset({f"vmr_{d}": bc_flat_values for d in "nesw"})
+
+    expected_modelled_baseline = calc_expected_baseline(footprint, bc, lifetime_hrs=None, obs_units=1e-9)
+
+    np.testing.assert_allclose(combined_dataset["bc_mod"].values, expected_modelled_baseline)
+
+
+def test_footprints_data_merge_no_climatology(model_scenario_ch4_climatology_dummy, footprint_dummy):
+    """Check single-year flux and bc are not treated as a climatology if allow_climatology is False.
+
+    The flux and bc data are only for 2010 and 2009, which is before the obs/footprint data, so forward filling
+    without a climatology only use the values from the last month. This replicates previous behaviour.
+
+    TODO: This has been kept consistent with previous behaviour for now but we should evaluate this behaviour and
+     remove this check if needed as this may not be a desired result.
+    """
+    combined_dataset = model_scenario_ch4_climatology_dummy.footprints_data_merge(allow_climatology=False)
+
+    aligned_time = combined_dataset["time"]
+    assert aligned_time[0] == Timestamp("2012-01-01T00:00:00")
+    assert aligned_time[-1] == Timestamp("2012-01-02T00:00:00")
+
+    footprint = footprint_dummy.data.sel(time=aligned_time)
+
+    # Both flux and bc (vmr_* values) are monthly and equal to the month number: January = 1, December = 12
+    # When allow_climatology is False we just expect this to forward fill from the last month (December), hence using 12
+    # - just using simplified flattened values rather than full (lat, lon) grid   
+    num_points = footprint.time.size
+    last_month = xr.DataArray([12] * num_points, coords={"time": aligned_time})
+
+    # Check expected behaviour - expected_modelled_mf uses the last value (from December)
+    expected_modelled_mf = (footprint["fp"] * last_month).sum(dim=("lat", "lon")).values
+    expected_modelled_mf *= 1e9  # fp x flux in mol/mol but output converted to obs units of ppb
+
+    np.testing.assert_allclose(combined_dataset["mf_mod"].values, expected_modelled_mf)
+
+    # Check expected behaviour - calc_expected_baseline uses the last value (from December)
+    # - just using simplified flattened values rather than full (lat, lon, height) grid
+    bc = xr.Dataset({f"vmr_{d}": last_month for d in "nesw"})
+    expected_modelled_baseline = calc_expected_baseline(footprint, bc, lifetime_hrs=None, obs_units=1e-9)
+
+    np.testing.assert_allclose(combined_dataset["bc_mod"].values, expected_modelled_baseline)
+
 
 
 # %% Test alignment when using platform keyword with dummy data (CH4)

@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+import xarray as xr
 
 from openghg.analyse._alignment import (
     _buffer_start_and_end_dates,
@@ -8,7 +9,85 @@ from openghg.analyse._alignment import (
     infer_freq_in_seconds,
     time_overlap,
 )
+from openghg.analyse._modelled_baseline import baseline_sensitivities
+from openghg.analyse._modelled_obs import fp_x_flux_integrated
 from openghg.retrieve import get_obs_surface
+
+
+def _climatology_inputs():
+    """Return monthly reference-year data and a December-to-January target."""
+    target_times = pd.to_datetime(["2012-12-31", "2013-01-01"])
+    source_times = pd.to_datetime(["2016-01-01", "2016-12-01"])
+    coords = {"time": target_times, "lat": [1.0], "lon": [10.0], "height": [500.0]}
+    footprint = xr.Dataset(
+        {
+            "fp": (("time", "lat", "lon"), np.ones((2, 1, 1))),
+            "particle_locations_n": (("time", "lon", "height"), np.ones((2, 1, 1))),
+            "particle_locations_e": (("time", "lat", "height"), np.ones((2, 1, 1))),
+            "particle_locations_s": (("time", "lon", "height"), np.ones((2, 1, 1))),
+            "particle_locations_w": (("time", "lat", "height"), np.ones((2, 1, 1))),
+        },
+        coords=coords,
+    )
+    footprint.fp.attrs["units"] = "m2 s mol-1"
+    for direction in "nesw":
+        footprint[f"particle_locations_{direction}"].attrs["units"] = "1"
+    footprint.lat.attrs["units"] = "degrees_north"
+    footprint.lon.attrs["units"] = "degrees_east"
+
+    flux = xr.Dataset(
+        {"flux": (("time", "lat", "lon"), np.array([[[1.0]], [[12.0]]]))},
+        coords={"time": source_times, "lat": [1.0], "lon": [10.0]},
+    )
+    flux.flux.attrs["units"] = "mol m-2 s-1"
+    flux.lat.attrs["units"] = "degrees_north"
+    flux.lon.attrs["units"] = "degrees_east"
+
+    bc = xr.Dataset(
+        {
+            f"vmr_{direction}": (dims, np.array([[[1.0]], [[12.0]]]))
+            for direction, dims in {
+                "n": ("time", "lon", "height"),
+                "e": ("time", "lat", "height"),
+                "s": ("time", "lon", "height"),
+                "w": ("time", "lat", "height"),
+            }.items()
+        },
+        coords={"time": source_times, "lat": [1.0], "lon": [10.0], "height": [500.0]},
+    )
+    for direction in "nesw":
+        bc[f"vmr_{direction}"].attrs["units"] = "1"
+
+    return footprint, flux, bc
+
+
+def test_fp_x_flux_integrated_maps_single_year_climatology_across_year_boundary():
+    """Monthly reference-year flux uses each matching target calendar month."""
+    footprint, flux, _ = _climatology_inputs()
+
+    result = fp_x_flux_integrated(footprint, flux)
+
+    np.testing.assert_allclose(result.values.ravel(), [12.0, 1.0])
+
+
+def test_fp_x_flux_integrated_broadcasts_annual_climatology_across_year_boundary():
+    """A single annual reference value remains valid for every target month."""
+    footprint, flux, _ = _climatology_inputs()
+    flux = flux.isel(time=[0])
+
+    result = fp_x_flux_integrated(footprint, flux)
+
+    np.testing.assert_allclose(result.values.ravel(), [1.0, 1.0])
+
+
+def test_baseline_sensitivities_maps_single_year_climatology_across_year_boundary():
+    """Monthly reference-year boundary conditions use each target calendar month."""
+    footprint, _, bc = _climatology_inputs()
+
+    sensitivities = baseline_sensitivities(bc, footprint)
+    result = sensitivities.to_dataarray().sum("variable").values.ravel()
+
+    np.testing.assert_allclose(result, [48.0, 4.0])
 
 
 @pytest.fixture

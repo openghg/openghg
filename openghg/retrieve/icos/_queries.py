@@ -593,7 +593,7 @@ def dobj_info(
     )
     dobj_df = make_query_df(query)
 
-    if format_info:
+    if format_info and not dobj_df.empty:
         return dobj_df.merge(icos_format_info().reset_index(), on="spec_label", how="left")
 
     return dobj_df

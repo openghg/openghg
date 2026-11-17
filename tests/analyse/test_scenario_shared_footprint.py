@@ -187,12 +187,15 @@ def test_hitres_calculation_uses_explicit_scenario(stored_co2_scenario, represen
         # Reuse the production conversion of the real legacy footprint; do not
         # manufacture time-resolved sensitivities or shift dates to match PARIS.
         components = time_resolved_and_residual_footprints(alternate.fp_HiTRes)
-        alternate = alternate.drop_vars("fp_HiTRes").merge(components)
+        alternate = alternate.drop_dims("H_back").merge(components)
     for name in ("fp_HiTRes", "fp_time_resolved", "fp_residual"):
         if name in alternate:
             attrs = alternate[name].attrs.copy()
             alternate[name] = alternate[name] * 2
             alternate[name].attrs = attrs
+    if representation == "legacy":
+        # Older stores may only declare the sensitivity units on fp.
+        alternate.fp_HiTRes.attrs.pop("units")
 
     result = model._calc_modelled_obs_HiTRes(scenario=alternate, output_fpXflux=True)
 
@@ -220,14 +223,9 @@ def test_public_time_resolved_calculation_unchanged(stored_co2_scenario):
     assert model.modelled_obs is result
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=ValueError,
-    reason="Existing on devel: real time-resolved CO2 fp_x_flux retains incompatible flux units.",
-)
 def test_public_time_resolved_footprint_flux_output(stored_co2_scenario):
-    """Keep the existing optional-output unit failure visible for a separate fix."""
-    stored_co2_scenario.calc_modelled_obs(output_fp_x_flux=True)
+    result = stored_co2_scenario.calc_modelled_obs(output_fp_x_flux=True)
+    xr.testing.assert_allclose(result.fp_x_flux.sum(["lat", "lon"]), result.mf_mod_high_res)
 
 
 @pytest.mark.parametrize("resample_to", [None, "2h"])
