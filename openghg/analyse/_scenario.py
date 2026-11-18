@@ -303,16 +303,20 @@ class ModelScenario:
 
         # TODO: Check species, site etc. values align between inputs?
 
-    def _check_column_max_level(self, max_level: int | None) -> None:
+    def _check_column_max_level(
+        self, max_level: int | None, footprint: FootprintData | None = None
+    ) -> None:
         """Check that column observations and footprints use the same vertical extent."""
-        if self.footprint is None:
+        if footprint is None:
+            footprint = self.footprint
+        if footprint is None:
             return
 
         obs_max_level = max_level
         if self.obs is not None:
             obs_max_level = self.obs.data.attrs.get("max_level", max_level)
 
-        fp_max_level = self.footprint.data.attrs.get("max_level", self.footprint.metadata.get("max_level"))
+        fp_max_level = footprint.data.attrs.get("max_level", footprint.metadata.get("max_level"))
         if fp_max_level is None or str(fp_max_level).lower() == "unknown":
             raise ValueError(
                 "Column footprint data must have a 'max_level' attribute before it can be used "
@@ -964,6 +968,8 @@ class ModelScenario:
             return self._check_footprint_resample(resample_to, footprint=footprint)
 
         self._check_data_is_present(need=["obs"])
+        if isinstance(self.obs, ObsColumnData):
+            self._check_column_max_level(max_level=None, footprint=footprint)
         obs = cast(ObsData, self.obs)
 
         # Extract platform

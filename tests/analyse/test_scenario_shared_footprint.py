@@ -374,6 +374,31 @@ def test_explicit_satellite_alignment_keeps_irregular_sounding_times(stored_sate
     assert model.scenario is cached
 
 
+@pytest.mark.parametrize(
+    ("max_level", "remove_max_level", "message"),
+    [
+        (3, False, r"observations use 17, while footprints use 3"),
+        (None, True, r"must have a 'max_level' attribute"),
+    ],
+)
+def test_explicit_satellite_alignment_validates_footprint_max_level(
+    stored_satellite_scenario, max_level, remove_max_level, message
+):
+    """Column observations reject explicit footprints with incompatible vertical extents."""
+    model = stored_satellite_scenario
+    alternate = FootprintData(
+        data=model.footprint.data.copy(deep=True), metadata=model.footprint.metadata.copy()
+    )
+    if remove_max_level:
+        alternate.data.attrs.pop("max_level")
+        alternate.metadata.pop("max_level")
+    else:
+        alternate.data.attrs["max_level"] = max_level
+
+    with pytest.raises(ValueError, match=message):
+        model._scenario_for_footprint(alternate)
+
+
 def test_explicit_satellite_alignment_preserves_tolerance(stored_satellite_scenario):
     """Perturb real GOSAT times to exercise the existing nearest-match tolerance."""
     model = stored_satellite_scenario
