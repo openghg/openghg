@@ -193,6 +193,7 @@ class ModelScenario:
         """
         self.obs: ObsData | ObsColumnData | None = None
         self.obs_column: ObsColumnData | None = None
+        self._requested_column_max_level: int | None = None
         self.footprint: FootprintData | None = None
         self.fluxes: dict[str, FluxData] | None = None
         self.bc: BoundaryConditionsData | None = None
@@ -303,9 +304,7 @@ class ModelScenario:
 
         # TODO: Check species, site etc. values align between inputs?
 
-    def _check_column_max_level(
-        self, max_level: int | None, footprint: FootprintData | None = None
-    ) -> None:
+    def _check_column_max_level(self, max_level: int | None, footprint: FootprintData | None = None) -> None:
         """Check that column observations and footprints use the same vertical extent."""
         if footprint is None:
             footprint = self.footprint
@@ -476,6 +475,7 @@ class ModelScenario:
 
         # Updating obs to be obs_column
         self.obs = obs_column
+        self._requested_column_max_level = max_level
 
         # Add keywords to class for convenience
         if self.obs_column is not None:
@@ -969,7 +969,7 @@ class ModelScenario:
 
         self._check_data_is_present(need=["obs"])
         if isinstance(self.obs, ObsColumnData):
-            self._check_column_max_level(max_level=None, footprint=footprint)
+            self._check_column_max_level(max_level=self._requested_column_max_level, footprint=footprint)
         obs = cast(ObsData, self.obs)
 
         # Extract platform
@@ -1449,7 +1449,7 @@ class ModelScenario:
         data = {}
 
         if output_TS:
-            data[ts_name] = fp_x_flux.sum(["lat", "lon"])
+            data[ts_name] = fp_x_flux.sum(["lat", "lon"], keep_attrs=True)
 
         if output_fpXflux:
             data[fp_x_flux_name] = fp_x_flux

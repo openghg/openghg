@@ -16,7 +16,7 @@ from helpers import get_footprint_datapath
 
 from openghg.analyse import ModelScenario, make_integrated_low_freq_flux
 from openghg.analyse._modelled_obs import fp_x_flux_integrated, time_resolved_and_residual_footprints
-from openghg.dataobjects import FootprintData
+from openghg.dataobjects import FootprintData, ObsColumnData
 from openghg.retrieve import get_flux, get_footprint, get_obs_column
 from openghg.standardise import standardise_footprint
 from openghg.standardise.footprints import parse_acrg_org, parse_paris
@@ -397,6 +397,19 @@ def test_explicit_satellite_alignment_validates_footprint_max_level(
 
     with pytest.raises(ValueError, match=message):
         model._scenario_for_footprint(alternate)
+
+
+def test_explicit_satellite_alignment_uses_requested_max_level(stored_satellite_scenario):
+    reference = stored_satellite_scenario
+    obs = ObsColumnData(data=reference.obs.data.copy(deep=False), metadata=reference.obs.metadata.copy())
+    max_level = obs.data.attrs.pop("max_level")
+    model = ModelScenario(
+        obs_column=obs, footprint=reference.footprint, platform="satellite", max_level=max_level
+    )
+
+    result = model._scenario_for_footprint(reference.footprint)
+
+    xr.testing.assert_allclose(result, reference.combine_obs_footprint(cache=False))
 
 
 def test_explicit_satellite_alignment_preserves_tolerance(stored_satellite_scenario):
