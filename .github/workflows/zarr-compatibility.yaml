@@ -13,10 +13,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
     env:
       UV_PYTHON: ${{ matrix.python-version }}
       PYTHONPATH: ${{ github.workspace }}
+      # The legacy numcodecs 0.15.1 stack has no Python 3.14 wheels.
+      LEGACY_PYTHON_VERSION: ${{ matrix.python-version == '3.14' && '3.13' || matrix.python-version }}
       OPENGHG_LEGACY_PYTHON: ${{ github.workspace }}/.venv-legacy/bin/python
     steps:
       - uses: actions/checkout@v7
@@ -36,7 +38,7 @@ jobs:
           zarr==2.18.3
           numcodecs==0.15.1
           EOF
-          uv venv .venv-legacy
+          uv venv .venv-legacy --python "$LEGACY_PYTHON_VERSION"
           uv pip install --python "$OPENGHG_LEGACY_PYTHON" -r /tmp/legacy-requirements.txt --overrides /tmp/legacy-overrides.txt
       - name: Verify storage regressions with the pre-upgrade dependencies
         run: >-
