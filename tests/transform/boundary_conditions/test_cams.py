@@ -158,9 +158,11 @@ def _write_mock_co2_cams_file(tmp_path, filename: str) -> xr.Dataset:
     return ds
 
 
-def test_parse_cams_data(monkeypatch, tmp_path):
+@pytest.mark.parametrize(("source_units", "expected_units"), [("mol mol-1", "1.0"), ("ppm", "1e-06")])
+def test_parse_cams_data(monkeypatch, tmp_path, source_units, expected_units):
     """Direct CAMS data preserves expected values, times, units, and metadata."""
     dataset = _write_mock_co2_cams_file(tmp_path, "cams73_v23r1_co2_conc_surface_inst_202101.nc")
+    dataset.CO2.attrs["units"] = source_units
 
     monkeypatch.setattr(
         "openghg.transform.boundary_conditions._cams.find_domain",
@@ -191,7 +193,7 @@ def test_parse_cams_data(monkeypatch, tmp_path):
         ),
     )
     for variable in ("vmr_n", "vmr_s", "vmr_e", "vmr_w"):
-        assert bc_data[variable].attrs["units"] == "1.0"
+        assert bc_data[variable].attrs["units"] == expected_units
 
 
 @pytest.mark.parametrize("inputs", [{}, {"datapath": "raw.nc", "data": xr.Dataset()}])
