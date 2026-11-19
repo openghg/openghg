@@ -14,6 +14,7 @@ from openghg.util import (
 )
 from openghg.store import infer_date_range, update_zero_dim
 from openghg.types import ParseError
+from openghg.standardise.footprints._units import normalise_footprint_units
 
 logger = logging.getLogger("openghg.standardise.footprint")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -151,6 +152,8 @@ def parse_paris(
         H_back = fp_data.H_back
         if H_back.dtype == "timedelta64[ns]":
             fp_data["H_back"] = H_back.dt.seconds / 3600.0
+
+    normalise_footprint_units(fp_data)
 
     for attr, new_attr in attribute_rename.items():
         if attr in fp_data:

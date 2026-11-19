@@ -3,6 +3,7 @@ import pytest
 import xarray as xr
 from openghg.store import DataSchema
 from openghg.types import ValidationError
+from openghg.util import cf_ureg
 
 
 def test_data_schema():
@@ -80,3 +81,37 @@ def test_data_schema_wrong_dtype(data_schema_1, dummy_data_1):
 def test_data_schema_missing_variable_dimension(data_schema_1, dummy_data_1):
     with pytest.raises(ValueError, match="Missing dimension for data variable: fp, lon"):
         data_schema_1.validate_data(dummy_data_1.rename(lon="height"))
+
+
+def test_data_schema_requires_units_on_named_variables_and_coordinates():
+    data = xr.Dataset(
+        {
+            "flux": (
+                ("time", "lat", "lon"),
+                np.ones((1, 1, 1)),
+                {"units": "umol m-2 s-1"},
+            )
+        },
+        coords={
+            "time": np.array(["2020-01-01"], dtype="datetime64[ns]"),
+            "lat": ("lat", [51.0], {"units": "degrees_north"}),
+            "lon": ("lon", [-2.0], {"units": "degrees_east"}),
+        },
+    )
+    schema = DataSchema(
+        data_vars={"flux": ("time", "lat", "lon")},
+        units={"lat": "degrees_north", "lon": "degrees_east"},
+        units_compatible={"flux": "mol m-2 s-1"},
+    )
+
+    schema.validate_data(data)
+    quantified = data.pint.quantify(unit_registry=cf_ureg)
+    assert quantified.flux.pint.units == cf_ureg("umol m-2 s-1").units
+
+    missing_units = data.copy()
+    del missing_units["flux"].attrs["units"]
+    with pytest.raises(ValidationError, match="units"):
+        schema.validate_data(missing_units)
+
+    with pytest.raises(ValidationError, match="not compatible"):
+        schema.validate_data(data.assign(flux=data.flux.assign_attrs(units="ppm")))

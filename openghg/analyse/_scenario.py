@@ -767,9 +767,10 @@ class ModelScenario:
         """Align units in dataset with obs units.
 
         Units will only be updated for data variables that: 1) have units and 2) have
-        a ``"time"`` dimension. Variables whose names end with
-        ``"_number_of_observations"`` are never converted, including when explicitly
-        listed in ``data_vars``. The input dataset is not modified.
+        a ``"time"`` dimension. Observation-count variables named
+        ``"number_of_observations"`` or ending in ``"_number_of_observations"`` are
+        never converted, including when explicitly listed in ``data_vars``. The input
+        dataset is not modified.
 
         Args:
             ds: dataset to align units on
@@ -791,7 +792,10 @@ class ModelScenario:
         data_vars = data_vars or ds.data_vars
         for dv in data_vars:
             unit = ds[dv].attrs.get("units")
-            is_observation_count = str(dv).endswith("_number_of_observations")
+            name = str(dv)
+            is_observation_count = name == "number_of_observations" or name.endswith(
+                "_number_of_observations"
+            )
             if unit is not None and "time" in ds[dv].dims and not is_observation_count:
                 to_convert.append(dv)
 

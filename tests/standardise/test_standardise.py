@@ -1226,7 +1226,11 @@ def test_standardise_6km_footprints(tmp_path):
     shape = (2, latitude.size, longitude.size)
     footprint = xr.Dataset(
         data_vars={
-            "srr": (("time", "latitude", "longitude"), np.ones(shape, dtype=np.float32)),
+            "srr": (
+                ("time", "latitude", "longitude"),
+                np.ones(shape, dtype=np.float32),
+                {"units": "(mol/mol)/(mol/m2/s)"},
+            ),
             "srr_time_resolved": (
                 ("time", "latitude", "longitude", "resolution"),
                 np.ones((*shape, 1), dtype=np.float32),

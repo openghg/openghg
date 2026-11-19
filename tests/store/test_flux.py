@@ -447,7 +447,7 @@ def test_transform_and_add_edgar_database(clear_stores):
     """
     # Regridding to a new domain will use the xesmf importer - so skip this test
     # if module is not present.
-    xesmf = pytest.importorskip("xesmf")
+    pytest.importorskip("xesmf")
 
     folder = "v6.0_CH4"
     test_datapath = get_flux_datapath(f"EDGAR/yearly/{folder}")
@@ -512,6 +512,8 @@ def test_flux_schema():
     assert "time" in data_vars["flux"]
     assert "lat" in data_vars["flux"]
     assert "lon" in data_vars["flux"]
+    assert data_schema.units_compatible == {"flux": "mol m-2 s-1"}
+    assert data_schema.units == {"lat": "degrees_north", "lon": "degrees_east"}
 
     # TODO: Could also add checks for dims and dtypes?
 
@@ -535,7 +537,7 @@ def test_info_metadata_raise_error(clear_stores):
     date = "2015"
 
     with pytest.raises(ValueError):
-        proc_results = transform_flux_data(
+        transform_flux_data(
             store="user",
             datapath=test_datapath,
             database=database,
@@ -554,7 +556,7 @@ def test_info_metadata():
     database = "EDGAR"
     date = "2015"
 
-    proc_results = transform_flux_data(
+    transform_flux_data(
         store="user",
         datapath=test_datapath,
         database=database,

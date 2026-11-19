@@ -10,8 +10,6 @@ import xarray as xr
 from pathlib import Path
 from unittest.mock import patch
 
-from tests.helpers.helpers import print_dict_diff
-
 
 @pytest.fixture(autouse=True)
 def clear_store():
@@ -30,7 +28,6 @@ def test_read_footprint_co2_from_data(mocker):
 
     metadata = {
         "site": "TAC",
-        "inlet": "100m",
         "inlet": "100m",
         "domain": "TEST",
         "model": "NAME",
@@ -102,6 +99,11 @@ def test_read_footprint_standard(keyword, value):
     assert footprint_coords == ["height", "lat", "lon", "time"]
 
     assert "fp" in footprint_data.data_vars
+    assert footprint_data.fp.attrs["units"] == "(mol/mol)/(mol/m2/s)"
+    assert footprint_data.particle_locations_n.attrs["units"] == "1"
+    assert footprint_data.height.attrs["units"] == "m"
+    assert footprint_data.lat.attrs["units"] == "degrees_north"
+    assert footprint_data.lon.attrs["units"] == "degrees_east"
 
     expected_attrs = {
         "author": "OpenGHG Cloud",
@@ -569,6 +571,8 @@ def test_footprint_schema():
     assert "particle_locations_e" in data_vars
     assert "particle_locations_s" in data_vars
     assert "particle_locations_w" in data_vars
+    assert data_schema.units["fp"] == "m2 s mol-1"
+    assert data_schema.units["particle_locations_n"] == "1"
 
     # TODO: Could also add checks for dims and dtypes?
 
@@ -618,6 +622,8 @@ def test_footprint_schema_temporal():
     assert "particle_locations_w" in data_vars
 
     assert "H_back" in data_vars["fp_HiTRes"]
+    assert data_schema.units["fp_HiTRes"] == "m2 s mol-1"
+    assert data_schema.units["H_back"] == "hour"
 
 
 def test_footprint_schema_lifetime():
@@ -652,6 +658,8 @@ def test_footprint_schema_paris(source_format):
     assert "fp_time_resolved" in data_vars
     assert "fp_residual" in data_vars
     assert "fp" not in data_vars
+    assert data_schema.units["fp_time_resolved"] == "m2 s mol-1"
+    assert data_schema.units["fp_residual"] == "m2 s mol-1"
 
 
 def test_process_footprints():
@@ -812,7 +820,6 @@ def test_passing_in_different_chunks_to_same_store_works():
 
 def test_pass_empty_dict_means_full_dimension_chunks():
     file1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
-    file2 = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
 
     bucket = get_writable_bucket(name="user")
 
@@ -834,7 +841,6 @@ def test_pass_empty_dict_means_full_dimension_chunks():
 
 def test_footprints_chunking_schema():
     file1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
-    file2 = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
 
     bucket = get_writable_bucket(name="user")
 

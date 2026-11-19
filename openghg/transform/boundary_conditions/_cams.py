@@ -18,6 +18,7 @@ from openghg.util import (
 )
 from openghg.store import infer_date_range, update_zero_dim
 from openghg.retrieve import get_footprint
+from openghg.standardise.boundary_conditions._units import normalise_boundary_condition_units
 
 logger = logging.getLogger("openghg.transform.boundary_conditions")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -34,12 +35,12 @@ def get_cams_data_units(ds: xr.Dataset, species: str) -> str:
     species = species.upper()
     if species not in ds:
         raise ValueError(f"Species '{species}' not found in dataset.")
+    units_from_data = ds[species].attrs.get("units")
+    if not isinstance(units_from_data, str) or not units_from_data.strip():
+        raise ValueError(f"Could not parse units: {units_from_data!r}")
     try:
-        units_from_data = ds[species].attrs["units"]
-        parsed_units = cf_ureg.parse_expression(units_from_data)
-        if not parsed_units.dimensionless:
-            raise ValueError(f"Invalid units for '{species}'.  Not dimensionless: {units_from_data}")
-        units = str(parsed_units.magnitude)
+        parsed_units = cf_ureg.Quantity(cf_ureg.parse_expression(units_from_data.strip()))
+        units = str(float(parsed_units.m_as("dimensionless")))
     except Exception as e:
         raise ValueError(f"Could not parse units: {units_from_data}") from e
     return units
@@ -328,13 +329,12 @@ def make_metadata(ds: xr.Dataset, period: str, continuous: bool, **kwargs: Any) 
 
 
 def set_units(ds: xr.Dataset, units: str) -> None:
-    """Set units of variables vmr_x
+    """Set coordinate units and apply the parsed CAMS units to all VMR variables.
     Args:
         ds: dataset with variable vmr_n/s/w/e
         units: units of the variables
     """
-    for c in ["n", "s", "e", "w"]:
-        ds[f"vmr_{c}"].attrs["units"] = units
+    normalise_boundary_condition_units(ds, vmr_units=units, overwrite_vmr_units=True)
 
 
 def parse_cams(
