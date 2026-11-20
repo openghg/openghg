@@ -795,7 +795,7 @@ def test_sector_routing_rejects_incompatible_units(stored_co2_scenario):
     model = stored_co2_scenario
     model.fluxes["natural-rtot"].data.flux.attrs["units"] = "m"
     keep_attrs = xr.get_options()["keep_attrs"]
-    with pytest.raises(ValueError, match="must have mole-fraction units"):
+    with pytest.raises(ValueError, match="Flux units.*must be compatible"):
         model.calc_modelled_obs(time_resolved_by_sector={"ocean": False})
     assert xr.get_options()["keep_attrs"] == keep_attrs
 
