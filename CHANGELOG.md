@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Updated
 
+- Updated the grouped Python runtime, development and documentation dependencies. [Dependabot PR #1803](https://github.com/openghg/openghg/pull/1803).
 - Added Python 3.14 to the CI test matrices and extended OpenGHG support to Python 3.11-3.14. Upgraded SciPy and updated the conda version bounds for h5py, netCDF4 and msgpack. [PR #1809](https://github.com/openghg/openghg/pull/1809).
 - Part of [Issue #1040](https://github.com/openghg/openghg/issues/1040): Refactored `ModelScenario` alignment and integrated/time-resolved calculations to accept an explicit shared footprint scenario internally, preparing flux-sector grouping without changing the existing public calculation behaviour. [PR #1782](https://github.com/openghg/openghg/pull/1782)
 - Support current xarray and Zarr 3 packages while retaining format 2 stores, existing data versions, compression and read-only shared-store access.[PR #1786](https://github.com/openghg/openghg/pull/1786).
