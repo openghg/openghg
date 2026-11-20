@@ -152,14 +152,12 @@ def _make_hf_flux_rolling_avg_array(
     # starting at each time point in flux_hf_rolling.time
     max_h_back = _max_h_back(fp_high_time_res)
     highest_res_h = _fp_time_and_h_back_freq_gcd(fp_high_time_res)
-    window_size = max_h_back // highest_res_h
-    flux_hf_rolling = flux_high_freq.rolling(time=window_size).construct("H_back")
 
-    # set H_back coordinates using highest_res_H frequency
+    # Size the rolling window from the lag coordinates so it includes the oldest lag.
     h_back_type = fp_high_time_res.H_back.dtype
-    flux_hf_rolling = flux_hf_rolling.assign_coords(
-        {"H_back": np.arange(0, max_h_back, highest_res_h, dtype=h_back_type)[::-1]}
-    )
+    lags = np.arange(0, max_h_back, highest_res_h, dtype=h_back_type)[::-1]
+    flux_hf_rolling = flux_high_freq.rolling(time=lags.size).construct("H_back")
+    flux_hf_rolling = flux_hf_rolling.assign_coords(H_back=lags)
     flux_hf_rolling.H_back.attrs["units"] = fp_high_time_res.H_back.attrs.get("units")
 
     # select subsequence of H_back times to match high res fp (i.e. fp without max H_back coord)
