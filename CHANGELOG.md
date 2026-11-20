@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Fixed group-write permissions on new metastore lock files when using filelock 4.
+- Fixed group-write permissions on new metastore lock files when using filelock 4. [PR #1811](https://github.com/openghg/openghg/pull/1811).
 - Updated inlet type hints to accept numeric values, lists and tuples, and preserved units, key names and special keywords when formatting inlet collections. [PR #1796](https://github.com/openghg/openghg/pull/1796)
 - Retained the first month's mean flux in time-resolved `fp_x_flux` calculations when the footprint look-back window starts mid-month. Previously, date selection dropped this monthly value and could leave the residual contribution missing. Recomputing affected `ModelScenario` outputs and downstream inversions can therefore change their results. [PR #1790](https://github.com/openghg/openghg/pull/1790)
 - Aligned Conda's Filelock, Pint and Pint-xarray upper bounds with the supported versions in `pyproject.toml`, avoiding unit-parsing and file-lock permission failures with unsupported versions. [PR #1790](https://github.com/openghg/openghg/pull/1790)
@@ -23,7 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Updated
 
+- Updated the grouped Python runtime, development and documentation dependencies. [Dependabot PR #1803](https://github.com/openghg/openghg/pull/1803).
 - Added Python 3.14 to the CI test matrices and extended OpenGHG support to Python 3.11-3.14. Upgraded SciPy and updated the conda version bounds for h5py, netCDF4 and msgpack. [PR #1809](https://github.com/openghg/openghg/pull/1809).
+- Part of [Issue #1040](https://github.com/openghg/openghg/issues/1040): Refactored `ModelScenario` alignment and integrated/time-resolved calculations to accept an explicit shared footprint scenario internally, preparing flux-sector grouping without changing the existing public calculation behaviour. [PR #1782](https://github.com/openghg/openghg/pull/1782)
 - Support current xarray and Zarr 3 packages while retaining format 2 stores, existing data versions, compression and read-only shared-store access.[PR #1786](https://github.com/openghg/openghg/pull/1786).
 - Added Python 3.13 to the CI test matrices, dropped Python 3.10 support, and restricted OpenGHG to Python 3.11-3.13. [PR #1741](https://github.com/openghg/openghg/pull/1741).
 - Removed file and retrieved-data hashing from standardisation. Repeated inputs now follow the normal `if_exists` overlap policy, and data can be standardised again after its datasource is deleted. The deprecated `force` argument remains accepted but is ignored; passing `force=True` emits a `DeprecationWarning`, and callers should use `if_exists` to choose update behaviour. [Issue #1676](https://github.com/openghg/openghg/issues/1676)
