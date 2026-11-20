@@ -7,7 +7,7 @@ import numpy as np
 from helpers import clear_test_stores
 from openghg.dataobjects import SearchResults
 from openghg.retrieve import search_surface
-from openghg.retrieve.icos import retrieve_atmospheric
+from openghg.retrieve.icos import _retrieve, retrieve_atmospheric
 from openghg.types import AttrMismatchError, MetadataAndData
 
 
@@ -770,3 +770,171 @@ def test_retrieve_eye_ave_par_compare():
                 assert expected.lower() == actual.lower(), f"Metadata {md} mismatch: {expected} != {actual}"
             else:
                 assert expected == actual, f"Metadata {md} mismatch: {expected} != {actual}"
+
+
+
+
+
+def _minimal_attrs() -> dict:
+    return {
+        "measurement_unit": "ppm",
+        "dataset_calibration_scale": "WMO X2019",
+        "dataset_data_frequency": 1,
+        "dataset_data_frequency_unit": "hour",
+        "sampling_heights": "10 m",
+        "altitude": "100 m",
+        "station_name": "Regression station",
+        "latitude": "1.2",
+        "longitude": "2.3",
+    }
+
+
+def _minimal_data_info() -> dict:
+    return {
+        "dobj_uri": "https://meta.icos-cp.eu/objects/test-object",
+        "species": "co2",
+        "site": "AAA",
+        "project_name": "icos",
+    }
+
+
+def test_create_icos_attributes_keeps_metadata_instrument_when_dataset_has_no_instrument(mocker):
+    """Text products should not need an instrument data variable to create metadata."""
+
+    EXPECTED_CO2 = 410.0
+
+    mocker.patch.object(
+        _retrieve,
+        "attributes_requiring_retrieval",
+        return_value={"instrument": "co2-ch4-co-h2o picarro analyzer"},
+    )
+
+    dataset = xr.Dataset(
+        data_vars={
+            "co2": ("time", [EXPECTED_CO2]),
+            "co2 variability": ("time", [0.1]),
+            "co2 number_of_observations": ("time", [12]),
+            "flag": ("time", ["O"]),
+        },
+        coords={"time": pd.date_range("2020-01-01", periods=1)},
+    )
+
+    attributes = _retrieve.create_icos_attributes(
+        dataset=dataset,
+        data_info=_minimal_data_info(),
+        data_attributes=_minimal_attrs(),
+        species="co2",
+        dataset_source="icos",
+    )
+
+    assert attributes["instrument"] == "co2-ch4-co-h2o picarro analyzer"
+
+
+def test_create_icos_attributes_sets_single_instrument_id(mocker):
+    """A single NetCDF instrument ID should still be copied into attributes."""
+
+    EXPECTED_CO2 = 410.0
+
+    mocker.patch.object(
+        _retrieve, 
+        "attributes_requiring_retrieval", 
+        return_value={}
+    )
+    dataset = xr.Dataset(
+        data_vars={
+            "co2": ("time", [EXPECTED_CO2, 411.0]),
+            "flag": ("time", ["O", "O"]),
+            "instrument": ("time", [7, 7]),
+        },
+        coords={"time": pd.date_range("2020-01-01", periods=2)},
+    )
+
+    attributes = _retrieve.create_icos_attributes(
+        dataset=dataset,
+        data_info=_minimal_data_info(),
+        data_attributes=_minimal_attrs(),
+        species="co2",
+        dataset_source="icos",
+    )
+
+    assert attributes["instrument"] == "icos_id_7"
+
+
+def test_retrieve_and_parse_icos_data_handles_flask_sampling_start_end(mocker):
+    """Flask text files should parse SamplingStart/SamplingEnd timestamps."""
+
+    EXPECTED_CO2 = 410.0
+
+    flask_text = "\n".join(
+        [
+            "# HEADER_LINES: 4",
+            "# COMMENT",
+            "# co2: mole fraction",
+            "# site;SamplingHeight;SamplingStart;SamplingEnd;co2;Stdev;EstRep;ScalLink;CombUnc;NbPoints;Flag;InstrumentId",
+            (
+                "AAA;10.0;2020-01-01T00:00:00Z;2020-01-01T01:00:00Z;"
+                f"{EXPECTED_CO2};0.1;0.1;0.1;0.2;12;O;1"
+            ),
+        ]
+    )
+    mocker.patch.object(
+        _retrieve._data_parsing, 
+        "_retrieve_dobj_format", 
+        return_value="asciiAtcFlaskTimeSer"
+    )
+    mocker.patch.object(
+        _retrieve._data_parsing, 
+        "get_icos_text_file", 
+        return_value=flask_text
+    )
+    mocker.patch.object(
+        _retrieve._data_parsing, 
+        "get_data_attrs", 
+        return_value={})
+
+    dataset, _ = _retrieve.retrieve_and_parse_icos_data(
+        _minimal_data_info(), dataset_source="EYE-AVE-PAR"
+    )
+
+    assert "co2" in dataset
+    assert dataset.sizes["time"] == 1
+    assert dataset["time"].values[0] == np.datetime64("2020-01-01T00:00:00")
+
+
+def test_parse_icos_text_file_drops_sentinel_missing_values(mocker):
+    """ICOS sentinel values should not be stored as real observations."""
+
+    EXPECTED_CO2 = 410.0
+
+    text = "\n".join(
+        [
+            "# HEADER_LINES: 4",
+            "# COMMENT",
+            "# co2: mole fraction",
+            "# site;Year;Month;Day;Hour;Minute;co2;Stdev;NbPoints;Flag",
+            "AAA;2020;1;1;0;0;-999.99;0.1;12;O",
+            f"AAA;2020;1;1;1;0;{EXPECTED_CO2};0.2;12;O",
+        ]
+    )
+
+    mocker.patch.object(
+        _retrieve._data_parsing, 
+        "get_icos_text_file", 
+        return_value=text
+    )
+
+    mocker.patch.object(
+        _retrieve._data_parsing, 
+        "_retrieve_dobj_format", 
+        return_value="asciiAtcProductTimeSer"
+    )
+
+    mocker.patch.object(
+        _retrieve._data_parsing, 
+        "get_data_attrs", 
+        return_value={})
+
+    dataset, _ = _retrieve.parse_icos_text_file(_minimal_data_info())
+
+    assert dataset.sizes["time"] == 1
+    assert dataset["co2"].values[0] == EXPECTED_CO2
