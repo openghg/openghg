@@ -51,7 +51,7 @@ jobs:
       fail-fast: false
       matrix:
         operating-system: [ubuntu-latest]
-        python-version: ["3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -67,7 +67,7 @@ jobs:
           enable-cache: true
 
       - name: Install project (including dev dependencies)
-        run: uv sync --extra dev --extra fp-x-flux
+        run: uv sync --locked --extra dev --extra fp-x-flux
 
       - name: Check formatting with Ruff
         run: |
