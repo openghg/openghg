@@ -246,9 +246,9 @@ class FileLock:
             self.lock = _FileLock(lock_path, timeout=600, mode=0o664)  # file lock with 10 minute timeout
         except PermissionError as e:
             raise LockingError(
-                "You do not have the correct permissions to add data to this object store."
-                f"Ask {lock_path.owner()} to set group permissions for {lock_path} to 'rw',"
-                f"e.g. using `chmod +664 {lock_path}`"
+                "You do not have the correct permissions to add data to this object store. "
+                f"Ask {lock_path.owner()} to run `chmod g+w` on {lock_path} "
+                "if the store is intended for group writes."
             ) from e
 
     def acquire(self) -> None:
