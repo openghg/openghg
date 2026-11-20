@@ -32,7 +32,7 @@ def integrity_check(raise_error: bool = True) -> dict[str, dict[str, str]] | Non
     for bucket in readable_buckets.values():
         for data_type in data_types:
             # Now load the object
-            with open_object_store(bucket=bucket, data_type=data_type) as objstore:
+            with open_object_store(bucket=bucket, data_type=data_type, mode="r") as objstore:
                 # Get all the Datasources
                 datasource_uuids = objstore.uuids
                 # Check they all exist

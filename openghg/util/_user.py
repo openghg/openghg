@@ -106,9 +106,10 @@ def create_config(silent: bool = False) -> None:
         recent = "config_version" in config
 
         if recent:
-            user_store_path = Path(config["object_store"]["user"]["path"])
+            user_store_config = dict(config["object_store"]["user"])
         else:
-            user_store_path = Path(config["object_store"]["local_store"])
+            user_store_config = {"path": config["object_store"]["local_store"], "permissions": "rw"}
+        user_store_path = user_store_config["path"]
 
         logger.info(f"Current user object store path: {user_store_path}")
 
@@ -123,10 +124,13 @@ def create_config(silent: bool = False) -> None:
                 print("You must enter a path. Unable to complete config setup.")
                 return
 
-            new_path = Path(new_path_input).expanduser().resolve()
-            stores["user"] = {"path": str(new_path), "permissions": "rw"}
+            if "factory" in user_store_config:
+                user_store_config["path"] = new_path_input
+            else:
+                user_store_config["path"] = str(Path(new_path_input).expanduser().resolve())
+            stores["user"] = user_store_config
         else:
-            stores["user"] = {"path": str(user_store_path), "permissions": "rw"}
+            stores["user"] = user_store_config
 
         # Copy in exisiting shared stores
         if recent:
@@ -246,10 +250,10 @@ def _combine_config(config_version: str, object_stores: dict, user_id: str | Non
     # Create the object store dictionary
     object_store_info = {}
     for name, data in object_stores.items():
-        path = str(Path(data["path"]).expanduser().resolve())
+        path = data["path"] if "factory" in data else str(Path(data["path"]).expanduser().resolve())
         permissions = data["permissions"].strip()
 
-        object_store_info[name] = {"path": path, "permissions": permissions}
+        object_store_info[name] = {**data, "path": path, "permissions": permissions}
 
     if user_id is None:
         user_id = str(uuid.uuid4())
@@ -289,6 +293,9 @@ def read_local_config() -> dict:
     # for OpenGHG >= 0.8.0
     valid_stores = {}
     for name, store_data in config["object_store"].items():
+        if "factory" in store_data:
+            valid_stores[name] = store_data
+            continue
         store_path = Path(store_data["path"])
         # If it doesn't exist or its empty then we expect it to be created / populated
         if not store_path.exists() or not any(store_path.iterdir()):
@@ -349,6 +356,8 @@ def check_config() -> None:
         raise ConfigFileError(f"Unable to read object store data, {please_update}")
 
     for name, data in object_stores.items():
+        if "factory" in data:
+            continue
         p = Path(data["path"])
         if not p.exists():
             logger.info(f"The path for object store {name} at {p} does not exist but will be created.")

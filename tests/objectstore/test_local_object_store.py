@@ -1,6 +1,3 @@
-# from pathlib import Path
-
-from pathlib import Path
 import tempfile
 
 import pytest
@@ -73,6 +70,24 @@ def test_get_bucket():
     tmpdir = tempfile.gettempdir()
     b = get_bucket()
     assert tmpdir in b
+
+
+def test_custom_user_store_preserves_location_and_rejects_local_helpers(monkeypatch):
+    location = "custom://server/zone/catalog"
+    monkeypatch.setattr(
+        "openghg.objectstore._local_store.read_local_config",
+        lambda: {
+            "object_store": {
+                "user": {"path": location, "permissions": "rw", "factory": "example.backend:factory"}
+            }
+        },
+    )
+    assert get_bucket() == get_bucket("user") == get_writable_bucket("user") == location
+    with pytest.raises(ObjectStoreError, match="requires a local user object store"):
+        get_user_objectstore_path()
+    monkeypatch.setenv("OPENGHG_TUT_STORE", "1")
+    with pytest.raises(ObjectStoreError, match="requires a local user object store"):
+        get_bucket()
 
 
 def test_get_object_lock_path(tmp_path):

@@ -100,6 +100,55 @@ def test_footprint_attribute_modification(footprint_read):
     assert "author" not in new_attrs
 
 
+def test_attribute_updates_use_writable_datasource_context(monkeypatch):
+    from contextlib import contextmanager
+
+    manager = data_manager(data_type="surface", site="tac", species="co2", store="user")
+    uuid = next(iter(manager.metadata))
+    calls = []
+
+    class BackendDatasource:
+        def update_attributes(self, **kwargs):
+            assert calls[-1] == ("load", uuid)
+            calls.append(("edit", kwargs))
+            return True
+
+        def save(self):
+            calls.append("save")
+
+    class BackendObjectStore:
+        def get_datasource(self, uuid):
+            assert calls[-1] == "enter"
+            calls.append(("load", uuid))
+            return BackendDatasource()
+
+    @contextmanager
+    def objectstore(data_type):
+        assert data_type == "surface"
+        calls.append("enter")
+        yield BackendObjectStore()
+        calls.append("exit")
+
+    monkeypatch.setattr(manager, "objectstore", objectstore)
+    manager.update_attributes(uuid=uuid, version="v1", to_update={"comment": "edited"})
+    assert calls == [
+        "enter",
+        ("load", uuid),
+        (
+            "edit",
+            {
+                "version": "v1",
+                "data_vars": None,
+                "update_global": True,
+                "to_update": {"comment": "edited"},
+                "to_delete": None,
+            },
+        ),
+        "save",
+        "exit",
+    ]
+
+
 def test_footprint_data_variable_attribute_modification(footprint_read):
     """Test updating units for 'fp' data variable only (not globally or for other data variables)."""
     search_res = data_manager(data_type="footprints", site="tmb", network="lghg", store="user")
