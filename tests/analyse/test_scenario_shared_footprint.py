@@ -229,14 +229,10 @@ def test_public_time_resolved_footprint_flux_output(stored_co2_scenario):
 
 
 @pytest.mark.parametrize("resample_to", [None, "2h"])
-@pytest.mark.xfail(
-    strict=True,
-    raises=ValueError,
-    reason="Existing on devel: real TAC lag coordinates produce unequal rolling-window and H_back lengths.",
-)
 def test_public_time_resolved_alternative_resampling(stored_co2_scenario, resample_to):
-    """Keep the existing lag-window limitation visible without changing the kernel."""
-    stored_co2_scenario.calc_modelled_obs(resample_to=resample_to)
+    result = stored_co2_scenario.calc_modelled_obs(resample_to=resample_to)
+    assert np.isfinite(result.mf_mod_high_res).all()
+    assert (result.mf_mod_high_res != 0).any()
 
 
 @pytest.mark.parametrize("wrapped", [False, True])
@@ -496,3 +492,350 @@ def test_public_footprint_only_calculation_unchanged(stored_integrated_co2_scena
     xr.testing.assert_identical(model.scenario, expected_scenario)
     expected = model._calc_modelled_obs_integrated(scenario=expected_scenario, output_fpXflux=True)
     xr.testing.assert_allclose(result, model.convert_units(expected))
+
+
+def expected_sector_contribution(model, source, resolved, use_low_freq_flux=None):
+    """Reference contribution from the existing integrated or lag-resolved kernel."""
+    calculate = model._calc_modelled_obs_HiTRes if resolved else model._calc_modelled_obs_integrated
+    with xr.set_options(keep_attrs=True):
+        contribution = calculate(
+            sources=source,
+            scenario=model.scenario,
+            output_TS=False,
+            output_fpXflux=True,
+            use_low_freq_flux=use_low_freq_flux,
+        ).fp_x_flux.pint.quantify()
+    return contribution.pint.to("mol/mol")
+
+
+@pytest.mark.parametrize("resample_to", ["coarsest", "2h"])
+def test_mixed_sector_routing_reuses_one_footprint(stored_co2_scenario, mocker, resample_to):
+    """Biological and monthly ocean fluxes use different kernels on a shared footprint."""
+    model = stored_co2_scenario
+    footprint = model.footprint
+    footprint.data.fp_HiTRes.attrs.pop("units")  # Older stores only declare units on fp.
+    original = footprint.data.copy(deep=True)
+    keep_attrs = xr.get_options()["keep_attrs"]
+    alignment = mocker.spy(model, "_scenario_for_footprint")
+    integrated = mocker.spy(model, "_calc_modelled_obs_integrated")
+    resolved = mocker.spy(model, "_calc_modelled_obs_HiTRes")
+    retrieval = mocker.patch.object(model, "_get_data", side_effect=AssertionError("No additional retrieval"))
+
+    result = model.calc_modelled_obs(
+        time_resolved_by_sector={"natural-rtot": True, "ocean": False},
+        resample_to=resample_to,
+        split_by_sectors=True,
+        output_fp_x_flux=True,
+    )
+
+    assert alignment.call_count == 1
+    assert integrated.call_count == resolved.call_count == 1
+    assert integrated.call_args.kwargs["sources"] == "ocean"
+    assert resolved.call_args.kwargs["sources"] == "natural-rtot"
+    assert integrated.call_args.kwargs["scenario"] is resolved.call_args.kwargs["scenario"]
+    retrieval.assert_not_called()
+    assert model.footprint is footprint
+    xr.testing.assert_identical(footprint.data, original)
+    assert "mf_mod_high_res" not in result
+    assert result.source.values.tolist() == ["natural-rtot", "ocean"]
+    assert result.mf_mod.dims == ("time",)
+    assert np.isfinite(result.mf_mod).all()
+    assert (result.mf_mod_sectoral != 0).any("time").all()
+    xr.testing.assert_allclose(result.mf_mod_sectoral.sum("source"), result.mf_mod)
+    xr.testing.assert_allclose(result.fp_x_flux_sectoral.sum("source"), result.fp_x_flux)
+    xr.testing.assert_allclose(
+        result.fp_x_flux.pint.quantify().sum(["lat", "lon"]).pint.dequantify(), result.mf_mod
+    )
+    assert xr.get_options()["keep_attrs"] == keep_attrs
+
+
+@pytest.mark.parametrize(
+    "selection",
+    [
+        {"natural-rtot": True, "ocean": False},
+        {"natural-rtot": False, "ocean": True},
+        {"natural-rtot": True, "ocean": True},
+        {"natural-rtot": False, "ocean": False},
+        {"ocean": False},
+    ],
+)
+def test_configured_sector_values_match_existing_kernels(stored_co2_scenario, selection):
+    """Each source uses its selected kernel, with lag-resolved routing as the default."""
+    model = stored_co2_scenario
+    result = model.calc_modelled_obs(
+        time_resolved_by_sector=selection, split_by_sectors=True, output_fp_x_flux=True
+    )
+    for source in model.flux_sources:
+        contribution = expected_sector_contribution(model, source, selection.get(source, True))
+        expected = model.convert_units(
+            xr.Dataset(
+                {"mf_mod": contribution.sum(["lat", "lon"]), "fp_x_flux": contribution}
+            ).pint.dequantify()
+        )
+        xr.testing.assert_allclose(result.mf_mod_sectoral.sel(source=source, drop=True), expected.mf_mod)
+        xr.testing.assert_allclose(
+            result.fp_x_flux_sectoral.sel(source=source, drop=True), expected.fp_x_flux
+        )
+
+
+def test_sector_output_flag_does_not_change_total(stored_co2_scenario):
+    """Sector diagnostics preserve the total contribution and its temporal averaging."""
+    model = stored_co2_scenario
+    selection = {"natural-rtot": False, "ocean": False}
+    total = model.calc_modelled_obs(time_resolved_by_sector=selection, output_fp_x_flux=True)
+    sectoral = model.calc_modelled_obs(
+        time_resolved_by_sector=selection, output_fp_x_flux=True, split_by_sectors=True
+    )
+    xr.testing.assert_identical(total.mf_mod, sectoral.mf_mod)
+    xr.testing.assert_identical(total.fp_x_flux, sectoral.fp_x_flux)
+    xr.testing.assert_allclose(sectoral.mf_mod_sectoral.sum("source"), total.mf_mod)
+
+
+def test_integrated_sector_release_time_override(stored_co2_scenario):
+    """Integrated sector calculations retain the low-frequency flux-time override."""
+    model = stored_co2_scenario
+    result = model.calc_modelled_obs(
+        sources="natural-rtot",
+        time_resolved_by_sector={"natural-rtot": False},
+        use_low_freq_flux=False,
+    )
+    contribution = expected_sector_contribution(model, "natural-rtot", False, use_low_freq_flux=False)
+    expected = model.convert_units(
+        contribution.sum(["lat", "lon"]).to_dataset(name="mf_mod").pint.dequantify()
+    )
+    xr.testing.assert_allclose(result.mf_mod, expected.mf_mod)
+
+
+def test_integrated_sector_respects_climatology_option(stored_co2_scenario):
+    model = stored_co2_scenario
+    flux = model.fluxes["ocean"]
+    one_year = flux.data.sel(time="2014")
+    flux.data = one_year.assign_coords(time=one_year.indexes["time"] + pd.DateOffset(years=1))
+    options = {"sources": "ocean", "time_resolved_by_sector": {"ocean": False}, "calc_bc": False}
+
+    with_climatology = model.footprints_data_merge(**options)
+    without_climatology = model.footprints_data_merge(**options, allow_climatology=False)
+
+    assert (with_climatology.mf_mod != 0).any()
+    assert (without_climatology.mf_mod == 0).all()
+
+
+def test_selected_sources_only_are_routed(stored_integrated_co2_scenario):
+    """Overrides for unselected sources do not require lag-resolved footprint data."""
+    result = stored_integrated_co2_scenario.calc_modelled_obs(
+        sources="ocean",
+        time_resolved_by_sector={"natural-rtot": True, "ocean": False},
+        split_by_sectors=True,
+    )
+    assert result.source.values.tolist() == ["ocean"]
+    assert "fp_x_flux" not in result
+    xr.testing.assert_allclose(result.mf_mod_sectoral.sum("source"), result.mf_mod)
+
+
+@pytest.mark.parametrize("representation", ["legacy", "resolved_and_residual"])
+def test_sector_routing_supports_both_time_resolved_formats(stored_co2_scenario, representation):
+    model = stored_co2_scenario
+    expected = model.calc_modelled_obs(time_resolved_by_sector={"ocean": False})
+    if representation == "resolved_and_residual":
+        data = model.footprint.data
+        components = time_resolved_and_residual_footprints(data.fp_HiTRes)
+        model.footprint.data = data.drop_dims("H_back").merge(components)
+    result = model.calc_modelled_obs(time_resolved_by_sector={"ocean": False}, recalculate=True)
+    xr.testing.assert_allclose(result, expected)
+    assert result.attrs == expected.attrs
+
+
+@pytest.mark.parametrize(
+    "selection,error,match",
+    [
+        (True, TypeError, "must be a mapping"),
+        ([True], TypeError, "must be a mapping"),
+        ({1: True}, TypeError, "keys must be"),
+        ({"missing": True}, ValueError, "Unknown flux source"),
+        ({"ocean": "false"}, TypeError, "must be True or False"),
+        ({"ocean": 1}, TypeError, "must be True or False"),
+        ({"ocean": None}, TypeError, "must be True or False"),
+    ],
+)
+def test_sector_selection_validation_precedes_cache(stored_co2_scenario, selection, error, match):
+    model = stored_co2_scenario
+    cached = model.calc_modelled_obs(time_resolved_by_sector={"ocean": False})
+    aligned = model.scenario
+    with pytest.raises(error, match=match):
+        model.calc_modelled_obs(time_resolved_by_sector=selection)
+    assert model.modelled_obs is cached
+    assert model.scenario is aligned
+
+
+def test_time_resolved_sector_requires_lag_sensitivities(stored_integrated_co2_scenario):
+    with pytest.raises(ValueError, match="Time-resolved sectors require"):
+        stored_integrated_co2_scenario.calc_modelled_obs(time_resolved_by_sector={"natural-rtot": True})
+
+
+def test_integrated_sector_requires_integrated_sensitivity(stored_co2_scenario):
+    model = stored_co2_scenario
+    model.footprint.data = model.footprint.data.drop_vars("fp")
+    with pytest.raises(ValueError, match="Integrated sectors require fp"):
+        model.calc_modelled_obs(time_resolved_by_sector={"ocean": False})
+
+
+def test_time_resolved_sector_requires_residual(stored_co2_scenario):
+    model = stored_co2_scenario
+    data = model.footprint.data
+    components = time_resolved_and_residual_footprints(data.fp_HiTRes)
+    model.footprint.data = data.drop_dims("H_back").merge(components).drop_vars("fp_residual")
+    with pytest.raises(ValueError, match="also require fp_residual"):
+        model.calc_modelled_obs(time_resolved_by_sector={"natural-rtot": True})
+
+
+def test_sector_routing_requires_declared_units(stored_co2_scenario):
+    """Reject sensitivities with neither explicit nor inherited units."""
+    for name in ("fp", "fp_HiTRes"):
+        stored_co2_scenario.footprint.data[name].attrs.pop("units")
+    with pytest.raises(ValueError, match="requires declared sensitivity units"):
+        stored_co2_scenario.calc_modelled_obs(time_resolved_by_sector={"ocean": False})
+
+
+@pytest.mark.parametrize("missing", ["coordinate", "variable_dimension"])
+def test_time_resolved_sector_requires_lag_coordinate(stored_co2_scenario, missing):
+    model = stored_co2_scenario
+    if missing == "coordinate":
+        model.footprint.data = model.footprint.data.drop_vars("H_back")
+    else:
+        model.footprint.data["fp_HiTRes"] = model.footprint.data.fp_HiTRes.sum("H_back")
+    with pytest.raises(ValueError, match="require an H_back coordinate"):
+        model.calc_modelled_obs(time_resolved_by_sector={"ocean": False})
+
+
+def test_sector_cache_tracks_selection_and_output_options(stored_co2_scenario, mocker):
+    model = stored_co2_scenario
+    compute = mocker.spy(model, "_calc_modelled_obs_by_sector")
+    first = model.calc_modelled_obs(time_resolved_by_sector={"ocean": False})
+    assert model.calc_modelled_obs(time_resolved_by_sector={"ocean": False}) is first
+    assert compute.call_count == 1
+    all_integrated = model.calc_modelled_obs(time_resolved_by_sector={"natural-rtot": False, "ocean": False})
+    assert all_integrated is not first
+    selected = model.calc_modelled_obs(sources="ocean", time_resolved_by_sector={"ocean": False})
+    assert selected is not all_integrated
+    spatial = model.calc_modelled_obs(
+        sources="ocean", time_resolved_by_sector={"ocean": False}, output_fp_x_flux=True
+    )
+    assert "fp_x_flux" in spatial
+    assert compute.call_count == 4
+    units = model.calc_modelled_obs(
+        sources="ocean", time_resolved_by_sector={"ocean": False}, output_units="mol/mol"
+    )
+    xr.testing.assert_allclose(units.mf_mod, selected.mf_mod / 1e6)
+    assert compute.call_count == 5
+
+
+def test_configured_and_default_cache_do_not_cross(stored_co2_scenario):
+    model = stored_co2_scenario
+    configured = model.calc_modelled_obs(time_resolved_by_sector={"ocean": False})
+    default = model.calc_modelled_obs()
+    assert default is not configured
+    assert "mf_mod_high_res" in default and "mf_mod" not in default
+    assert model._sector_modelled_obs_cache_key is None
+    assert model.calc_modelled_obs(time_resolved_by_sector={"ocean": False}) is not default
+
+
+def test_empty_selection_keeps_existing_default(stored_co2_scenario):
+    model = stored_co2_scenario
+    default = model.calc_modelled_obs()
+    assert model.calc_modelled_obs(time_resolved_by_sector={}) is default
+
+
+def test_configured_cache_false_clears_previous_cached_results(stored_co2_scenario):
+    model = stored_co2_scenario
+    expected = model.calc_modelled_obs(time_resolved_by_sector={"ocean": False})
+    result = model.calc_modelled_obs(time_resolved_by_sector={"ocean": False}, cache=False)
+    xr.testing.assert_identical(result, expected)
+    assert model.modelled_obs is model.scenario is model._sector_modelled_obs_cache_key is None
+
+
+def test_configured_merge_replaces_stale_modelled_fields(stored_co2_scenario, mocker):
+    model = stored_co2_scenario
+    alignment = mocker.spy(model, "_scenario_for_footprint")
+    first = model.footprints_data_merge(time_resolved_by_sector={"ocean": False}, calc_bc=False)
+    assert alignment.call_count == 1
+    second = model.footprints_data_merge(
+        time_resolved_by_sector={"natural-rtot": False, "ocean": False}, calc_bc=False
+    )
+    assert alignment.call_count == 2
+    assert "time_resolved_by_sector" in second.attrs
+    assert not np.allclose(first.mf_mod, second.mf_mod)
+    default = model.footprints_data_merge(calc_bc=False)
+    assert "mf_mod_high_res" in default
+    assert "time_resolved_by_sector" not in default.attrs
+
+
+def test_configured_merge_validation_preserves_cache(stored_co2_scenario):
+    model = stored_co2_scenario
+    cached = model.footprints_data_merge(time_resolved_by_sector={"ocean": False}, calc_bc=False)
+    modelled = model.modelled_obs
+    with pytest.raises(TypeError, match="must be True or False"):
+        model.footprints_data_merge(time_resolved_by_sector={"ocean": "false"}, calc_bc=False)
+    assert model.scenario is cached
+    assert model.modelled_obs is modelled
+    with pytest.raises(ValueError):
+        model.footprints_data_merge(time_resolved_by_sector={"ocean": False}, calc_bc=False, output_units="m")
+    assert model.scenario is cached
+    assert model.modelled_obs is modelled
+
+
+def test_sector_cache_tracks_mutated_mapping(stored_co2_scenario):
+    model = stored_co2_scenario
+    selection = {"ocean": False}
+    first = model.calc_modelled_obs(time_resolved_by_sector=selection)
+    selection["natural-rtot"] = False
+    assert model.calc_modelled_obs(time_resolved_by_sector=selection) is not first
+
+
+def test_sector_routing_rejects_incompatible_units(stored_co2_scenario):
+    model = stored_co2_scenario
+    model.fluxes["natural-rtot"].data.flux.attrs["units"] = "m"
+    keep_attrs = xr.get_options()["keep_attrs"]
+    with pytest.raises(ValueError, match="must have mole-fraction units"):
+        model.calc_modelled_obs(time_resolved_by_sector={"ocean": False})
+    assert xr.get_options()["keep_attrs"] == keep_attrs
+
+
+@pytest.mark.parametrize("merge", [False, True], ids=["modelled-obs", "merge"])
+def test_configured_footprint_only_model(stored_co2_scenario, merge):
+    reference = stored_co2_scenario
+    model = ModelScenario(species="co2", footprint=reference.footprint, flux=reference.fluxes)
+    options = {"time_resolved_by_sector": {"ocean": False}, "split_by_sectors": True}
+    if merge:
+        result = model.footprints_data_merge(**options, calc_bc=False)
+        assert "fp" in result
+    else:
+        result = model.calc_modelled_obs(**options)
+    np.testing.assert_array_equal(result.time.values, model.footprint.data.time.values)
+    xr.testing.assert_allclose(result.mf_mod_sectoral.sum("source"), result.mf_mod)
+
+
+def test_configured_satellite_keeps_sounding_alignment(stored_satellite_scenario):
+    model = stored_satellite_scenario
+    aligned = model.combine_obs_footprint()
+    result = model.footprints_data_merge(
+        time_resolved_by_sector={"all": False}, split_by_sectors=True, calc_bc=False, resample_to="2h"
+    )
+    np.testing.assert_array_equal(result.time.values, aligned.time.values)
+    assert result.attrs["resample_to"] == "None"
+    xr.testing.assert_allclose(result.mf_mod_sectoral.sum("source"), result.mf_mod)
+
+
+def test_sector_output_remains_lazy_and_serialisable(stored_co2_scenario, tmp_path):
+    model = stored_co2_scenario
+    model.footprint.data = model.footprint.data.chunk(time=12)
+    for flux in model.fluxes.values():
+        flux.data = flux.data.chunk(time=12)
+    result = model.calc_modelled_obs(
+        time_resolved_by_sector={"ocean": False}, split_by_sectors=True, output_fp_x_flux=True
+    )
+    assert result.fp_x_flux.chunks is not None
+    path = tmp_path / "sector_output.nc"
+    result.to_netcdf(path, engine="h5netcdf")
+    with xr.open_dataset(path, engine="h5netcdf") as reopened:
+        xr.testing.assert_allclose(reopened, result)
+        assert reopened.attrs["time_resolved_by_sector"] == result.attrs["time_resolved_by_sector"]

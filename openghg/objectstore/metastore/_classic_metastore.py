@@ -241,17 +241,14 @@ class FileLock:
     def __init__(self, bucket: str, key: str) -> None:
         lock_path = get_object_lock_path(bucket, key)
 
-        # If lock is created for first time, make sure group has 'rw' permissions
-        if not lock_path.exists():
-            lock_path.touch(mode=0o664)
-
+        # Let filelock create the lock file so it applies the group-writable mode.
         try:
             self.lock = _FileLock(lock_path, timeout=600, mode=0o664)  # file lock with 10 minute timeout
         except PermissionError as e:
             raise LockingError(
-                "You do not have the correct permissions to add data to this object store."
-                f"Ask {lock_path.owner()} to set group permissions for {lock_path} to 'rw',"
-                f"e.g. using `chmod +664 {lock_path}`"
+                "You do not have the correct permissions to add data to this object store. "
+                f"Ask {lock_path.owner()} to run `chmod g+w` on {lock_path} "
+                "if the store is intended for group writes."
             ) from e
 
     def acquire(self) -> None:
