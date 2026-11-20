@@ -1,5 +1,3 @@
-from multiprocessing.sharedctypes import Value
-
 import numpy as np
 import pandas as pd
 import pytest
@@ -66,6 +64,23 @@ def test_daterange_from_str():
 
     assert daterange[0] == Timestamp("2019-01-01 15:33:00", tz="UTC")
     assert daterange[-1] == Timestamp("2020-01-01 15:33:00", tz="UTC")
+
+
+@pytest.mark.parametrize("helper", [create_daterange, daterange_from_str])
+def test_daterange_legacy_frequency(helper, recwarn):
+    start = Timestamp("2019-01-01", tz="UTC")
+    end = Timestamp("2019-01-01 06:00:00", tz="UTC")
+    args = (start, end) if helper is create_daterange else (create_daterange_str(start, end),)
+    expected = pd.date_range(start, end, freq="2h")
+
+    pd.testing.assert_index_equal(helper(*args, freq="2h"), expected)
+    assert not recwarn
+
+    pd.testing.assert_index_equal(helper(*args, freq="2H"), expected)
+    assert len(recwarn) == 1
+    warning = recwarn.pop(FutureWarning)
+    assert "Frequency '2H' is deprecated. Use '2h'." in str(warning.message)
+    assert warning.filename == __file__
 
 
 def test_daterange_overlap():
