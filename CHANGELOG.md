@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fixed group-write permissions on new metastore lock files when using filelock 4. [PR #1811](https://github.com/openghg/openghg/pull/1811).
+- Bound ModelScenario Numba map tasks to at most 32 releases and retain existing smaller time/spatial chunks. [PR #1713](https://github.com/openghg/openghg/pull/1713)
 - Avoid artificial footprint release rows in the regular Numba kernel and retain small requested compute chunks through the indexed fallback. Fractional lag offsets are rejected consistently. [PR #1799](https://github.com/openghg/openghg/pull/1799)
 - Corrected time-resolved footprint-times-flux calculations to normalize declared physical units (including residual footprints), preserve promoted precision when requested, align nearby spatial grids within a bounded tolerance, and interpret sparse lags as hourly offsets. Results remain native dimensionless mol/mol before optional float32 ppm persistence. Recompute affected sensitivities and downstream inversions when inputs use scaled units, mixed precision, shifted grids or sparse lags. [Issue #1798](https://github.com/openghg/openghg/issues/1798)
 - Updated inlet type hints to accept numeric values, lists and tuples, and preserved units, key names and special keywords when formatting inlet collections. [PR #1796](https://github.com/openghg/openghg/pull/1796)

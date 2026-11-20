@@ -79,6 +79,10 @@ the indexed kernel handles chunks too small for a regular flux halo. Only
 flux receives a left halo: no artificial footprint releases are allocated.
 Latitude, longitude and source chunk sizes default to their full dimensions.
 
+ModelScenario map requests use at most 32 releases per compute chunk and retain
+the footprint's maximum spatial chunk sizes. Existing smaller time chunks are
+retained; small chunks use the indexed kernel when the lag halo is too deep.
+
 .. autofunction:: openghg.analyse.align_flux_to_time_targets
 
 .. autofunction:: openghg.analyse.fp_x_flux_time_resolved_numba
