@@ -51,6 +51,34 @@ __all__ = [
 
 # TupleTimeType = Tuple[Union[int, float], str]
 
+_LEGACY_FREQUENCY_ALIASES = {
+    "H": "h",
+    "BH": "bh",
+    "CBH": "cbh",
+    "T": "min",
+    "S": "s",
+    "L": "ms",
+    "U": "us",
+    "N": "ns",
+    "M": "ME",
+    "BM": "BME",
+    "SM": "SME",
+    "CBM": "CBME",
+    "Q": "QE",
+    "BQ": "BQE",
+    "A": "YE",
+    "Y": "YE",
+    "BA": "BYE",
+    "BY": "BYE",
+    "AS": "YS",
+    "BAS": "BYS",
+}
+
+
+def normalise_pandas_frequency(frequency: str) -> str:
+    """Translate removed pandas frequency aliases while preserving counts and anchors."""
+    return re.sub(r"[A-Za-z]+", lambda unit: _LEGACY_FREQUENCY_ALIASES.get(unit[0], unit[0]), frequency)
+
 
 def find_duplicate_timestamps(data: Dataset | DataFrame) -> list:
     """Check for duplicates
@@ -1024,7 +1052,7 @@ def evaluate_sampling_period(sampling_period: Timedelta | str | None) -> str | N
 
         # Check string passed can be evaluated as a Timedelta object and extract this in seconds.
         try:
-            sampling_period_td = Timedelta(sampling_period)
+            sampling_period_td = Timedelta(normalise_pandas_frequency(sampling_period))
         except ValueError as e:
             raise ValueError(
                 f"Could not evaluate sampling period: '{sampling_period}'. Must be specified as a string with valid unit (e.g. 1m for 1 minute)."

@@ -575,7 +575,7 @@ def _read_raw_data(
         data = data.sort_index()
 
     # Read the site code from the Dataframe
-    site = str(data["sample_site_code"][0]).upper()
+    site = str(data["sample_site_code"].iloc[0]).upper()
 
     site_data = get_site_info()
     # If this isn't a site we recognize try and read it from the filename

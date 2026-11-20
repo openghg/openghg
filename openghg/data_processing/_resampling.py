@@ -34,6 +34,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from openghg.util import Registry
+from openghg.util._time import normalise_pandas_frequency
 
 from ._attrs import rename, update_attrs
 from ._xarray_helpers import xr_sqrt
@@ -53,9 +54,10 @@ def add_averaging_attrs(func: ResampleFunctionType) -> ResampleFunctionType:
 
     @wraps(func)
     def wrapper(ds: xr.Dataset, averaging_period: str, *args: Any, **kwargs: Any) -> xr.Dataset:
-        average_in_seconds = pd.Timedelta(averaging_period).total_seconds()
+        period = normalise_pandas_frequency(averaging_period)
+        average_in_seconds = pd.Timedelta(period).total_seconds()
         avg_attrs = {"averaged_period": average_in_seconds, "averaged_period_str": averaging_period}
-        return func(ds, averaging_period, *args, **kwargs).assign_attrs(avg_attrs)
+        return func(ds, period, *args, **kwargs).assign_attrs(avg_attrs)
 
     return wrapper
 

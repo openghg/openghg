@@ -7,6 +7,7 @@ import xarray as xr
 
 from openghg.analyse._alignment import reindex_time_to_target, time_of_day_offset
 from openghg.analyse._utils import reindex_on_dims
+from openghg.util._time import normalise_pandas_frequency
 
 
 def fp_x_flux_integrated(
@@ -48,17 +49,16 @@ def make_integrated_low_freq_flux(flux: xr.DataArray | xr.Dataset) -> xr.Dataset
 
 # helper functions for time-resolved calculation
 def calc_hourly_freq(times: xr.DataArray, dim: str = "time", input_nanoseconds: bool = False) -> int:
-    """Infer frequency of DataArray of times.
+    """Infer the frequency of a DataArray of times in whole hours.
 
-    Set `input_nanoseconds` to True if the times are in terms of nanoseconds.
-    Otherwise times are assumed to be in terms of hours.
+    Numeric times are assumed to be in hours, or nanoseconds with `input_nanoseconds=True`.
     """
-    nanosecond_to_hour = 1 / (1e9 * 60.0 * 60.0)
-
+    gaps = times.diff(dim=dim).values
+    if np.issubdtype(gaps.dtype, np.timedelta64):
+        return int((gaps / np.timedelta64(1, "h")).mean())
     if input_nanoseconds:
-        return int(times.diff(dim=dim).values.mean() * nanosecond_to_hour)
-    else:
-        return int(times.diff(dim=dim).values.mean())
+        return int(gaps.mean() / (1e9 * 3600))
+    return int(gaps.mean())
 
 
 def time_resolved_and_residual_footprints(fp_high_time_res: xr.DataArray) -> xr.Dataset:
@@ -235,7 +235,7 @@ def fp_x_flux_time_resolved(
     if averaging is not None:
         # TODO: could check if resampling is necessary
         # TODO: we might also want to change how we resample, depending on whether we're upsampling or downsampling
-        fp = fp.resample(time=averaging).ffill()
+        fp = fp.resample(time=normalise_pandas_frequency(averaging)).ffill()
 
     # explicit variables to make mypy happy...
     fp_time_resolved: xr.DataArray = fp.fp_time_resolved
