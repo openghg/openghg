@@ -98,12 +98,13 @@ def tac_ds():
     return ds
 
 
-def test_mean_resample(tac_ds):
+@pytest.mark.parametrize("period", ["4h", "4H"])
+def test_mean_resample(tac_ds, period):
     ds = xr.ones_like(tac_ds)
 
-    ds_4h = mean_resample(ds, averaging_period="4h")
+    ds_4h = mean_resample(ds, averaging_period=period)
 
-    assert {"averaged_period": 4 * 3600.0, "averaged_period_str": "4h"}.items() <= ds_4h.attrs.items()
+    assert {"averaged_period": 4 * 3600.0, "averaged_period_str": period}.items() <= ds_4h.attrs.items()
 
     ds_4h_expected = xr.ones_like(ds.resample(time="4h").mean(keep_attrs=True))
 

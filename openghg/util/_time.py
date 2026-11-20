@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from datetime import date
+from inspect import currentframe
 from itertools import pairwise
 import logging
 from math import isnan
 import re
 from typing import TYPE_CHECKING
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -50,6 +52,48 @@ __all__ = [
 ]
 
 # TupleTimeType = Tuple[Union[int, float], str]
+
+_LEGACY_FREQUENCY_ALIASES = {
+    "H": "h",
+    "BH": "bh",
+    "CBH": "cbh",
+    "T": "min",
+    "t": "min",
+    "S": "s",
+    "L": "ms",
+    "U": "us",
+    "N": "ns",
+    "M": "ME",
+    "BM": "BME",
+    "SM": "SME",
+    "CBM": "CBME",
+    "Q": "QE",
+    "BQ": "BQE",
+    "A": "YE",
+    "Y": "YE",
+    "BA": "BYE",
+    "BY": "BYE",
+    "AS": "YS",
+    "BAS": "BYS",
+}
+
+
+def normalise_pandas_frequency(frequency: str) -> str:
+    """Translate removed pandas frequency aliases and warn callers about the replacement."""
+    normalised = re.sub(r"[A-Za-z]+", lambda unit: _LEGACY_FREQUENCY_ALIASES.get(unit[0], unit[0]), frequency)
+    if normalised != frequency:
+        # Skip OpenGHG frames so nested helpers still warn at the call site.
+        stacklevel = 1
+        frame = currentframe()
+        while frame is not None and frame.f_globals.get("__name__", "").partition(".")[0] == "openghg":
+            stacklevel += 1
+            frame = frame.f_back
+        warnings.warn(
+            f"Frequency {frequency!r} is deprecated. Use {normalised!r}.",
+            FutureWarning,
+            stacklevel=stacklevel,
+        )
+    return normalised
 
 
 def find_duplicate_timestamps(data: Dataset | DataFrame) -> list:
@@ -137,11 +181,12 @@ def daterange_overlap(daterange_a: str, daterange_b: str) -> bool:
 
 
 def create_daterange(start: Timestamp, end: Timestamp, freq: str | None = "D") -> DatetimeIndex:
-    """Create a minute aligned daterange
+    """Create a UTC date range with the requested frequency.
 
     Args:
         start: Start date
         end: End date
+        freq: Pandas frequency alias. Defaults to one day.
     Returns:
         pandas.DatetimeIndex
     """
@@ -151,6 +196,8 @@ def create_daterange(start: Timestamp, end: Timestamp, freq: str | None = "D") -
     start = timestamp_tzaware(start)
     end = timestamp_tzaware(end)
 
+    if isinstance(freq, str):
+        freq = normalise_pandas_frequency(freq)
     return pd.date_range(start=start, end=end, freq=freq)
 
 
@@ -177,12 +224,12 @@ def create_daterange_str(start: str | Timestamp, end: str | Timestamp) -> str:
 
 
 def daterange_from_str(daterange_str: str, freq: str | None = "D") -> DatetimeIndex:
-    """Get a Pandas DatetimeIndex from a string. The created
-    DatetimeIndex has minute frequency.
+    """Create a UTC date range from a string with the requested frequency.
 
     Args:
         daterange_str (str): Daterange string
         of the form 2019-01-01T00:00:00_2019-12-31T00:00:00
+        freq: Pandas frequency alias. Defaults to one day.
     Returns:
         pandas.DatetimeIndex: DatetimeIndex covering daterange
     """
@@ -192,6 +239,8 @@ def daterange_from_str(daterange_str: str, freq: str | None = "D") -> DatetimeIn
     start = timestamp_tzaware(split[0])
     end = timestamp_tzaware(split[1])
 
+    if isinstance(freq, str):
+        freq = normalise_pandas_frequency(freq)
     return pd.date_range(start=start, end=end, freq=freq)
 
 
@@ -1024,7 +1073,7 @@ def evaluate_sampling_period(sampling_period: Timedelta | str | None) -> str | N
 
         # Check string passed can be evaluated as a Timedelta object and extract this in seconds.
         try:
-            sampling_period_td = Timedelta(sampling_period)
+            sampling_period_td = Timedelta(normalise_pandas_frequency(sampling_period))
         except ValueError as e:
             raise ValueError(
                 f"Could not evaluate sampling period: '{sampling_period}'. Must be specified as a string with valid unit (e.g. 1m for 1 minute)."

@@ -306,7 +306,7 @@ def _select_time(x: xr.Dataset) -> xr.Dataset:
     Returns:
         xarray.Dataset: Updated dataset
     """
-    month = x.time.resample(time="M").count().idxmax().values.astype("datetime64[M]")
+    month = x.time.resample(time="ME").count().idxmax().values.astype("datetime64[M]")
     start_date = month.astype("datetime64[D]")
     end_date = (month + np.timedelta64(1, "M")).astype("datetime64[D]")
     return x.where((x.time >= start_date) & (x.time < end_date), drop=True)

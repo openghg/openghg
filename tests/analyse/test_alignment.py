@@ -123,14 +123,17 @@ def test_extract_obs_freq(obs_data):
     assert _extract_obs_freq(obs_data.data) is None
 
 
-def test_infer_freq_in_seconds():
+@pytest.mark.parametrize("time_unit", ["ns", "us", "ms"])
+def test_infer_freq_in_seconds(time_unit):
     """Test that we can infer the frequency from regular data.
 
     Also check that minor pertubations don't affect the result,
     if they're within tolerance and don't change the median gap.
     """
     freq_in_seconds = 3
-    times = pd.date_range("2020-01-01", freq=f"{freq_in_seconds}s", periods=10).values
+    times = pd.date_range("2020-01-01", freq=f"{freq_in_seconds}s", periods=10).to_numpy(
+        dtype=f"datetime64[{time_unit}]", copy=True
+    )
 
     assert freq_in_seconds == infer_freq_in_seconds(times)
 
@@ -149,7 +152,7 @@ def test_infer_freq_in_seconds_tolerance():
     Also test that we can raise tolerance.
     """
     freq_in_seconds = 3
-    times = pd.date_range("2020-01-01", freq="3s", periods=10).values
+    times = pd.date_range("2020-01-01", freq="3s", periods=10).to_numpy(copy=True)
 
     # adding 1s to a time point gives consecutive differences of 2s and 4s,
     # so the difference between the minimum and maximum gaps is 2s, which is
@@ -170,7 +173,7 @@ def test_infer_freq_footprint():
     that is used in another function.
     """
     freq = "1h"
-    times = pd.date_range("2020-01-01", freq=freq, periods=10).values
+    times = pd.date_range("2020-01-01", freq=freq, periods=10).to_numpy(copy=True)
     times[3] += pd.Timedelta("1m")
 
     # code used to infer freq of "other" (e.g. footprints) in `align_obs_and_other`

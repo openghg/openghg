@@ -73,6 +73,7 @@ from openghg.retrieve import (
     search_column,
 )
 from openghg.util import synonyms, clean_string, format_inlet, verify_site_with_satellite, define_platform
+from openghg.util._time import normalise_pandas_frequency
 from openghg.types import SearchError, ReindexMethod
 from ._alignment import combine_datasets, resample_obs_and_other
 from ._modelled_baseline import baseline_sensitivities
@@ -1114,7 +1115,8 @@ class ModelScenario:
                 hours=start_date.hour + start_date.minute / 60.0 + start_date.second / 3600.0
             )
             offset = cast(pd.Timedelta, offset)  # mypy thinks this could be NaT
-            footprint_data = footprint_data.resample(indexer={"time": resample_to}, offset=offset).mean()
+            period = normalise_pandas_frequency(resample_to)
+            footprint_data = footprint_data.resample(indexer={"time": period}, offset=offset).mean()
             return footprint_data
 
     def _param_setup(

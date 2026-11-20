@@ -177,7 +177,8 @@ def test_regular_coarse_flux_matches_existing_time_resolved_method(step_hours: i
     _assert_value_parity(result, expected.astype(np.float32))
 
 
-def test_align_flux_to_time_targets_uses_left_labelled_interval_membership() -> None:
+@pytest.mark.parametrize("time_unit", ["ns", "us"])
+def test_align_flux_to_time_targets_uses_left_labelled_interval_membership(time_unit: str) -> None:
     """Map targets to containing left-labelled flux intervals."""
     times = pd.date_range("2021-01-01", periods=3, freq="h")
     flux = xr.DataArray(
@@ -193,12 +194,12 @@ def test_align_flux_to_time_targets_uses_left_labelled_interval_membership() -> 
             "2021-01-01 01:59:59",
             "2021-01-01 02:59:59",
         ]
-    )
+    ).as_unit(time_unit)
 
     result = align_flux_to_time_targets(flux, targets)
 
     assert result.values.tolist() == [20.0, 10.0, 20.0, 20.0, 30.0]
-    assert result["time"].values.tolist() == targets.values.tolist()
+    np.testing.assert_array_equal(result["time"].values, targets.to_numpy())
 
 
 @pytest.mark.parametrize(

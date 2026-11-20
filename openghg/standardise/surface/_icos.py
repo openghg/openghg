@@ -165,7 +165,7 @@ def _read_data_large_header(
 
     # Read some metadata before dropping the columns
     # sampling_height_data = df["samplingheight"][0]
-    site_name_data = df["#site"][0]
+    site_name_data = df["#site"].iloc[0]
 
     if site != site_name_data.lower():
         raise ValueError("Site mismatch between site argument passed and site in data.")
