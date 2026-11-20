@@ -58,6 +58,7 @@ _LEGACY_FREQUENCY_ALIASES = {
     "BH": "bh",
     "CBH": "cbh",
     "T": "min",
+    "t": "min",
     "S": "s",
     "L": "ms",
     "U": "us",
