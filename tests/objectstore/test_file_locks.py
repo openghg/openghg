@@ -5,6 +5,7 @@ from timeit import default_timer
 
 import pytest
 from openghg.objectstore.metastore import DataClassMetaStore
+from openghg.objectstore.metastore._classic_metastore import FileLock
 from openghg.objectstore import get_object_lock_path
 
 
@@ -96,15 +97,16 @@ def test_lock_is_advisory(tmp_path, mocker):
     ms3.close()
 
 
-def test_lock_permissions(tmp_path, get_metastores):
-    ms1, ms2 = get_metastores
-
-    # Acquire lock to ensure lock file is created and maintained
-    ms1.lock.acquire()
+def test_lock_permissions(tmp_path):
+    old_umask = os.umask(0o022)
     try:
-        lock_path = get_object_lock_path(str(tmp_path), ms1.key)
-        assert lock_path.exists(), f"Lock file {lock_path} does not exist"
-        permissions = os.stat(lock_path).st_mode
-        assert stat.filemode(permissions) == "-rw-rw-r--"
+        lock = FileLock(str(tmp_path), "key")
+        lock.acquire()
     finally:
-        ms1.lock.release()
+        os.umask(old_umask)
+
+    try:
+        lock_path = get_object_lock_path(str(tmp_path), "key")
+        assert stat.S_IMODE(lock_path.stat().st_mode) == 0o664
+    finally:
+        lock.release()

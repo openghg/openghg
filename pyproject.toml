@@ -27,7 +27,7 @@ dependencies = [
     "cdsapi>=0.7.7",
     "cf-xarray<=0.10.6",
     "dask<2026.9",
-    "filelock<=3.32.6",
+    "filelock<=4.2.10",
     "flox<=0.10.4",
     "h5netcdf>=1.8.0,<=1.8.1",
     "h5py<3.17",
@@ -136,7 +136,7 @@ pip = "*"
 # These entries override matching PyPI dependencies from this project.
 cf_xarray = "<=0.10.6"
 cftime = "*"
-filelock = "<=3.29.0"
+filelock = "<=4.2.10"
 flox = "<=0.10.4"
 hdf5 = "*"
 h5netcdf = ">=1.8.0,<=1.8.1"
