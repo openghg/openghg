@@ -201,6 +201,8 @@ def parse_icos_text_file(data_info: dict | pd.Series) -> tuple[xr.Dataset, dict]
     # attrs = _data_parsing.get_full_attrs(dobj_uri, species, header)
 
     skiprows = int(header["header_lines"]) - 1
+    # Missing-value sentinels used in ICOS text files
+    na_values = ["-999.99", "-9.99"]
 
     data_format = _data_parsing._retrieve_dobj_format(data_info)
     if data_format == "asciiAtcFlaskTimeSer":
@@ -217,7 +219,10 @@ def parse_icos_text_file(data_info: dict | pd.Series) -> tuple[xr.Dataset, dict]
             "Flag",
             "InstrumentId",
         ]
-        dataframe = pd.read_csv(io.StringIO(icos_text), skiprows=skiprows, sep=";", usecols=usecols)
+
+        dataframe = pd.read_csv(
+            io.StringIO(icos_text), skiprows=skiprows, sep=";", usecols=usecols, na_values=na_values
+        )
 
         dataframe["TIMESTAMP"] = pd.to_datetime(dataframe["SamplingStart"]).dt.tz_localize(None)
 
@@ -227,12 +232,16 @@ def parse_icos_text_file(data_info: dict | pd.Series) -> tuple[xr.Dataset, dict]
         if "Second" in header["columns"]:
             usecols.append("Second")
 
-        dataframe = pd.read_csv(io.StringIO(icos_text), skiprows=skiprows, sep=";", usecols=usecols)
+        dataframe = pd.read_csv(
+            io.StringIO(icos_text), skiprows=skiprows, sep=";", usecols=usecols, na_values=na_values
+        )
 
         # make time index
         date_cols, times = _data_parsing.parse_date_columns(dataframe)
         dataframe["TIMESTAMP"] = times
         dataframe = dataframe.drop(columns=date_cols)
+    # Drop rows where the measurement itself is missing (sentinel values read as NaN)
+    dataframe = dataframe.dropna(subset=[species])
 
     # # try to get dtypes
     # dtypes = dtypes_dict(df.columns.to_list(), attrs) if attrs is not None else None
