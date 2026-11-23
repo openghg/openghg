@@ -18,8 +18,9 @@ Footprint times flux
 ``fp_x_flux_time_resolved_numba`` computes source-resolved model sensitivity without
 summing the spatial grid. It returns a lazy ``(source, lat, lon, time)`` array,
 so basis functions can be applied later. When observation times are supplied,
-selection happens after the full lagged calculation is constructed. Install
-the optional kernel dependency with ``pip install 'openghg[fp-x-flux]'``.
+selection happens after the full lagged calculation is constructed. OpenGHG
+installs Numba for this calculation. On Intel Macs with Python 3.14, use the
+Conda environment described in :doc:`../install` to get a prebuilt Numba package.
 Single-source flux, regularly spaced coarse flux, and irregular footprint
 release times are supported.
 
