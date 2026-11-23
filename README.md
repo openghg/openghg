@@ -12,7 +12,7 @@ For more information, please visit [our documentation](https://docs.openghg.org/
 
 ## Install OpenGHG
 
-OpenGHG supports Python 3.11 through 3.14 on Linux or MacOS (Python 3.14 is the recommended version). To install the released package, you can use `uv` or `conda`. For development installs from a local checkout, you can also use `pixi`.
+OpenGHG supports Python 3.11 through 3.14 on Linux or MacOS (Python 3.13 is the recommended version). To install the released package, you can use `uv` or `conda`. For development installs from a local checkout, you can also use `pixi`.
 
 OpenGHG installs Numba automatically for time-resolved footprint-times-flux calculations (`fp-x-flux`). With `pip` or `uv`, this covers Linux, Apple Silicon Macs, and Intel Macs running Python 3.11–3.13. For Python 3.14 on an Intel Mac, use Conda to get a prebuilt Numba package from `conda-forge`. [Conda setup](#installing-with-conda)
 
@@ -81,9 +81,9 @@ Do not run commands such as `pip install -U h5py h5netcdf netcdf4` inside the Pi
 
 2. **Create and activate an environment for OpenGHG:**
    ```bash
-   uv venv openghg-env --python 3.14
+   uv venv openghg-env --python 3.13
    ```
-   Python 3.14 is the recommended version. Additionally, any supported python
+   Python 3.13 is the recommended version. Additionally, any supported python
    version (3.11-3.14) can be specified while creating the environment as
    follows.
    ```bash
@@ -107,10 +107,10 @@ To get OpenGHG installed using `conda`, follow these steps:
 
 1. **Create and activate a `conda` environment:**
    ```bash
-   conda create --name openghg_env python=3.14
+   conda create --name openghg_env python=3.13
    conda activate openghg_env
    ```
-   Python 3.14 is the recommended version. Any supported python version
+   Python 3.13 is the recommended version. Any supported python version
    (3.11-3.14) can be used instead.
 
 2. **Install OpenGHG and its dependencies using the `conda-forge` and `openghg` channels:**
@@ -178,9 +178,10 @@ If you'd like to contribute to OpenGHG, here are the steps to set up a developme
 
 2. **Create and activate an environment for OpenGHG:**
    ```bash
-   uv venv --python 3.14
+   export UV_PYTHON=3.13
+   uv venv --python 3.13
    ```
-   Python 3.14 is the recommended version. A python environment with name can
+   Python 3.13 is the recommended version. A python environment with name can
    also be created, as showed in non-developer instance previously.
    Additionally, any supported python version (3.11-3.14) can be specified
    while creating the environment as follows. Keep `UV_PYTHON` set when
@@ -203,7 +204,7 @@ If you'd like to contribute to OpenGHG, here are the steps to set up a developme
    ```bash
    uv sync --locked --extra dev --extra doc
    ```
-   This installs the local checkout in **editable mode** with the development and documentation dependencies. Run `uv sync --locked` for a checkout with the runtime dependencies alone.
+   This installs the local checkout in **editable mode** with the development and documentation dependencies. For a runtime-only checkout on the recommended Python version, run `uv sync --locked --python 3.13`.
 
    Run development commands through `uv` so that their executables and
    dependencies always come from the project's `.venv`, even if another
