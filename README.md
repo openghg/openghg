@@ -14,6 +14,8 @@ For more information, please visit [our documentation](https://docs.openghg.org/
 
 OpenGHG supports Python 3.11 through 3.14 on Linux or MacOS (Python 3.14 is the recommended version). To install the released package, you can use `uv` or `conda`. For development installs from a local checkout, you can also use `pixi`.
 
+OpenGHG installs Numba automatically for time-resolved footprint-times-flux calculations (`fp-x-flux`). With `pip` or `uv`, this covers Linux, Apple Silicon Macs, and Intel Macs running Python 3.11–3.13. For Python 3.14 on an Intel Mac, use Conda to get a prebuilt Numba package from `conda-forge`. [Conda setup](#installing-with-conda)
+
 ### Installing with Pixi for development
 
 OpenGHG reads and writes NetCDF/HDF5 data through `xarray`, `h5netcdf`, `h5py`, `netcdf4`, and `zarr`. The Pixi environment in this repository installs the compiled scientific, HDF5, and NetCDF stack from `conda-forge` and installs the local OpenGHG checkout in editable mode.
@@ -199,9 +201,9 @@ If you'd like to contribute to OpenGHG, here are the steps to set up a developme
 
 3. **Install development dependencies and the package in editable mode:**
    ```bash
-   uv sync --all-extras
+   uv sync --locked --extra dev --extra doc
    ```
-   This ensures that the local repository is installed in **editable mode**, meaning changes to the source code are immediately reflected. It will also ensure that all the dev and documentation dependencies are installed in the environment.
+   This installs the local checkout in **editable mode** with the development and documentation dependencies. Run `uv sync --locked` for a checkout with the runtime dependencies alone.
 
    Run development commands through `uv` so that their executables and
    dependencies always come from the project's `.venv`, even if another
@@ -223,11 +225,10 @@ If you'd like to contribute to OpenGHG, here are the steps to set up a developme
 
 2. **Create and activate a `conda` environment:**
    ```bash
-   conda create --name openghg-dev python=3.14
+   conda env create --name openghg-dev --file environment.yaml
    conda activate openghg-dev
    ```
-   Python 3.14 is the recommended version. Any supported python version
-   (3.11-3.14) can be used instead.
+   The environment file selects a supported Python version and installs Numba from `conda-forge`.
 
 3. **Install development dependencies:**
    ```bash
