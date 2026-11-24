@@ -118,6 +118,15 @@ To get OpenGHG installed using `conda`, follow these steps:
 
 Note: The optional `xesmf` library is pre-installed when using `conda`. No additional steps are required for regridding functionality.
 
+### Numba for Footprint-Times-Flux
+
+OpenGHG installs Numba automatically for time-resolved footprint-times-flux
+calculations (`fp-x-flux`). With `pip` or `uv`, this covers Linux, Apple
+Silicon Macs, and Intel Macs running Python 3.11–3.13. On an Intel Mac with
+Python 3.14, use the Conda setup above for a prebuilt Numba package. If you
+are working from a local checkout, create the Conda environment with
+`conda env create --name openghg-dev --file environment.yaml`.
+
 ---
 
 ## Quickstart Configuration
@@ -199,7 +208,7 @@ If you'd like to contribute to OpenGHG, here are the steps to set up a developme
 
 3. **Install development dependencies and the package in editable mode:**
    ```bash
-   uv sync --all-extras
+   uv sync --locked --extra dev --extra doc
    ```
    This ensures that the local repository is installed in **editable mode**, meaning changes to the source code are immediately reflected. It will also ensure that all the dev and documentation dependencies are installed in the environment.
 
