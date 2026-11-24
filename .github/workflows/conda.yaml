@@ -9,8 +9,6 @@ on:
       - 'CHANGELOG.md'
   pull_request:
     branches: [master, devel]
-    paths-ignore:
-      - 'CHANGELOG.md'
   workflow_dispatch:
 
 jobs:
@@ -28,7 +26,20 @@ jobs:
         python-version: ["3.11", "3.12", "3.13", "3.14"]
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: ${{ github.event_name == 'pull_request' && 2 || 1 }}
+      - name: Check for changelog-only changes
+        id: changes
+        if: github.event_name == 'pull_request'
+        run: |
+          # Compare the PR merge commit with its first parent (the base).
+          changed_files="$(git diff --name-only --no-renames HEAD^1 HEAD)"
+          if [[ "$changed_files" == "CHANGELOG.md" ]]; then
+            echo "changelog_only=true" >> "$GITHUB_OUTPUT"
+            echo "Skipping setup and tests for a changelog-only pull request."
+          fi
       - uses: mamba-org/setup-micromamba@v3
+        if: steps.changes.outputs.changelog_only != 'true'
         with:
           environment-file: environment.yaml
           cache-environment: true
@@ -38,11 +49,14 @@ jobs:
             -f environment-dev.yaml
             python=${{ matrix.python-version }}
       - name: List installed packages
+        if: steps.changes.outputs.changelog_only != 'true'
         run: micromamba list
         shell: micromamba-shell {0}
       - name: Install OpenGHG
+        if: steps.changes.outputs.changelog_only != 'true'
         run: conda develop .
         shell: micromamba-shell {0}
       - name: Run the tests
+        if: steps.changes.outputs.changelog_only != 'true'
         run: pytest -v tests/
         shell: micromamba-shell {0}
