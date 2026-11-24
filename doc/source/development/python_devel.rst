@@ -486,23 +486,32 @@ Google `style docstrings <https://sphinxcontrib-napoleon.readthedocs.io/en/lates
 for details. The documentation is automatically built using `Sphinx <http://sphinx-doc.org>`__. Whenever a commit is pushed to devel the
 documentation is automatically rebuilt and updated.
 
-To build the documentation locally you will first need to install the
-documentation dependencies. If you haven't yet installed the documentation dependencies please do so by running
+Install ``make`` and `Pandoc <https://pandoc.org/installing.html>`__ and make sure both are on your ``PATH``.
+On macOS with Homebrew, use ``brew install pandoc``. From the repository root, install the
+``doc`` extra, which provides ``sphinx-build``. Use a separate environment to keep the docs
+dependencies independent of your development environment.
 
 .. code-block:: bash
 
-   pip install -e ".[doc]"
+   export UV_PROJECT_ENVIRONMENT=.venv-docs
+   export UV_PYTHON=3.13
+   uv sync --locked --extra doc
 
-Next ensure you have `pandoc <https://pandoc.org/>`__ installed. Installation instructions
-can be `found here <https://pandoc.org/installing.html>`__
-
-Then move to the ``doc`` directory and run:
+If you haven't configured OpenGHG before, create the default configuration so the tutorial
+examples can run during the build.
 
 .. code-block:: bash
 
-   make
+   uv run --no-sync openghg --default-config
 
-When finished, point your browser to ``build/html/index.html``.
+Build the HTML from the repository root. Running ``make`` through ``uv`` makes
+``sphinx-build`` available to the Makefile.
+
+.. code-block:: bash
+
+   uv run --no-sync make -C doc html
+
+Open ``doc/build/html/index.html`` in your browser.
 
 Committing
 ==========

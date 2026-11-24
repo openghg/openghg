@@ -12,7 +12,7 @@ OpenGHG is developed and `tested on Linux and MacOS <https://github.com/openghg/
 support for Windows is planned.
 
 To install OpenGHG, you first need to install Python 3.11 through 3.14.
-Python 3.14 is the recommended version for local installations. To check if you have a supported Python installed type;
+Python 3.13 is the recommended version for local installations. Run the following command to check your version.
 
 .. code-block:: bash
 
@@ -93,14 +93,13 @@ incompatibilities.
 pip
 ---
 
-For pip installations, use Python 3.11 through 3.14. We recommend Python
-3.14.
+For pip installations, use Python 3.11 through 3.14. We recommend Python 3.13.
 
 First create a virtual environment and activate it
 
 .. code-block:: bash
 
-    python -m venv /path/to/env/openghg_env
+    python3.13 -m venv /path/to/env/openghg_env
     source /path/to/env/bin/activate
 
 Here change ``/path/to/env`` with your own path.
@@ -119,7 +118,7 @@ First create and activate a conda environment
 
 .. code-block:: bash
 
-    conda create --name openghg_env
+    conda create --name openghg_env python=3.13
     conda activate openghg_env
 
 Next install OpenGHG from our conda channel

@@ -7834,7 +7834,7 @@ packages:
   - cdsapi>=0.7.7
   - cf-xarray<=0.11.3
   - dask<2026.9
-  - filelock<=4.2.10
+  - filelock<=4.2.12
   - flox<=0.11.2
   - h5netcdf>=1.8.0,<=1.8.3
   - h5py<3.17
@@ -7883,8 +7883,8 @@ packages:
   - pytest-tornasync<=0.6.0.post2 ; extra == 'dev'
   - pytest>=7.0.0,<=9.2.0 ; extra == 'dev'
   - requests-mock<=1.12.1 ; extra == 'dev'
-  - ruff==0.17.5 ; extra == 'dev'
-  - tox<=4.67.13 ; extra == 'dev'
+  - ruff==0.17.6 ; extra == 'dev'
+  - tox<=4.67.15 ; extra == 'dev'
   - types-paramiko<=5.1.0.20261030 ; extra == 'dev'
   - types-pyyaml<=6.0.12.20261113 ; extra == 'dev'
   - types-requests<=2.33.0.20261030 ; extra == 'dev'
