@@ -2,7 +2,7 @@ name: OpenGHG tests
 
 on:
   push:
-    branches: [master, devel]
+    branches: [master]
     tags:
       - "*"
     paths-ignore:

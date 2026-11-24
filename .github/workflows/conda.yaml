@@ -2,7 +2,7 @@ name: Create conda environment and run tests
 
 on:
   push:
-    branches: [master, devel]
+    branches: [master]
     tags:
       - "*"
     paths-ignore:
