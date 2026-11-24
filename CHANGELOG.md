@@ -23,7 +23,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Updated
 
-- Included Numba in default OpenGHG environments so time-resolved footprint-times-flux calculations are available after installation. [PR #1814](https://github.com/openghg/openghg/pull/1814).
 - Added pandas 3 support for time resampling, footprint alignment and surface-data parsing. [PR #1812](https://github.com/openghg/openghg/pull/1812).
 - Updated the grouped Python runtime, development and documentation dependencies. [Dependabot PR #1803](https://github.com/openghg/openghg/pull/1803).
 - Added Python 3.14 to the CI test matrices and extended OpenGHG support to Python 3.11-3.14. Upgraded SciPy and updated the conda version bounds for h5py, netCDF4 and msgpack. [PR #1809](https://github.com/openghg/openghg/pull/1809).

@@ -36,10 +36,6 @@ Installation
 We highly recommend creating a separate virtual environment for ``openghg``. This ensures the correct versions
 of libraries can be installed without making changes to versions of libraries needed for other projects / programs.
 
-On Intel Macs with Python 3.14, use Conda for Numba-based footprint-times-flux
-calculations. The repository's Pixi environment also includes Numba and uses
-Python 3.11.
-
 Pixi
 ----
 

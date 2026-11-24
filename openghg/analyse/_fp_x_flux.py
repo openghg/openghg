@@ -17,7 +17,7 @@ import xarray as xr
 
 try:
     from numba import njit  # type: ignore[import-not-found]
-except ImportError:  # pragma: no cover - Numba may be unavailable on Intel macOS with Python 3.14
+except ImportError:  # pragma: no cover - exercised in base installs without the optional extra
     njit = None  # type: ignore[assignment]
 
 
@@ -33,19 +33,18 @@ _R = TypeVar("_R")
 
 
 def _numba_kernel(function: Callable[_P, _R]) -> Callable[_P, _R]:
-    """Decorate a kernel when Numba can be imported."""
+    """Decorate a kernel when the optional Numba dependency is installed."""
     if njit is None:
         return function
     return cast(Callable[_P, _R], njit(cache=True)(function))
 
 
 def _require_numba() -> None:
-    """Raise an actionable error when Numba cannot be imported."""
+    """Raise an actionable error when the optional Numba extra is absent."""
     if njit is None:
         raise ImportError(
-            "The footprint-times-flux kernel requires Numba. "
-            "Install OpenGHG with its runtime dependencies. "
-            "On Intel Macs with Python 3.14, use the Conda environment."
+            "fp_x_flux_time_resolved_numba requires the optional Numba dependency. "
+            "Install OpenGHG with `pip install 'openghg[fp-x-flux]'`."
         )
 
 
@@ -888,7 +887,7 @@ def fp_x_flux_time_resolved_numba_core(
         A lazy, dimensionless DataArray ordered as ``source, lat, lon, time``.
 
     Raises:
-        ImportError: If the Numba dependency cannot be imported.
+        ImportError: If OpenGHG was installed without the ``fp-x-flux`` extra.
         ValueError: If prepared dimensions, coordinates, chunks, time labels,
             lag values, or flux coverage violate the core contract.
     """
@@ -1021,7 +1020,7 @@ def fp_x_flux_time_resolved_numba(  # noqa: PLR0913
         A lazy, dimensionless DataArray ordered as ``source, lat, lon, time``.
 
     Raises:
-        ImportError: If the Numba dependency cannot be imported.
+        ImportError: If OpenGHG was installed without the ``fp-x-flux`` extra.
         ValueError: If inputs, source labels, interval timestamps, lag values,
             flux coverage, chunks, or the optional time selector are invalid.
     """
@@ -1127,7 +1126,7 @@ def warm_numba_fp_x_flux() -> str:
         A readiness message suitable for collecting from distributed workers.
 
     Raises:
-        ImportError: If the Numba dependency cannot be imported.
+        ImportError: If OpenGHG was installed without the ``fp-x-flux`` extra.
     """
     _require_numba()
     fp = np.zeros((1, 1, 1, 1), dtype=np.float32)

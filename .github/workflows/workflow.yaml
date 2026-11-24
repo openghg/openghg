@@ -66,13 +66,8 @@ jobs:
           version: "latest"
           enable-cache: true
 
-      - name: Test the Numba kernel in the default environment
-        run: |
-          uv sync --locked
-          uv run --no-sync python -m pytest -q tests/analyse/test_fp_x_flux.py::test_warm_numba_fp_x_flux
-
       - name: Install project (including dev dependencies)
-        run: uv sync --locked --extra dev
+        run: uv sync --locked --extra dev --extra fp-x-flux
 
       - name: Check formatting with Ruff
         run: |
