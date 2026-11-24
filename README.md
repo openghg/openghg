@@ -239,6 +239,10 @@ If you'd like to contribute to OpenGHG, here are the steps to set up a developme
 
 ---
 
+### Building the Documentation
+
+The [local documentation build guide](doc/source/development/python_devel.rst#documentation) explains how to install the docs extra with `uv`, run `make -C doc html`, and preview `doc/build/html/index.html`.
+
 ### Running Tests
 
 OpenGHG uses `pytest` for testing. After setting up the development environment, you can run tests as follows:
