@@ -9,8 +9,6 @@ on:
       - 'CHANGELOG.md'
   pull_request:
     branches: [master, devel]
-    paths-ignore:
-      - 'CHANGELOG.md'
   workflow_dispatch:
     inputs:
       tag:
@@ -55,38 +53,61 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          fetch-depth: ${{ github.event_name == 'pull_request' && 2 || 1 }}
+
+      - name: Check for changelog-only changes
+        id: changes
+        if: github.event_name == 'pull_request'
+        run: |
+          # Compare the PR merge commit with its first parent (the base).
+          changed_files="$(git diff --name-only --no-renames HEAD^1 HEAD)"
+          if [[ "$changed_files" == "CHANGELOG.md" ]]; then
+            echo "changelog_only=true" >> "$GITHUB_OUTPUT"
+            echo "Skipping setup and tests for a changelog-only pull request."
+          fi
+
       - name: Set up Python ${{ matrix.python-version }}
+        if: steps.changes.outputs.changelog_only != 'true'
         uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
       - name: Install uv
+        if: steps.changes.outputs.changelog_only != 'true'
         uses: astral-sh/setup-uv@v7
         with:
           version: "latest"
           enable-cache: true
 
       - name: Install project (including dev dependencies)
+        if: steps.changes.outputs.changelog_only != 'true'
         run: uv sync --locked --extra dev --extra fp-x-flux
 
       - name: Check formatting with Ruff
+        if: steps.changes.outputs.changelog_only != 'true'
         run: |
           uv run ruff format --check openghg/
 
       - name: Lint with Ruff
+        if: steps.changes.outputs.changelog_only != 'true'
         run: |
           uv run ruff check openghg/
 
       - name: Run mypy
+        if: steps.changes.outputs.changelog_only != 'true'
         run: uv run mypy --python-version ${{ matrix.python-version }} openghg/
 
       - name: Create mock cdsapi config file
+        if: steps.changes.outputs.changelog_only != 'true'
         run: |
           echo $'url: https://www.openghg.org\nkey: 00000:f5690ad7-test-test-test-6fb0573991ca\n' > ~/.cdsapirc
       - name: Install udunits package for CF compliance checks
+        if: steps.changes.outputs.changelog_only != 'true'
         run: |
           sudo apt-get install libudunits2-0
       - name: Test with pytest
+        if: steps.changes.outputs.changelog_only != 'true'
         run: |
           uv run pytest --run-cfchecks
   docs:
