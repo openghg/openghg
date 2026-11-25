@@ -34,24 +34,26 @@ requirements:
     {% endfor %}
 
 test:
-  imports:
-    - openghg
-    - openghg.analyse
-    - openghg.dataobjects
-    - openghg.objectstore
-    - openghg.plotting
-    - openghg.retrieve
-    - openghg.retrieve.icos
-    - openghg.retrieve.ceda
-    - openghg.service
-    - openghg.standardise
-    - openghg.standardise.meta
-    - openghg.standardise.surface
-    - openghg.store
-    - openghg.store.base
-    - openghg.transform
-    - openghg.types
-    - openghg.util
+  commands:
+    - python -m pip install "icoscp<=0.2.3" "xarray-validate==0.0.5" "numpy>=2.0"
+    - python -c "import openghg"
+    - python -c "import openghg.analyse"
+    - python -c "import openghg.dataobjects"
+    - python -c "import openghg.objectstore"
+    - python -c "import openghg.plotting"
+    - python -c "import openghg.retrieve"
+    - python -c "import openghg.retrieve.icos"
+    - python -c "import openghg.retrieve.ceda"
+    - python -c "import openghg.service"
+    - python -c "import openghg.standardise"
+    - python -c "import openghg.standardise.meta"
+    - python -c "import openghg.standardise.surface"
+    - python -c "import openghg.store"
+    - python -c "import openghg.store.base"
+    - python -c "import openghg.store._data_schema"
+    - python -c "import openghg.transform"
+    - python -c "import openghg.types"
+    - python -c "import openghg.util"
 
 about:
   home: "https://github.com/openghg/openghg"

@@ -116,6 +116,11 @@ To get OpenGHG installed using `conda`, follow these steps:
    conda install --channel conda-forge --channel openghg openghg
    ```
 
+3. **Install dependencies that are not included in the conda package:**
+   ```bash
+   python -m pip install "icoscp<=0.2.3" "xarray-validate==0.0.5" "numpy>=2.0"
+   ```
+
 Note: The optional `xesmf` library is pre-installed when using `conda`. No additional steps are required for regridding functionality.
 
 ---
