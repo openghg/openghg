@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.20.0] - 2026-11-24
 
+### Added
+
+- Added versioned JSON metadata and CF history helpers for xarray DataArrays and Datasets. [Issue #1682](https://github.com/openghg/openghg/issues/1682)
+
 ### Fixed
 
 - Fixed group-write permissions on new metastore lock files when using filelock 4. [PR #1811](https://github.com/openghg/openghg/pull/1811).
