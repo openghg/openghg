@@ -11,7 +11,7 @@ from openghg.retrieve import (
     search_surface,
 )
 from openghg.dataobjects import data_manager
-from pandas import Timestamp
+from pandas import Timedelta, Timestamp
 
 from tests.helpers.helpers import print_dict_diff
 
@@ -83,6 +83,19 @@ def test_search_surface_selects_dates():
 
     assert data_sliced.time[0] == Timestamp("2014-01-01T22:36:30")
     assert data_sliced.time[-1] == Timestamp("2014-01-07T09:17:30")
+
+
+def test_search_surface_end_date_offset_applied_once():
+    """end_date is exclusive: a time step 1 s before it is returned, one at it is not."""
+    last = Timestamp("2014-01-07T09:17:30")
+
+    res = search_surface(
+        site="hfd", species="co2", inlet="50m", start_date="2014-01-01", end_date=last + Timedelta("1s")
+    )
+    assert res.retrieve_all().data.time[-1] == last
+
+    res = search_surface(site="hfd", species="co2", inlet="50m", start_date="2014-01-01", end_date=last)
+    assert res.retrieve_all().data.time[-1] < last
 
 
 def test_search_surface_range():

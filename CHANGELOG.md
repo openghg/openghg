@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.20.0...HEAD)
 
+### Fixed
+
+- Applied the 1 s `end_date` offset once when retrieving data with a date range. It was applied both in search and again when slicing, so a time step less than 2 s before `end_date` was dropped. `end_date` stays exclusive, and a time step 1 s before it is now returned. [Issue #1817](https://github.com/openghg/openghg/issues/1817)
+
 ## [0.20.0] - 2026-11-24
 
 ### Fixed
