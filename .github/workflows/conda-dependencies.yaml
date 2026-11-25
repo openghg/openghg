@@ -1,0 +1,33 @@
+name: Check conda package dependencies
+
+on:
+  push:
+    branches: [master, devel]
+  pull_request:
+    branches: [master, devel]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check-dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Prepare conda-only environment
+        run: |
+          grep -q '^  - pip:$' environment.yaml
+          sed '/^  - pip:$/,$d' environment.yaml > "$RUNNER_TEMP/conda-only.yaml"
+      - uses: mamba-org/setup-micromamba@v3
+        with:
+          environment-file: ${{ runner.temp }}/conda-only.yaml
+          init-shell: bash
+      - name: Install pip-only dependencies
+        run: python -m pip install "icoscp<=0.2.3" "xarray-validate==0.0.5" "numpy>=2.0"
+        shell: micromamba-shell {0}
+      - name: Check dependency and OpenGHG imports
+        run: |
+          python -c "import icoscp, icoscp_core, numpy, xarray_validate"
+          python -c "import openghg.retrieve.icos, openghg.store._data_schema"
+        shell: micromamba-shell {0}
