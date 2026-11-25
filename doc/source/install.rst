@@ -127,6 +127,12 @@ Next install OpenGHG from our conda channel
 
     conda install --channel conda-forge --channel openghg openghg
 
+Then install the dependencies not included in the conda package:
+
+.. code-block:: bash
+
+    python -m pip install "icoscp<=0.2.3" "xarray-validate==0.0.5" "numpy>=2.0"
+
 
 Configuration
 =============
