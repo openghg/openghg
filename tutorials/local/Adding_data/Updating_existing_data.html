@@ -1,39 +1,49 @@
 <!DOCTYPE html>
 
-<html lang="en" data-content_root="../../../">
+
+<html lang="en" data-content_root="../../../" >
+
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Updating existing data &#8212; OpenGHG 0.19.0 documentation</title>
-    
-    <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+    <title>Updating existing data &#8212; OpenGHG 0.20.0 documentation</title>
   
-    
-    <link rel="stylesheet"
-      href="../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
   
-    
-      
   
-    
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/pydata-sphinx-theme.css?v=1140d252" />
     <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=9c3e77be" />
     <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
-    
-    <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
   
-    <script src="../../../_static/documentation_options.js?v=8a079089"></script>
-    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+  <!-- So that users can add custom icons -->
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="../../../_static/documentation_options.js?v=b52c616d"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
@@ -42,362 +52,446 @@
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/local/Adding_data/Updating_existing_data';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <script src="../../../_static/custom.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="next" title="Comparing observations to emissions" href="../Analysing_data/Comparing_with_emissions.html" />
     <link rel="prev" title="Metadata and attributes" href="Metadata_and_attributes.html" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="docsearch:language" content="en">
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.20.0" />
+    <meta name="docbuild:last-update" content="Nov 25, 2026"/>
+  
     
-
-    <!-- Google Analytics -->
-    
+    <script src="../../../_static/searchtools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../searchindex.js"></script>
+  
   </head>
-  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
-    
-    <div class="container-fluid" id="banner"></div>
-
-    
-    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
-
-  <div id="navbar-start">
-    
-    
-<a class="navbar-brand" href="../../../index.html">
-<p class="title">OpenGHG</p>
-</a>
-
-    
-  </div>
-
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
 
   
-  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
-    <div id="navbar-center" class="mr-auto">
-      
-      <div class="navbar-center-item">
-        <ul id="navbar-main-elements" class="navbar-nav">
-    <li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../../../install.html">
-  Installation
- </a>
-</li>
-
-<li class="toctree-l1 current active nav-item">
- <a class="reference internal nav-link" href="../../index.html">
-  Tutorials
- </a>
-</li>
-
-<li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../../../api/index.html">
-  User API
- </a>
-</li>
-
-<li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../../../development/index_devel.html">
-  Development
- </a>
-</li>
-
-<li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../../../api/index_devapi.html">
-  Developer API
- </a>
-</li>
-
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
     
-</ul>
-      </div>
-      
-    </div>
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
 
-    <div id="navbar-end">
-      
-      <div class="navbar-end-item">
-        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
-      </ul>
-      </div>
-      
-    </div>
-  </div>
-</div>
-    </nav>
-    
-
-    <div class="container-xl">
-      <div class="row">
-          
-            
-            <!-- Only show if we have sidebars configured, else just a small margin  -->
-            <div class="col-12 col-md-3 bd-sidebar">
-              <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
-  <i class="icon fas fa-search"></i>
-  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
-</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
-  <div class="bd-toc-item active">
-    <p aria-level="2" class="caption" role="heading">
- <span class="caption-text">
-  Adding data
- </span>
-</p>
-<ul class="current nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="Adding_observation_data.html">
-   Adding observation data
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="Adding_ancillary_data.html">
-   Adding ancillary spatial data
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="Creating_data_from_databases.html">
-   Using databases to add data
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="Metadata_and_attributes.html">
-   Metadata and attributes
-  </a>
- </li>
- <li class="toctree-l1 current active">
-  <a class="current reference internal" href="#">
-   Updating existing data
-  </a>
- </li>
-</ul>
-<p aria-level="2" class="caption" role="heading">
- <span class="caption-text">
-  Analysing data
- </span>
-</p>
-<ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="../Analysing_data/Comparing_with_emissions.html">
-   Comparing observations to emissions
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../Analysing_data/Comparing_satellite_observations_with_emissions.html">
-   Comparing Satellite Observations to Emissions
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../Analysing_data/Working_with_co2.html">
-   Working with carbon dioxide
-  </a>
- </li>
-</ul>
-<p aria-level="2" class="caption" role="heading">
- <span class="caption-text">
-  Exploring data
- </span>
-</p>
-<ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="../Exploring_data/Explore_NOAA_ObsPack.html">
-   Explore NOAA ObsPack
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../Exploring_data/Retrieving_remote_data.html">
-   Retrieving data from remote archives
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../Exploring_data/Searching_and_plotting.html">
-   Searching and plotting
-  </a>
- </li>
-</ul>
-<p aria-level="2" class="caption" role="heading">
- <span class="caption-text">
-  Managing the object store
- </span>
-</p>
-<ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="../Managing_object_store/Managing_data.html">
-   Managing and deleting data
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../Managing_object_store/Changing_object_store.html">
-   Changing the object store path
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../Managing_object_store/Converting_a_store.html">
-   Converting an object store
-  </a>
- </li>
-</ul>
-<p aria-level="2" class="caption" role="heading">
- <span class="caption-text">
-  Outputting data
- </span>
-</p>
-<ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="../Outputting_data/Creating_obspack.html">
-   Creating an ObsPack
-  </a>
- </li>
-</ul>
-
-  </div>
-</nav>
-              </div>
-              <div class="sidebar-end-items">
-              </div>
-            </div>
-            
-          
-
-          
-          <div class="d-none d-xl-block col-xl-2 bd-toc">
-            
-              
-              <div class="toc-item">
-                
-<div class="tocsection onthispage pt-5 pb-3">
-    <i class="fas fa-list"></i> On this page
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
 </div>
 
-<nav id="bd-toc-nav">
-    <ul class="visible nav section-nav flex-column">
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#updating-data">
-   Updating data
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.20.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.20.0 documentation - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../install.html">
+    Installation
   </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#managing-versions">
-   Managing versions
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    Tutorials
   </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#replacing-identical-data">
-   Replacing “identical” data
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    User API
   </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#example-workflow">
-   Example workflow
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../development/index_devel.html">
+    Development
   </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#using-the-tutorial-object-store">
-     0. Using the tutorial object store
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#adding-example-data">
-     1. Adding example data
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#adding-more-data">
-     2. Adding more data
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#updating-with-new-data">
-     3. Updating with new data
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#replacing-existing-data-with-new-data">
-     4. Replacing existing data with new data
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#id4">
-     5. Replacing “identical” data
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#cleanup">
-     6. Cleanup
-    </a>
-   </li>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index_devapi.html">
+    Developer API
+  </a>
+</li>
+
   </ul>
- </li>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page" aria-expanded="false" aria-controls="pst-secondary-sidebar-modal">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../install.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    User API
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../development/index_devel.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index_devapi.html">
+    Developer API
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Adding data</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="Adding_observation_data.html">Adding observation data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Adding_ancillary_data.html">Adding ancillary spatial data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Adding_co2_satellite_data.html">Adding CO2 satellite data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Creating_data_from_databases.html">Using databases to add data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Metadata_and_attributes.html">Metadata and attributes</a></li>
+<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">Updating existing data</a></li>
 </ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Analysing data</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Analysing_data/Comparing_with_emissions.html">Comparing observations to emissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Analysing_data/Comparing_satellite_observations_with_emissions.html">Comparing Satellite Observations to Emissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Analysing_data/Working_with_co2.html">Working with carbon dioxide</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Exploring data</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Exploring_data/Explore_NOAA_ObsPack.html">Explore NOAA ObsPack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Exploring_data/Retrieving_remote_data.html">Retrieving data from remote archives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Exploring_data/Searching_and_plotting.html">Searching and plotting</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Managing the object store</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Managing_data.html">Managing and deleting data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Changing_object_store.html">Changing the object store path</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Converting_a_store.html">Converting an object store</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Outputting data</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Outputting_data/Creating_obspack.html">Creating an ObsPack</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
 
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Tutorials</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Updating existing data</span></li>
+  </ul>
 </nav>
-              </div>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
               
-              <div class="toc-item">
+              
+              
                 
-              </div>
-              
-            
-          </div>
-          
-
-          
-          
-            
-          
-          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
-              
-              <div>
-                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
   <section id="updating-existing-data">
-<span id="id1"></span><h1>Updating existing data<a class="headerlink" href="#updating-existing-data" title="Link to this heading">¶</a></h1>
+<span id="id1"></span><h1>Updating existing data<a class="headerlink" href="#updating-existing-data" title="Link to this heading">#</a></h1>
 <p>OpenGHG categorises data based on the supplied necessary keywords and stores these as the associated metadata. For each data type these keywords will be different but they will always be used to understand how the data is defined.</p>
 <p>When adding data to the object store, two checks will be made against currently stored data:</p>
 <ol class="arabic simple">
 <li><p>Whether data has the same set of distinct keywords.</p></li>
-<li><p>Whether the time range for the data being added overlaps with the current time range for that data.</p></li>
+<li><p>Whether any time-coordinate values in the data being added match values
+already stored for that data.</p></li>
 </ol>
-<p>If the data exists but the time range does not overlap, this data will be added, grouped with the previous data and associated with the same keywords.</p>
-<p>By default, if data exists and the time range <em>does</em> overlap with existing data, the data will not be added and this will produce a <code class="docutils literal notranslate"><span class="pre">DataOverlapError</span></code>.</p>
+<p>By default, this is an exact check for matching time-coordinate values rather
+than a check that the start and end date ranges intersect.</p>
+<p>If the data exists but there are no matching time-coordinate values, the new data
+will be added, grouped with the previous data and associated with the same
+keywords when using the default <code class="docutils literal notranslate"><span class="pre">if_exists=&quot;auto&quot;</span></code> policy.</p>
+<p>By default, if data exists and matching time-coordinate values are found, the
+data will not be added and this will produce a <code class="docutils literal notranslate"><span class="pre">DataOverlapError</span></code>.</p>
 <section id="updating-data">
-<h2>Updating data<a class="headerlink" href="#updating-data" title="Link to this heading">¶</a></h2>
-<p>To add updated data to the object store which does overlap on time with current data, when using the <code class="docutils literal notranslate"><span class="pre">standarise_*</span></code> functions the user can specify what action to perform in this case using the <code class="docutils literal notranslate"><span class="pre">if_exists</span></code> input. This provides the options:</p>
+<h2>Updating data<a class="headerlink" href="#updating-data" title="Link to this heading">#</a></h2>
+<p>To add updated data to the object store, when using the <code class="docutils literal notranslate"><span class="pre">standardise_*</span></code>
+functions the user can specify what action to perform using the <code class="docutils literal notranslate"><span class="pre">if_exists</span></code>
+input. This provides the options:</p>
 <ol class="arabic simple">
-<li><p>“auto” - combine with previous data if no overlapping data points, raise <code class="docutils literal notranslate"><span class="pre">DataOverlap</span></code> error otherwise (default).</p></li>
-<li><p>“new” - store the newly added data (only)</p></li>
-<li><p><em>“combine” - combine the new and previous data and prefer the new data in the case where the time range overlaps. - to be implemented.</em></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code> - add to the current data if there are no matching
+time-coordinate values; raise <code class="docutils literal notranslate"><span class="pre">DataOverlapError</span></code> otherwise (default).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;new&quot;</span></code> - make the latest version contain only the newly added data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;combine&quot;</span></code> - combine the new and previous data and prefer the new data where
+time-coordinate values match.</p></li>
 </ol>
-<p>By default, using the “new” option will also create a new version of the data. In this way, the previous data will be retained (saved) but the new data will become the details which are accessed by default.</p>
+<p><code class="docutils literal notranslate"><span class="pre">if_exists</span></code> determines the contents of the resulting latest version;
+<code class="docutils literal notranslate"><span class="pre">save_current</span></code> determines whether that result is written to a new version or
+into the current latest version.</p>
+<p>These choices are deliberate versioning behaviour, not a special case of how
+files are passed in. When a list of filepaths is successfully concatenated by
+the parser, the <code class="docutils literal notranslate"><span class="pre">if_exists</span></code> policy is applied once to the combined dataset.
+Calling the same function repeatedly in a Python loop applies the policy once
+per call. Both approaches use the same policy, but the resulting version history
+can differ depending on how the parser groups the inputs. For a growing time
+series, use <code class="docutils literal notranslate"><span class="pre">if_exists=&quot;auto&quot;</span></code> for files without matching time-coordinate
+values or <code class="docutils literal notranslate"><span class="pre">if_exists=&quot;combine&quot;</span></code> when new files should be merged with current
+data.</p>
 </section>
 <section id="managing-versions">
-<h2>Managing versions<a class="headerlink" href="#managing-versions" title="Link to this heading">¶</a></h2>
-<p>If data files are large or there will be many updates needed, it may not be desirable to save the currently stored data and it may be prefered to delete this rather than retain this as a version. Whether to retain or overwrite the current data can set using the <em class="xref py py-obj">save_current</em> input.</p>
-<ol class="arabic">
-<li><p>“auto”</p>
-<blockquote>
-<div><ol class="loweralpha simple">
-<li><p>if data does not overlap, retain current data and version.</p></li>
-<li><p>if data does overlap and <code class="docutils literal notranslate"><span class="pre">if_exists=&quot;auto&quot;</span></code>, raise <code class="docutils literal notranslate"><span class="pre">DataOverlap</span></code> error.</p></li>
-<li><p>if data does overlap and <code class="docutils literal notranslate"><span class="pre">if_exists=&quot;new&quot;</span></code>, save current data and create a new version.</p></li>
-</ol>
-</div></blockquote>
-</li>
-<li><p>“yes” (/”y”) - Save the current data and create a new version for the new data.</p></li>
-<li><p>“no” (/”n”) - Do not save the current data and replace with the new data.</p></li>
-</ol>
+<h2>Managing versions<a class="headerlink" href="#managing-versions" title="Link to this heading">#</a></h2>
+<p>If data files are large or there will be many updates needed, it may not be
+desirable to save the currently stored data and it may be preferred to delete
+this rather than retain it as a version. Whether to retain or overwrite the
+current data can be set using the <code class="docutils literal notranslate"><span class="pre">save_current</span></code> input.</p>
+<p>When a matching datasource already exists, the update behaviour is:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p><code class="docutils literal notranslate"><span class="pre">if_exists</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">save_current=&quot;auto&quot;</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">save_current=&quot;y&quot;</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">save_current=&quot;n&quot;</span></code></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code></p></td>
+<td><p>Append points with new time-coordinate values in place.</p></td>
+<td><p>Copy current data to a new version, then append points with new
+time-coordinate values.</p></td>
+<td><p>Append points with new time-coordinate values in place.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;new&quot;</span></code></p></td>
+<td><p>Create a new version containing only new data.</p></td>
+<td><p>Create a new version containing only new data.</p></td>
+<td><p>Replace the current latest version with new data.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;combine&quot;</span></code></p></td>
+<td><p>Create a new version containing old and new data, preferring new data at
+matching times.</p></td>
+<td><p>Create a new version containing old and new data, preferring new data at
+matching times.</p></td>
+<td><p>Update the current latest version in place, preferring new data at
+matching times.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>For every <code class="docutils literal notranslate"><span class="pre">if_exists=&quot;auto&quot;</span></code> case, matching time-coordinate values still raise
+<code class="docutils literal notranslate"><span class="pre">DataOverlapError</span></code>. Repeated calls with <code class="docutils literal notranslate"><span class="pre">if_exists=&quot;combine&quot;</span></code> and
+<code class="docutils literal notranslate"><span class="pre">save_current=&quot;auto&quot;</span></code> create a new version on each update after the first; use
+<code class="docutils literal notranslate"><span class="pre">save_current=&quot;n&quot;</span></code> to combine in place.</p>
 </section>
-<section id="replacing-identical-data">
-<h2>Replacing “identical” data<a class="headerlink" href="#replacing-identical-data" title="Link to this heading">¶</a></h2>
-<p>One check OpenGHG will make will be whether or not an exact copy of this file has been added previously. In this case this will not check within the object store explicitly, and the data will not be added. For the rare cases where this may not be the desired behaviour, the <em class="xref py py-obj">force</em> flag using <em class="xref py py-obj">True</em> or <a href="#id2"><span class="problematic" id="id3">`</span></a>False`can be used to bypass this check and attempt to add the data to the object store in the usual way.</p>
+<section id="repeating-input-data">
+<h2>Repeating input data<a class="headerlink" href="#repeating-input-data" title="Link to this heading">#</a></h2>
+<p>OpenGHG does not identify repeated input files separately from their data. Repeating an
+input therefore follows the same <code class="docutils literal notranslate"><span class="pre">if_exists</span></code> update policy as any other update. With
+the default <code class="docutils literal notranslate"><span class="pre">if_exists=&quot;auto&quot;</span></code>, matching time-coordinate values raise a
+<code class="docutils literal notranslate"><span class="pre">DataOverlapError</span></code>. Use <code class="docutils literal notranslate"><span class="pre">if_exists=&quot;new&quot;</span></code> to replace the latest data with
+the repeated input, or <code class="docutils literal notranslate"><span class="pre">if_exists=&quot;combine&quot;</span></code> to combine it with the current
+data.</p>
 </section>
 <section id="example-workflow">
-<h2>Example workflow<a class="headerlink" href="#example-workflow" title="Link to this heading">¶</a></h2>
+<h2>Example workflow<a class="headerlink" href="#example-workflow" title="Link to this heading">#</a></h2>
 <p>This section includes an example workflow of how these keywords can be used.
 The sections must be completed in order to produce the expected results.</p>
 <section id="using-the-tutorial-object-store">
-<h3>0. Using the tutorial object store<a class="headerlink" href="#using-the-tutorial-object-store" title="Link to this heading">¶</a></h3>
+<h3>0. Using the tutorial object store<a class="headerlink" href="#using-the-tutorial-object-store" title="Link to this heading">#</a></h3>
 <p>For these sections, you should work in a sandboxed object
 store called the tutorial store to produce the expected results.
 To do this we use the
@@ -419,9 +513,9 @@ have been run using this store.</p>
 </div>
 </section>
 <section id="adding-example-data">
-<h3>1. Adding example data<a class="headerlink" href="#adding-example-data" title="Link to this heading">¶</a></h3>
+<h3>1. Adding example data<a class="headerlink" href="#adding-example-data" title="Link to this heading">#</a></h3>
 <p>We can grab some example data to demonstrate this workflow, in this case from the Macehead site in Ireland.
-This data includes may different species so we will focus on just $CF_6$ for this tutorial.</p>
+This data includes many different species so we will focus on just <code class="docutils literal notranslate"><span class="pre">CF_4</span></code> for this tutorial.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.tutorial</span><span class="w"> </span><span class="kn">import</span> <span class="n">retrieve_example_data</span>
 
 <span class="n">data_url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/openghg/example_data/raw/main/timeseries/mhd_2010.tar.gz&quot;</span>
@@ -470,9 +564,9 @@ This data includes may different species so we will focus on just $CF_6$ for thi
 The start and end dates cover the year of 2010: 2010-01-01 - 2010-12-31.</p>
 </section>
 <section id="adding-more-data">
-<h3>2. Adding more data<a class="headerlink" href="#adding-more-data" title="Link to this heading">¶</a></h3>
+<h3>2. Adding more data<a class="headerlink" href="#adding-more-data" title="Link to this heading">#</a></h3>
 <p>We can now download and add data for the next year (2011). The times for this data should
-not overlap with the data in our datasource.</p>
+not match any time-coordinate values in our datasource.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.tutorial</span><span class="w"> </span><span class="kn">import</span> <span class="n">retrieve_example_data</span>
 
 <span class="n">data_url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/openghg/example_data/raw/main/timeseries/mhd_2011.tar.gz&quot;</span>
@@ -514,7 +608,7 @@ not overlap with the data in our datasource.</p>
 This has combined the details from both files that were added to the object store into one datasource.</p>
 </section>
 <section id="updating-with-new-data">
-<h3>3. Updating with new data<a class="headerlink" href="#updating-with-new-data" title="Link to this heading">¶</a></h3>
+<h3>3. Updating with new data<a class="headerlink" href="#updating-with-new-data" title="Link to this heading">#</a></h3>
 <p>If we wanted to use the same flags but add new data only, we can do this using the input flag:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">if_exists=&quot;new&quot;</span></code></p></li>
@@ -559,15 +653,15 @@ data from 2012 to check this.</p>
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>Examining the metadata we should not see this only includes the new data from 2012 and latest_version has increased by 1.</p>
+<p>Examining the metadata we should now see this includes only the new data from 2012 and latest_version has increased by 1.</p>
 </section>
 <section id="replacing-existing-data-with-new-data">
-<h3>4. Replacing existing data with new data<a class="headerlink" href="#replacing-existing-data-with-new-data" title="Link to this heading">¶</a></h3>
+<h3>4. Replacing existing data with new data<a class="headerlink" href="#replacing-existing-data-with-new-data" title="Link to this heading">#</a></h3>
 <p>If we wanted to update the data but did <em>not</em> want to retain the current latest version
 of the data we can do this using the flags:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">if_exists=&quot;new&quot;</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">save_current=False</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">save_current=&quot;n&quot;</span></code></p></li>
 </ul>
 <p>We can test this by downloading data for the same site from 2013.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.tutorial</span><span class="w"> </span><span class="kn">import</span> <span class="n">retrieve_example_data</span>
@@ -585,7 +679,7 @@ of the data we can do this using the flags:</p>
                     <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
                     <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span>
                     <span class="n">if_exists</span><span class="o">=</span><span class="s2">&quot;new&quot;</span><span class="p">,</span>
-                    <span class="n">save_current</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                    <span class="n">save_current</span><span class="o">=</span><span class="s2">&quot;n&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Searching should return one datasource as before:</p>
@@ -611,19 +705,18 @@ of the data we can do this using the flags:</p>
 <p>This now contains new data only from 2013 but the version has not changed
 (indicating the previous version data has not been retained).</p>
 </section>
-<section id="id4">
-<h3>5. Replacing “identical” data<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
-<p>There may be circumstances (e.g. data corruption, testing) where it is necessary to
-replace “identical” data (i.e. the same original input file with the same details).</p>
-<p>This can be done using the flag:</p>
+<section id="id2">
+<h3>5. Repeating input data<a class="headerlink" href="#id2" title="Link to this heading">#</a></h3>
+<p>There may be circumstances (e.g. data corruption or testing) where it is necessary to
+replace data using the same original input file. Choose the update explicitly with:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">force=True</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">if_exists=&quot;new&quot;</span></code></p></li>
 </ul>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">standardise_surface</span><span class="p">(</span><span class="n">filepaths</span><span class="o">=</span><span class="n">data_2013</span><span class="p">,</span>
                     <span class="n">source_format</span><span class="o">=</span><span class="n">source_format</span><span class="p">,</span>
                     <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
                     <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span>
-                    <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="n">if_exists</span><span class="o">=</span><span class="s2">&quot;new&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_search5</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;cf4&quot;</span><span class="p">)</span>
@@ -640,18 +733,19 @@ replace “identical” data (i.e. the same original input file with the same de
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>By default this will create a new version as shown above.</p>
-<p>To avoid this pass both the <code class="docutils literal notranslate"><span class="pre">force</span></code> and <code class="docutils literal notranslate"><span class="pre">save_current</span></code> flag instead:</p>
+<p>By default, <code class="docutils literal notranslate"><span class="pre">if_exists=&quot;new&quot;</span></code> creates a new version as shown above.</p>
+<p>To replace the latest version without retaining the current version, also pass
+<code class="docutils literal notranslate"><span class="pre">save_current=&quot;n&quot;</span></code>:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">force=True</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">save_current=False</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">if_exists=&quot;new&quot;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">save_current=&quot;n&quot;</span></code></p></li>
 </ul>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">standardise_surface</span><span class="p">(</span><span class="n">filepaths</span><span class="o">=</span><span class="n">data_2013</span><span class="p">,</span>
                     <span class="n">source_format</span><span class="o">=</span><span class="n">source_format</span><span class="p">,</span>
                     <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
                     <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span>
-                    <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                    <span class="n">save_current</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                    <span class="n">if_exists</span><span class="o">=</span><span class="s2">&quot;new&quot;</span><span class="p">,</span>
+                    <span class="n">save_current</span><span class="o">=</span><span class="s2">&quot;n&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_search6</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;cf4&quot;</span><span class="p">)</span>
@@ -671,7 +765,7 @@ replace “identical” data (i.e. the same original input file with the same de
 <p>This should include the same start, end date and latest_version as the previous search output.</p>
 </section>
 <section id="cleanup">
-<h3>6. Cleanup<a class="headerlink" href="#cleanup" title="Link to this heading">¶</a></h3>
+<h3>6. Cleanup<a class="headerlink" href="#cleanup" title="Link to this heading">#</a></h3>
 <p>If you’re finished with the data in this tutorial you can cleanup the
 tutorial object store using the <code class="docutils literal notranslate"><span class="pre">clear_tutorial_store</span></code> function again.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">openghg.tutorial</span><span class="w"> </span><span class="kn">import</span> <span class="n">clear_tutorial_store</span>
@@ -685,50 +779,115 @@ tutorial object store using the <code class="docutils literal notranslate"><span
 </section>
 
 
-              </div>
+                </article>
               
               
-              <!-- Previous / next buttons -->
-<div class='prev-next-area'>
-    <a class='left-prev' id="prev-link" href="Metadata_and_attributes.html" title="previous page">
-        <i class="fas fa-angle-left"></i>
-        <div class="prev-next-info">
-            <p class="prev-next-subtitle">previous</p>
-            <p class="prev-next-title">Metadata and attributes</p>
-        </div>
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="Metadata_and_attributes.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Metadata and attributes</p>
+      </div>
     </a>
-    <a class='right-next' id="next-link" href="../Analysing_data/Comparing_with_emissions.html" title="next page">
-    <div class="prev-next-info">
+    <a class="right-next"
+       href="../Analysing_data/Comparing_with_emissions.html"
+       title="next page">
+      <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
         <p class="prev-next-title">Comparing observations to emissions</p>
-    </div>
-    <i class="fas fa-angle-right"></i>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
     </a>
 </div>
+                </footer>
               
-          </main>
-          
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal" tabindex="-1"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
-      </div>
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#updating-data">Updating data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#managing-versions">Managing versions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#repeating-input-data">Repeating input data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-workflow">Example workflow</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#using-the-tutorial-object-store">0. Using the tutorial object store</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adding-example-data">1. Adding example data</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adding-more-data">2. Adding more data</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#updating-with-new-data">3. Updating with new data</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#replacing-existing-data-with-new-data">4. Replacing existing data with new data</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">5. Repeating input data</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cleanup">6. Cleanup</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2024 OpenGHG development team.
+      <br/>
+    
+  </p>
+</div>
+      
     </div>
   
-    <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
-  <footer class="footer mt-5 mt-md-0">
-  <div class="container">
-    
-    <div class="footer-item">
-      <p class="copyright">
-    &copy; Copyright 2024 OpenGHG development team.<br>
-</p>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.24.0.
+</p></div>
+      
     </div>
-    
-    <div class="footer-item">
-      <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 8.2.3.<br>
-</p>
-    </div>
-    
-  </div>
-</footer>
+  
+</div>
+
+  </footer>
   </body>
 </html>

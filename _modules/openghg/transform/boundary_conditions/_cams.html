@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>openghg.transform.boundary_conditions._cams &#8212; OpenGHG 0.20.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/togglebutton.css?v=9c3e77be" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=db7899ab" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../../../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="../../../../_static/documentation_options.js?v=b52c616d"></script>
+    <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../../_static/thebelab-helper.js"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../../../_static/togglebutton.js?v=b8b12719"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/openghg/transform/boundary_conditions/_cams';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <script src="../../../../_static/custom.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.20.0" />
+    <meta name="docbuild:last-update" content="Nov 25, 2026"/>
+  
+    
+    <script src="../../../../_static/searchtools.js"></script>
+    <script src="../../../../_static/language_data.js"></script>
+    <script src="../../../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.20.0 documentation - Home"/>
+    <img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.20.0 documentation - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../install.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../tutorials/index.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../api/index.html">
+    User API
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../development/index_devel.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../api/index_devapi.html">
+    Developer API
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../install.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../tutorials/index.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../api/index.html">
+    User API
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../development/index_devel.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../api/index_devapi.html">
+    Developer API
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">openghg.transform.boundary_conditions._cams</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for openghg.transform.boundary_conditions._cams</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">Literal</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">find_domain</span><span class="p">,</span>
+    <span class="n">normalise_to_filepath_list</span><span class="p">,</span>
+    <span class="n">open_time_nc_fn</span><span class="p">,</span>
+    <span class="n">get_data</span><span class="p">,</span>
+    <span class="n">timestamp_now</span><span class="p">,</span>
+    <span class="n">cf_ureg</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.store</span><span class="w"> </span><span class="kn">import</span> <span class="n">infer_date_range</span><span class="p">,</span> <span class="n">update_zero_dim</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.retrieve</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_footprint</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.transform.boundary_conditions&quot;</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>  <span class="c1"># Have to set level for logger as well as handler</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_cams_data_units</span><span class="p">(</span><span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get unit of CAMS dataset.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        ds: dataset from raw cams data from which extract the units</span>
+<span class="sd">        species: species of the data</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        unit</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">species</span> <span class="o">=</span> <span class="n">species</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">species</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ds</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Species &#39;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">&#39; not found in dataset.&quot;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">units_from_data</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="n">species</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span>
+        <span class="n">parsed_units</span> <span class="o">=</span> <span class="n">cf_ureg</span><span class="o">.</span><span class="n">parse_expression</span><span class="p">(</span><span class="n">units_from_data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">parsed_units</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid units for &#39;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">&#39;.  Not dimensionless: </span><span class="si">{</span><span class="n">units_from_data</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">units</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">parsed_units</span><span class="o">.</span><span class="n">magnitude</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not parse units: </span><span class="si">{</span><span class="n">units_from_data</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+    <span class="k">return</span> <span class="n">units</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">interp1d_np</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">xi</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="c1"># np.interp returns a scalar if `xi` is a scalar, but we know `xi` is an array</span>
+    <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">xi</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">xr_interp</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">dim</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">interp_vals</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">coord</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Iterpolate along given dim.</span>
+
+<span class="sd">        If &#39;coord&#39; is passed, then an alternate coordinate can be used, but the interpolation happens</span>
+<span class="sd">        along &#39;dim&#39;.</span>
+
+<span class="sd">        This is useful if there is a &quot;physical&quot; coordinate, like altitude, which depends on lat and lon.</span>
+<span class="sd">        So if data has dims: lat, level, and data.z is a coordinate with dims lat, level, which converts</span>
+<span class="sd">        level to a height, dependant on lat, then setting dim=&#39;level&#39; and coord=&#39;z&#39; will allow interpolation</span>
+<span class="sd">        with interp_vals that are on the same scale as &#39;z&#39;.</span>
+<span class="sd">    Note: `data[coord]` (or `data[dim]` if `coord` is `None`) must be sorted in increasing order. If not</span>
+<span class="sd">    the interpolation will not fail, but the results will be meaningless. See the docs for `np.interp` for details.</span>
+<span class="sd">        The function is based on https://tutorial.xarray.dev/advanced/apply_ufunc/example-interp.html</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dim_coord</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="k">if</span> <span class="n">coord</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">data</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span>
+    <span class="n">result</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">apply_ufunc</span><span class="p">(</span>
+        <span class="n">interp1d_np</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">,</span>
+        <span class="n">dim_coord</span><span class="p">,</span>
+        <span class="n">interp_vals</span><span class="p">,</span>
+        <span class="n">input_core_dims</span><span class="o">=</span><span class="p">[[</span><span class="n">dim</span><span class="p">],</span> <span class="p">[</span><span class="n">dim</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;__newdim__&quot;</span><span class="p">]],</span>
+        <span class="n">output_core_dims</span><span class="o">=</span><span class="p">[[</span><span class="s2">&quot;__newdim__&quot;</span><span class="p">]],</span>
+        <span class="n">exclude_dims</span><span class="o">=</span><span class="nb">set</span><span class="p">((</span><span class="n">dim</span><span class="p">,)),</span>
+        <span class="n">vectorize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">dask</span><span class="o">=</span><span class="s2">&quot;parallelized&quot;</span><span class="p">,</span>
+        <span class="n">output_dtypes</span><span class="o">=</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">dtype</span><span class="p">],</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">({</span><span class="s2">&quot;__newdim__&quot;</span><span class="p">:</span> <span class="n">dim</span><span class="p">})</span>
+    <span class="n">result</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">interp_vals</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">cams_to_domain</span><span class="p">(</span>
+    <span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">xr_interp_fn</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="n">xr_interp</span><span class="p">,</span> <span class="n">get_footprint_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Interpolate CAMS data on another grid (should be one commonly used in openghg)</span>
+<span class="sd">    Args:</span>
+<span class="sd">        ds: datset to</span>
+<span class="sd">        xr_interp_fn: interpolation function to use</span>
+<span class="sd">        get_footprint_kwargs: kwargs passed to get_footprint from openghg_retrieve to find the footprint data from which the grid will be taken.</span>
+<span class="sd">            If None, will use function find_domain from openghg.util to get lat/lon and set the height as np.linspace(500.0, 19500.0, 20, endpoint=True)</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        interpolated Dataset with 4 variables: vmr_n/e/s/w</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">get_footprint_kwargs</span><span class="p">:</span>
+        <span class="n">fp</span> <span class="o">=</span> <span class="n">get_footprint</span><span class="p">(</span><span class="o">**</span><span class="n">get_footprint_kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">lat</span> <span class="o">=</span> <span class="n">fp</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">lon</span> <span class="o">=</span> <span class="n">fp</span><span class="p">[</span><span class="s2">&quot;lon&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="n">fp</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span> <span class="o">=</span> <span class="n">find_domain</span><span class="p">(</span><span class="n">domain</span><span class="p">)[:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">500.0</span><span class="p">,</span> <span class="mf">19500.0</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">lat_n</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">lat</span> <span class="o">&gt;</span> <span class="n">lat</span><span class="o">.</span><span class="n">max</span><span class="p">())</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="n">lat_s</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">lat</span> <span class="o">&lt;</span> <span class="n">lat</span><span class="o">.</span><span class="n">min</span><span class="p">())</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="n">lon_e</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">lon</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">lon</span> <span class="o">&gt;</span> <span class="n">lon</span><span class="o">.</span><span class="n">max</span><span class="p">())</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="n">lon_w</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">lon</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">lon</span> <span class="o">&lt;</span> <span class="n">lon</span><span class="o">.</span><span class="n">min</span><span class="p">())</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+    <span class="n">vertical_interface_height</span> <span class="o">=</span> <span class="n">get_vertical_interface_height</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="n">vertical_interface_height</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">hlevel</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">values</span>
+        <span class="o">+</span> <span class="n">vertical_interface_height</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">hlevel</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span><span class="o">.</span><span class="n">values</span>
+    <span class="p">)</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">(</span>
+        <span class="p">{</span><span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="n">dim</span> <span class="k">if</span> <span class="n">dim</span> <span class="o">!=</span> <span class="s2">&quot;hlevel&quot;</span> <span class="k">else</span> <span class="s2">&quot;level&quot;</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">vertical_interface_height</span><span class="o">.</span><span class="n">dims</span><span class="p">]),</span> <span class="n">z</span><span class="p">)}</span>
+    <span class="p">)</span>
+
+    <span class="n">north</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[[</span><span class="s2">&quot;species&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">lat</span><span class="o">=</span><span class="n">lat_n</span><span class="p">,</span> <span class="n">lon</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="n">lon_w</span><span class="p">,</span> <span class="n">lon_e</span><span class="p">))</span><span class="o">.</span><span class="n">drop_vars</span><span class="p">(</span><span class="s2">&quot;lat&quot;</span><span class="p">)</span>
+    <span class="n">south</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[[</span><span class="s2">&quot;species&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">lat</span><span class="o">=</span><span class="n">lat_s</span><span class="p">,</span> <span class="n">lon</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="n">lon_w</span><span class="p">,</span> <span class="n">lon_e</span><span class="p">))</span><span class="o">.</span><span class="n">drop_vars</span><span class="p">(</span><span class="s2">&quot;lat&quot;</span><span class="p">)</span>
+    <span class="n">east</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[[</span><span class="s2">&quot;species&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">lon</span><span class="o">=</span><span class="n">lon_e</span><span class="p">,</span> <span class="n">lat</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="n">lat_s</span><span class="p">,</span> <span class="n">lat_n</span><span class="p">))</span><span class="o">.</span><span class="n">drop_vars</span><span class="p">(</span><span class="s2">&quot;lon&quot;</span><span class="p">)</span>
+    <span class="n">west</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[[</span><span class="s2">&quot;species&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">lon</span><span class="o">=</span><span class="n">lon_w</span><span class="p">,</span> <span class="n">lat</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="n">lat_s</span><span class="p">,</span> <span class="n">lat_n</span><span class="p">))</span><span class="o">.</span><span class="n">drop_vars</span><span class="p">(</span><span class="s2">&quot;lon&quot;</span><span class="p">)</span>
+
+    <span class="n">data_vars</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;vmr_n&quot;</span><span class="p">:</span> <span class="n">xr_interp_fn</span><span class="p">(</span><span class="n">north</span><span class="o">.</span><span class="n">species</span><span class="p">,</span> <span class="s2">&quot;level&quot;</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">lon</span><span class="o">=</span><span class="n">lon</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;vmr_e&quot;</span><span class="p">:</span> <span class="n">xr_interp_fn</span><span class="p">(</span><span class="n">east</span><span class="o">.</span><span class="n">species</span><span class="p">,</span> <span class="s2">&quot;level&quot;</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">lat</span><span class="o">=</span><span class="n">lat</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;vmr_s&quot;</span><span class="p">:</span> <span class="n">xr_interp_fn</span><span class="p">(</span><span class="n">south</span><span class="o">.</span><span class="n">species</span><span class="p">,</span> <span class="s2">&quot;level&quot;</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">lon</span><span class="o">=</span><span class="n">lon</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;vmr_w&quot;</span><span class="p">:</span> <span class="n">xr_interp_fn</span><span class="p">(</span><span class="n">west</span><span class="o">.</span><span class="n">species</span><span class="p">,</span> <span class="s2">&quot;level&quot;</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">lat</span><span class="o">=</span><span class="n">lat</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">),</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">data_vars</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_vertical_interface_height</span><span class="p">(</span><span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the vertical interface height variable used by CAMS files.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ds: CAMS dataset containing either ``altitude`` or</span>
+<span class="sd">            ``height_above_reference_ellipsoid``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Vertical interface heights for the CAMS dataset.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If neither supported vertical interface height variable is present.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s2">&quot;altitude&quot;</span> <span class="ow">in</span> <span class="n">ds</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;altitude&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s2">&quot;height_above_reference_ellipsoid&quot;</span> <span class="ow">in</span> <span class="n">ds</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;height_above_reference_ellipsoid&quot;</span><span class="p">]</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+        <span class="s2">&quot;Could not find CAMS vertical interface heights. Expected &#39;altitude&#39; or &quot;</span>
+        <span class="s2">&quot;&#39;height_above_reference_ellipsoid&#39;.&quot;</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_resample_args</span><span class="p">(</span><span class="n">xr_time</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">period</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Infer the arguments that will be used for the time resampling of the dataset</span>
+<span class="sd">    Args:</span>
+<span class="sd">        xr_time: time coordinates of the dataset to resample</span>
+<span class="sd">        species: species of the dataset (necessary to set the &#39;closed&#39; parameter that will be used for resampling)</span>
+<span class="sd">        period: targeted period. Can be &quot;3h&quot;, &quot;daily&quot;, &quot;monthly&quot;, &quot;yearly&quot; or a pandas aliases</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dict with 2 keys : &quot;time&quot; and &quot;closed; whose values are the one passed to xr.Dataset().resample</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">org_freq_str</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">infer_freq</span><span class="p">(</span><span class="n">xr_time</span><span class="p">)</span>
+    <span class="n">org_freq</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">org_freq_str</span> <span class="k">if</span> <span class="n">org_freq_str</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isdecimal</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;1&quot;</span> <span class="o">+</span> <span class="n">org_freq_str</span><span class="p">)</span>
+    <span class="n">thres_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;3h&quot;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;daily&quot;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;monthly&quot;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="mi">31</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;yearly&quot;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="mi">365</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">),</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">org_freq</span> <span class="o">&gt;</span> <span class="n">thres_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">period</span><span class="p">,</span> <span class="n">period</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Original time resolution is coarser than targeted one.&quot;</span><span class="p">)</span>
+
+    <span class="n">alias_period</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;daily&quot;</span><span class="p">:</span> <span class="s2">&quot;D&quot;</span><span class="p">,</span> <span class="s2">&quot;monthly&quot;</span><span class="p">:</span> <span class="s2">&quot;MS&quot;</span><span class="p">,</span> <span class="s2">&quot;yearly&quot;</span><span class="p">:</span> <span class="s2">&quot;YS&quot;</span><span class="p">}</span>
+
+    <span class="n">closed</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="s2">&quot;right&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;right&quot;</span> <span class="k">if</span> <span class="n">species</span> <span class="o">==</span> <span class="s2">&quot;n2o&quot;</span> <span class="k">else</span> <span class="s2">&quot;left&quot;</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">alias_period</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">period</span><span class="p">,</span> <span class="n">period</span><span class="p">),</span> <span class="s2">&quot;closed&quot;</span><span class="p">:</span> <span class="n">closed</span><span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">calc_altitude_from_pressure</span><span class="p">(</span><span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate altitude of dataset levels. Specific to CAMS N2O files.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        ds: dataset (CAMS N2O files), contains ap, bp, and Psurf variables</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        ds: dataset whith new variable altitude (in meter)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pressure</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">ap</span> <span class="o">+</span> <span class="n">ds</span><span class="o">.</span><span class="n">bp</span> <span class="o">*</span> <span class="n">ds</span><span class="o">.</span><span class="n">Psurf</span>
+    <span class="n">scale_height</span> <span class="o">=</span> <span class="mf">7.64e3</span>  <span class="c1"># in metres</span>
+    <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;altitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">scale_height</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">pressure</span> <span class="o">/</span> <span class="n">ds</span><span class="o">.</span><span class="n">Psurf</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ds</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_gridsize</span><span class="p">(</span><span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate mean grid cell size of dataset</span>
+<span class="sd">    Args:</span>
+<span class="sd">        ds: dataset containing lon and lat coordinates</span>
+<span class="sd">    Returns</span>
+<span class="sd">        string of the form &quot;{lat_grid} x {lon_grid}&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lat_grid</span> <span class="o">=</span> <span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">lon_grid</span> <span class="o">=</span> <span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s2">&quot;lon&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;lon&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">lat_grid</span><span class="si">}</span><span class="s2"> x </span><span class="si">{</span><span class="n">lon_grid</span><span class="si">}</span><span class="s2">&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_and_set_params</span><span class="p">(</span>
+    <span class="n">filepath</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">],</span>
+    <span class="n">cams_version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">species</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">input_observations</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract fron the file names informations on species, cams version, input observations used in the files.</span>
+<span class="sd">    Check that they correspond to parameters cams_version, species and input_observations (if given) and format them to be saved as attributes and metadata.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        filepath: list of filepath that will be standardised</span>
+<span class="sd">        cams_version: version of cams product that is used</span>
+<span class="sd">        secies: species of interest</span>
+<span class="sd">        input_observations: type of input observations (e.g. &quot;surface_satellite_dm&quot;) that is used</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple containing 1. a string aggregating the cams versions used, 2. the species and 3. a string aggregating the input observations used.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cams_version_check</span><span class="p">,</span> <span class="n">species_check</span><span class="p">,</span> <span class="n">input_observations_check</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">filepath</span><span class="p">:</span>
+        <span class="n">file_keywords</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_keywords</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">4</span> <span class="ow">or</span> <span class="n">file_keywords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;cams73&quot;</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.nc&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Filenames not in a proper format: expected something like cams73_*_*_conc_*.nc. Please don&#39;t alter the names from the unzipped CAMS files.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_keywords</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">4</span> <span class="ow">and</span> <span class="n">file_keywords</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;conc&quot;</span><span class="p">:</span>
+            <span class="n">detected_input_observations</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_keywords</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">detected_input_observations</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_keywords</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">species</span> <span class="ow">and</span> <span class="n">species</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="n">file_keywords</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Input species is </span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2"> but species detected in filename is </span><span class="si">{</span><span class="n">file_keywords</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+        <span class="n">species_check</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file_keywords</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">cams_version</span> <span class="ow">and</span> <span class="n">cams_version</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;mix&quot;</span><span class="p">,</span> <span class="n">file_keywords</span><span class="p">[</span><span class="mi">1</span><span class="p">]]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Input cams_version is </span><span class="si">{</span><span class="n">cams_version</span><span class="si">}</span><span class="s2"> but cams_version detected in </span><span class="si">{</span><span class="n">file</span><span class="si">}</span><span class="s2"> is </span><span class="si">{</span><span class="n">file_keywords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+        <span class="n">cams_version_check</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file_keywords</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">input_observations</span> <span class="ow">and</span> <span class="n">input_observations</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;mix&quot;</span><span class="p">,</span> <span class="n">detected_input_observations</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Input input_observations is </span><span class="si">{</span><span class="n">input_observations</span><span class="si">}</span><span class="s2"> but input_observations detected in </span><span class="si">{</span><span class="n">file</span><span class="si">}</span><span class="s2"> is </span><span class="si">{</span><span class="n">detected_input_observations</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+        <span class="n">input_observations_check</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">detected_input_observations</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">species_check</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Multiple species detected. Please standardise them separately&quot;</span><span class="p">)</span>
+    <span class="n">species</span> <span class="o">=</span> <span class="n">species_check</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">cams_version_check</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">cams_version_check</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">cams_version</span> <span class="o">==</span> <span class="s2">&quot;mix&quot;</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cams_version used: </span><span class="si">{</span><span class="n">cams_version_check</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">cams_version_check</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Multiple cams versions detected: </span><span class="si">{</span><span class="n">cams_version_check</span><span class="si">}</span><span class="s2">. If you want to mix the cams versions, set cams_version=&#39;mix&#39;.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">cams_version</span> <span class="o">=</span> <span class="n">cams_version_check</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">input_observations_check</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">input_observations_check</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">input_observations</span> <span class="o">==</span> <span class="s2">&quot;mix&quot;</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;input_observations used: </span><span class="si">{</span><span class="n">input_observations_check</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_observations_check</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Multiple input observations detected: </span><span class="si">{</span><span class="n">input_observations_check</span><span class="si">}</span><span class="s2">. If you want to mix the input observations, set input_observations=&#39;mix&#39;.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">input_observations</span> <span class="o">=</span> <span class="n">input_observations_check</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">cams_version</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">input_observations</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">make_metadata</span><span class="p">(</span><span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">period</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">continuous</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create metadata dictionnary for standardisation.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        ds: processed boundary conditions data</span>
+<span class="sd">        filepath: (List of) Path of boundary conditions fil</span>
+<span class="sd">        period: period at which at resample and store the data</span>
+<span class="sd">        continuous: whether time stamps have to be continuous</span>
+<span class="sd">        **kwargs: other parameters to put as metadata</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        metadata: dict containing metadata</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">metadata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+    <span class="n">metadata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;processed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp_now</span><span class="p">())</span>
+
+    <span class="c1"># If filepath is a single file, the naming scheme of this file can be used</span>
+    <span class="c1"># as one factor to try and determine the period.</span>
+    <span class="c1"># If multiple files, this input isn&#39;t needed.</span>
+
+    <span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="p">,</span> <span class="n">period_str</span> <span class="o">=</span> <span class="n">infer_date_range</span><span class="p">(</span>
+        <span class="n">ds</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">filepath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span> <span class="n">continuous</span><span class="o">=</span><span class="n">continuous</span>
+    <span class="p">)</span>
+
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;start_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">start_date</span><span class="p">)</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;end_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">end_date</span><span class="p">)</span>
+
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;max_longitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s2">&quot;lon&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;min_longitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s2">&quot;lon&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;max_latitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;min_latitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;min_height&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s2">&quot;level&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;max_height&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s2">&quot;level&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
+
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;time_period&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">period_str</span>
+
+    <span class="k">return</span> <span class="n">metadata</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">set_units</span><span class="p">(</span><span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">units</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set units of variables vmr_x</span>
+<span class="sd">    Args:</span>
+<span class="sd">        ds: dataset with variable vmr_n/s/w/e</span>
+<span class="sd">        units: units of the variables</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;n&quot;</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="s2">&quot;e&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">]:</span>
+        <span class="n">ds</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;vmr_</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">units</span>
+
+
+<div class="viewcode-block" id="parse_cams">
+<a class="viewcode-back" href="../../../../api/api_transform.html#openghg.transform.boundary_conditions.parse_cams">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_cams</span><span class="p">(</span>
+    <span class="n">bc_input</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">datapath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">species</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">period</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">cams_version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">input_observations</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">get_footprint_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">continuous</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">chunks</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse raw CAMS boundary conditions and add data and metadata.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        bc_input: Input used to create boundary conditions. For example:</span>
+<span class="sd">            - a model name and version and period such as &quot;cams_v24r1_daily&quot;</span>
+<span class="sd">            - a description such as &quot;cams_uniform_mixedversion_daily&quot; (uniform values based on CAMS average from a mix of version at daily resolution)</span>
+<span class="sd">            Advice is to always put cams to state the model, as well as info on the cams version used and period, even though this will be put in the metadata.</span>
+<span class="sd">        domain: Region for boundary conditions</span>
+<span class="sd">        datapath: Path or paths containing raw boundary-condition data.</span>
+<span class="sd">            Specify either ``datapath`` or ``data``.</span>
+<span class="sd">        data: In-memory raw CAMS dataset. Specify either ``datapath`` or</span>
+<span class="sd">            ``data``.</span>
+<span class="sd">        species: Species name</span>
+<span class="sd">        period: period at which at resample and store the data</span>
+<span class="sd">        cams_version: cams version to use. Put &#39;mix&#39; if you want to use files from multiple cams versions.</span>
+<span class="sd">        input_observations: input observations used to make the cams file (e.g. &quot;surface_satellite_dm&quot;). Put &#39;mix&#39; if you want to use files from multiple input observations.</span>
+<span class="sd">        get_footprint_kwargs: arguments passed to openghg.retrieve.get_footprint to get the grid that that will be used to store the data</span>
+<span class="sd">        continuous: whether time stamps have to be continuous</span>
+<span class="sd">        chunks: Chunking schema to use when storing data. It expects a dictionary of dimension name and chunk size,</span>
+<span class="sd">                for example {&quot;time&quot;: 100}. If None then a chunking schema will be set automatically by OpenGHG.</span>
+<span class="sd">                See documentation for guidance on chunking: https://docs.openghg.org/tutorials/local/Adding_data/Adding_ancillary_data.html#chunking.</span>
+<span class="sd">                To disable chunking pass in an empty dictionary.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict: Dictionary of &quot;species_bc_input_domain&quot; : data, metadata, attributes</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If exactly one input is not supplied or the species or</span>
+<span class="sd">            units cannot be determined from direct data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">datapath</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">datapath</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Please specify exactly one of `datapath` or `data`.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">datapath</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="n">xr_open_fn</span><span class="p">,</span> <span class="n">datapath</span> <span class="o">=</span> <span class="n">open_time_nc_fn</span><span class="p">(</span><span class="n">datapath</span><span class="p">)</span>
+        <span class="n">filepath_list</span> <span class="o">=</span> <span class="n">normalise_to_filepath_list</span><span class="p">(</span><span class="n">datapath</span><span class="p">)</span>
+        <span class="n">cams_version</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">input_observations</span> <span class="o">=</span> <span class="n">_check_and_set_params</span><span class="p">(</span>
+            <span class="n">filepath_list</span><span class="p">,</span> <span class="n">cams_version</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">input_observations</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">filepath_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">species</span> <span class="o">=</span> <span class="n">species</span> <span class="ow">or</span> <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;species&quot;</span><span class="p">)</span>
+        <span class="n">cams_version</span> <span class="o">=</span> <span class="n">cams_version</span> <span class="ow">or</span> <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;CAMS_version&quot;</span><span class="p">,</span> <span class="s2">&quot;unknown&quot;</span><span class="p">)</span>
+        <span class="n">input_observations</span> <span class="o">=</span> <span class="n">input_observations</span> <span class="ow">or</span> <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;CAMS_input_observations&quot;</span><span class="p">,</span> <span class="s2">&quot;unknown&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">species</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Species must be specified when transforming direct data.&quot;</span><span class="p">)</span>
+
+    <span class="n">units</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">with</span> <span class="n">get_data</span><span class="p">(</span><span class="n">dataset</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">filepath</span><span class="o">=</span><span class="n">datapath</span><span class="p">,</span> <span class="n">check_coords</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">ds</span><span class="p">:</span>
+        <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="n">chunks</span><span class="p">)</span>
+
+        <span class="n">units</span> <span class="o">=</span> <span class="n">get_cams_data_units</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">species</span><span class="p">)</span>
+        <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">sortby</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">dims</span><span class="p">))</span>
+
+        <span class="c1"># Resample data</span>
+        <span class="k">if</span> <span class="n">period</span><span class="p">:</span>
+            <span class="n">resample_args</span> <span class="o">=</span> <span class="n">get_resample_args</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">period</span><span class="p">)</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="o">**</span><span class="n">resample_args</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">period</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;original frequency (</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">xr</span><span class="o">.</span><span class="n">infer_freq</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">time</span><span class="p">))</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+        <span class="c1"># Calc pressure if species is &quot;n2o&quot;</span>
+        <span class="k">if</span> <span class="n">species</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;n2o&quot;</span><span class="p">:</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="n">calc_altitude_from_pressure</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+
+        <span class="c1"># Rename variables</span>
+        <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">rename</span><span class="p">({</span><span class="s2">&quot;latitude&quot;</span><span class="p">:</span> <span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;longitude&quot;</span><span class="p">:</span> <span class="s2">&quot;lon&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span> <span class="s2">&quot;species&quot;</span><span class="p">})</span>
+
+        <span class="c1"># Interpolate vmrn/s/e/w variables</span>
+        <span class="n">bc_data</span> <span class="o">=</span> <span class="n">cams_to_domain</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="n">get_footprint_kwargs</span><span class="o">=</span><span class="n">get_footprint_kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Create time dimension if not present</span>
+        <span class="k">if</span> <span class="s2">&quot;time&quot;</span> <span class="ow">in</span> <span class="n">bc_data</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+            <span class="n">bc_data</span> <span class="o">=</span> <span class="n">update_zero_dim</span><span class="p">(</span><span class="n">bc_data</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Add new attributes</span>
+    <span class="n">add_attrs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;ECMWF CAMS </span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2"> volume mixing ratios at domain edges&quot;</span><span class="p">,</span>
+        <span class="n">CAMS_resolution</span><span class="o">=</span><span class="n">get_gridsize</span><span class="p">(</span><span class="n">ds</span><span class="p">),</span>
+        <span class="n">author</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;USER&quot;</span><span class="p">),</span>
+        <span class="n">date_created</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">timestamp_now</span><span class="p">()),</span>
+        <span class="n">files_used</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">file</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">filepath_list</span><span class="p">])),</span>  <span class="c1"># type: ignore</span>
+        <span class="n">CAMS_version</span><span class="o">=</span><span class="n">cams_version</span><span class="p">,</span>
+        <span class="n">CAMS_input_observations</span><span class="o">=</span><span class="n">input_observations</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">bc_data</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">add_attrs</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">units</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Units could not be determined from data.&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># set_unit</span>
+        <span class="n">set_units</span><span class="p">(</span><span class="n">bc_data</span><span class="p">,</span> <span class="n">units</span><span class="p">)</span>
+
+    <span class="c1"># create metadata</span>
+    <span class="n">metadata</span> <span class="o">=</span> <span class="n">make_metadata</span><span class="p">(</span>
+        <span class="n">bc_data</span><span class="p">,</span>
+        <span class="n">period</span><span class="p">,</span>
+        <span class="n">continuous</span><span class="p">,</span>
+        <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
+        <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
+        <span class="n">bc_input</span><span class="o">=</span><span class="n">bc_input</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">key</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">species</span><span class="p">,</span> <span class="n">bc_input</span><span class="p">,</span> <span class="n">domain</span><span class="p">))</span>
+
+    <span class="n">boundary_conditions_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="p">{}}</span>
+    <span class="n">boundary_conditions_data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bc_data</span><span class="o">.</span><span class="n">rename</span><span class="p">({</span><span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="s2">&quot;height&quot;</span><span class="p">})</span>
+    <span class="n">boundary_conditions_data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata</span>
+
+    <span class="k">return</span> <span class="n">boundary_conditions_data</span></div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2024 OpenGHG development team.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.24.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

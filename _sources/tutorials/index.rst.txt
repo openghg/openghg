@@ -12,6 +12,7 @@ They'll also help you with managing and customising your object store.
 
    local/Adding_data/Adding_observation_data
    local/Adding_data/Adding_ancillary_data
+   local/Adding_data/Adding_co2_satellite_data
    local/Adding_data/Creating_data_from_databases
    local/Adding_data/Metadata_and_attributes
    local/Adding_data/Updating_existing_data

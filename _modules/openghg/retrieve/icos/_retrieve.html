@@ -1,38 +1,48 @@
 <!DOCTYPE html>
 
-<html lang="en" data-content_root="../../../../">
+
+<html lang="en" data-content_root="../../../../" >
+
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve.icos._retrieve &#8212; OpenGHG 0.19.0 documentation</title>
-    
-    <link href="../../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
-<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+    <title>openghg.retrieve.icos._retrieve &#8212; OpenGHG 0.20.0 documentation</title>
   
-    
-    <link rel="stylesheet"
-      href="../../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="../../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="../../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
   
-    
-      
   
-    
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
     <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/pydata-sphinx-theme.css?v=1140d252" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/togglebutton.css?v=9c3e77be" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/thebelab.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=db7899ab" />
-    
-    <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
   
-    <script src="../../../../_static/documentation_options.js?v=8a079089"></script>
-    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+  <!-- So that users can add custom icons -->
+  <script defer src="../../../../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="../../../../_static/documentation_options.js?v=b52c616d"></script>
+    <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/thebelab-helper.js"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
@@ -41,136 +51,312 @@
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/openghg/retrieve/icos/_retrieve';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <script src="../../../../_static/custom.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="docsearch:language" content="en">
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.20.0" />
+    <meta name="docbuild:last-update" content="Nov 25, 2026"/>
+  
     
-
-    <!-- Google Analytics -->
-    
+    <script src="../../../../_static/searchtools.js"></script>
+    <script src="../../../../_static/language_data.js"></script>
+    <script src="../../../../searchindex.js"></script>
+  
   </head>
-  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
-    
-    <div class="container-fluid" id="banner"></div>
-
-    
-    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
-
-  <div id="navbar-start">
-    
-    
-<a class="navbar-brand" href="../../../../index.html">
-<p class="title">OpenGHG</p>
-</a>
-
-    
-  </div>
-
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
 
   
-  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
-    <div id="navbar-center" class="mr-auto">
-      
-      <div class="navbar-center-item">
-        <ul id="navbar-main-elements" class="navbar-nav">
-    <li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../../../../install.html">
-  Installation
- </a>
-</li>
-
-<li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../../../../tutorials/index.html">
-  Tutorials
- </a>
-</li>
-
-<li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../../../../api/index.html">
-  User API
- </a>
-</li>
-
-<li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../../../../development/index_devel.html">
-  Development
- </a>
-</li>
-
-<li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../../../../api/index_devapi.html">
-  Developer API
- </a>
-</li>
-
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
     
-</ul>
-      </div>
-      
-    </div>
+<form class="bd-search d-flex align-items-center"
+      action="../../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
 
-    <div id="navbar-end">
-      
-      <div class="navbar-end-item">
-        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
-      </ul>
-      </div>
-      
-    </div>
-  </div>
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
 </div>
-    </nav>
-    
 
-    <div class="container-xl">
-      <div class="row">
-          
-            
-            <!-- Only show if we have sidebars configured, else just a small margin  -->
-            <div class="col-12 col-md-3 bd-sidebar">
-              <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../../search.html" method="get">
-  <i class="icon fas fa-search"></i>
-  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
-</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
-  <div class="bd-toc-item active">
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.20.0 documentation - Home"/>
+    <img src="../../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.20.0 documentation - Home"/>
+  
+  
+</a></div>
     
   </div>
-</nav>
-              </div>
-              <div class="sidebar-end-items">
-              </div>
-            </div>
-            
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../install.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../tutorials/index.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../api/index.html">
+    User API
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../development/index_devel.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../api/index_devapi.html">
+    Developer API
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
           
 
-          
-          <div class="d-none d-xl-block col-xl-2 bd-toc">
-            
-          </div>
-          
+<button type="button" class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
 
+<button type="button" class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
           
           
-            
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../install.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../tutorials/index.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../api/index.html">
+    User API
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../development/index_devel.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../api/index_devapi.html">
+    Developer API
+  </a>
+</li>
+
+  </ul>
+</nav></div>
           
-          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+        
+      </div>
+    
+    
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
               
-              <div>
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">openghg.retrieve.icos._retrieve</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
                 
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
   <h1>Source code for openghg.retrieve.icos._retrieve</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">openghg_defs</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.dataobjects</span><span class="w"> </span><span class="kn">import</span> <span class="n">ObsData</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.objectstore</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_writable_bucket</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.standardise.meta</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataset_formatter</span><span class="p">,</span> <span class="n">align_metadata_attributes</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util._deprecation</span><span class="w"> </span><span class="kn">import</span> <span class="n">_warn_if_force_ignored</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">convert_to_list_of_metadata_and_data</span><span class="p">,</span> <span class="n">MetadataAndData</span><span class="p">,</span> <span class="n">MetadataFormatError</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">openghg_defs</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.retrieve.icos</span><span class="w"> </span><span class="kn">import</span> <span class="n">_data_parsing</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.retrieve&quot;</span><span class="p">)</span>
 <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>  <span class="c1"># Have to set level for logger as well as handler</span>
@@ -191,6 +377,8 @@
     <span class="n">store</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">update_mismatch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;never&quot;</span><span class="p">,</span>
     <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">if_exists</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">retrieve_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;icoscp_core&quot;</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ObsData</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">ObsData</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise</span>
 <span class="sd">    data will be retrieved from the ICOS Carbon Portal. Data retrieval from the Carbon Portal may take a short time.</span>
@@ -221,13 +409,27 @@
 <span class="sd">                - &quot;never&quot; - don&#39;t update mismatches and raise an AttrMismatchError</span>
 <span class="sd">                - &quot;from_source&quot; / &quot;attributes&quot; - update mismatches based on attributes from ICOS Header</span>
 <span class="sd">                - &quot;from_definition&quot; / &quot;metadata&quot; - update mismatches based on input metadata</span>
-<span class="sd">        force: Force adding of data even if this is identical to data stored (checked based on previously retrieved file hashes).</span>
+<span class="sd">        force: Deprecated and ignored. Use ``if_exists`` to control overlap</span>
+<span class="sd">            handling. Passing ``True`` emits a deprecation warning.</span>
+<span class="sd">        if_exists: What to do if data already exists. ``&quot;auto&quot;`` skips overlapping</span>
+<span class="sd">            data, ``&quot;new&quot;`` creates a version containing only the retrieved data,</span>
+<span class="sd">            and ``&quot;combine&quot;`` updates the current timeseries with the retrieved data.</span>
+<span class="sd">        retrieve_method: Option of &#39;icoscp_core&#39; or &#39;dobj&#39; method but should always use &#39;icoscp_core&#39; method</span>
+<span class="sd">             unless testing against previous approach. The &#39;dobj&#39; method is included for completeness but is deprecated.</span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        ObsData, list[ObsData] or None</span>
+
+<span class="sd">    Warns:</span>
+<span class="sd">        DeprecationWarning: If ``force`` is ``True``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.retrieve</span><span class="w"> </span><span class="kn">import</span> <span class="n">search_surface</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.store</span><span class="w"> </span><span class="kn">import</span> <span class="n">ObsSurface</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">to_lowercase</span><span class="p">,</span> <span class="n">format_data_level</span>
+
+    <span class="n">retrieve_methods</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;icoscp_core&quot;</span><span class="p">,</span> <span class="s2">&quot;dobj&quot;</span><span class="p">]</span>
+
+    <span class="n">_warn_if_force_ignored</span><span class="p">(</span><span class="n">force</span><span class="p">)</span>
 
     <span class="c1"># ICOS: Potentially a different constraint for data_level to general constraint ([1, 2], rather than [0, 1, 2, 3])</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data_level</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
@@ -267,21 +469,38 @@
         <span class="c1"># break</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># We&#39;ll also need to check we have current data</span>
-        <span class="n">standardised_data</span> <span class="o">=</span> <span class="n">_retrieve_remote</span><span class="p">(</span>
-            <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
-            <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
-            <span class="n">data_level</span><span class="o">=</span><span class="n">data_level</span><span class="p">,</span>
-            <span class="n">dataset_source</span><span class="o">=</span><span class="n">dataset_source</span><span class="p">,</span>
-            <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
-            <span class="n">sampling_height</span><span class="o">=</span><span class="n">sampling_height</span><span class="p">,</span>
-            <span class="n">update_mismatch</span><span class="o">=</span><span class="n">update_mismatch</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">retrieve_method</span> <span class="o">==</span> <span class="s2">&quot;icoscp_core&quot;</span><span class="p">:</span>
+            <span class="n">standardised_data</span> <span class="o">=</span> <span class="n">_retrieve_remote</span><span class="p">(</span>
+                <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
+                <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
+                <span class="n">data_level</span><span class="o">=</span><span class="n">data_level</span><span class="p">,</span>
+                <span class="n">dataset_source</span><span class="o">=</span><span class="n">dataset_source</span><span class="p">,</span>
+                <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
+                <span class="n">sampling_height</span><span class="o">=</span><span class="n">sampling_height</span><span class="p">,</span>
+                <span class="n">update_mismatch</span><span class="o">=</span><span class="n">update_mismatch</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">retrieve_method</span> <span class="o">==</span> <span class="s2">&quot;dobj&quot;</span><span class="p">:</span>
+            <span class="c1"># Deprecated method but retained to alow for comparison with updated icoscp_core method</span>
+            <span class="n">standardised_data</span> <span class="o">=</span> <span class="n">_retrieve_remote_dobj</span><span class="p">(</span>
+                <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
+                <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
+                <span class="n">data_level</span><span class="o">=</span><span class="n">data_level</span><span class="p">,</span>
+                <span class="n">dataset_source</span><span class="o">=</span><span class="n">dataset_source</span><span class="p">,</span>
+                <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
+                <span class="n">sampling_height</span><span class="o">=</span><span class="n">sampling_height</span><span class="p">,</span>
+                <span class="n">update_mismatch</span><span class="o">=</span><span class="n">update_mismatch</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Did not recognise input for retrieve_method. Should be one of </span><span class="si">{</span><span class="n">retrieve_methods</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
         <span class="k">if</span> <span class="n">standardised_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="n">bucket</span> <span class="o">=</span> <span class="n">get_writable_bucket</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">store</span><span class="p">)</span>
         <span class="k">with</span> <span class="n">ObsSurface</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">)</span> <span class="k">as</span> <span class="n">obs</span><span class="p">:</span>
-            <span class="n">obs</span><span class="o">.</span><span class="n">store_data</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">standardised_data</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">)</span>
+            <span class="n">obs</span><span class="o">.</span><span class="n">store_data</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">standardised_data</span><span class="p">,</span> <span class="n">if_exists</span><span class="o">=</span><span class="n">if_exists</span><span class="p">)</span>
 
         <span class="c1"># Create the expected ObsData type</span>
         <span class="n">obs_data</span> <span class="o">=</span> <span class="p">[]</span>
@@ -290,7 +509,7 @@
             <span class="c1"># These contain URLs that are case sensitive so skip lowercasing these</span>
             <span class="n">skip_keys</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="s2">&quot;citation_string&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;instrument_data&quot;</span><span class="p">,</span>
+                <span class="c1">#  &quot;instrument_data&quot;,</span>
                 <span class="s2">&quot;dobj_pid&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;dataset_source&quot;</span><span class="p">,</span>
             <span class="p">]</span>
@@ -304,7 +523,779 @@
 
 
 
+<span class="c1"># Parsing ICOS text file format is also</span>
+<span class="c1"># equivalent to openghg.standardise.surface._icos.py</span>
+<span class="c1"># def _read_data_large_header</span>
+<span class="c1"># TODO: Should ensure this is put in a central location and not duplicated</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_icos_text_file</span><span class="p">(</span><span class="n">data_info</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Updating to match previous Dobj format initially and then</span>
+<span class="sd">    converting to Dataset</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">dobj_uri</span> <span class="o">=</span> <span class="n">data_info</span><span class="p">[</span><span class="s2">&quot;dobj_uri&quot;</span><span class="p">]</span>
+    <span class="n">species</span> <span class="o">=</span> <span class="n">data_info</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
+
+    <span class="n">icos_text</span> <span class="o">=</span> <span class="n">_data_parsing</span><span class="o">.</span><span class="n">get_icos_text_file</span><span class="p">(</span><span class="n">dobj_uri</span><span class="p">)</span>
+
+    <span class="c1"># What are steps that we need to do to the text data to parse into expected DataFrame</span>
+
+    <span class="c1"># TODO: Check why we&#39;re not using attrs rather than header?</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="n">_data_parsing</span><span class="o">.</span><span class="n">get_icos_text_header</span><span class="p">(</span><span class="n">icos_text</span><span class="p">)</span>
+    <span class="c1"># attrs = _data_parsing.get_full_attrs(dobj_uri, species, header)</span>
+
+    <span class="n">skiprows</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;header_lines&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="n">data_format</span> <span class="o">=</span> <span class="n">_data_parsing</span><span class="o">.</span><span class="n">_retrieve_dobj_format</span><span class="p">(</span><span class="n">data_info</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">data_format</span> <span class="o">==</span> <span class="s2">&quot;asciiAtcFlaskTimeSer&quot;</span><span class="p">:</span>
+        <span class="n">usecols</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">species</span><span class="p">,</span>
+            <span class="s2">&quot;SamplingHeight&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;SamplingStart&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;SamplingEnd&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Stdev&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;EstRep&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ScalLink&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;CombUnc&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;NbPoints&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Flag&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;InstrumentId&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="n">dataframe</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(</span><span class="n">icos_text</span><span class="p">),</span> <span class="n">skiprows</span><span class="o">=</span><span class="n">skiprows</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;;&quot;</span><span class="p">,</span> <span class="n">usecols</span><span class="o">=</span><span class="n">usecols</span><span class="p">)</span>
+
+        <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;TIMESTAMP&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;SamplingStart&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">tz_localize</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">usecols</span> <span class="o">=</span> <span class="p">[</span><span class="n">species</span><span class="p">,</span> <span class="s2">&quot;Stdev&quot;</span><span class="p">,</span> <span class="s2">&quot;NbPoints&quot;</span><span class="p">,</span> <span class="s2">&quot;Flag&quot;</span><span class="p">,</span> <span class="s2">&quot;Year&quot;</span><span class="p">,</span> <span class="s2">&quot;Month&quot;</span><span class="p">,</span> <span class="s2">&quot;Day&quot;</span><span class="p">,</span> <span class="s2">&quot;Hour&quot;</span><span class="p">,</span> <span class="s2">&quot;Minute&quot;</span><span class="p">]</span>
+        <span class="c1"># Keep the Second column when the file has one, so timestamps keep their seconds</span>
+        <span class="k">if</span> <span class="s2">&quot;Second&quot;</span> <span class="ow">in</span> <span class="n">header</span><span class="p">[</span><span class="s2">&quot;columns&quot;</span><span class="p">]:</span>
+            <span class="n">usecols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Second&quot;</span><span class="p">)</span>
+
+        <span class="n">dataframe</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(</span><span class="n">icos_text</span><span class="p">),</span> <span class="n">skiprows</span><span class="o">=</span><span class="n">skiprows</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;;&quot;</span><span class="p">,</span> <span class="n">usecols</span><span class="o">=</span><span class="n">usecols</span><span class="p">)</span>
+
+        <span class="c1"># make time index</span>
+        <span class="n">date_cols</span><span class="p">,</span> <span class="n">times</span> <span class="o">=</span> <span class="n">_data_parsing</span><span class="o">.</span><span class="n">parse_date_columns</span><span class="p">(</span><span class="n">dataframe</span><span class="p">)</span>
+        <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;TIMESTAMP&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">times</span>
+        <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">date_cols</span><span class="p">)</span>
+
+    <span class="c1"># # try to get dtypes</span>
+    <span class="c1"># dtypes = dtypes_dict(df.columns.to_list(), attrs) if attrs is not None else None</span>
+    <span class="c1"># if dtypes is not None:</span>
+    <span class="c1">#     # if Stdev dtype not specified, make it the same as the mole fraction column</span>
+    <span class="c1">#     if species in dtypes and &quot;Stdev&quot; not in dtypes:</span>
+    <span class="c1">#         dtypes[&quot;Stdev&quot;] = dtypes[species]</span>
+
+    <span class="c1">#     df = df.astype(dtypes)</span>
+
+    <span class="c1"># Convert columns to the dtypes declared by ICOS, to match the previous (dobj) method</span>
+    <span class="n">attrs</span> <span class="o">=</span> <span class="n">_data_parsing</span><span class="o">.</span><span class="n">get_data_attrs</span><span class="p">(</span><span class="n">dobj_uri</span><span class="p">,</span> <span class="n">species</span><span class="p">)</span>
+    <span class="n">dtypes</span> <span class="o">=</span> <span class="n">_data_parsing</span><span class="o">.</span><span class="n">dtypes_dict</span><span class="p">(</span><span class="n">dataframe</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">to_list</span><span class="p">(),</span> <span class="n">attrs</span><span class="p">)</span>
+    <span class="c1"># Times are already parsed above, so don&#39;t convert the TIMESTAMP column</span>
+    <span class="c1"># If it&#39;s passed test_icos_retrieve_skips_obspack_globalview fails</span>
+    <span class="n">dtypes</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;TIMESTAMP&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="c1"># if Stdev dtype not specified, make it the same as the mole fraction column</span>
+    <span class="k">if</span> <span class="n">species</span> <span class="ow">in</span> <span class="n">dtypes</span> <span class="ow">and</span> <span class="s2">&quot;Stdev&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dtypes</span><span class="p">:</span>
+        <span class="n">dtypes</span><span class="p">[</span><span class="s2">&quot;Stdev&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dtypes</span><span class="p">[</span><span class="n">species</span><span class="p">]</span>
+    <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtypes</span><span class="p">)</span>
+
+    <span class="n">dataframe</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+
+    <span class="c1"># If there is a stdev column, replace missing values with nans</span>
+    <span class="c1"># Then rename columns</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;stdev&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;stdev&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;stdev&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">rename_cols</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="s2">&quot;time&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;stdev&quot;</span><span class="p">:</span> <span class="n">species</span> <span class="o">+</span> <span class="s2">&quot;_variability&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;nbpoints&quot;</span><span class="p">:</span> <span class="n">species</span> <span class="o">+</span> <span class="s2">&quot;_number_of_observations&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">rename_cols</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="s2">&quot;time&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;nbpoints&quot;</span><span class="p">:</span> <span class="n">species</span> <span class="o">+</span> <span class="s2">&quot;_number_of_observations&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">rename_cols</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">is_monotonic_increasing</span><span class="p">:</span>
+        <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+
+    <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">)</span>
+
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">to_xarray</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">header</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_icos_obspack_nc_file</span><span class="p">(</span><span class="n">data_info</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parsing expected obspack netcdf format from ICOS CP</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timedelta</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">numpy.char</span><span class="w"> </span><span class="kn">import</span> <span class="n">decode</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_internal_json</span>
+
+    <span class="n">dobj_uri</span> <span class="o">=</span> <span class="n">data_info</span><span class="p">[</span><span class="s2">&quot;dobj_uri&quot;</span><span class="p">]</span>
+    <span class="n">species</span> <span class="o">=</span> <span class="n">data_info</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
+
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">_data_parsing</span><span class="o">.</span><span class="n">get_icos_nc_file</span><span class="p">(</span><span class="n">dobj_uri</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">species</span> <span class="o">==</span> <span class="s2">&quot;co2&quot;</span><span class="p">:</span>
+        <span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;ppm&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;ppb&quot;</span>
+
+    <span class="c1"># For now: for ICOS Combined need to convert units manually</span>
+    <span class="n">attributes_data</span> <span class="o">=</span> <span class="n">load_internal_json</span><span class="p">(</span><span class="s2">&quot;attributes.json&quot;</span><span class="p">)</span>
+    <span class="n">unit_interpret</span> <span class="o">=</span> <span class="n">attributes_data</span><span class="p">[</span><span class="s2">&quot;unit_interpret&quot;</span><span class="p">]</span>
+    <span class="n">unit_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">unit_interpret</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">units</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">))</span>
+
+    <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">unit_value</span>
+    <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;value_std_dev&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;value_std_dev&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">unit_value</span>
+    <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;icos_LTR&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;icos_LTR&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">unit_value</span>
+    <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;icos_SMR&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;icos_SMR&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">unit_value</span>
+    <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;icos_STTB&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;icos_STTB&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">unit_value</span>
+
+    <span class="c1"># TODO: Lower case all the data variables in the dataset</span>
+
+    <span class="n">rename_cols_lower</span> <span class="o">=</span> <span class="p">{</span><span class="n">dv</span><span class="p">:</span> <span class="n">dv</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">dv</span> <span class="ow">in</span> <span class="n">dataset</span><span class="p">}</span>  <span class="c1"># type: ignore</span>
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">rename_cols_lower</span><span class="p">)</span>
+
+    <span class="n">rename_col_names</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">species</span><span class="p">,</span>
+        <span class="s2">&quot;qc_flag&quot;</span><span class="p">:</span> <span class="s2">&quot;flag&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;value_std_dev&quot;</span><span class="p">:</span> <span class="n">species</span> <span class="o">+</span> <span class="s2">&quot;_variability&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;icos_ltr&quot;</span><span class="p">:</span> <span class="n">species</span> <span class="o">+</span> <span class="s2">&quot;_repeatability&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">rename_col_names</span><span class="p">)</span>
+
+    <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">Timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+
+    <span class="n">dataset</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_repeatability&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;comment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;ICOS LTR as defined by Yver Kwok et al., 2015, doi:10.5194/amt-8-3867-2015&quot;</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Recast &quot;flag&quot; column to decode bytes and update to same dtype as other data</span>
+    <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;flag&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">decode</span><span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;flag&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;bytes_&quot;</span><span class="p">),</span> <span class="s2">&quot;utf-8&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+
+    <span class="c1"># TODO: Add south/west normalisation such that sign flips if these are provided</span>
+    <span class="k">if</span> <span class="s2">&quot;south&quot;</span> <span class="ow">in</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">&quot;latitude units are in relation to south rather than north. The values have NOT been converted to the degrees north convention, so the sign of the latitude may be wrong.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="s2">&quot;west&quot;</span> <span class="ow">in</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">&quot;longitude units are in relation to west rather than east. The values have NOT been converted to the degrees east convention, so the sign of the longitude may be wrong.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;altitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units_comment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;altitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span>
+    <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units_comment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span>
+    <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units_comment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span>
+    <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;intake_height&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units_comment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;intake_height&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span>
+
+    <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;altitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;masl&quot;</span>
+    <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;intake_height&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;magl&quot;</span>
+    <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;obs_flag&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;units&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;assimilation_concerns&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;units&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="n">attrs</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">attrs</span>
+
+    <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;measurement_unit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">units</span>
+
+    <span class="k">return</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">attrs</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">retrieve_and_parse_icos_data</span><span class="p">(</span>
+    <span class="n">data_info</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">dataset_source</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Based on known formats we want to be able to retrieve from ICOS, call</span>
+<span class="sd">    the correct parsing function (mainly based on dataset_source and derived data_format)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data_format</span> <span class="o">=</span> <span class="n">_data_parsing</span><span class="o">.</span><span class="n">_retrieve_dobj_format</span><span class="p">(</span><span class="n">data_info</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">data_format</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;asciiAtcFlaskTimeSer&quot;</span><span class="p">,</span> <span class="s2">&quot;asciiAtcProductTimeSer&quot;</span><span class="p">):</span>
+        <span class="n">dataset</span><span class="p">,</span> <span class="n">data_attributes</span> <span class="o">=</span> <span class="n">parse_icos_text_file</span><span class="p">(</span><span class="n">data_info</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">data_format</span> <span class="o">==</span> <span class="s2">&quot;netcdfTimeSeries&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dataset_source</span> <span class="o">==</span> <span class="s2">&quot;ICOS Combined&quot;</span><span class="p">:</span>
+            <span class="n">dataset</span><span class="p">,</span> <span class="n">data_attributes</span> <span class="o">=</span> <span class="n">parse_icos_obspack_nc_file</span><span class="p">(</span><span class="n">data_info</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Unable to parse other netcdf files than &#39;ICOS Combined&#39;. Current dataset_source: </span><span class="si">{</span><span class="n">dataset_source</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported ICOS data_format: </span><span class="si">{</span><span class="n">data_format</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Ensure all required keys exist in data_attributes with sensible defaults</span>
+    <span class="n">defaults</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;dataset_calibration_scale&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dataset_data_frequency&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dataset_data_frequency_unit&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;measurement_unit&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;sampling_heights&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;altitude&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;station_name&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;latitude&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;longitude&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dataset_intake_ht&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;site_name&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;site_latitude&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;site_longitude&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;site_elevation&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">default_value</span> <span class="ow">in</span> <span class="n">defaults</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data_attributes</span><span class="p">:</span>
+            <span class="n">data_attributes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_value</span>
+
+    <span class="k">return</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">data_attributes</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">attributes_requiring_retrieval</span><span class="p">(</span>
+    <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">dobj_uri</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">site</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">station_meta</span><span class="p">:</span> <span class="n">_data_parsing</span><span class="o">.</span><span class="n">Station</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create attribute details which are based on retrieval of other URIs from</span>
+<span class="sd">    ICOS CP. This includes:</span>
+<span class="sd">     - Details from Dobj metadata - icoscp_core.meta.get_dobj_meta(dobj_uri)</span>
+<span class="sd">     - Details from Station metadata - _data_parsing.Station / icoscp_core.meta.get_station_meta(station_uri)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">retrieved_attributes_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">dobj_meta</span> <span class="o">=</span> <span class="n">_data_parsing</span><span class="o">.</span><span class="n">_check_and_get_dobj_meta</span><span class="p">(</span><span class="n">dobj_uri</span><span class="p">)</span>
+    <span class="n">station_meta</span> <span class="o">=</span> <span class="n">_data_parsing</span><span class="o">.</span><span class="n">_check_and_get_station_meta</span><span class="p">(</span><span class="n">site</span><span class="p">,</span> <span class="n">station_meta</span><span class="p">)</span>
+
+    <span class="c1"># TODO: Decide on how to include data owner details</span>
+    <span class="c1"># Currently searching for PI details and combining into one string separated by &quot;;&quot;</span>
+    <span class="c1"># Could just pick first entry instead?</span>
+    <span class="n">pi_details</span> <span class="o">=</span> <span class="n">_data_parsing</span><span class="o">.</span><span class="n">retrieve_station_staff</span><span class="p">(</span><span class="n">station_meta</span><span class="o">=</span><span class="n">station_meta</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="s2">&quot;PI&quot;</span><span class="p">)</span>
+    <span class="n">data_owners</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">PI</span><span class="p">[</span><span class="s1">&#39;firstName&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">PI</span><span class="p">[</span><span class="s1">&#39;lastName&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">PI</span> <span class="ow">in</span> <span class="n">pi_details</span><span class="o">.</span><span class="n">iterrows</span><span class="p">()]</span>
+    <span class="n">data_owner_emails</span> <span class="o">=</span> <span class="p">[</span><span class="n">PI</span><span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">PI</span> <span class="ow">in</span> <span class="n">pi_details</span><span class="o">.</span><span class="n">iterrows</span><span class="p">()]</span>
+
+    <span class="n">data_owners_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">data_owners_dict</span><span class="p">[</span><span class="s2">&quot;data_owner&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_owners</span><span class="p">)</span>
+    <span class="n">data_owners_dict</span><span class="p">[</span><span class="s2">&quot;data_owner_email&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_owner_emails</span><span class="p">)</span>
+
+    <span class="c1"># References dict includes &#39;citation_string&#39;, &#39;licence_name&#39;, &#39;licence_info&#39;</span>
+    <span class="n">references_dict</span> <span class="o">=</span> <span class="n">_data_parsing</span><span class="o">.</span><span class="n">retrieve_dobj_references</span><span class="p">(</span><span class="n">dobj_meta</span><span class="o">=</span><span class="n">dobj_meta</span><span class="p">)</span>
+
+    <span class="c1"># Instrument dict includes &#39;instrument&#39; / &#39;instrument1&#39; ...</span>
+    <span class="n">instrument_dict</span> <span class="o">=</span> <span class="n">_data_parsing</span><span class="o">.</span><span class="n">retrieve_dobj_instrument</span><span class="p">(</span><span class="n">dobj_meta</span><span class="o">=</span><span class="n">dobj_meta</span><span class="p">)</span>
+    <span class="c1"># instrument_dict = {key: value.lower() for key, value in instrument_dict.items()}</span>
+
+    <span class="c1"># Measurement type dict includes &#39;measurement_type&#39;</span>
+    <span class="c1"># measurement_type_dict = _data_parsing.retrieve_dobj_measurement_type(species, dobj_meta=dobj_meta)</span>
+    <span class="c1"># measurement_type_dict[&quot;measurement_type&quot;] = measurement_type_dict[&quot;measurement_type&quot;].lower()</span>
+
+    <span class="c1"># Collect together retrieved details</span>
+    <span class="n">retrieved_attributes_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">data_owners_dict</span><span class="p">)</span>
+    <span class="n">retrieved_attributes_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">references_dict</span><span class="p">)</span>
+    <span class="n">retrieved_attributes_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">instrument_dict</span><span class="p">)</span>
+    <span class="c1"># retrieved_attributes_dict.update(measurement_type_dict)</span>
+
+    <span class="k">return</span> <span class="n">retrieved_attributes_dict</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">create_icos_attributes</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span>
+    <span class="n">data_info</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+    <span class="n">data_attributes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">additional_data</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">station_meta</span><span class="p">:</span> <span class="n">_data_parsing</span><span class="o">.</span><span class="n">Station</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">dataset_source</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">keep_dataset_source_names</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      Create attributes for ICOS dataset by combining the attributes from the downloaded data</span>
+<span class="sd">      with details retrieved from the ICOS Carbon Portal</span>
+
+<span class="sd">      This includes:</span>
+<span class="sd">      - Recording the data object URL, species, site and data sources.</span>
+<span class="sd">      - Converting the data frequenry into a sampling period in seconds.</span>
+<span class="sd">      - Maps ICOS attribute names (e.g &quot;sampling_heights&quot;) to</span>
+<span class="sd">      OpenGHG names (e.g &quot;inlet&quot;) and formats inlet heighs and coordinates.</span>
+<span class="sd">      The names used depend on whether dataset_source is &quot;ICOS_combined&quot;.</span>
+<span class="sd">      -Adds data owner, citation, licence, from the ICOS CP data</span>
+<span class="sd">      object and station metadata (see attribute_requiring_retrieval).</span>
+<span class="sd">      -Sets &quot;instruments&quot; from the unique instrument IDs in the dataset: &quot;icos_id_&lt;n&gt;&quot; for</span>
+<span class="sd">      one ID, &quot;combined&quot; for several, or &quot;unknown&quot; for none. If the dataset has no</span>
+<span class="sd">    instrument variable, the instrument retrieved from ICOS CP is used instead.</span>
+
+
+<span class="sd">      Args:</span>
+<span class="sd">          dataset: Parsed ICOS data.</span>
+<span class="sd">          data_info: Details of the ICOS data object. Must include &quot;dobj_uri&quot;, &quot;site&quot;</span>
+<span class="sd">              and &quot;species&quot;. &quot;project_name&quot; is used if dataset_source is not kept.</span>
+<span class="sd">          data_attributes: Attributes extracted from the downloaded data</span>
+<span class="sd">              (e.g. from retrieve_and_parse_icos_data).</span>
+<span class="sd">          species: Species name, passed on to attributes_requiring_retrieval.</span>
+<span class="sd">          additional_data: Extra attributes to add (e.g. network, data_type, data_level).</span>
+<span class="sd">          station_meta: ICOS Station metadata. Retrieved from the site if not given.</span>
+<span class="sd">          dataset_source:  Name of the ICOS product the data was retrieved from (e.g. &quot;ICOS Combined&quot;,</span>
+<span class="sd">             &quot;ICOS FastTrack&quot;). If it isn&#39;t in keep_dataset_source_names, it is replaced by the</span>
+<span class="sd">              project name in data_info (e.g. &quot;icos&quot;, &quot;euroObspack&quot;). &quot;ICOS Combined&quot; (ObsPack netCDF)</span>
+<span class="sd">              data uses different ICOS attribute names, which are mapped accordingly.</span>
+<span class="sd">          keep_dataset_source_names: dataset_source values that are not replaced by the project</span>
+<span class="sd">              name.Defaults to [&quot;ICOS FastTrack&quot;, &quot;EYE-AVE-PAR&quot;, &quot;ICOS Combined&quot;, &quot;ICOS Flask&quot;].</span>
+
+<span class="sd">      Returns:</span>
+<span class="sd">          dict: Attributes for the dataset</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">extract_float</span><span class="p">,</span> <span class="n">format_inlet</span>
+
+    <span class="k">if</span> <span class="n">additional_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">additional_data</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">keep_dataset_source_names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">keep_dataset_source_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ICOS FastTrack&quot;</span><span class="p">,</span> <span class="s2">&quot;EYE-AVE-PAR&quot;</span><span class="p">,</span> <span class="s2">&quot;ICOS Combined&quot;</span><span class="p">,</span> <span class="s2">&quot;ICOS Flask&quot;</span><span class="p">]</span>
+
+    <span class="c1"># if user_input:</span>
+    <span class="c1">#     site = user_input[&quot;site&quot;]</span>
+    <span class="c1"># else:</span>
+    <span class="c1">#     site = data_info[&quot;site&quot;]</span>
+
+    <span class="k">if</span> <span class="n">dataset_source</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">keep_dataset_source_names</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dataset_source</span> <span class="o">=</span> <span class="n">data_info</span><span class="p">[</span><span class="s2">&quot;project_name&quot;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">dataset_source</span> <span class="o">=</span> <span class="s2">&quot;NA&quot;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Unable to read project information from ICOS data object info.&quot;</span><span class="p">)</span>
+
+    <span class="n">dobj_uri</span> <span class="o">=</span> <span class="n">data_info</span><span class="p">[</span><span class="s2">&quot;dobj_uri&quot;</span><span class="p">]</span>
+
+    <span class="c1"># data_attributes = data.attrs</span>
+    <span class="n">icos_site</span> <span class="o">=</span> <span class="n">data_info</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span>
+
+    <span class="n">attributes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;icoscp_url&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">dobj_uri</span><span class="p">)</span>
+    <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_info</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
+    <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">icos_site</span>
+    <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;dataset_source&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset_source</span>
+
+    <span class="c1"># TODO: See if we can add this back in - where are these details in new setup?</span>
+    <span class="c1"># Joe says he doesn&#39;t think we need the attribute &quot;measurement_type&quot; so we can just comment out everywhere</span>
+    <span class="c1"># attributes[&quot;measurement_type&quot;] = data_attributes[&quot;long_name&quot;].lower()</span>
+
+    <span class="c1"># TODO: Remove this from general attributes but make sure this is</span>
+    <span class="c1"># included as a specific value on the appropriate variable.</span>
+    <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_attributes</span><span class="p">[</span><span class="s2">&quot;measurement_unit&quot;</span><span class="p">]</span>
+
+    <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;dataset_calibration_scale&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_attributes</span><span class="p">[</span><span class="s2">&quot;dataset_calibration_scale&quot;</span><span class="p">]</span>
+    <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;dataset_data_frequency&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_attributes</span><span class="p">[</span><span class="s2">&quot;dataset_data_frequency&quot;</span><span class="p">]</span>
+
+    <span class="n">freq_unit</span> <span class="o">=</span> <span class="n">data_attributes</span><span class="p">[</span><span class="s2">&quot;dataset_data_frequency_unit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">freq_unit</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;second&quot;</span><span class="p">,</span> <span class="s2">&quot;seconds&quot;</span><span class="p">):</span>
+        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_attributes</span><span class="p">[</span><span class="s2">&quot;dataset_data_frequency&quot;</span><span class="p">])</span>
+
+    <span class="k">elif</span> <span class="n">freq_unit</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;minute&quot;</span><span class="p">,</span> <span class="s2">&quot;minutes&quot;</span><span class="p">):</span>
+        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_attributes</span><span class="p">[</span><span class="s2">&quot;dataset_data_frequency&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">freq_unit</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;hour&quot;</span><span class="p">,</span> <span class="s2">&quot;hours&quot;</span><span class="p">):</span>
+        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_attributes</span><span class="p">[</span><span class="s2">&quot;dataset_data_frequency&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3600</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Fallback if frequency unit is unknown or doesn&#39;t match</span>
+        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;not_set&quot;</span>
+
+    <span class="k">if</span> <span class="n">dataset_source</span> <span class="o">==</span> <span class="s2">&quot;ICOS Combined&quot;</span><span class="p">:</span>
+        <span class="n">attrs_mapping</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;sampling_height&quot;</span><span class="p">:</span> <span class="s2">&quot;dataset_intake_ht&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;inlet&quot;</span><span class="p">:</span> <span class="s2">&quot;dataset_intake_ht&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">:</span> <span class="s2">&quot;dataset_intake_ht&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;station_long_name&quot;</span><span class="p">:</span> <span class="s2">&quot;site_name&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;station_latitude&quot;</span><span class="p">:</span> <span class="s2">&quot;site_latitude&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;station_longitude&quot;</span><span class="p">:</span> <span class="s2">&quot;site_longitude&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;station_height_masl&quot;</span><span class="p">:</span> <span class="s2">&quot;site_elevation&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">remove_attrs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">attrs_mapping</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;dataset_intake_ht_unit&quot;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">attrs_mapping</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;sampling_height&quot;</span><span class="p">:</span> <span class="s2">&quot;sampling_heights&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;inlet&quot;</span><span class="p">:</span> <span class="s2">&quot;sampling_heights&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">:</span> <span class="s2">&quot;sampling_heights&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;station_height_masl&quot;</span><span class="p">:</span> <span class="s2">&quot;altitude&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;station_long_name&quot;</span><span class="p">:</span> <span class="s2">&quot;station_name&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;station_latitude&quot;</span><span class="p">:</span> <span class="s2">&quot;latitude&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;station_longitude&quot;</span><span class="p">:</span> <span class="s2">&quot;longitude&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">remove_attrs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">attrs_mapping</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+    <span class="c1"># Copy across equivalent attributes from downloaded data and apply formatting</span>
+    <span class="n">inlet_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;sampling_height&quot;</span><span class="p">,</span> <span class="s2">&quot;inlet&quot;</span><span class="p">,</span> <span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">,</span> <span class="s2">&quot;station_height_masl&quot;</span><span class="p">]</span>
+    <span class="n">coord_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;station_latitude&quot;</span><span class="p">,</span> <span class="s2">&quot;station_longitude&quot;</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">new_key</span><span class="p">,</span> <span class="n">current_key</span> <span class="ow">in</span> <span class="n">attrs_mapping</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">data_attributes</span><span class="p">[</span><span class="n">current_key</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">new_key</span> <span class="ow">in</span> <span class="n">inlet_keys</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># ICOS headers give e.g. &quot;75.0 m&quot; - format the number so &quot;75.0&quot; -&gt; &quot;75m&quot; / &quot;75&quot;</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">extract_float</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)),</span> <span class="n">key_name</span><span class="o">=</span><span class="n">new_key</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="c1"># Non-numeric value (e.g. &quot;unknown&quot; default) - keep previous behaviour</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span> <span class="n">key_name</span><span class="o">=</span><span class="n">new_key</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">new_key</span> <span class="ow">in</span> <span class="n">coord_keys</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">_data_parsing</span><span class="o">.</span><span class="n">format_icos_coord</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="n">attributes</span><span class="p">[</span><span class="n">new_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;sampling_height_units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;metres&quot;</span>
+
+    <span class="k">if</span> <span class="n">remove_attrs</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">remove_attrs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
+                <span class="n">dataset</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+    <span class="n">add_attributes</span> <span class="o">=</span> <span class="n">attributes_requiring_retrieval</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">dobj_uri</span><span class="p">,</span> <span class="n">station_meta</span><span class="o">=</span><span class="n">station_meta</span><span class="p">)</span>
+    <span class="n">attributes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">add_attributes</span><span class="p">)</span>
+
+    <span class="n">attributes</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;instrument_data&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Establish array of the instrument IDs</span>
+        <span class="n">instrument_array</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">data_vars</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+
+        <span class="c1"># Find the unique instrument IDs</span>
+        <span class="n">unique_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">instrument_array</span><span class="p">)</span>
+
+        <span class="c1"># Determine instrument value based on uniqueness</span>
+        <span class="c1"># If no instrument IDs then instrument value should be set to unknown</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique_vals</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">instrument_value</span> <span class="o">=</span> <span class="s2">&quot;unknown&quot;</span>
+        <span class="c1"># If 1 instrument ID then instrument value should be set to that value</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique_vals</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># All same - use icos_id_&lt;number&gt;</span>
+            <span class="n">instrument_value</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;icos_id_</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">unique_vals</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="c1"># If more than 1 instrument ID than instrument value should be set to combibed</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Multiple different values - combine them</span>
+            <span class="c1"># Option 1: underscore-separated</span>
+            <span class="n">instrument_value</span> <span class="o">=</span> <span class="s2">&quot;combined&quot;</span>
+
+            <span class="c1"># Option 2: comma-separated (alternative)</span>
+            <span class="c1"># instrument_value = &quot;,&quot;.join([f&quot;icos_id_{int(v)}&quot; for v in sorted(unique_vals)])</span>
+
+            <span class="c1"># Apply to both attributes and metadata</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="c1"># If &#39;instrument&#39; variable doesn&#39;t exist in dataset, check attributes</span>
+        <span class="c1"># (it may have been added by attributes_requiring_retrieval)</span>
+        <span class="k">if</span> <span class="s2">&quot;instrument&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attributes</span><span class="p">:</span>
+            <span class="n">instrument_value</span> <span class="o">=</span> <span class="s2">&quot;unknown&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Use the value from attributes (already set by attributes_requiring_retrieval)</span>
+            <span class="n">instrument_value</span> <span class="o">=</span> <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span>
+
+    <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">instrument_value</span>
+
+    <span class="n">attributes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">additional_data</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">attributes</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">create_metadata</span><span class="p">(</span>
+    <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">attributes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="n">additional_data</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">openghg_site_metadata</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create metadata to be stored in the metastore for ICOS data</span>
+
+<span class="sd">    This includes:</span>
+<span class="sd">    - Adds the station long name, latitude and longitude from the OpenGHG site</span>
+<span class="sd">        information (openghg_defs), if it has an entry for this site under this</span>
+<span class="sd">        network. Otherwise these keys are left out.</span>
+<span class="sd">    - Records the site code and copies the dataset source, species, instrument, calibration scale and</span>
+<span class="sd">        sampling period from the attributes.</span>
+<span class="sd">    - Adds the OpenGHG-specific values passed in additional_data (e.g. network,</span>
+<span class="sd">        data_type, data_source, source_format, data_level).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        site: Site code</span>
+<span class="sd">        network: Network name (e.g. &quot;ICOS&quot;), used to look up the site information</span>
+<span class="sd">        attributes: Attributes created by create_icos_attributes. Must include</span>
+<span class="sd">            &quot;dataset_source&quot;, &quot;species&quot;, &quot;instrument&quot;, &quot;dataset_calibration_scale&quot;</span>
+<span class="sd">            and &quot;sampling_period&quot;.</span>
+<span class="sd">        additional_data: OpenGHG-specific values to add to the metadata.</span>
+<span class="sd">        openghg_site_metadata: OpenGHG site information, keyed by site code and then</span>
+<span class="sd">            network. Loaded from the openghg_defs site_info file if not provided.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Metadata for the dataset</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">additional_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">additional_data</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># Load our site metadata for a few things like the station&#39;s long_name that</span>
+    <span class="c1"># isn&#39;t in the ICOS metadata in the way we want it at the momenet - 2023-03-20</span>
+    <span class="k">if</span> <span class="n">openghg_site_metadata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">site_info_fpath</span> <span class="o">=</span> <span class="n">openghg_defs</span><span class="o">.</span><span class="n">site_info_file</span>
+        <span class="n">openghg_site_metadata</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">site_info_fpath</span><span class="p">)</span>
+
+    <span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">site_info</span> <span class="o">=</span> <span class="n">openghg_site_metadata</span><span class="p">[</span><span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()][</span><span class="n">network</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;station_long_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">site_info</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;station_latitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">site_info</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">]</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;station_longitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">site_info</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">]</span>
+
+    <span class="c1"># Add user defined values</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">site</span>
+
+    <span class="c1"># Add relevant values from created attributes</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;dataset_source&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;dataset_source&quot;</span><span class="p">]</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span>
+
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;calibration_scale&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;dataset_calibration_scale&quot;</span><span class="p">]</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">]</span>
+
+    <span class="n">metadata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">additional_data</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">metadata</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_retrieve_remote</span><span class="p">(</span>
+    <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">data_level</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">species</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sampling_height</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">dataset_source</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">update_mismatch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;never&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">MetadataAndData</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieve ICOS data from the ICOS Carbon Portal and standardise it into</span>
+<span class="sd">    a format expected by OpenGHG. A dictionary of metadata and Datasets</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        site: Site code</span>
+<span class="sd">        data_level: ICOS data level (1, 2)</span>
+<span class="sd">        - Data level 1: Near Real Time Data (NRT) or Internal Work data (IW).</span>
+<span class="sd">        - Data level 2: The final quality checked ICOS RI data set, published by the CFs,</span>
+<span class="sd">                        to be distributed through the Carbon Portal.</span>
+<span class="sd">                        This level is the ICOS-data product and free available for users.</span>
+<span class="sd">        See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone</span>
+<span class="sd">        species: Species name</span>
+<span class="sd">        inlet: Height of the inlet for sampling in metres.</span>
+<span class="sd">        sampling_height: Alias for inlet</span>
+<span class="sd">        dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack. Specify &quot;ICOS</span>
+<span class="sd">            Combined&quot; here in order to retrieve the combined timeseries including all Obspack and ICOS</span>
+<span class="sd">            data (e.g. https://doi.org/10.18160/0HYS-FF7X)</span>
+<span class="sd">        update_mismatch: This determines how mismatches between the &quot;metadata&quot; derived from</span>
+<span class="sd">            stored data and &quot;attributes&quot; derived from ICOS Header are handled.</span>
+<span class="sd">            This includes the options:</span>
+<span class="sd">                - &quot;never&quot; - don&#39;t update mismatches and raise an AttrMismatchError</span>
+<span class="sd">                - &quot;from_source&quot; / &quot;attributes&quot; - update mismatches based on attributes from ICOS Header</span>
+<span class="sd">                - &quot;from_definition&quot; / &quot;metadata&quot; - update mismatches based on input metadata</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dict or None: Dictionary of processed data and metadata if found</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.standardise.meta</span><span class="w"> </span><span class="kn">import</span> <span class="n">assign_attributes</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">format_data_level</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.retrieve.icos</span><span class="w"> </span><span class="kn">import</span> <span class="n">_queries</span><span class="p">,</span> <span class="n">_stations</span>
+
+    <span class="k">if</span> <span class="n">species</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">species</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;CO&quot;</span><span class="p">,</span> <span class="s2">&quot;CO2&quot;</span><span class="p">,</span> <span class="s2">&quot;CH4&quot;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">species</span> <span class="o">=</span> <span class="p">[</span><span class="n">species</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">sampling_height</span> <span class="ow">and</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">inlet</span> <span class="o">=</span> <span class="n">sampling_height</span>
+    <span class="k">elif</span> <span class="n">sampling_height</span> <span class="ow">and</span> <span class="n">inlet</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Both sampling height and inlet specified. Using inlet value of </span><span class="si">{</span><span class="n">inlet</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># TODO: Check: does species need to go through synomyms and upper?</span>
+    <span class="n">species_upper</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">species</span><span class="p">]</span>
+
+    <span class="c1"># TODO: BIG Decide whether this spec_label search is needed in the same way with new interface</span>
+    <span class="c1"># - For &quot;ICOS FastTrack&quot; - &quot;FastTrack&quot; is included in spec_label name and species in &quot;species&quot; column</span>
+    <span class="c1"># - For &quot;EYE-AVE-PAR&quot; - &quot;EYE-AVE-PAR&quot; is not in spec_label but is in file_name and species in &quot;species&quot; column</span>
+    <span class="c1"># - For &quot;ICOS Combined&quot; - is this always European ObsPack?</span>
+    <span class="c1">#  - project_name includes &quot;euroObspack&quot; but does not always align with spec_label including &quot;ObsPack&quot;</span>
+
+    <span class="c1"># Want to create `spec_label` regex based on all relevant species</span>
+    <span class="c1"># Annoyingly FastTrack and EYE-AVE-PAR data don&#39;t have the species anywhere in the data_pids dataframe</span>
+    <span class="c1"># so we need to handle these cases separately.</span>
+    <span class="k">if</span> <span class="n">dataset_source</span> <span class="o">==</span> <span class="s2">&quot;ICOS FastTrack&quot;</span><span class="p">:</span>
+        <span class="n">search_str</span> <span class="o">=</span> <span class="s2">&quot;FastTrack NRT&quot;</span>
+    <span class="k">elif</span> <span class="n">dataset_source</span> <span class="o">==</span> <span class="s2">&quot;EYE-AVE-PAR&quot;</span><span class="p">:</span>
+        <span class="n">search_str</span> <span class="o">=</span> <span class="s2">&quot;GHG&quot;</span>
+    <span class="k">elif</span> <span class="n">dataset_source</span> <span class="o">==</span> <span class="s2">&quot;ICOS Flask&quot;</span><span class="p">:</span>
+        <span class="n">data_level</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data_level</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">data_level</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">search_str</span> <span class="o">=</span> <span class="s2">&quot;Flask data in ICOS ATC/CAL format&quot;</span>
+        <span class="k">elif</span> <span class="n">data_level</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">search_str</span> <span class="o">=</span> <span class="s2">&quot;ICOS ATC/CAL Flask Release&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Error: for ICOS Flask data the data level must be 1 or 2.&quot;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">MetadataFormatError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># For this see https://stackoverflow.com/a/55335207</span>
+        <span class="c1"># Need to make sure this is a raw string and that all \ characters have been escaped.</span>
+        <span class="n">search_str</span> <span class="o">=</span> <span class="sa">rf</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">b(?:</span><span class="si">{</span><span class="s1">&#39;|&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">,</span><span class="w"> </span><span class="n">species_upper</span><span class="p">))</span><span class="si">}</span><span class="s2">)</span><span class="se">\\</span><span class="s2">b&quot;</span>
+
+    <span class="c1"># Additional filters to apply</span>
+    <span class="c1"># - If we want the combined .nc file we search for &quot;Obspack&quot;</span>
+    <span class="c1"># - Otherwise filter out any data that contains &quot;Obspack&quot; or &quot;csv&quot; in the specLabel</span>
+    <span class="c1"># - Also filter out some drought files which cause trouble being read in</span>
+    <span class="k">if</span> <span class="n">dataset_source</span> <span class="o">==</span> <span class="s2">&quot;ICOS Combined&quot;</span><span class="p">:</span>
+        <span class="n">spec_label</span> <span class="o">=</span> <span class="p">[</span><span class="n">search_str</span><span class="p">,</span> <span class="s2">&quot;Obspack&quot;</span><span class="p">]</span>
+        <span class="n">spec_label_include</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">spec_label</span> <span class="o">=</span> <span class="p">[</span><span class="n">search_str</span><span class="p">,</span> <span class="s2">&quot;Obspack&quot;</span><span class="p">,</span> <span class="s2">&quot;csv&quot;</span><span class="p">]</span>
+        <span class="n">spec_label_include</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">]</span>
+        <span class="c1"># filtered_sources = data_pids[</span>
+        <span class="c1">#     data_pids[&quot;specLabel&quot;].str.contains(search_str)</span>
+        <span class="c1">#     &amp; ~data_pids[&quot;specLabel&quot;].str.contains(&quot;Obspack&quot;)</span>
+        <span class="c1">#     &amp; ~data_pids[&quot;specLabel&quot;].str.contains(&quot;csv&quot;)</span>
+        <span class="c1">#     &amp; ~data_pids[&quot;station&quot;].str.contains(&quot;ATMO_&quot;)</span>
+        <span class="c1"># ]</span>
+
+    <span class="n">filename_str</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">project</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">dataset_source</span> <span class="o">==</span> <span class="s2">&quot;EYE-AVE-PAR&quot;</span><span class="p">:</span>
+        <span class="n">project</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">filename_str</span> <span class="o">=</span> <span class="s2">&quot;EYE-AVE-PAR&quot;</span>
+    <span class="k">elif</span> <span class="n">dataset_source</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">dataset_source</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;ICOS FastTrack&quot;</span><span class="p">,</span> <span class="s2">&quot;ICOS Flask&quot;</span><span class="p">,</span> <span class="s2">&quot;ICOS Combined&quot;</span><span class="p">):</span>
+        <span class="c1"># No source requested, or a named product already narrowed down by spec_label</span>
+        <span class="n">project</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;icos&quot;</span><span class="p">,</span> <span class="s2">&quot;euroObspack&quot;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">dataset_source</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;icos&quot;</span><span class="p">:</span>
+        <span class="n">project</span> <span class="o">=</span> <span class="s2">&quot;icos&quot;</span>
+    <span class="k">elif</span> <span class="n">dataset_source</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;european obspack&quot;</span><span class="p">:</span>
+        <span class="n">project</span> <span class="o">=</span> <span class="s2">&quot;euroObspack&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">valid</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ICOS&quot;</span><span class="p">,</span> <span class="s2">&quot;European ObsPack&quot;</span><span class="p">,</span> <span class="s2">&quot;ICOS FastTrack&quot;</span><span class="p">,</span> <span class="s2">&quot;ICOS Flask&quot;</span><span class="p">,</span> <span class="s2">&quot;ICOS Combined&quot;</span><span class="p">,</span> <span class="s2">&quot;EYE-AVE-PAR&quot;</span><span class="p">]</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Unrecognised dataset_source &#39;</span><span class="si">{</span><span class="n">dataset_source</span><span class="si">}</span><span class="s2">&#39;. Should be one of </span><span class="si">{</span><span class="n">valid</span><span class="si">}</span><span class="s2">.&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="c1"># TODO: ALSO: Do we need to / could filter by &quot;ATMO_&quot; station first?</span>
+    <span class="c1"># Previous: For some reason they have separate station record pages that contain &quot;ATMO_&quot;</span>
+
+    <span class="n">data_object_info</span> <span class="o">=</span> <span class="n">_queries</span><span class="o">.</span><span class="n">dobj_info</span><span class="p">(</span>
+        <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
+        <span class="n">data_level</span><span class="o">=</span><span class="n">data_level</span><span class="p">,</span>
+        <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
+        <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
+        <span class="n">spec_label</span><span class="o">=</span><span class="n">spec_label</span><span class="p">,</span>
+        <span class="n">spec_label_include</span><span class="o">=</span><span class="n">spec_label_include</span><span class="p">,</span>
+        <span class="n">project</span><span class="o">=</span><span class="n">project</span><span class="p">,</span>
+        <span class="n">filename_str</span><span class="o">=</span><span class="n">filename_str</span><span class="p">,</span>
+        <span class="n">format_info</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># May or may not need this?</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">data_object_info</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No ICOS data found for site=</span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">, species=</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">, inlet=</span><span class="si">{</span><span class="n">inlet</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total rows from dobj_info: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data_object_info</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Columns: </span><span class="si">{</span><span class="n">data_object_info</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">data_object_info</span><span class="o">.</span><span class="n">to_string</span><span class="p">())</span>
+
+    <span class="c1"># Load our site metadata for a few things like the station&#39;s long_name that</span>
+    <span class="c1"># isn&#39;t in the ICOS metadata in the way we want it at the momenet - 2023-03-20</span>
+    <span class="n">site_info_fpath</span> <span class="o">=</span> <span class="n">openghg_defs</span><span class="o">.</span><span class="n">site_info_file</span>
+    <span class="n">openghg_site_metadata</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">site_info_fpath</span><span class="p">)</span>
+
+    <span class="n">station_meta</span> <span class="o">=</span> <span class="n">_stations</span><span class="o">.</span><span class="n">retrieve_station_meta</span><span class="p">(</span><span class="n">site</span><span class="p">)</span>
+
+    <span class="n">keep_dataset_source_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ICOS FastTrack&quot;</span><span class="p">,</span> <span class="s2">&quot;EYE-AVE-PAR&quot;</span><span class="p">,</span> <span class="s2">&quot;ICOS Combined&quot;</span><span class="p">,</span> <span class="s2">&quot;ICOS Flask&quot;</span><span class="p">]</span>
+
+    <span class="c1"># user_input = {</span>
+    <span class="c1">#     &quot;site&quot;: site,</span>
+    <span class="c1">#     &quot;data_level&quot;: data_level,</span>
+    <span class="c1">#     &quot;inlet&quot;: inlet,</span>
+    <span class="c1">#     &quot;sampling_height&quot;: sampling_height,</span>
+    <span class="c1">#     &quot;species&quot;: species,</span>
+    <span class="c1"># }</span>
+
+    <span class="n">standardised_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">data_info</span> <span class="ow">in</span> <span class="n">data_object_info</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="n">dobj_uri</span> <span class="o">=</span> <span class="n">data_info</span><span class="p">[</span><span class="s2">&quot;dobj_uri&quot;</span><span class="p">]</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Retrieving </span><span class="si">{</span><span class="n">dobj_uri</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
+
+        <span class="c1"># data = get_icos_data(row)</span>
+        <span class="c1"># print(data)</span>
+
+        <span class="n">dataset</span><span class="p">,</span> <span class="n">data_attributes</span> <span class="o">=</span> <span class="n">retrieve_and_parse_icos_data</span><span class="p">(</span><span class="n">data_info</span><span class="p">,</span> <span class="n">dataset_source</span><span class="o">=</span><span class="n">dataset_source</span><span class="p">)</span>
+
+        <span class="c1"># Apply ICOS flags - O, U and R are all valid data, set mf to nan for everything else</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;flag&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="s2">&quot;O&quot;</span><span class="p">,</span> <span class="s2">&quot;U&quot;</span><span class="p">,</span> <span class="s2">&quot;R&quot;</span><span class="p">]),</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">network</span> <span class="o">=</span> <span class="s2">&quot;ICOS&quot;</span>
+
+        <span class="c1"># Add ICOS in directly here for now</span>
+        <span class="n">additional_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">additional_data</span><span class="p">[</span><span class="s2">&quot;network&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">network</span>
+        <span class="n">additional_data</span><span class="p">[</span><span class="s2">&quot;data_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;surface&quot;</span>
+        <span class="n">additional_data</span><span class="p">[</span><span class="s2">&quot;data_source&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;icoscp&quot;</span>
+        <span class="n">additional_data</span><span class="p">[</span><span class="s2">&quot;source_format&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;icos&quot;</span>
+        <span class="c1"># additional_data[&quot;icos_data_level&quot;] = str(data_level)</span>
+        <span class="n">additional_data</span><span class="p">[</span><span class="s2">&quot;data_level&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">format_data_level</span><span class="p">(</span><span class="n">data_level</span><span class="p">)</span>
+
+        <span class="n">species_label</span> <span class="o">=</span> <span class="n">data_info</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
+
+        <span class="n">attributes</span> <span class="o">=</span> <span class="n">create_icos_attributes</span><span class="p">(</span>
+            <span class="n">dataset</span><span class="p">,</span>
+            <span class="n">data_info</span><span class="p">,</span>
+            <span class="n">data_attributes</span><span class="p">,</span>
+            <span class="n">species_label</span><span class="p">,</span>
+            <span class="n">additional_data</span><span class="p">,</span>
+            <span class="n">station_meta</span><span class="o">=</span><span class="n">station_meta</span><span class="p">,</span>
+            <span class="n">dataset_source</span><span class="o">=</span><span class="n">dataset_source</span><span class="p">,</span>
+            <span class="n">keep_dataset_source_names</span><span class="o">=</span><span class="n">keep_dataset_source_names</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">dataset</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">attributes</span><span class="p">)</span>
+
+        <span class="n">metadata</span> <span class="o">=</span> <span class="n">create_metadata</span><span class="p">(</span>
+            <span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">attributes</span><span class="p">,</span> <span class="n">additional_data</span><span class="p">,</span> <span class="n">openghg_site_metadata</span><span class="o">=</span><span class="n">openghg_site_metadata</span>
+        <span class="p">)</span>
+
+        <span class="c1"># So there isn&#39;t an easy way of getting a hash of a Dataset, can we do something</span>
+        <span class="c1"># simple here we can compare data that&#39;s being added? Then we&#39;ll be able to make sure</span>
+        <span class="c1"># ObsSurface.store_data won&#39;t accept data it&#39;s already seen</span>
+        <span class="n">data_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;key-</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="n">standardised_data</span><span class="p">[</span><span class="n">data_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">,</span>
+            <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">dataset</span><span class="p">,</span>
+            <span class="s2">&quot;attributes&quot;</span><span class="p">:</span> <span class="n">attributes</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="n">standardised_data</span> <span class="o">=</span> <span class="n">dataset_formatter</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">standardised_data</span><span class="p">)</span>
+    <span class="n">standardised_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">standardised_data</span><span class="p">,</span> <span class="n">update_mismatch</span><span class="o">=</span><span class="n">update_mismatch</span><span class="p">)</span>
+
+    <span class="n">standardised_data_list</span> <span class="o">=</span> <span class="n">convert_to_list_of_metadata_and_data</span><span class="p">(</span><span class="n">standardised_data</span><span class="p">)</span>
+    <span class="n">align_metadata_attributes</span><span class="p">(</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">standardised_data_list</span><span class="p">,</span> <span class="n">update_mismatch</span><span class="o">=</span><span class="n">update_mismatch</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;surface&quot;</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">standardised_data_list</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_retrieve_remote_dobj</span><span class="p">(</span>
     <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">data_level</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">species</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -499,15 +1490,17 @@
 
         <span class="n">to_store</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
+        <span class="c1"># TODO: Here I have left instrument either to combined or na for the legacy dobj as I</span>
+        <span class="c1"># don&#39;t think there is info on the actual instrument number ID such as we have in the</span>
+        <span class="c1"># new icoscp_core retrieval. I think currently this doesn&#39;t affect legacy vs new retrieval</span>
+        <span class="c1"># test but might</span>
         <span class="k">if</span> <span class="n">dataset_source</span> <span class="o">==</span> <span class="s2">&quot;ICOS Combined&quot;</span><span class="p">:</span>
-            <span class="n">to_store</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;NA&quot;</span>
-            <span class="n">to_store</span><span class="p">[</span><span class="s2">&quot;instrument_data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;NA&quot;</span>
+            <span class="n">to_store</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;combined&quot;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">instrument_attributes</span> <span class="o">=</span> <span class="n">acq_data</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span>
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                <span class="n">to_store</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;NA&quot;</span>
-                <span class="n">to_store</span><span class="p">[</span><span class="s2">&quot;instrument_data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;NA&quot;</span>
+                <span class="n">to_store</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;unknown&quot;</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Do some tidying of the instrument attributes</span>
                 <span class="n">instruments</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
@@ -534,7 +1527,7 @@
         <span class="n">attributes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">to_store</span><span class="p">)</span>
 
         <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">station_data</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
-        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;measurement_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">measurement_type</span>
+        <span class="c1"># attributes[&quot;measurement_type&quot;] = measurement_type</span>
         <span class="c1"># TODO: Remove this from general attributes but make sure this is</span>
         <span class="c1"># included as a specific value on the appropriate variable.</span>
         <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">units</span>
@@ -602,21 +1595,21 @@
             <span class="n">rename_cols</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">],</span>
                 <span class="s2">&quot;qc_flag&quot;</span><span class="p">:</span> <span class="s2">&quot;flag&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;value_std_dev&quot;</span><span class="p">:</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; variability&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;icos_ltr&quot;</span><span class="p">:</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; repeatability&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;value_std_dev&quot;</span><span class="p">:</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot;_variability&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;icos_ltr&quot;</span><span class="p">:</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot;_repeatability&quot;</span><span class="p">,</span>
             <span class="p">}</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;stdev&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;stdev&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dataframe</span><span class="p">[</span><span class="s2">&quot;stdev&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
                 <span class="n">rename_cols</span> <span class="o">=</span> <span class="p">{</span>
                     <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="s2">&quot;time&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;stdev&quot;</span><span class="p">:</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; variability&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;nbpoints&quot;</span><span class="p">:</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; number_of_observations&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;stdev&quot;</span><span class="p">:</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot;_variability&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;nbpoints&quot;</span><span class="p">:</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot;_number_of_observations&quot;</span><span class="p">,</span>
                 <span class="p">}</span>
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                 <span class="n">rename_cols</span> <span class="o">=</span> <span class="p">{</span>
                     <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="s2">&quot;time&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;nbpoints&quot;</span><span class="p">:</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; number_of_observations&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;nbpoints&quot;</span><span class="p">:</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot;_number_of_observations&quot;</span><span class="p">,</span>
                 <span class="p">}</span>
 
         <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">rename_cols</span><span class="p">)</span>
@@ -638,13 +1631,10 @@
         <span class="n">dataset</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">attributes</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">dataset_source</span> <span class="o">==</span> <span class="s2">&quot;ICOS Combined&quot;</span><span class="p">:</span>
-            <span class="n">dataset</span><span class="p">[</span><span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; repeatability&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span>
-                <span class="s2">&quot;comment&quot;</span>
-            <span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;ICOS LTR as defined by Yver Kwok et al., 2015, doi:10.5194/amt-8-3867-2015&quot;</span>
+            <span class="n">dataset</span><span class="p">[</span><span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot;_repeatability&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;comment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;ICOS LTR as defined by Yver Kwok et al., 2015, doi:10.5194/amt-8-3867-2015&quot;</span>
+            <span class="p">)</span>
 
-        <span class="c1"># So there isn&#39;t an easy way of getting a hash of a Dataset, can we do something</span>
-        <span class="c1"># simple here we can compare data that&#39;s being added? Then we&#39;ll be able to make sure</span>
-        <span class="c1"># ObsSurface.store_data won&#39;t accept data it&#39;s already seen</span>
         <span class="n">data_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;key-</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="c1"># TODO - do we need both attributes and metadata here?</span>
         <span class="n">standardised_data</span><span class="p">[</span><span class="n">data_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
@@ -686,36 +1676,67 @@
 <span class="c1">#         metadata = {d.id: dict(d) for _, d in df.iterrows()}</span>
 </pre></div>
 
-              </div>
+                </article>
               
               
-              <!-- Previous / next buttons -->
-<div class='prev-next-area'>
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
 </div>
+                </footer>
               
-          </main>
-          
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
 
-      </div>
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2024 OpenGHG development team.
+      <br/>
+    
+  </p>
+</div>
+      
     </div>
   
-    <script src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
-  <footer class="footer mt-5 mt-md-0">
-  <div class="container">
-    
-    <div class="footer-item">
-      <p class="copyright">
-    &copy; Copyright 2024 OpenGHG development team.<br>
-</p>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.24.0.
+</p></div>
+      
     </div>
-    
-    <div class="footer-item">
-      <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 8.2.3.<br>
-</p>
-    </div>
-    
-  </div>
-</footer>
+  
+</div>
+
+  </footer>
   </body>
 </html>

@@ -86,6 +86,45 @@ for our different types so these can be added to the object store.
     Downloading ch4_EUROPE_201607.tar.gz: 100%|██████████| 77.4k/77.4k [00:00<00:00, 4.22MB/s]
 
 
+Adding an in-memory dataset
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The native NetCDF parsers also accept an ``xarray.Dataset`` through the
+``data`` argument. Use this when the data has already been opened or processed
+in Python; ``data`` and ``filepath`` are alternatives, so provide exactly one.
+This is available for footprints, fluxes, boundary conditions, Eulerian model
+output, site meteorology, and OpenGHG-formatted column data.
+
+For example, a flux dataset can be loaded and stored without writing a second
+copy to disk:
+
+.. code:: ipython3
+
+    import xarray as xr
+    from openghg.standardise import standardise_flux
+
+    with xr.open_dataset(data_file_flux) as dataset:
+        flux_data = dataset.load()
+
+    standardise_flux(
+        data=flux_data,
+        species="ch4",
+        domain="EUROPE",
+        source="anthro",
+    )
+
+The same pattern applies to the other ancillary data types, with their usual
+metadata arguments, for example ``standardise_bc(data=bc_data, ...)`` and
+``standardise_footprint(data=footprint_data, ...)``. Data added this way is
+stored and retrieved in the same way as data supplied by file path.
+
+.. code:: ipython3
+
+    from openghg.retrieve import get_flux
+
+    flux_data = get_flux(species="ch4", domain="EUROPE", source="anthro")
+
+
 Data domains
 ~~~~~~~~~~~~
 
@@ -132,10 +171,10 @@ species.
 
     standardise_footprint(data_file_fp, site="TAC", domain="EUROPE", inlet="100m", model="NAME")
 
-
-.. parsed-literal::
-
-    WARNING:openghg.store:This file has been uploaded previously with the filename : TAC-100magl_UKV_EUROPE_201607.nc - skipping.
+When adding further footprint files for different time periods, the default
+``if_exists="auto"`` is usually the right choice. Use
+:ref:`updating_existing_data` before changing this option, especially if the new
+files share time-coordinate values with data already in the object store.
 
 
 This standardised data can then be accessed and retrieved from the
@@ -301,11 +340,6 @@ at the edges of the “EUROPE” domain. They were created using the `CAMS clima
     from openghg.standardise import standardise_bc
 
     standardise_bc(data_file_bc, species="ch4", domain="EUROPE", bc_input="CAMS")
-
-
-.. parsed-literal::
-
-    WARNING:openghg.store:This file has been uploaded previously with the filename : ch4_EUROPE_201607.nc - skipping.
 
 
 User defined keywords: ``source`` and ``bc_input``

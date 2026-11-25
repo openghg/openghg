@@ -85,6 +85,21 @@ With a single object store with read/write permissions any data you standardise 
 store. When you use the search and retrieve functions both object stores will be searched. We document how to
 select which store to write data to in :ref:`addings-obs-data`.
 
+Upgrading shared stores to filelock 4
+-------------------------------------
+
+Filelock 4 preserves the permissions of existing lock files. In a shared store
+intended for group writes, a lock file with mode ``0644`` can prevent other
+members of the group from acquiring the lock.
+
+Check that the affected ``*._data.lock_v2`` file belongs to the store's shared
+group. The lock-file owner can restore group write access by running
+``chmod g+w`` on that file. Replace the path below with the affected lock file.
+
+.. code-block:: bash
+
+    chmod g+w "/path/to/group_store/your-metastore._data.lock_v2"
+
 Migrating to the new configuration file
 ---------------------------------------
 

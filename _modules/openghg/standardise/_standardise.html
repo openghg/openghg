@@ -1,38 +1,48 @@
 <!DOCTYPE html>
 
-<html lang="en" data-content_root="../../../">
+
+<html lang="en" data-content_root="../../../" >
+
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise._standardise &#8212; OpenGHG 0.19.0 documentation</title>
-    
-    <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+    <title>openghg.standardise._standardise &#8212; OpenGHG 0.20.0 documentation</title>
   
-    
-    <link rel="stylesheet"
-      href="../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
   
-    
-      
   
-    
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/pydata-sphinx-theme.css?v=1140d252" />
     <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=9c3e77be" />
     <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
-    
-    <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
   
-    <script src="../../../_static/documentation_options.js?v=8a079089"></script>
-    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+  <!-- So that users can add custom icons -->
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="../../../_static/documentation_options.js?v=b52c616d"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
@@ -41,129 +51,325 @@
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/openghg/standardise/_standardise';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <script src="../../../_static/custom.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="docsearch:language" content="en">
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.20.0" />
+    <meta name="docbuild:last-update" content="Nov 25, 2026"/>
+  
     
-
-    <!-- Google Analytics -->
-    
+    <script src="../../../_static/searchtools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../searchindex.js"></script>
+  
   </head>
-  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
-    
-    <div class="container-fluid" id="banner"></div>
-
-    
-    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
-
-  <div id="navbar-start">
-    
-    
-<a class="navbar-brand" href="../../../index.html">
-<p class="title">OpenGHG</p>
-</a>
-
-    
-  </div>
-
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
 
   
-  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
-    <div id="navbar-center" class="mr-auto">
-      
-      <div class="navbar-center-item">
-        <ul id="navbar-main-elements" class="navbar-nav">
-    <li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../../../install.html">
-  Installation
- </a>
-</li>
-
-<li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../../../tutorials/index.html">
-  Tutorials
- </a>
-</li>
-
-<li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../../../api/index.html">
-  User API
- </a>
-</li>
-
-<li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../../../development/index_devel.html">
-  Development
- </a>
-</li>
-
-<li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../../../api/index_devapi.html">
-  Developer API
- </a>
-</li>
-
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
     
-</ul>
-      </div>
-      
-    </div>
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
 
-    <div id="navbar-end">
-      
-      <div class="navbar-end-item">
-        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
-      </ul>
-      </div>
-      
-    </div>
-  </div>
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
 </div>
-    </nav>
-    
 
-    <div class="container-xl">
-      <div class="row">
-          
-            
-            <!-- Only show if we have sidebars configured, else just a small margin  -->
-            <div class="col-12 col-md-3 bd-sidebar">
-              <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
-  <i class="icon fas fa-search"></i>
-  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
-</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
-  <div class="bd-toc-item active">
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.20.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.20.0 documentation - Home"/>
+  
+  
+</a></div>
     
   </div>
-</nav>
-              </div>
-              <div class="sidebar-end-items">
-              </div>
-            </div>
-            
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../install.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../tutorials/index.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    User API
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../development/index_devel.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index_devapi.html">
+    Developer API
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
           
 
-          
-          <div class="d-none d-xl-block col-xl-2 bd-toc">
-            
-          </div>
-          
+<button type="button" class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
 
+<button type="button" class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
           
           
-            
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../install.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../tutorials/index.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    User API
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../development/index_devel.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index_devapi.html">
+    Developer API
+  </a>
+</li>
+
+  </ul>
+</nav></div>
           
-          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+        
+      </div>
+    
+    
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
               
-              <div>
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">openghg.standardise._standardise</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
                 
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
   <h1>Source code for openghg.standardise._standardise</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span></span><span class="sd">&quot;&quot;&quot;Standardise supported data products and store them in OpenGHG.</span>
+
+<span class="sd">The public functions in this module accept either file input through</span>
+<span class="sd">``filepath`` or an in-memory :class:`xarray.Dataset` through ``data``. Exactly</span>
+<span class="sd">one input form must be supplied. Data is parsed using the selected</span>
+<span class="sd">``source_format``, validated for its OpenGHG data type, and assigned to a</span>
+<span class="sd">matching datasource in the selected object store.</span>
+
+<span class="sd">The ``if_exists`` and ``save_current`` arguments control different parts of</span>
+<span class="sd">an update. ``if_exists`` determines the contents of the resulting latest</span>
+<span class="sd">version when a matching datasource already exists:</span>
+
+<span class="sd">* ``&quot;auto&quot;`` appends non-overlapping data but raises ``DataOverlapError`` if</span>
+<span class="sd">  any timestamps overlap;</span>
+<span class="sd">* ``&quot;new&quot;`` makes the supplied data the complete contents of the latest</span>
+<span class="sd">  version, without retaining existing data in that version; and</span>
+<span class="sd">* ``&quot;combine&quot;`` combines existing and supplied data, replacing existing</span>
+<span class="sd">  values at overlapping timestamps with the supplied values.</span>
+
+<span class="sd">``save_current`` determines whether the update creates a version while</span>
+<span class="sd">preserving the previously current data. ``&quot;y&quot;`` and ``&quot;yes&quot;`` always create</span>
+<span class="sd">a version; ``&quot;n&quot;`` and ``&quot;no&quot;`` update the current version without preserving</span>
+<span class="sd">it. With ``&quot;auto&quot;``, ``if_exists=&quot;auto&quot;`` updates the current version in place,</span>
+<span class="sd">whereas ``if_exists=&quot;new&quot;`` or ``if_exists=&quot;combine&quot;`` creates a version. The</span>
+<span class="sd">deprecated ``overwrite=True`` option selects ``if_exists=&quot;new&quot;`` when</span>
+<span class="sd">``if_exists`` has not been set explicitly.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timedelta</span>
@@ -171,6 +377,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.objectstore</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_writable_bucket</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">sort_by_filenames</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util._deprecation</span><span class="w"> </span><span class="kn">import</span> <span class="n">_warn_if_force_ignored</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">multiPathType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">numcodecs</span><span class="w"> </span><span class="kn">import</span> <span class="n">Blosc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
@@ -189,12 +396,21 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        data_type: type of data to standardise</span>
-<span class="sd">        filepath: path to file(s) to standardise</span>
+<span class="sd">        filepath: Path to file(s) to standardise. Exactly one of ``filepath``</span>
+<span class="sd">            and ``data`` must be supplied.</span>
+<span class="sd">        data: In-memory dataset in the format expected by the selected parser.</span>
+<span class="sd">            Exactly one of ``filepath`` and ``data`` must be supplied. The</span>
+<span class="sd">            caller retains ownership of the dataset.</span>
 <span class="sd">        store: Name of object store to write to, required if user has access to more than one</span>
-<span class="sd">        writable store</span>
-<span class="sd">        **kwargs: data type specific arguments, see specific implementations below.</span>
+<span class="sd">            writable store.</span>
+<span class="sd">        **kwargs: Data-type-specific arguments. See the module documentation</span>
+<span class="sd">            for ``if_exists`` and ``save_current`` behavior.</span>
+
 <span class="sd">    Returns:</span>
-<span class="sd">        dict: Dictionary of result data.</span>
+<span class="sd">        list[dict]: Details of the datasource UUIDs data was assigned to.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If neither or both of ``filepath`` and ``data`` are supplied.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.store._meta</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_data_class</span>
 
@@ -318,7 +534,8 @@
 <span class="sd">             - &quot;y&quot; / &quot;yes&quot; - Save current data exactly as it exists as a separate (previous) version</span>
 <span class="sd">             - &quot;n&quot; / &quot;no&quot; - Allow current data to updated / deleted</span>
 <span class="sd">        overwrite: Deprecated. This will use options for if_exists=&quot;new&quot;.</span>
-<span class="sd">        force: Force adding of data even if this is identical to data stored.</span>
+<span class="sd">        force: Deprecated and ignored. Use ``if_exists`` to control overlap</span>
+<span class="sd">            handling. Passing ``True`` emits a deprecation warning.</span>
 <span class="sd">        compression: Enable compression in the store</span>
 <span class="sd">        compressor: A custom compressor to use. If None, this will default to</span>
 <span class="sd">            `Blosc(cname=&quot;zstd&quot;, clevel=5, shuffle=Blosc.SHUFFLE)`.</span>
@@ -335,11 +552,17 @@
 <span class="sd">            - None - check all file extensions and set to True is all are &quot;.nc&quot; or &quot;.nc4&quot;</span>
 <span class="sd">            - True - attempt to open concatenated if all files are recognised as netcdf files.</span>
 <span class="sd">            - False - open and standardise each file individually.</span>
+
+<span class="sd">    Warns:</span>
+<span class="sd">        DeprecationWarning: If ``force`` is ``True``.</span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary of result data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.standardise.surface</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_gcwerks_input</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_filepath</span>
+
+    <span class="n">_warn_if_force_ignored</span><span class="p">(</span><span class="n">force</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">filepath</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">source_format</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;gcwerks&quot;</span><span class="p">:</span>
@@ -378,7 +601,6 @@
         <span class="n">update_mismatch</span><span class="o">=</span><span class="n">update_mismatch</span><span class="p">,</span>
         <span class="n">if_exists</span><span class="o">=</span><span class="n">if_exists</span><span class="p">,</span>
         <span class="n">save_current</span><span class="o">=</span><span class="n">save_current</span><span class="p">,</span>
-        <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">,</span>
         <span class="n">compression</span><span class="o">=</span><span class="n">compression</span><span class="p">,</span>
         <span class="n">compressor</span><span class="o">=</span><span class="n">compressor</span><span class="p">,</span>
         <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
@@ -392,8 +614,8 @@
 <div class="viewcode-block" id="standardise_column">
 <a class="viewcode-back" href="../../../api/api_standardise.html#openghg.standardise.standardise_column">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">standardise_column</span><span class="p">(</span>
-    <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">],</span>
-    <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">species</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;satellite&quot;</span><span class="p">,</span>
     <span class="n">obs_region</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">site</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -416,11 +638,16 @@
     <span class="n">chunks</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">info_metadata</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">concat_nc_files</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Read column observation file</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        filepath: Path to the input observation file.</span>
+<span class="sd">        filepath: Path to the input observation file. Exactly one of ``filepath``</span>
+<span class="sd">            and ``data`` must be supplied.</span>
+<span class="sd">        data: In-memory column-observation dataset in the format expected by</span>
+<span class="sd">            ``source_format``. Exactly one of ``filepath`` and ``data`` must</span>
+<span class="sd">            be supplied. The caller retains ownership of the dataset.</span>
 <span class="sd">        species: Species name or synonym (e.g., &quot;ch4&quot;).</span>
 <span class="sd">        platform: Type of platform (default is &quot;satellite&quot;). Can be one of:</span>
 <span class="sd">            - &quot;satellite&quot;</span>
@@ -438,17 +665,13 @@
 <span class="sd">        tag: Special tagged values to add to the Datasource. This will be added to any</span>
 <span class="sd">            current values if the tag key already exists in a list.</span>
 <span class="sd">        store: The name of the store to write the processed data to.</span>
-<span class="sd">        if_exists: Determines behavior if data already exists in the store.</span>
-<span class="sd">            Can be one of:</span>
-<span class="sd">            - &quot;auto&quot; (default): Checks for overlap and decides whether to add or raise an error.</span>
-<span class="sd">            - &quot;new&quot;: Only includes new data, ignoring existing data.</span>
-<span class="sd">            - &quot;combine&quot;: Replaces and inserts new data into the existing timeseries.</span>
-<span class="sd">        save_current: Decides whether to save the current version of the data:</span>
-<span class="sd">            - &quot;auto&quot; (default): Automatically saves based on `if_exists` behavior.</span>
-<span class="sd">            - &quot;yes&quot; or &quot;y&quot;: Save current data as a separate version.</span>
-<span class="sd">            - &quot;no&quot; or &quot;n&quot;: Allow updates or deletion of current data.</span>
+<span class="sd">        if_exists: Existing-data handling (``&quot;auto&quot;``, ``&quot;new&quot;``, or ``&quot;combine&quot;``);</span>
+<span class="sd">            see the module documentation.</span>
+<span class="sd">        save_current: Version preservation (``&quot;auto&quot;``, ``&quot;y&quot;``/``&quot;yes&quot;``, or</span>
+<span class="sd">            ``&quot;n&quot;``/``&quot;no&quot;``); see the module documentation.</span>
 <span class="sd">        overwrite: Deprecated. Replaced by `if_exists=&quot;new&quot;`.</span>
-<span class="sd">        force: Forces the addition of data even if it&#39;s identical to the existing data.</span>
+<span class="sd">        force: Deprecated and ignored. Use ``if_exists`` to control overlap</span>
+<span class="sd">            handling. Passing ``True`` emits a deprecation warning.</span>
 <span class="sd">        compression: Enables or disables compression during data storage (default is True).</span>
 <span class="sd">        compressor: Custom compression method. Defaults to `Blosc(cname=&quot;zstd&quot;, clevel=5, shuffle=Blosc.SHUFFLE)`.</span>
 <span class="sd">            See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.)`.</span>
@@ -464,14 +687,21 @@
 <span class="sd">            - None - check all file extensions and set to True is all are &quot;.nc&quot; or &quot;.nc4&quot;</span>
 <span class="sd">            - True - attempt to open concatenated if all files are recognised as netcdf files.</span>
 <span class="sd">            - False - open and standardise each file individually.</span>
+
+<span class="sd">    Warns:</span>
+<span class="sd">        DeprecationWarning: If ``force`` is ``True``.</span>
+
 <span class="sd">    Returns:</span>
-<span class="sd">        dict: Dictionary containing confirmation of standardisation process.</span>
+<span class="sd">        Details of the datasource UUIDs for the processed data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_warn_if_force_ignored</span><span class="p">(</span><span class="n">force</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">standardise</span><span class="p">(</span>
         <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span>
         <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;column&quot;</span><span class="p">,</span>
         <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
         <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
         <span class="n">platform</span><span class="o">=</span><span class="n">platform</span><span class="p">,</span>
         <span class="n">obs_region</span><span class="o">=</span><span class="n">obs_region</span><span class="p">,</span>
@@ -486,7 +716,6 @@
         <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
         <span class="n">if_exists</span><span class="o">=</span><span class="n">if_exists</span><span class="p">,</span>
         <span class="n">save_current</span><span class="o">=</span><span class="n">save_current</span><span class="p">,</span>
-        <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">,</span>
         <span class="n">compression</span><span class="o">=</span><span class="n">compression</span><span class="p">,</span>
         <span class="n">compressor</span><span class="o">=</span><span class="n">compressor</span><span class="p">,</span>
         <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
@@ -501,10 +730,10 @@
 <div class="viewcode-block" id="standardise_bc">
 <a class="viewcode-back" href="../../../api/api_standardise.html#openghg.standardise.standardise_bc">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">standardise_bc</span><span class="p">(</span>
-    <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">],</span>
-    <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">bc_input</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">species</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">bc_input</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">source_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;openghg&quot;</span><span class="p">,</span>
     <span class="n">period</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">continuous</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -520,11 +749,16 @@
     <span class="n">chunks</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">info_metadata</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">concat_nc_files</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Standardise boundary condition data and store it in the object store.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        filepath: Path of boundary conditions file</span>
+<span class="sd">        filepath: Path of boundary conditions file. Exactly one of ``filepath``</span>
+<span class="sd">            and ``data`` must be supplied.</span>
+<span class="sd">        data: In-memory boundary-condition dataset in the format expected by</span>
+<span class="sd">            ``source_format``. Exactly one of ``filepath`` and ``data`` must</span>
+<span class="sd">            be supplied. The caller retains ownership of the dataset.</span>
 <span class="sd">        species: Species name</span>
 <span class="sd">        bc_input: Input used to create boundary conditions. For example:</span>
 <span class="sd">            - a model name such as &quot;MOZART&quot; or &quot;CAMS&quot;</span>
@@ -536,18 +770,13 @@
 <span class="sd">        tag: Special tagged values to add to the Datasource. This will be added to any</span>
 <span class="sd">            current values if the tag key already exists in a list.</span>
 <span class="sd">        store: Name of store to write to</span>
-<span class="sd">        if_exists: What to do if existing data is present.</span>
-<span class="sd">            - &quot;auto&quot; - checks new and current data for timeseries overlap</span>
-<span class="sd">                - adds data if no overlap</span>
-<span class="sd">                - raises DataOverlapError if there is an overlap</span>
-<span class="sd">            - &quot;new&quot; - just include new data and ignore previous</span>
-<span class="sd">            - &quot;combine&quot; - replace and insert new data into current timeseries</span>
-<span class="sd">        save_current: Whether to save data in current form and create a new version.</span>
-<span class="sd">             - &quot;auto&quot; - this will depend on if_exists input (&quot;auto&quot; -&gt; False), (other -&gt; True)</span>
-<span class="sd">             - &quot;y&quot; / &quot;yes&quot; - Save current data exactly as it exists as a separate (previous) version</span>
-<span class="sd">             - &quot;n&quot; / &quot;no&quot; - Allow current data to updated / deleted</span>
+<span class="sd">        if_exists: Existing-data handling (``&quot;auto&quot;``, ``&quot;new&quot;``, or ``&quot;combine&quot;``);</span>
+<span class="sd">            see the module documentation.</span>
+<span class="sd">        save_current: Version preservation (``&quot;auto&quot;``, ``&quot;y&quot;``/``&quot;yes&quot;``, or</span>
+<span class="sd">            ``&quot;n&quot;``/``&quot;no&quot;``); see the module documentation.</span>
 <span class="sd">        overwrite: Deprecated. This will use options for if_exists=&quot;new&quot;.</span>
-<span class="sd">        force: Force adding of data even if this is identical to data stored.</span>
+<span class="sd">        force: Deprecated and ignored. Use ``if_exists`` to control overlap</span>
+<span class="sd">            handling. Passing ``True`` emits a deprecation warning.</span>
 <span class="sd">        compression: Enable compression in the store</span>
 <span class="sd">        compressor: A custom compressor to use. If None, this will default to</span>
 <span class="sd">            `Blosc(cname=&quot;zstd&quot;, clevel=5, shuffle=Blosc.SHUFFLE)`.</span>
@@ -563,14 +792,21 @@
 <span class="sd">            - None - check all file extensions and set to True is all are &quot;.nc&quot; or &quot;.nc4&quot;</span>
 <span class="sd">            - True - attempt to open concatenated if all files are recognised as netcdf files.</span>
 <span class="sd">            - False - open and standardise each file individually.</span>
+
+<span class="sd">    Warns:</span>
+<span class="sd">        DeprecationWarning: If ``force`` is ``True``.</span>
+
 <span class="sd">    Returns:</span>
-<span class="sd">        dict: Dictionary containing confirmation of standardisation process.</span>
+<span class="sd">        Details of the datasource UUIDs for the processed data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_warn_if_force_ignored</span><span class="p">(</span><span class="n">force</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">standardise</span><span class="p">(</span>
         <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span>
         <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;boundary_conditions&quot;</span><span class="p">,</span>
         <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
         <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
         <span class="n">bc_input</span><span class="o">=</span><span class="n">bc_input</span><span class="p">,</span>
         <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
@@ -581,7 +817,6 @@
         <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
         <span class="n">if_exists</span><span class="o">=</span><span class="n">if_exists</span><span class="p">,</span>
         <span class="n">save_current</span><span class="o">=</span><span class="n">save_current</span><span class="p">,</span>
-        <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">,</span>
         <span class="n">compression</span><span class="o">=</span><span class="n">compression</span><span class="p">,</span>
         <span class="n">compressor</span><span class="o">=</span><span class="n">compressor</span><span class="p">,</span>
         <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
@@ -595,9 +830,9 @@
 <div class="viewcode-block" id="standardise_footprint">
 <a class="viewcode-back" href="../../../api/api_standardise.html#openghg.standardise.standardise_footprint">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">standardise_footprint</span><span class="p">(</span>
-    <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">],</span>
-    <span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">site</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">satellite</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">obs_region</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -619,7 +854,7 @@
     <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">high_spatial_resolution</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">time_resolved</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">time_resolved</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">high_time_resolution</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">short_lifetime</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">sort</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -631,12 +866,17 @@
     <span class="n">sort_files</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">concat_nc_files</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">inner_domain</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Reads footprint data files and returns the UUIDs of the Datasources</span>
 <span class="sd">    the processed data has been assigned to</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        filepath: Path(s) of file to standardise</span>
+<span class="sd">        filepath: Path(s) of file to standardise. Exactly one of ``filepath``</span>
+<span class="sd">            and ``data`` must be supplied.</span>
+<span class="sd">        data: In-memory footprint dataset in the format expected by</span>
+<span class="sd">            ``source_format``. Exactly one of ``filepath`` and ``data`` must</span>
+<span class="sd">            be supplied. The caller retains ownership of the dataset.</span>
 <span class="sd">        model: Model used to create footprint (e.g. NAME or FLEXPART)</span>
 <span class="sd">        domain: Domain of footprints</span>
 <span class="sd">        site: Site name</span>
@@ -657,25 +897,23 @@
 <span class="sd">        continuous: Whether time stamps have to be continuous.</span>
 <span class="sd">        retrieve_met: Whether to also download meterological data for this footprints area</span>
 <span class="sd">        high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.</span>
-<span class="sd">        time_resolved: Indicate footprints are high time resolution (include H_back dimension)</span>
-<span class="sd">            Note this will be set to True automatically for Carbon Dioxide data.</span>
+<span class="sd">        time_resolved: Indicate whether footprints are time resolved (include an</span>
+<span class="sd">            H_back dimension). For CO2, the default (None) selects time-resolved</span>
+<span class="sd">            footprints for backwards compatibility. Set this explicitly to False</span>
+<span class="sd">            to add an integrated footprint.</span>
 <span class="sd">        short_lifetime: Indicate footprint is for a short-lived species. Needs species input.</span>
 <span class="sd">            Note this will be set to True if species has an associated lifetime.</span>
 <span class="sd">        high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.</span>
 <span class="sd">        tag: Special tagged values to add to the Datasource. This will be added to any</span>
 <span class="sd">            current values if the tag key already exists in a list.</span>
 <span class="sd">        store: Name of store to write to</span>
-<span class="sd">        if_exists: What to do if existing data is present.</span>
-<span class="sd">            - &quot;auto&quot; - checks new and current data for timeseries overlap</span>
-<span class="sd">                - adds data if no overlap</span>
-<span class="sd">                - raises DataOverlapError if there is an overlap</span>
-<span class="sd">            - &quot;new&quot; - just include new data and ignore previous</span>
-<span class="sd">            - &quot;combine&quot; - replace and insert new data into current timeseries</span>
-<span class="sd">        save_current: Whether to save data in current form and create a new version.</span>
-<span class="sd">             - &quot;auto&quot; - this will depend on if_exists input (&quot;auto&quot; -&gt; False), (other -&gt; True)</span>
-<span class="sd">             - &quot;y&quot; / &quot;yes&quot; - Save current data exactly as it exists as a separate (previous) version</span>
-<span class="sd">             - &quot;n&quot; / &quot;no&quot; - Allow current data to updated / deleted        overwrite: Deprecated. This will use options for if_exists=&quot;new&quot;.</span>
-<span class="sd">        force: Force adding of data even if this is identical to data stored.</span>
+<span class="sd">        if_exists: Existing-data handling (``&quot;auto&quot;``, ``&quot;new&quot;``, or ``&quot;combine&quot;``);</span>
+<span class="sd">            see the module documentation.</span>
+<span class="sd">        save_current: Version preservation (``&quot;auto&quot;``, ``&quot;y&quot;``/``&quot;yes&quot;``, or</span>
+<span class="sd">            ``&quot;n&quot;``/``&quot;no&quot;``); see the module documentation.</span>
+<span class="sd">        overwrite: Deprecated. This will use options for if_exists=&quot;new&quot;.</span>
+<span class="sd">        force: Deprecated and ignored. Use ``if_exists`` to control overlap</span>
+<span class="sd">            handling. Passing ``True`` emits a deprecation warning.</span>
 <span class="sd">        sort: Sort data in by time</span>
 <span class="sd">        drop_duplicates: Drop duplicate timestamps, keeping the first value</span>
 <span class="sd">        compression: Enable compression in the store</span>
@@ -692,10 +930,15 @@
 <span class="sd">            - False - open and standardise each file individually.</span>
 <span class="sd">        inner_domain: For nested domains, specify the inner part of the domain (e.g. &quot;6km&quot;).</span>
 <span class="sd">            When both ``domain`` and ``inner_domain`` are provided, they are combined as ``&quot;{domain}{inner_domain}&quot;`` (e.g. &quot;EUROPE6km&quot;) to form the full domain identifier used for the footprint metadata. However it is written as {domain}-{inner_domain} in the metadata.</span>
+
+<span class="sd">    Warns:</span>
+<span class="sd">        DeprecationWarning: If ``force`` or ``high_time_resolution`` is ``True``.</span>
+
 <span class="sd">    Returns:</span>
-<span class="sd">        dict / None: Dictionary containing confirmation of standardisation process. None</span>
-<span class="sd">        if file already processed.</span>
+<span class="sd">        Details of the datasource UUIDs for the processed data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_warn_if_force_ignored</span><span class="p">(</span><span class="n">force</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="n">high_time_resolution</span><span class="p">:</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
             <span class="s2">&quot;This argument is deprecated and will be replaced in future versions with time_resolved.&quot;</span><span class="p">,</span>
@@ -708,13 +951,14 @@
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
         <span class="n">filepath</span> <span class="o">=</span> <span class="p">[</span><span class="n">filepath</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="n">sort_files</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">sort_files</span> <span class="ow">and</span> <span class="n">filepath</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">filepath</span> <span class="o">=</span> <span class="n">sort_by_filenames</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">standardise</span><span class="p">(</span>
         <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span>
         <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;footprints&quot;</span><span class="p">,</span>
         <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
         <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
         <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
         <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
@@ -738,7 +982,6 @@
         <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
         <span class="n">if_exists</span><span class="o">=</span><span class="n">if_exists</span><span class="p">,</span>
         <span class="n">save_current</span><span class="o">=</span><span class="n">save_current</span><span class="p">,</span>
-        <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">,</span>
         <span class="n">compression</span><span class="o">=</span><span class="n">compression</span><span class="p">,</span>
         <span class="n">compressor</span><span class="o">=</span><span class="n">compressor</span><span class="p">,</span>
         <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
@@ -754,10 +997,10 @@
 <div class="viewcode-block" id="standardise_flux">
 <a class="viewcode-back" href="../../../api/api_standardise.html#openghg.standardise.standardise_flux">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">standardise_flux</span><span class="p">(</span>
-    <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">],</span>
-    <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">species</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">source</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">source_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;openghg&quot;</span><span class="p">,</span>
     <span class="n">database_version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -778,11 +1021,16 @@
     <span class="n">filters</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">info_metadata</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">concat_nc_files</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Process flux / emissions data</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        filepath: Path of flux / emissions file</span>
+<span class="sd">        filepath: Path of flux / emissions file. Exactly one of ``filepath``</span>
+<span class="sd">            and ``data`` must be supplied.</span>
+<span class="sd">        data: In-memory flux dataset in the format expected by ``source_format``.</span>
+<span class="sd">            Exactly one of ``filepath`` and ``data`` must be supplied. The</span>
+<span class="sd">            caller retains ownership of the dataset.</span>
 <span class="sd">        species: Species name</span>
 <span class="sd">        source: Flux / Emissions source</span>
 <span class="sd">        domain: Flux / Emissions domain</span>
@@ -800,18 +1048,13 @@
 <span class="sd">        tag: Special tagged values to add to the Datasource. This will be added to any</span>
 <span class="sd">            current values if the tag key already exists in a list.</span>
 <span class="sd">        store: Name of store to write to</span>
-<span class="sd">        if_exists: What to do if existing data is present.</span>
-<span class="sd">            - &quot;auto&quot; - checks new and current data for timeseries overlap</span>
-<span class="sd">                - adds data if no overlap</span>
-<span class="sd">                - raises DataOverlapError if there is an overlap</span>
-<span class="sd">            - &quot;new&quot; - just include new data and ignore previous</span>
-<span class="sd">            - &quot;combine&quot; - replace and insert new data into current timeseries</span>
-<span class="sd">        save_current: Whether to save data in current form and create a new version.</span>
-<span class="sd">             - &quot;auto&quot; - this will depend on if_exists input (&quot;auto&quot; -&gt; False), (other -&gt; True)</span>
-<span class="sd">             - &quot;y&quot; / &quot;yes&quot; - Save current data exactly as it exists as a separate (previous) version</span>
-<span class="sd">             - &quot;n&quot; / &quot;no&quot; - Allow current data to updated / deleted</span>
+<span class="sd">        if_exists: Existing-data handling (``&quot;auto&quot;``, ``&quot;new&quot;``, or ``&quot;combine&quot;``);</span>
+<span class="sd">            see the module documentation.</span>
+<span class="sd">        save_current: Version preservation (``&quot;auto&quot;``, ``&quot;y&quot;``/``&quot;yes&quot;``, or</span>
+<span class="sd">            ``&quot;n&quot;``/``&quot;no&quot;``); see the module documentation.</span>
 <span class="sd">        overwrite: Deprecated. This will use options for if_exists=&quot;new&quot;.</span>
-<span class="sd">        force: Force adding of data even if this is identical to data stored.</span>
+<span class="sd">        force: Deprecated and ignored. Use ``if_exists`` to control overlap</span>
+<span class="sd">            handling. Passing ``True`` emits a deprecation warning.</span>
 <span class="sd">        compression: Enable compression in the store</span>
 <span class="sd">        compressor: A custom compressor to use. If None, this will default to</span>
 <span class="sd">            `Blosc(cname=&quot;zstd&quot;, clevel=5, shuffle=Blosc.SHUFFLE)`.</span>
@@ -823,9 +1066,15 @@
 <span class="sd">            - None - check all file extensions and set to True is all are &quot;.nc&quot; or &quot;.nc4&quot;</span>
 <span class="sd">            - True - attempt to open concatenated if all files are recognised as netcdf files.</span>
 <span class="sd">            - False - open and standardise each file individually.</span>
-<span class="sd">    returns:</span>
-<span class="sd">        dict: Dictionary of Datasource UUIDs data assigned to</span>
+
+<span class="sd">    Warns:</span>
+<span class="sd">        DeprecationWarning: If ``force`` or ``high_time_resolution`` is ``True``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Details of the datasource UUIDs for the processed data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_warn_if_force_ignored</span><span class="p">(</span><span class="n">force</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">high_time_resolution</span><span class="p">:</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
@@ -838,6 +1087,7 @@
         <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;flux&quot;</span><span class="p">,</span>
         <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span>
         <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
         <span class="n">source_format</span><span class="o">=</span><span class="n">source_format</span><span class="p">,</span>
         <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
         <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
@@ -853,7 +1103,6 @@
         <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
         <span class="n">if_exists</span><span class="o">=</span><span class="n">if_exists</span><span class="p">,</span>
         <span class="n">save_current</span><span class="o">=</span><span class="n">save_current</span><span class="p">,</span>
-        <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">,</span>
         <span class="n">compression</span><span class="o">=</span><span class="n">compression</span><span class="p">,</span>
         <span class="n">compressor</span><span class="o">=</span><span class="n">compressor</span><span class="p">,</span>
         <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
@@ -863,10 +1112,12 @@
 
 
 
+<div class="viewcode-block" id="standardise_eulerian">
+<a class="viewcode-back" href="../../../api/api_standardise.html#openghg.standardise.standardise_eulerian">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">standardise_eulerian</span><span class="p">(</span>
-    <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">],</span>
-    <span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">species</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">source_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;openghg&quot;</span><span class="p">,</span>
     <span class="n">start_date</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">end_date</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -883,11 +1134,16 @@
     <span class="n">chunks</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">info_metadata</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">concat_nc_files</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Read Eulerian model output</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        filepath: Path of Eulerian model species output</span>
+<span class="sd">        filepath: Path of Eulerian model species output. Exactly one of</span>
+<span class="sd">            ``filepath`` and ``data`` must be supplied.</span>
+<span class="sd">        data: In-memory Eulerian-model dataset in the format expected by</span>
+<span class="sd">            ``source_format``. Exactly one of ``filepath`` and ``data`` must</span>
+<span class="sd">            be supplied. The caller retains ownership of the dataset.</span>
 <span class="sd">        model: Eulerian model name</span>
 <span class="sd">        species: Species name</span>
 <span class="sd">        source_format: Data format, for example openghg (internal format)</span>
@@ -896,20 +1152,15 @@
 <span class="sd">        setup: Additional setup details for run</span>
 <span class="sd">        tag: Special tagged values to add to the Datasource. This will be added to any</span>
 <span class="sd">            current values if the tag key already exists in a list.</span>
-<span class="sd">        if_exists: What to do if existing data is present.</span>
-<span class="sd">            - &quot;auto&quot; - checks new and current data for timeseries overlap</span>
-<span class="sd">                - adds data if no overlap</span>
-<span class="sd">                - raises DataOverlapError if there is an overlap</span>
-<span class="sd">            - &quot;new&quot; - just include new data and ignore previous</span>
-<span class="sd">            - &quot;combine&quot; - replace and insert new data into current timeseries</span>
-<span class="sd">        save_current: Whether to save data in current form and create a new version.</span>
-<span class="sd">            - &quot;auto&quot; - this will depend on if_exists input (&quot;auto&quot; -&gt; False), (other -&gt; True)</span>
-<span class="sd">            - &quot;y&quot; / &quot;yes&quot; - Save current data exactly as it exists as a separate (previous) version</span>
-<span class="sd">            - &quot;n&quot; / &quot;no&quot; - Allow current data to updated / deleted</span>
+<span class="sd">        if_exists: Existing-data handling (``&quot;auto&quot;``, ``&quot;new&quot;``, or ``&quot;combine&quot;``);</span>
+<span class="sd">            see the module documentation.</span>
+<span class="sd">        save_current: Version preservation (``&quot;auto&quot;``, ``&quot;y&quot;``/``&quot;yes&quot;``, or</span>
+<span class="sd">            ``&quot;n&quot;``/``&quot;no&quot;``); see the module documentation.</span>
 <span class="sd">        overwrite: Deprecated. This will use options for if_exists=&quot;new&quot;.</span>
 <span class="sd">        store: Name of object store to write to, required if user has access to more than one</span>
 <span class="sd">        writable store</span>
-<span class="sd">        force: Force adding of data even if this is identical to data stored.</span>
+<span class="sd">        force: Deprecated and ignored. Use ``if_exists`` to control overlap</span>
+<span class="sd">            handling. Passing ``True`` emits a deprecation warning.</span>
 <span class="sd">        compression: Enable compression in the store</span>
 <span class="sd">        compressor: A custom compressor to use. If None, this will default to</span>
 <span class="sd">            `Blosc(cname=&quot;zstd&quot;, clevel=5, shuffle=Blosc.SHUFFLE)`.</span>
@@ -925,13 +1176,24 @@
 <span class="sd">            - None - check all file extensions and set to True is all are &quot;.nc&quot; or &quot;.nc4&quot;</span>
 <span class="sd">            - True - attempt to open concatenated if all files are recognised as netcdf files.</span>
 <span class="sd">            - False - open and standardise each file individually.</span>
+
+<span class="sd">    Warns:</span>
+<span class="sd">        DeprecationWarning: If ``force`` is ``True``.</span>
+
 <span class="sd">    Returns:</span>
-<span class="sd">        dict: Dictionary of result data</span>
+<span class="sd">        Details of the datasource UUIDs for the processed data.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If exactly one of ``filepath`` and ``data`` is not</span>
+<span class="sd">            supplied.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_warn_if_force_ignored</span><span class="p">(</span><span class="n">force</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">standardise</span><span class="p">(</span>
         <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span>
         <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;eulerian_model&quot;</span><span class="p">,</span>
         <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
         <span class="n">source_format</span><span class="o">=</span><span class="n">source_format</span><span class="p">,</span>
         <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
         <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
@@ -941,7 +1203,6 @@
         <span class="n">tag</span><span class="o">=</span><span class="n">tag</span><span class="p">,</span>
         <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
         <span class="n">if_exists</span><span class="o">=</span><span class="n">if_exists</span><span class="p">,</span>
-        <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">,</span>
         <span class="n">save_current</span><span class="o">=</span><span class="n">save_current</span><span class="p">,</span>
         <span class="n">compression</span><span class="o">=</span><span class="n">compression</span><span class="p">,</span>
         <span class="n">compressor</span><span class="o">=</span><span class="n">compressor</span><span class="p">,</span>
@@ -949,7 +1210,8 @@
         <span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">,</span>
         <span class="n">info_metadata</span><span class="o">=</span><span class="n">info_metadata</span><span class="p">,</span>
         <span class="n">concat_nc_files</span><span class="o">=</span><span class="n">concat_nc_files</span><span class="p">,</span>
-    <span class="p">)</span>
+    <span class="p">)</span></div>
+
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">standardise_from_binary_data</span><span class="p">(</span>
@@ -1047,7 +1309,8 @@
 <span class="sd">            - &quot;y&quot; / &quot;yes&quot; - Save current data exactly as it exists as a separate (previous) version</span>
 <span class="sd">            - &quot;n&quot; / &quot;no&quot; - Allow current data to updated / deleted</span>
 <span class="sd">        overwrite: Deprecated. This will use options for if_exists=&quot;new&quot;.</span>
-<span class="sd">        force: Force adding of data even if this is identical to data stored.</span>
+<span class="sd">        force: Deprecated and ignored. Use ``if_exists`` to control overlap</span>
+<span class="sd">            handling. Passing ``True`` emits a deprecation warning.</span>
 <span class="sd">        compressor: A custom compressor to use. If None, this will default to</span>
 <span class="sd">            `Blosc(cname=&quot;zstd&quot;, clevel=5, shuffle=Blosc.SHUFFLE)`.</span>
 <span class="sd">            See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.</span>
@@ -1058,9 +1321,15 @@
 <span class="sd">            - None - check all file extensions and set to True is all are &quot;.nc&quot; or &quot;.nc4&quot;</span>
 <span class="sd">            - True - attempt to open concatenated if all files are recognised as netcdf files.</span>
 <span class="sd">            - False - open and standardise each file individually.</span>
+
+<span class="sd">    Warns:</span>
+<span class="sd">        DeprecationWarning: If ``force`` is ``True``.</span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary of datasource UUIDs data assigned to</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_warn_if_force_ignored</span><span class="p">(</span><span class="n">force</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">domain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
@@ -1084,7 +1353,6 @@
         <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
         <span class="n">if_exists</span><span class="o">=</span><span class="n">if_exists</span><span class="p">,</span>
         <span class="n">save_current</span><span class="o">=</span><span class="n">save_current</span><span class="p">,</span>
-        <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">,</span>
         <span class="n">compressor</span><span class="o">=</span><span class="n">compressor</span><span class="p">,</span>
         <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
         <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
@@ -1095,10 +1363,12 @@
 
 
 
+<div class="viewcode-block" id="standardise_site_met">
+<a class="viewcode-back" href="../../../api/api_standardise.html#openghg.standardise.standardise_site_met">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">standardise_site_met</span><span class="p">(</span>
-    <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
-    <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">site</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">network</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">met_source</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">source_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ecmwf&quot;</span><span class="p">,</span>
     <span class="n">if_exists</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
@@ -1107,12 +1377,43 @@
     <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">chunks</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">compressor</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Standardise site meteorology data and store it in the object store.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        filepath: Path to the site meteorology data. Exactly one of ``filepath``</span>
+<span class="sd">            and ``data`` must be supplied.</span>
+<span class="sd">        data: In-memory site-meteorology dataset in the format expected by</span>
+<span class="sd">            ``source_format``. Exactly one of ``filepath`` and ``data`` must</span>
+<span class="sd">            be supplied. The caller retains ownership of the dataset.</span>
+<span class="sd">        site: Site code or name.</span>
+<span class="sd">        network: Measurement network name.</span>
+<span class="sd">        met_source: Source of the meteorology data.</span>
+<span class="sd">        source_format: Input data format.</span>
+<span class="sd">        if_exists: Existing-data handling (``&quot;auto&quot;``, ``&quot;new&quot;``, or ``&quot;combine&quot;``);</span>
+<span class="sd">            see the module documentation.</span>
+<span class="sd">        save_current: Version preservation (``&quot;auto&quot;``, ``&quot;y&quot;``/``&quot;yes&quot;``, or</span>
+<span class="sd">            ``&quot;n&quot;``/``&quot;no&quot;``); see the module documentation.</span>
+<span class="sd">        store: Name of the object store to write to.</span>
+<span class="sd">        force: Deprecated and ignored. Use ``if_exists`` to control overlap</span>
+<span class="sd">            handling. Passing ``True`` emits a deprecation warning.</span>
+<span class="sd">        chunks: Chunking schema to use when storing the data.</span>
+<span class="sd">        compressor: Custom compressor to use when storing the data.</span>
+
+<span class="sd">    Warns:</span>
+<span class="sd">        DeprecationWarning: If ``force`` is ``True``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Details of the datasource UUIDs for the processed data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_warn_if_force_ignored</span><span class="p">(</span><span class="n">force</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">standardise</span><span class="p">(</span>
         <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;site_met&quot;</span><span class="p">,</span>
         <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
         <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
         <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span>
         <span class="n">met_source</span><span class="o">=</span><span class="n">met_source</span><span class="p">,</span>
@@ -1120,42 +1421,73 @@
         <span class="n">if_exists</span><span class="o">=</span><span class="n">if_exists</span><span class="p">,</span>
         <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span>
         <span class="n">save_current</span><span class="o">=</span><span class="n">save_current</span><span class="p">,</span>
-        <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">,</span>
         <span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">,</span>
         <span class="n">compressor</span><span class="o">=</span><span class="n">compressor</span><span class="p">,</span>
-    <span class="p">)</span>
+    <span class="p">)</span></div>
+
 </pre></div>
 
-              </div>
+                </article>
               
               
-              <!-- Previous / next buttons -->
-<div class='prev-next-area'>
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
 </div>
+                </footer>
               
-          </main>
-          
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
 
-      </div>
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2024 OpenGHG development team.
+      <br/>
+    
+  </p>
+</div>
+      
     </div>
   
-    <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
-  <footer class="footer mt-5 mt-md-0">
-  <div class="container">
-    
-    <div class="footer-item">
-      <p class="copyright">
-    &copy; Copyright 2024 OpenGHG development team.<br>
-</p>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.24.0.
+</p></div>
+      
     </div>
-    
-    <div class="footer-item">
-      <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 8.2.3.<br>
-</p>
-    </div>
-    
-  </div>
-</footer>
+  
+</div>
+
+  </footer>
   </body>
 </html>

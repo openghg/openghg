@@ -1,38 +1,48 @@
 <!DOCTYPE html>
 
-<html lang="en" data-content_root="../../../">
+
+<html lang="en" data-content_root="../../../" >
+
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.analyse._scenario &#8212; OpenGHG 0.19.0 documentation</title>
-    
-    <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+    <title>openghg.analyse._scenario &#8212; OpenGHG 0.20.0 documentation</title>
   
-    
-    <link rel="stylesheet"
-      href="../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
   
-    
-      
   
-    
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/pydata-sphinx-theme.css?v=1140d252" />
     <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=9c3e77be" />
     <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
-    
-    <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
   
-    <script src="../../../_static/documentation_options.js?v=8a079089"></script>
-    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+  <!-- So that users can add custom icons -->
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="../../../_static/documentation_options.js?v=b52c616d"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
@@ -41,127 +51,295 @@
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/openghg/analyse/_scenario';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <script src="../../../_static/custom.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="docsearch:language" content="en">
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.20.0" />
+    <meta name="docbuild:last-update" content="Nov 25, 2026"/>
+  
     
-
-    <!-- Google Analytics -->
-    
+    <script src="../../../_static/searchtools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../searchindex.js"></script>
+  
   </head>
-  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
-    
-    <div class="container-fluid" id="banner"></div>
-
-    
-    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
-
-  <div id="navbar-start">
-    
-    
-<a class="navbar-brand" href="../../../index.html">
-<p class="title">OpenGHG</p>
-</a>
-
-    
-  </div>
-
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
 
   
-  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
-    <div id="navbar-center" class="mr-auto">
-      
-      <div class="navbar-center-item">
-        <ul id="navbar-main-elements" class="navbar-nav">
-    <li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../../../install.html">
-  Installation
- </a>
-</li>
-
-<li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../../../tutorials/index.html">
-  Tutorials
- </a>
-</li>
-
-<li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../../../api/index.html">
-  User API
- </a>
-</li>
-
-<li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../../../development/index_devel.html">
-  Development
- </a>
-</li>
-
-<li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../../../api/index_devapi.html">
-  Developer API
- </a>
-</li>
-
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
     
-</ul>
-      </div>
-      
-    </div>
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
 
-    <div id="navbar-end">
-      
-      <div class="navbar-end-item">
-        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
-      </ul>
-      </div>
-      
-    </div>
-  </div>
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
 </div>
-    </nav>
-    
 
-    <div class="container-xl">
-      <div class="row">
-          
-            
-            <!-- Only show if we have sidebars configured, else just a small margin  -->
-            <div class="col-12 col-md-3 bd-sidebar">
-              <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
-  <i class="icon fas fa-search"></i>
-  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
-</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
-  <div class="bd-toc-item active">
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.20.0 documentation - Home"/>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark pst-js-only" alt="OpenGHG 0.20.0 documentation - Home"/>
+  
+  
+</a></div>
     
   </div>
-</nav>
-              </div>
-              <div class="sidebar-end-items">
-              </div>
-            </div>
-            
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../install.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../tutorials/index.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    User API
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../development/index_devel.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index_devapi.html">
+    Developer API
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
           
 
-          
-          <div class="d-none d-xl-block col-xl-2 bd-toc">
-            
-          </div>
-          
+<button type="button" class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
 
+<button type="button" class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
           
           
-            
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../install.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../tutorials/index.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    User API
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../development/index_devel.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index_devapi.html">
+    Developer API
+  </a>
+</li>
+
+  </ul>
+</nav></div>
           
-          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+        
+      </div>
+    
+    
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
               
-              <div>
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">openghg.analyse._scenario</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
                 
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
   <h1>Source code for openghg.analyse._scenario</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;The ModelScenario class allows users to collate related data sources and calculate</span>
 <span class="sd">modelled output based on this data. The types of data currently included are:</span>
@@ -208,16 +386,22 @@
 <span class="sd">on which data types are missing.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Hashable</span><span class="p">,</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Hashable</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Sequence</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timestamp</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dataset</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.analyse._modelled_obs</span><span class="w"> </span><span class="kn">import</span> <span class="n">fp_x_flux_integrated</span><span class="p">,</span> <span class="n">fp_x_flux_time_resolved</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.analyse._modelled_obs</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">fp_x_flux_integrated</span><span class="p">,</span>
+    <span class="n">fp_x_flux_time_resolved</span><span class="p">,</span>
+    <span class="n">make_integrated_low_freq_flux</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.dataobjects</span><span class="w"> </span><span class="kn">import</span> <span class="n">BoundaryConditionsData</span><span class="p">,</span> <span class="n">FluxData</span><span class="p">,</span> <span class="n">FootprintData</span><span class="p">,</span> <span class="n">ObsData</span><span class="p">,</span> <span class="n">ObsColumnData</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.retrieve</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">get_obs_surface</span><span class="p">,</span>
@@ -232,6 +416,7 @@
     <span class="n">search_column</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">synonyms</span><span class="p">,</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">format_inlet</span><span class="p">,</span> <span class="n">verify_site_with_satellite</span><span class="p">,</span> <span class="n">define_platform</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util._time</span><span class="w"> </span><span class="kn">import</span> <span class="n">normalise_pandas_frequency</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">SearchError</span><span class="p">,</span> <span class="n">ReindexMethod</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._alignment</span><span class="w"> </span><span class="kn">import</span> <span class="n">combine_datasets</span><span class="p">,</span> <span class="n">resample_obs_and_other</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._modelled_baseline</span><span class="w"> </span><span class="kn">import</span> <span class="n">baseline_sensitivities</span>
@@ -299,7 +484,8 @@
         <span class="n">flux</span><span class="p">:</span> <span class="n">FluxData</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FluxData</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">bc</span><span class="p">:</span> <span class="n">BoundaryConditionsData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">store</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">):</span>
+        <span class="n">time_resolved</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a ModelScenario instance based on a set of keywords to be</span>
 <span class="sd">        or directly supplied objects. This can be created as an empty class to be</span>
 <span class="sd">        populated.</span>
@@ -320,7 +506,10 @@
 <span class="sd">        network: Network name e.g. &quot;AGAGE&quot;.</span>
 <span class="sd">        domain: Domain name e.g. &quot;EUROPE&quot;.</span>
 <span class="sd">        platform: Platform name e.g &quot;satellite&quot;, &quot;column-insitu&quot;.</span>
-<span class="sd">        max_level: Maximum level for processing.</span>
+<span class="sd">        max_level: Maximum level for processing column observations. This is required when</span>
+<span class="sd">            retrieving column observations. If comparing modelled observations using a</span>
+<span class="sd">            footprint, it must match the footprint&#39;s ``max_level`` attribute. When supplying</span>
+<span class="sd">            an ``ObsColumnData`` object directly, its stored ``max_level`` is used instead.</span>
 <span class="sd">        obs_region: The geographic region covered by the data (&quot;BRAZIL&quot;, &quot;INDIA&quot;, &quot;UK&quot;).</span>
 <span class="sd">        selection: For satellite only, identifier for any data selection which has been</span>
 <span class="sd">            performed on satellite data. This can be based on any form of filtering, binning etc.</span>
@@ -340,6 +529,9 @@
 <span class="sd">        flux: Supply FluxData object directly (e.g. from get_flux() function).</span>
 <span class="sd">        bc: Supply BoundaryConditionsData object directly.</span>
 <span class="sd">        store: Name of object store to retrieve data from.</span>
+<span class="sd">        time_resolved: Whether to filter retrieved footprints by time resolution.</span>
+<span class="sd">            ``True`` selects time-resolved footprints, ``False`` selects integrated</span>
+<span class="sd">            footprints, and ``None`` does not filter on footprint resolution.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            None</span>
@@ -351,6 +543,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="p">:</span> <span class="n">ObsData</span> <span class="o">|</span> <span class="n">ObsColumnData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">obs_column</span><span class="p">:</span> <span class="n">ObsColumnData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_requested_column_max_level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">footprint</span><span class="p">:</span> <span class="n">FootprintData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fluxes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FluxData</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bc</span><span class="p">:</span> <span class="n">BoundaryConditionsData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
@@ -368,9 +561,10 @@
         <span class="c1"># For ObsColumn data processing</span>
         <span class="k">if</span> <span class="n">platform</span> <span class="ow">in</span> <span class="n">accepted_column_data_types</span><span class="p">:</span>
             <span class="c1"># Add observation column data (directly or through keywords, column or satellite)</span>
-            <span class="k">if</span> <span class="n">max_level</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">max_level</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">obs_column</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;If you are using column-based data (i.e. platform is </span><span class="si">{</span><span class="n">accepted_column_data_types</span><span class="si">}</span><span class="s2">), you need to pass max_level&quot;</span>
+                    <span class="s2">&quot;Retrieving column observations for ModelScenario requires max_level. &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Column platforms are </span><span class="si">{</span><span class="n">accepted_column_data_types</span><span class="si">}</span><span class="s2">.&quot;</span>
                 <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">add_obs_column</span><span class="p">(</span>
                 <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
@@ -423,7 +617,11 @@
             <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
             <span class="n">footprint</span><span class="o">=</span><span class="n">footprint</span><span class="p">,</span>
             <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span>
+            <span class="n">time_resolved</span><span class="o">=</span><span class="n">time_resolved</span><span class="p">,</span>
         <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">platform</span> <span class="ow">in</span> <span class="n">accepted_column_data_types</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">footprint</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_check_column_max_level</span><span class="p">(</span><span class="n">max_level</span><span class="o">=</span><span class="n">max_level</span><span class="p">)</span>
 
         <span class="c1"># Add flux data (directly or through keywords)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">add_flux</span><span class="p">(</span>
@@ -452,10 +650,49 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span><span class="p">:</span> <span class="n">Dataset</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">modelled_obs</span><span class="p">:</span> <span class="n">Dataset</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">modelled_baseline</span><span class="p">:</span> <span class="n">Dataset</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">flux_stacked</span><span class="p">:</span> <span class="n">Dataset</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flux_stacked</span><span class="p">:</span> <span class="n">Dataset</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sector_modelled_obs_cache_key</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 
         <span class="c1"># TODO: Check species, site etc. values align between inputs?</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_column_max_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">footprint</span><span class="p">:</span> <span class="n">FootprintData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check that column observations and footprints use the same vertical extent.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">footprint</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">footprint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">footprint</span>
+        <span class="k">if</span> <span class="n">footprint</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">obs_max_level</span> <span class="o">=</span> <span class="n">max_level</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">obs_max_level</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;max_level&quot;</span><span class="p">,</span> <span class="n">max_level</span><span class="p">)</span>
+
+        <span class="n">fp_max_level</span> <span class="o">=</span> <span class="n">footprint</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;max_level&quot;</span><span class="p">,</span> <span class="n">footprint</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;max_level&quot;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">fp_max_level</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_max_level</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;unknown&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Column footprint data must have a &#39;max_level&#39; attribute before it can be used &quot;</span>
+                <span class="s2">&quot;in ModelScenario. Re-standardise the footprint from a source file containing &quot;</span>
+                <span class="s2">&quot;max_level or, for data in a writable object store, add the known footprint &quot;</span>
+                <span class="s2">&quot;value using data_manager(...).update_attributes(...). Also use &quot;</span>
+                <span class="s2">&quot;update_metadata(...) to keep the stored metadata consistent. Do not infer the &quot;</span>
+                <span class="s2">&quot;footprint value from the requested observation level.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">obs_max_level</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">obs_max_level</span><span class="p">)</span> <span class="k">if</span> <span class="n">obs_max_level</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">fp_max_level</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fp_max_level</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;The column observation and footprint &#39;max_level&#39; attributes must be integers; &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;received </span><span class="si">{</span><span class="n">obs_max_level</span><span class="si">!r}</span><span class="s2"> and </span><span class="si">{</span><span class="n">fp_max_level</span><span class="si">!r}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+
+        <span class="k">if</span> <span class="n">obs_max_level</span> <span class="o">!=</span> <span class="n">fp_max_level</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Column observations and footprints must use the same max_level in &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;ModelScenario: observations use </span><span class="si">{</span><span class="n">obs_max_level</span><span class="si">}</span><span class="s2">, while footprints use &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">fp_max_level</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keywords</span><span class="p">:</span> <span class="n">ParamType</span><span class="p">,</span> <span class="n">data_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Use appropriate get function to search for data in object store.&quot;&quot;&quot;</span>
@@ -595,6 +832,7 @@
 
         <span class="c1"># Updating obs to be obs_column</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">obs</span> <span class="o">=</span> <span class="n">obs_column</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_requested_column_max_level</span> <span class="o">=</span> <span class="n">max_level</span>
 
         <span class="c1"># Add keywords to class for convenience</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_column</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -625,8 +863,35 @@
         <span class="n">network</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">footprint</span><span class="p">:</span> <span class="n">FootprintData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">store</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">time_resolved</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add footprint data based on keywords or direct FootprintData object.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add footprint data based on keywords or a supplied data object.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            site: Site code, such as ``&quot;TAC&quot;``.</span>
+<span class="sd">            inlet: Observation inlet value, such as ``&quot;100m&quot;``.</span>
+<span class="sd">            height: Alias for ``inlet``.</span>
+<span class="sd">            domain: Domain name for the footprints.</span>
+<span class="sd">            model: Model used to create the footprints, such as ``&quot;NAME&quot;``.</span>
+<span class="sd">            satellite: Satellite name for satellite footprints.</span>
+<span class="sd">            obs_region: Geographic region covered by satellite footprints.</span>
+<span class="sd">            met_model: Meteorological model used to create the footprints.</span>
+<span class="sd">            start_date: Start of the date range to retrieve.</span>
+<span class="sd">            end_date: End of the date range to retrieve.</span>
+<span class="sd">            species: Species code. This is required for species-specific</span>
+<span class="sd">                footprints, including CO2.</span>
+<span class="sd">            fp_inlet: Footprint release-height option when it differs from the</span>
+<span class="sd">                observation inlet.</span>
+<span class="sd">            network: Observation network used when inferring the release height.</span>
+<span class="sd">            footprint: Footprint data to attach directly instead of retrieving it.</span>
+<span class="sd">            store: Name of the object store from which to retrieve data.</span>
+<span class="sd">            time_resolved: Whether to filter retrieved footprints by time resolution.</span>
+<span class="sd">                ``True`` selects time-resolved footprints, ``False`` selects integrated</span>
+<span class="sd">                footprints, and ``None`` does not filter on footprint resolution.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None. The selected footprint is stored on this scenario.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">openghg.util</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
             <span class="n">species_lifetime</span><span class="p">,</span>
             <span class="n">extract_height_name</span><span class="p">,</span>
@@ -693,6 +958,7 @@
                     <span class="s2">&quot;start_date&quot;</span><span class="p">:</span> <span class="n">start_date</span><span class="p">,</span>
                     <span class="s2">&quot;end_date&quot;</span><span class="p">:</span> <span class="n">end_date</span><span class="p">,</span>
                     <span class="s2">&quot;store&quot;</span><span class="p">:</span> <span class="n">store</span><span class="p">,</span>
+                    <span class="s2">&quot;time_resolved&quot;</span><span class="p">:</span> <span class="n">time_resolved</span><span class="p">,</span>
                 <span class="p">}</span>
 
                 <span class="c1"># Check whether general inert footprint should be extracted (suitable for long-lived species)</span>
@@ -873,30 +1139,36 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Align units in dataset with obs units.</span>
 
-<span class="sd">        Units will only be updated for data variables that: 1) already have units, 2) have a &quot;time&quot; dimension.</span>
+<span class="sd">        Units will only be updated for data variables that: 1) have units and 2) have</span>
+<span class="sd">        a ``&quot;time&quot;`` dimension. Variables whose names end with</span>
+<span class="sd">        ``&quot;_number_of_observations&quot;`` are never converted, including when explicitly</span>
+<span class="sd">        listed in ``data_vars``. The input dataset is not modified.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            ds: dataset to align units on</span>
 <span class="sd">            output_units: target units; if None, then obs. units will be used,</span>
 <span class="sd">              or &quot;mol/mol&quot; if these are not present.</span>
 <span class="sd">            data_vars: data variables to convert; if None, all data variables satisfying the</span>
-<span class="sd">              conditions 1) and 2) will be converted.</span>
+<span class="sd">              conditions above will be converted.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            input dataset with aligned units</span>
+<span class="sd">            A dataset with aligned units.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># if output_units is None:</span>
+        <span class="c1">#     output_units = self.units or &quot;mol/mol&quot;  # use mol/mol if obs units are not available</span>
         <span class="k">if</span> <span class="n">output_units</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">output_units</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="ow">or</span> <span class="s2">&quot;mol/mol&quot;</span>  <span class="c1"># use mol/mol if obs units are not available</span>
+            <span class="n">output_units</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="ow">or</span> <span class="s2">&quot;mol/mol&quot;</span>
 
         <span class="n">to_convert</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">data_vars</span> <span class="o">=</span> <span class="n">data_vars</span> <span class="ow">or</span> <span class="n">ds</span><span class="o">.</span><span class="n">data_vars</span>
         <span class="k">for</span> <span class="n">dv</span> <span class="ow">in</span> <span class="n">data_vars</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">ds</span><span class="p">[</span><span class="n">dv</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;units&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s2">&quot;time&quot;</span> <span class="ow">in</span> <span class="n">ds</span><span class="p">[</span><span class="n">dv</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+            <span class="n">unit</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="n">dv</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;units&quot;</span><span class="p">)</span>
+            <span class="n">is_observation_count</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">dv</span><span class="p">)</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_number_of_observations&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">unit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s2">&quot;time&quot;</span> <span class="ow">in</span> <span class="n">ds</span><span class="p">[</span><span class="n">dv</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_observation_count</span><span class="p">:</span>
                 <span class="n">to_convert</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dv</span><span class="p">)</span>
 
         <span class="n">target_units</span> <span class="o">=</span> <span class="p">{</span><span class="n">dv</span><span class="p">:</span> <span class="n">output_units</span> <span class="k">for</span> <span class="n">dv</span> <span class="ow">in</span> <span class="n">to_convert</span><span class="p">}</span>
-
         <span class="n">result</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">pint</span><span class="o">.</span><span class="n">quantify</span><span class="p">()</span><span class="o">.</span><span class="n">pint</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">target_units</span><span class="p">)</span><span class="o">.</span><span class="n">pint</span><span class="o">.</span><span class="n">dequantify</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span></div>
 
@@ -965,7 +1237,9 @@
 
         <span class="k">return</span> <span class="n">platform</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_resample_obs_footprint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resample_to</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;coarsest&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_resample_obs_footprint</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">resample_to</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;coarsest&quot;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">footprint</span><span class="p">:</span> <span class="n">FootprintData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Slice and resample obs and footprint data to align along time</span>
 
 <span class="sd">        This slices the date to the smallest time frame</span>
@@ -980,14 +1254,17 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            resample_to: Resample option to use: either data based or using a valid pandas resample period.</span>
+<span class="sd">            footprint: Footprint to align. Defaults to the attached footprint.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            tuple: Two xarray.Dataset with aligned time dimensions</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Check data is present (not None) and cast to correct type</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_check_data_is_present</span><span class="p">(</span><span class="n">need</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;obs&quot;</span><span class="p">,</span> <span class="s2">&quot;footprint&quot;</span><span class="p">])</span>
+        <span class="c1"># An explicit footprint replaces only the attached-footprint requirement;</span>
+        <span class="c1"># observations are still required, and the default path retains both checks.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_data_is_present</span><span class="p">(</span><span class="n">need</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;obs&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">footprint</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[</span><span class="s2">&quot;obs&quot;</span><span class="p">,</span> <span class="s2">&quot;footprint&quot;</span><span class="p">])</span>
         <span class="n">obs</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">ObsData</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="p">)</span>
-        <span class="n">footprint</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">FootprintData</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">footprint</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">footprint</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">footprint</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">FootprintData</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">footprint</span><span class="p">)</span>
 
         <span class="n">obs_data</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">data</span>
         <span class="n">footprint_data</span> <span class="o">=</span> <span class="n">footprint</span><span class="o">.</span><span class="n">data</span>
@@ -1034,13 +1311,39 @@
 <span class="sd">                This data will be also be cached as the ModelScenario.scenario attribute.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_data_is_present</span><span class="p">(</span><span class="n">need</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;obs&quot;</span><span class="p">,</span> <span class="s2">&quot;footprint&quot;</span><span class="p">])</span>
-        <span class="n">obs</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">ObsData</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="p">)</span>
         <span class="n">footprint</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">FootprintData</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">footprint</span><span class="p">)</span>
 
         <span class="c1"># Return any matching cached data</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">recalculate</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;resample_to&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">resample_to</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span>
+
+        <span class="n">combined_dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scenario_for_footprint</span><span class="p">(</span><span class="n">footprint</span><span class="p">,</span> <span class="n">resample_to</span><span class="o">=</span><span class="n">resample_to</span><span class="p">,</span> <span class="n">platform</span><span class="o">=</span><span class="n">platform</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">cache</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span> <span class="o">=</span> <span class="n">combined_dataset</span>
+
+        <span class="k">return</span> <span class="n">combined_dataset</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_scenario_for_footprint</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">footprint</span><span class="p">:</span> <span class="n">FootprintData</span><span class="p">,</span>
+        <span class="n">resample_to</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;coarsest&quot;</span><span class="p">,</span>
+        <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Align an explicit footprint using the platform rules, without updating caches.</span>
+
+<span class="sd">        Without observations, only resample the footprint. Flux sources sharing a</span>
+<span class="sd">        footprint can reuse this aligned dataset for their calculations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_column</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_footprint_resample</span><span class="p">(</span><span class="n">resample_to</span><span class="p">,</span> <span class="n">footprint</span><span class="o">=</span><span class="n">footprint</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_data_is_present</span><span class="p">(</span><span class="n">need</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;obs&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="p">,</span> <span class="n">ObsColumnData</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_check_column_max_level</span><span class="p">(</span><span class="n">max_level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_requested_column_max_level</span><span class="p">,</span> <span class="n">footprint</span><span class="o">=</span><span class="n">footprint</span><span class="p">)</span>
+        <span class="n">obs</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">ObsData</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="p">)</span>
 
         <span class="c1"># Extract platform</span>
         <span class="k">if</span> <span class="n">platform</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1074,7 +1377,9 @@
                 <span class="p">)</span>
 
         <span class="c1"># Resample, align and merge the observation and footprint Datasets</span>
-        <span class="n">resampled_obs</span><span class="p">,</span> <span class="n">resampled_footprint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resample_obs_footprint</span><span class="p">(</span><span class="n">resample_to</span><span class="o">=</span><span class="n">resample_to</span><span class="p">)</span>
+        <span class="n">resampled_obs</span><span class="p">,</span> <span class="n">resampled_footprint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resample_obs_footprint</span><span class="p">(</span>
+            <span class="n">resample_to</span><span class="o">=</span><span class="n">resample_to</span><span class="p">,</span> <span class="n">footprint</span><span class="o">=</span><span class="n">footprint</span>
+        <span class="p">)</span>
 
         <span class="n">combined_dataset</span> <span class="o">=</span> <span class="n">combine_datasets</span><span class="p">(</span>
             <span class="n">dataset_A</span><span class="o">=</span><span class="n">resampled_obs</span><span class="p">,</span> <span class="n">dataset_B</span><span class="o">=</span><span class="n">resampled_footprint</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="n">tolerance</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">merge_method</span>
@@ -1093,11 +1398,7 @@
 
         <span class="n">combined_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">attributes</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">cache</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span> <span class="o">=</span> <span class="n">combined_dataset</span>
-
-        <span class="k">return</span> <span class="n">combined_dataset</span></div>
-
+        <span class="k">return</span> <span class="n">combined_dataset</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_clean_sources_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sources</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check sources input and make sure this is a list.</span>
@@ -1165,12 +1466,16 @@
         <span class="k">return</span> <span class="n">flux_stacked</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_check_footprint_resample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resample_to</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_footprint_resample</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">resample_to</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">footprint</span><span class="p">:</span> <span class="n">FootprintData</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check whether footprint needs resampling based on resample_to input.</span>
 <span class="sd">        Ignores resample_to keywords of (&quot;coarsest&quot;, &quot;obs&quot;, &quot;footprint&quot;) as this is</span>
 <span class="sd">        for comparison with observation data but uses pandas frequencies to resample.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">footprint</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">FootprintData</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">footprint</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">footprint</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_check_data_is_present</span><span class="p">(</span><span class="n">need</span><span class="o">=</span><span class="s2">&quot;footprint&quot;</span><span class="p">)</span>
+            <span class="n">footprint</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">FootprintData</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">footprint</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">resample_to</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;coarsest&quot;</span><span class="p">,</span> <span class="s2">&quot;obs&quot;</span><span class="p">,</span> <span class="s2">&quot;footprint&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">resample_to</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">footprint</span><span class="o">.</span><span class="n">data</span>
@@ -1182,7 +1487,8 @@
                 <span class="n">hours</span><span class="o">=</span><span class="n">start_date</span><span class="o">.</span><span class="n">hour</span> <span class="o">+</span> <span class="n">start_date</span><span class="o">.</span><span class="n">minute</span> <span class="o">/</span> <span class="mf">60.0</span> <span class="o">+</span> <span class="n">start_date</span><span class="o">.</span><span class="n">second</span> <span class="o">/</span> <span class="mf">3600.0</span>
             <span class="p">)</span>
             <span class="n">offset</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>  <span class="c1"># mypy thinks this could be NaT</span>
-            <span class="n">footprint_data</span> <span class="o">=</span> <span class="n">footprint_data</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">indexer</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">resample_to</span><span class="p">},</span> <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+            <span class="n">period</span> <span class="o">=</span> <span class="n">normalise_pandas_frequency</span><span class="p">(</span><span class="n">resample_to</span><span class="p">)</span>
+            <span class="n">footprint_data</span> <span class="o">=</span> <span class="n">footprint_data</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">indexer</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">period</span><span class="p">},</span> <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
             <span class="k">return</span> <span class="n">footprint_data</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_param_setup</span><span class="p">(</span>
@@ -1219,37 +1525,22 @@
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Did not recognise input for </span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="c1"># Check if cached modelled observations exist</span>
-        <span class="c1"># if self.modelled_obs is None or recalculate:</span>
-        <span class="k">if</span> <span class="n">parameter</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">recalculate</span><span class="p">:</span>
-            <span class="c1"># Check if observations are present and use these for resampling</span>
+        <span class="k">if</span> <span class="n">parameter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">prev_resample_to</span> <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;resample_to&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">prev_resample_to</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Check if parameter (e.g. modelled_obs or modelled_baseline) exists, the resample_to input is different than the current value or explicit recalculation is requested.</span>
+        <span class="c1"># - Note that if obs is not present, can resample the footprint directly as we don&#39;t have an obs data variable to store within self.scenario</span>
+        <span class="k">if</span> <span class="n">parameter</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">recalculate</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">(</span><span class="n">prev_resample_to</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">(</span><span class="n">resample_to</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_column</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">combine_obs_footprint</span><span class="p">(</span>
                     <span class="n">resample_to</span><span class="p">,</span> <span class="n">platform</span><span class="o">=</span><span class="n">platform</span><span class="p">,</span> <span class="n">recalculate</span><span class="o">=</span><span class="n">recalculate</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">True</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_footprint_resample</span><span class="p">(</span><span class="n">resample_to</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># Check previous resample_to input for cached data</span>
-            <span class="c1"># prev_resample_to = self.modelled_obs.attrs.get(&quot;resample_to&quot;)</span>
-            <span class="n">prev_resample_to</span> <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;resample_to&quot;</span><span class="p">)</span>
-
-            <span class="c1"># Check if this previous resample period matches input value</span>
-            <span class="c1"># - if not (or explicit recalculation requested), recreate scenario</span>
-            <span class="c1"># - if so return cached modelled observations</span>
-            <span class="k">if</span> <span class="n">prev_resample_to</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">(</span><span class="n">resample_to</span><span class="p">)</span> <span class="ow">or</span> <span class="n">recalculate</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">combine_obs_footprint</span><span class="p">(</span><span class="n">resample_to</span><span class="p">,</span> <span class="n">platform</span><span class="o">=</span><span class="n">platform</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># return self.modelled_obs</span>
-                <span class="k">return</span> <span class="kc">False</span>
-        <span class="k">elif</span> <span class="n">recalculate</span><span class="p">:</span>
-            <span class="c1"># Recalculate based on footprint data if obs not present</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_footprint_resample</span><span class="p">(</span><span class="n">resample_to</span><span class="p">)</span>
-
         <span class="c1"># TODO: Add check for matching sources and recalculate otherwise</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Return cached modelled observations if explicit recalculation not requested</span>
-            <span class="c1"># return self.modelled_obs</span>
             <span class="k">return</span> <span class="kc">False</span>
 
         <span class="k">return</span> <span class="kc">True</span>
@@ -1266,6 +1557,10 @@
         <span class="n">output_fp_x_flux</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">split_by_sectors</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">output_units</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">use_low_freq_flux</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">allow_climatology</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">time_resolved_by_sector</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the modelled observation points based on site footprint and fluxes.</span>
 
@@ -1289,6 +1584,17 @@
 <span class="sd">              different flux sources. The total mf_mod and fp_x_flux are available under their usual names.</span>
 <span class="sd">            output_units: target units; if None, then obs. units will be used,</span>
 <span class="sd">              or &quot;mol/mol&quot; if these are not present.</span>
+<span class="sd">            use_low_freq_flux: For integrated footprints, use monthly-mean fluxes</span>
+<span class="sd">              instead of the flux at the release time. Defaults to True for an</span>
+<span class="sd">              integrated CO2 footprint and False otherwise.</span>
+<span class="sd">            allow_climatology: Allow a single year of flux data to be reindexed as a climatology</span>
+<span class="sd">              for integrated calculations.</span>
+<span class="sd">            time_resolved_by_sector: Optional flux-source name to boolean mapping.</span>
+<span class="sd">              True uses time-resolved sensitivities and False uses integrated ``fp``</span>
+<span class="sd">              from the single attached footprint dataset. Unspecified sources retain</span>
+<span class="sd">              the existing footprint-based default. None or an empty mapping retains</span>
+<span class="sd">              the existing calculation path. Configured calculations return ``mf_mod``</span>
+<span class="sd">              and, when requested, ``mf_mod_sectoral`` and ``fp_x_flux_sectoral``.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            xarray.Dataset: Modelled observation values along the time axis, optionally with &quot;fp x flux&quot;.</span>
@@ -1299,6 +1605,24 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_data_is_present</span><span class="p">(</span><span class="n">need</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;footprint&quot;</span><span class="p">,</span> <span class="s2">&quot;fluxes&quot;</span><span class="p">])</span>
 
+        <span class="n">sector_resolution</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_sector_time_resolution</span><span class="p">(</span><span class="n">time_resolved_by_sector</span><span class="p">,</span> <span class="n">sources</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sector_resolution</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_modelled_obs_with_sector_resolution</span><span class="p">(</span>
+                <span class="n">sector_resolution</span><span class="p">,</span>
+                <span class="n">resample_to</span><span class="o">=</span><span class="n">resample_to</span><span class="p">,</span>
+                <span class="n">platform</span><span class="o">=</span><span class="n">platform</span><span class="p">,</span>
+                <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">,</span>
+                <span class="n">recalculate</span><span class="o">=</span><span class="n">recalculate</span><span class="p">,</span>
+                <span class="n">output_fp_x_flux</span><span class="o">=</span><span class="n">output_fp_x_flux</span><span class="p">,</span>
+                <span class="n">split_by_sectors</span><span class="o">=</span><span class="n">split_by_sectors</span><span class="p">,</span>
+                <span class="n">output_units</span><span class="o">=</span><span class="n">output_units</span><span class="p">,</span>
+                <span class="n">use_low_freq_flux</span><span class="o">=</span><span class="n">use_low_freq_flux</span><span class="p">,</span>
+                <span class="n">allow_climatology</span><span class="o">=</span><span class="n">allow_climatology</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Switching back from an explicitly configured calculation must not</span>
+        <span class="c1"># return its cached result as if it came from the legacy default path.</span>
+        <span class="n">recalculate</span> <span class="o">=</span> <span class="n">recalculate</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sector_modelled_obs_cache_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="n">param_calculate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_param_setup</span><span class="p">(</span>
             <span class="n">param</span><span class="o">=</span><span class="s2">&quot;modelled_obs&quot;</span><span class="p">,</span> <span class="n">resample_to</span><span class="o">=</span><span class="n">resample_to</span><span class="p">,</span> <span class="n">platform</span><span class="o">=</span><span class="n">platform</span><span class="p">,</span> <span class="n">recalculate</span><span class="o">=</span><span class="n">recalculate</span>
         <span class="p">)</span>
@@ -1307,14 +1631,25 @@
             <span class="n">modelled_obs</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Dataset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelled_obs</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">modelled_obs</span>
 
-        <span class="c1"># Check species and use high time resolution steps if this is carbon dioxide</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">species</span> <span class="o">==</span> <span class="s2">&quot;co2&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Combined data must have been defined before calculating modelled observations.&quot;</span><span class="p">)</span>
+
+        <span class="n">time_resolved_footprint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_footprint_is_time_resolved</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scenario</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">time_resolved_footprint</span><span class="p">:</span>
             <span class="n">modelled_obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_modelled_obs_HiTRes</span><span class="p">(</span>
-                <span class="n">sources</span><span class="o">=</span><span class="n">sources</span><span class="p">,</span> <span class="n">output_TS</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output_fpXflux</span><span class="o">=</span><span class="n">output_fp_x_flux</span>
+                <span class="n">sources</span><span class="o">=</span><span class="n">sources</span><span class="p">,</span>
+                <span class="n">output_TS</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">output_fpXflux</span><span class="o">=</span><span class="n">output_fp_x_flux</span><span class="p">,</span>
+                <span class="n">use_low_freq_flux</span><span class="o">=</span><span class="n">use_low_freq_flux</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">modelled_obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_modelled_obs_integrated</span><span class="p">(</span>
-                <span class="n">sources</span><span class="o">=</span><span class="n">sources</span><span class="p">,</span> <span class="n">output_TS</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output_fpXflux</span><span class="o">=</span><span class="n">output_fp_x_flux</span>
+                <span class="n">sources</span><span class="o">=</span><span class="n">sources</span><span class="p">,</span>
+                <span class="n">output_TS</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">output_fpXflux</span><span class="o">=</span><span class="n">output_fp_x_flux</span><span class="p">,</span>
+                <span class="n">use_low_freq_flux</span><span class="o">=</span><span class="n">use_low_freq_flux</span><span class="p">,</span>
+                <span class="n">allow_climatology</span><span class="o">=</span><span class="n">allow_climatology</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="c1"># calculate sectoral modelled mf and fp_x_flux</span>
@@ -1323,13 +1658,14 @@
             <span class="n">sectoral_datasets</span> <span class="o">=</span> <span class="p">[]</span>
 
             <span class="k">for</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">sources</span><span class="p">:</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">species</span> <span class="o">==</span> <span class="s2">&quot;co2&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">time_resolved_footprint</span><span class="p">:</span>
                     <span class="n">mod_obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_modelled_obs_HiTRes</span><span class="p">(</span>
                         <span class="n">sources</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
                         <span class="n">output_TS</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                         <span class="n">ts_name</span><span class="o">=</span><span class="s2">&quot;mf_mod_high_res_sectoral&quot;</span><span class="p">,</span>
                         <span class="n">output_fpXflux</span><span class="o">=</span><span class="n">output_fp_x_flux</span><span class="p">,</span>
                         <span class="n">fp_x_flux_name</span><span class="o">=</span><span class="s2">&quot;fp_x_flux_sectoral&quot;</span><span class="p">,</span>
+                        <span class="n">use_low_freq_flux</span><span class="o">=</span><span class="n">use_low_freq_flux</span><span class="p">,</span>
                     <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">mod_obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_modelled_obs_integrated</span><span class="p">(</span>
@@ -1338,6 +1674,7 @@
                         <span class="n">ts_name</span><span class="o">=</span><span class="s2">&quot;mf_mod_sectoral&quot;</span><span class="p">,</span>
                         <span class="n">output_fpXflux</span><span class="o">=</span><span class="n">output_fp_x_flux</span><span class="p">,</span>
                         <span class="n">fp_x_flux_name</span><span class="o">=</span><span class="s2">&quot;fp_x_flux_sectoral&quot;</span><span class="p">,</span>
+                        <span class="n">use_low_freq_flux</span><span class="o">=</span><span class="n">use_low_freq_flux</span><span class="p">,</span>
                     <span class="p">)</span>
                 <span class="n">mod_obs</span> <span class="o">=</span> <span class="n">mod_obs</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">({</span><span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">source</span><span class="p">]})</span>
                 <span class="n">sectoral_datasets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mod_obs</span><span class="p">)</span>
@@ -1358,8 +1695,194 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">modelled_obs</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Make sure this is reset and not cached</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Reset this to None after calculation completed</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sector_modelled_obs_cache_key</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="n">modelled_obs</span></div>
 
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_sector_time_resolution</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">selection</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">sources</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validated resolution choices for the requested flux sources, including defaults.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">selection</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">selection</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;time_resolved_by_sector must be a mapping of flux-source names to booleans.&quot;</span><span class="p">)</span>
+        <span class="n">fluxes</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FluxData</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">fluxes</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">source</span><span class="p">,</span> <span class="n">resolved</span> <span class="ow">in</span> <span class="n">selection</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;time_resolved_by_sector keys must be flux-source names (strings).&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">source</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fluxes</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown flux source in time_resolved_by_sector: </span><span class="si">{</span><span class="n">source</span><span class="si">!r}</span><span class="s2">.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">resolved</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;time_resolved_by_sector[</span><span class="si">{</span><span class="n">source</span><span class="si">!r}</span><span class="s2">] must be True or False.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">selection</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">footprint</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">FootprintData</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">footprint</span><span class="p">)</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">default</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_footprint_is_time_resolved</span><span class="p">(</span><span class="n">footprint</span><span class="p">)</span>
+        <span class="n">resolution</span> <span class="o">=</span> <span class="p">{</span><span class="n">source</span><span class="p">:</span> <span class="n">selection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span> <span class="k">for</span> <span class="n">source</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clean_sources_input</span><span class="p">(</span><span class="n">sources</span><span class="p">)}</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">resolution</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">default</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Time-resolved sectors require fp_HiTRes or fp_time_resolved in the shared footprint.&quot;</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="s2">&quot;fp_HiTRes&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">footprint</span> <span class="ow">and</span> <span class="s2">&quot;fp_residual&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">footprint</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Time-resolved sectors using fp_time_resolved also require fp_residual.&quot;</span><span class="p">)</span>
+            <span class="n">resolved_variable</span> <span class="o">=</span> <span class="s2">&quot;fp_HiTRes&quot;</span> <span class="k">if</span> <span class="s2">&quot;fp_HiTRes&quot;</span> <span class="ow">in</span> <span class="n">footprint</span> <span class="k">else</span> <span class="s2">&quot;fp_time_resolved&quot;</span>
+            <span class="k">if</span> <span class="s2">&quot;H_back&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">footprint</span><span class="o">.</span><span class="n">coords</span> <span class="ow">or</span> <span class="s2">&quot;H_back&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">footprint</span><span class="p">[</span><span class="n">resolved_variable</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Time-resolved sectors require an H_back coordinate on their sensitivity variable.&quot;</span>
+                <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">resolution</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="ow">and</span> <span class="s2">&quot;fp&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">footprint</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Integrated sectors require fp in the shared footprint.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">resolution</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calc_modelled_obs_with_sector_resolution</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">sector_resolution</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">],</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">resample_to</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">cache</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">recalculate</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">output_fp_x_flux</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">split_by_sectors</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">output_units</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">use_low_freq_flux</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">allow_climatology</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">scenario</span><span class="p">:</span> <span class="n">Dataset</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Configured calculation state with optional aligned-footprint reuse.&quot;&quot;&quot;</span>
+        <span class="n">request_key</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">tuple</span><span class="p">(</span><span class="n">sector_resolution</span><span class="o">.</span><span class="n">items</span><span class="p">()),</span>
+            <span class="n">resample_to</span><span class="p">,</span>
+            <span class="n">platform</span><span class="p">,</span>
+            <span class="n">output_fp_x_flux</span><span class="p">,</span>
+            <span class="n">split_by_sectors</span><span class="p">,</span>
+            <span class="n">output_units</span><span class="p">,</span>
+            <span class="n">use_low_freq_flux</span><span class="p">,</span>
+            <span class="n">allow_climatology</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">cache</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="n">recalculate</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelled_obs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sector_modelled_obs_cache_key</span> <span class="o">==</span> <span class="n">request_key</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelled_obs</span>
+
+        <span class="k">if</span> <span class="n">scenario</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">scenario</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scenario_for_footprint</span><span class="p">(</span>
+                <span class="n">cast</span><span class="p">(</span><span class="n">FootprintData</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">footprint</span><span class="p">),</span> <span class="n">resample_to</span><span class="p">,</span> <span class="n">platform</span>
+            <span class="p">)</span>
+        <span class="n">modelled_obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_modelled_obs_by_sector</span><span class="p">(</span>
+            <span class="n">scenario</span><span class="p">,</span>
+            <span class="n">sector_resolution</span><span class="p">,</span>
+            <span class="n">output_fp_x_flux</span><span class="o">=</span><span class="n">output_fp_x_flux</span><span class="p">,</span>
+            <span class="n">split_by_sectors</span><span class="o">=</span><span class="n">split_by_sectors</span><span class="p">,</span>
+            <span class="n">use_low_freq_flux</span><span class="o">=</span><span class="n">use_low_freq_flux</span><span class="p">,</span>
+            <span class="n">allow_climatology</span><span class="o">=</span><span class="n">allow_climatology</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">modelled_obs</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;resample_to&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">resample_to</span><span class="p">)</span>
+        <span class="n">modelled_obs</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;time_resolved_by_sector&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">sector_resolution</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">modelled_obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_units</span><span class="p">(</span><span class="n">modelled_obs</span><span class="p">,</span> <span class="n">output_units</span><span class="o">=</span><span class="n">output_units</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cache</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span> <span class="o">=</span> <span class="n">scenario</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">modelled_obs</span> <span class="o">=</span> <span class="n">modelled_obs</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sector_modelled_obs_cache_key</span> <span class="o">=</span> <span class="n">request_key</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">modelled_obs</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sector_modelled_obs_cache_key</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">modelled_obs</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calc_modelled_obs_by_sector</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">scenario</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span>
+        <span class="n">sector_resolution</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">],</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">output_fp_x_flux</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">split_by_sectors</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">use_low_freq_flux</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">allow_climatology</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Flux-sector contributions from one aligned footprint and existing kernels.</span>
+
+<span class="sd">        Each sector is calculated once and its contribution is included in the</span>
+<span class="sd">        total. Separate calculations avoid combining unlike flux time axes before</span>
+<span class="sd">        monthly averaging, so sectoral output does not alter the total.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">sectoral</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">source</span><span class="p">,</span> <span class="n">resolved</span> <span class="ow">in</span> <span class="n">sector_resolution</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">resolved</span> <span class="ow">and</span> <span class="s2">&quot;fp_HiTRes&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">scenario</span><span class="p">:</span>
+                <span class="n">sensitivity_names</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;fp_time_resolved&quot;</span><span class="p">,</span> <span class="s2">&quot;fp_residual&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">resolved</span> <span class="ow">and</span> <span class="p">(</span><span class="n">scenario</span><span class="o">.</span><span class="n">fp_HiTRes</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;units&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;fp&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">scenario</span><span class="p">):</span>
+                <span class="n">sensitivity_names</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;fp_HiTRes&quot;</span><span class="p">,)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Legacy fp_HiTRes can inherit sensitivity units from fp.</span>
+                <span class="n">sensitivity_names</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;fp&quot;</span><span class="p">,)</span>
+            <span class="n">missing_units</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">sensitivity_names</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">scenario</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;units&quot;</span><span class="p">)]</span>
+            <span class="k">if</span> <span class="n">missing_units</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Sector </span><span class="si">{</span><span class="n">source</span><span class="si">!r}</span><span class="s2"> requires declared sensitivity units for </span><span class="si">{</span><span class="n">missing_units</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="p">)</span>
+
+            <span class="n">calculate</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_calc_modelled_obs_HiTRes</span>
+                <span class="k">if</span> <span class="n">resolved</span>
+                <span class="k">else</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_calc_modelled_obs_integrated</span><span class="p">,</span> <span class="n">allow_climatology</span><span class="o">=</span><span class="n">allow_climatology</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="c1"># Sensitivity units are retained through reductions in the existing</span>
+            <span class="c1"># kernel. The option applies only to this configured pathway.</span>
+            <span class="k">with</span> <span class="n">xr</span><span class="o">.</span><span class="n">set_options</span><span class="p">(</span><span class="n">keep_attrs</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+                <span class="n">contribution</span> <span class="o">=</span> <span class="n">calculate</span><span class="p">(</span>
+                    <span class="n">sources</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
+                    <span class="n">scenario</span><span class="o">=</span><span class="n">scenario</span><span class="p">,</span>
+                    <span class="n">output_TS</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">output_fpXflux</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">use_low_freq_flux</span><span class="o">=</span><span class="n">use_low_freq_flux</span><span class="p">,</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">fp_x_flux</span><span class="o">.</span><span class="n">pint</span><span class="o">.</span><span class="n">quantify</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">contribution</span> <span class="o">=</span> <span class="n">contribution</span><span class="o">.</span><span class="n">pint</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;mol/mol&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Sector </span><span class="si">{</span><span class="n">source</span><span class="si">!r}</span><span class="s2"> footprint-times-flux must have mole-fraction units.&quot;</span>
+                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;mf_mod&quot;</span><span class="p">:</span> <span class="n">contribution</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">])}</span>
+            <span class="k">if</span> <span class="n">output_fp_x_flux</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="s2">&quot;fp_x_flux&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">contribution</span>
+            <span class="n">sector</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="c1"># Exact coordinate alignment prevents silent loss of times or grid</span>
+            <span class="c1"># points when source contributions have different indexes.</span>
+            <span class="k">if</span> <span class="n">total</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">total</span> <span class="o">=</span> <span class="n">sector</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">total</span><span class="p">,</span> <span class="n">sector</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">align</span><span class="p">(</span><span class="n">total</span><span class="p">,</span> <span class="n">sector</span><span class="p">,</span> <span class="n">join</span><span class="o">=</span><span class="s2">&quot;exact&quot;</span><span class="p">)</span>
+                <span class="c1"># Sectoral diagnostics retain their masks. Totals use additive</span>
+                <span class="c1"># zero, matching the existing skip-NaN spatial reductions.</span>
+                <span class="n">total</span> <span class="o">=</span> <span class="n">total</span> <span class="o">+</span> <span class="n">sector</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">split_by_sectors</span><span class="p">:</span>
+                <span class="n">sectoral_data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;mf_mod_sectoral&quot;</span><span class="p">:</span> <span class="n">sector</span><span class="p">[</span><span class="s2">&quot;mf_mod&quot;</span><span class="p">]}</span>
+                <span class="k">if</span> <span class="n">output_fp_x_flux</span><span class="p">:</span>
+                    <span class="n">sectoral_data</span><span class="p">[</span><span class="s2">&quot;fp_x_flux_sectoral&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sector</span><span class="p">[</span><span class="s2">&quot;fp_x_flux&quot;</span><span class="p">]</span>
+                <span class="n">sectoral</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Dataset</span><span class="p">(</span><span class="n">sectoral_data</span><span class="p">)</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="p">[</span><span class="n">source</span><span class="p">]))</span>
+
+        <span class="k">if</span> <span class="n">total</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;At least one flux source is required for sector-level calculation.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">split_by_sectors</span><span class="p">:</span>
+            <span class="n">total</span> <span class="o">=</span> <span class="n">total</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">xr</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">sectoral</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;source&quot;</span><span class="p">,</span> <span class="n">join</span><span class="o">=</span><span class="s2">&quot;exact&quot;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">total</span><span class="o">.</span><span class="n">pint</span><span class="o">.</span><span class="n">dequantify</span><span class="p">())</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_footprint_is_time_resolved</span><span class="p">(</span><span class="n">footprint</span><span class="p">:</span> <span class="n">FootprintData</span> <span class="o">|</span> <span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Identify the temporal representation from the stored sensitivity variables.</span>
+
+<span class="sd">        Species metadata does not determine the calculation path: CO2 can also</span>
+<span class="sd">        use integrated footprints. This preserves the existing dispatch checks.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">footprint</span><span class="o">.</span><span class="n">data</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">footprint</span><span class="p">,</span> <span class="n">FootprintData</span><span class="p">)</span> <span class="k">else</span> <span class="n">footprint</span>
+        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">name</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">data_vars</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;fp_HiTRes&quot;</span><span class="p">,</span> <span class="s2">&quot;fp_time_resolved&quot;</span><span class="p">))</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_calc_modelled_obs_integrated</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -1368,6 +1891,10 @@
         <span class="n">ts_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;mf_mod&quot;</span><span class="p">,</span>
         <span class="n">output_fpXflux</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">fp_x_flux_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;fp_x_flux&quot;</span><span class="p">,</span>
+        <span class="n">use_low_freq_flux</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">allow_climatology</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">scenario</span><span class="p">:</span> <span class="n">Dataset</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate modelled mole fraction timeseries using integrated footprints data.</span>
 
@@ -1377,6 +1904,9 @@
 <span class="sd">                       Default = True</span>
 <span class="sd">            output_fpXflux : Whether to output the modelled flux map DataArray used to create</span>
 <span class="sd">                            the timeseries. Default = False</span>
+<span class="sd">            allow_climatology: When aligning datasets, allow any datasets which represent a year of data</span>
+<span class="sd">                to be treated as a climatology and reindexed accordingly.</span>
+<span class="sd">            scenario: Aligned observation/footprint data. Defaults to the cached scenario.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            DataArray / DataArray :</span>
@@ -1389,14 +1919,19 @@
 <span class="sd">            If both output_TS and output_fpXflux are both True:</span>
 <span class="sd">                Both DataArrays are returned.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">scenario</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">scenario</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span>
+        <span class="k">if</span> <span class="n">scenario</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Combined data must have been defined before calling this function.&quot;</span><span class="p">)</span>
 
-        <span class="n">scenario</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span>
-
         <span class="n">flux</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">combine_flux_sources</span><span class="p">(</span><span class="n">sources</span><span class="p">)</span>
-        <span class="n">flux_modelled</span> <span class="o">=</span> <span class="n">fp_x_flux_integrated</span><span class="p">(</span><span class="n">scenario</span><span class="p">,</span> <span class="n">flux</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">use_low_freq_flux</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">use_low_freq_flux</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">species</span> <span class="o">==</span> <span class="s2">&quot;co2&quot;</span>
 
+        <span class="k">if</span> <span class="n">use_low_freq_flux</span><span class="p">:</span>
+            <span class="n">flux</span> <span class="o">=</span> <span class="n">make_integrated_low_freq_flux</span><span class="p">(</span><span class="n">flux</span><span class="p">)</span>
+
+        <span class="n">flux_modelled</span> <span class="o">=</span> <span class="n">fp_x_flux_integrated</span><span class="p">(</span><span class="n">scenario</span><span class="p">,</span> <span class="n">flux</span><span class="p">,</span> <span class="n">allow_climatology</span><span class="o">=</span><span class="n">allow_climatology</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="k">if</span> <span class="n">output_TS</span><span class="p">:</span>
@@ -1414,6 +1949,9 @@
         <span class="n">ts_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;mf_mod_high_res&quot;</span><span class="p">,</span>
         <span class="n">output_fpXflux</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">fp_x_flux_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;fp_x_flux&quot;</span><span class="p">,</span>
+        <span class="n">use_low_freq_flux</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">scenario</span><span class="p">:</span> <span class="n">Dataset</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate modelled mole fraction timeseries using high time resolution</span>
 <span class="sd">        footprints data and emissions data. This is appropriate for time variable</span>
@@ -1426,6 +1964,7 @@
 <span class="sd">                       Default = True</span>
 <span class="sd">            output_fpXflux : Whether to output the modelled flux map DataArray used to create</span>
 <span class="sd">                            the timeseries. Default = False</span>
+<span class="sd">            scenario: Aligned observation/footprint data. Defaults to the cached scenario.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            DataArray / DataArray :</span>
@@ -1458,13 +1997,31 @@
         <span class="c1"># TODO: Need to work out how this fits in with high time resolution method</span>
         <span class="c1"># Do we need to flag low resolution to use a different method? natural / anthro for example</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">scenario</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">scenario</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span>
+        <span class="k">if</span> <span class="n">scenario</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Combined data must have been defined before calling this function.&quot;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="s2">&quot;fp_HiTRes&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span><span class="p">:</span>
-            <span class="n">fp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">fp_HiTRes</span>
+        <span class="k">if</span> <span class="s2">&quot;fp_HiTRes&quot;</span> <span class="ow">in</span> <span class="n">scenario</span><span class="p">:</span>
+            <span class="n">fp</span> <span class="o">=</span> <span class="n">scenario</span><span class="o">.</span><span class="n">fp_HiTRes</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">fp</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;units&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;fp&quot;</span> <span class="ow">in</span> <span class="n">scenario</span><span class="p">:</span>
+                <span class="n">units</span> <span class="o">=</span> <span class="n">scenario</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;units&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">units</span><span class="p">:</span>
+                    <span class="c1"># Legacy files and stores may only declare units on fp.</span>
+                    <span class="c1"># assign_attrs leaves the caller&#39;s footprint metadata unchanged.</span>
+                    <span class="n">fp</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">assign_attrs</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="s2">&quot;fp_time_resolved&quot;</span> <span class="ow">in</span> <span class="n">scenario</span><span class="o">.</span><span class="n">data_vars</span><span class="p">:</span>
+            <span class="n">fp</span> <span class="o">=</span> <span class="n">scenario</span><span class="p">[[</span><span class="s2">&quot;fp_time_resolved&quot;</span><span class="p">,</span> <span class="s2">&quot;fp_residual&quot;</span><span class="p">]]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">fp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span><span class="p">[[</span><span class="s2">&quot;fp_time_resolved&quot;</span><span class="p">,</span> <span class="s2">&quot;fp_residual&quot;</span><span class="p">]]</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_modelled_obs_integrated</span><span class="p">(</span>
+                <span class="n">sources</span><span class="o">=</span><span class="n">sources</span><span class="p">,</span>
+                <span class="n">output_TS</span><span class="o">=</span><span class="n">output_TS</span><span class="p">,</span>
+                <span class="n">ts_name</span><span class="o">=</span><span class="n">ts_name</span><span class="p">,</span>
+                <span class="n">output_fpXflux</span><span class="o">=</span><span class="n">output_fpXflux</span><span class="p">,</span>
+                <span class="n">fp_x_flux_name</span><span class="o">=</span><span class="n">fp_x_flux_name</span><span class="p">,</span>
+                <span class="n">use_low_freq_flux</span><span class="o">=</span><span class="n">use_low_freq_flux</span><span class="p">,</span>
+                <span class="n">scenario</span><span class="o">=</span><span class="n">scenario</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="n">flux_ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">combine_flux_sources</span><span class="p">(</span><span class="n">sources</span><span class="p">)</span>
 
@@ -1473,7 +2030,7 @@
         <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="k">if</span> <span class="n">output_TS</span><span class="p">:</span>
-            <span class="n">data</span><span class="p">[</span><span class="n">ts_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">fp_x_flux</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">])</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">ts_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">fp_x_flux</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">],</span> <span class="n">keep_attrs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">output_fpXflux</span><span class="p">:</span>
             <span class="n">data</span><span class="p">[</span><span class="n">fp_x_flux_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">fp_x_flux</span>
@@ -1490,6 +2047,7 @@
         <span class="n">recalculate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">output_sensitivity</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">output_units</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">allow_climatology</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the modelled baseline points based on site footprint and boundary conditions.</span>
 <span class="sd">        Boundary conditions are multipled by any loss (exp(-t/lifetime)) for the species.</span>
@@ -1509,6 +2067,8 @@
 <span class="sd">            recalculate: Make sure to recalculate this data rather than return from cache. Default = False.</span>
 <span class="sd">            output_units: target units; if None, then obs. units will be used,</span>
 <span class="sd">              or &quot;mol/mol&quot; if these are not present.</span>
+<span class="sd">            allow_climatology: When aligning datasets, allow any datasets which represent a year of data</span>
+<span class="sd">                to be treated as a climatology and reindexed accordingly.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            xarray.Dataset containing modelled baseline values along the time axis and baseline sensitivities</span>
@@ -1536,7 +2096,9 @@
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="n">species</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="n">sensitivities</span> <span class="o">=</span> <span class="n">baseline_sensitivities</span><span class="p">(</span><span class="n">bc</span><span class="o">=</span><span class="n">bc_data</span><span class="p">,</span> <span class="n">fp</span><span class="o">=</span><span class="n">scenario</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">)</span>
+        <span class="n">sensitivities</span> <span class="o">=</span> <span class="n">baseline_sensitivities</span><span class="p">(</span>
+            <span class="n">bc</span><span class="o">=</span><span class="n">bc_data</span><span class="p">,</span> <span class="n">fp</span><span class="o">=</span><span class="n">scenario</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">allow_climatology</span><span class="o">=</span><span class="n">allow_climatology</span>
+        <span class="p">)</span>
 
         <span class="n">result</span> <span class="o">=</span> <span class="n">sensitivities</span> <span class="k">if</span> <span class="n">output_sensitivity</span> <span class="k">else</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">()</span>
 
@@ -1583,6 +2145,10 @@
         <span class="n">cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">recalculate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">output_units</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">use_low_freq_flux</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">allow_climatology</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">time_resolved_by_sector</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Produce combined object containing aligned footprint and observation data.</span>
 <span class="sd">        Can also include modelled timeseries data derived from flux.</span>
@@ -1604,26 +2170,67 @@
 <span class="sd">            cache: Cache this data after calculation. Default = True.</span>
 <span class="sd">            recalculate: Make sure to recalculate this data rather than return from cache. Default = False.</span>
 <span class="sd">            output_units: units to use for obs, or any data that should have the same units as obs (e.g. `mf_mod`).</span>
+<span class="sd">            use_low_freq_flux: For integrated footprints, use monthly-mean fluxes instead</span>
+<span class="sd">                of the flux at release time. ``None`` enables this for CO2 only.</span>
+<span class="sd">            allow_climatology: When aligning datasets, allow any datasets which represent a year of data</span>
+<span class="sd">                to be treated as a climatology and reindexed accordingly.</span>
+<span class="sd">            time_resolved_by_sector: Flux-source name to True (time-resolved) or</span>
+<span class="sd">                False (integrated) mapping, forwarded to ``calc_modelled_obs``.</span>
+<span class="sd">                All sources share the attached footprint dataset.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            xarray.Dataset: Combined dataset containing footprint and observation data</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">combined_dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">combine_obs_footprint</span><span class="p">(</span>
-            <span class="n">resample_to</span><span class="o">=</span><span class="n">resample_to</span><span class="p">,</span> <span class="n">platform</span><span class="o">=</span><span class="n">platform</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">,</span> <span class="n">recalculate</span><span class="o">=</span><span class="n">recalculate</span>
-        <span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">calc_timeseries</span> <span class="ow">or</span> <span class="n">calc_fp_x_flux</span><span class="p">:</span>
-            <span class="n">modelled_obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_modelled_obs</span><span class="p">(</span>
+        <span class="n">sector_resolution</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">calc_timeseries</span> <span class="ow">or</span> <span class="n">calc_fp_x_flux</span><span class="p">)</span> <span class="ow">and</span> <span class="n">time_resolved_by_sector</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_check_data_is_present</span><span class="p">(</span><span class="n">need</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;footprint&quot;</span><span class="p">,</span> <span class="s2">&quot;fluxes&quot;</span><span class="p">])</span>
+            <span class="n">sector_resolution</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_sector_time_resolution</span><span class="p">(</span><span class="n">time_resolved_by_sector</span><span class="p">,</span> <span class="n">sources</span><span class="p">)</span>
+        <span class="n">configured_path</span> <span class="o">=</span> <span class="n">sector_resolution</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sector_modelled_obs_cache_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">combined_dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">combine_obs_footprint</span><span class="p">(</span>
                 <span class="n">resample_to</span><span class="o">=</span><span class="n">resample_to</span><span class="p">,</span>
-                <span class="n">sources</span><span class="o">=</span><span class="n">sources</span><span class="p">,</span>
                 <span class="n">platform</span><span class="o">=</span><span class="n">platform</span><span class="p">,</span>
-                <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">,</span>
-                <span class="n">recalculate</span><span class="o">=</span><span class="n">recalculate</span><span class="p">,</span>
-                <span class="n">output_fp_x_flux</span><span class="o">=</span><span class="n">calc_fp_x_flux</span><span class="p">,</span>
-                <span class="n">split_by_sectors</span><span class="o">=</span><span class="n">split_by_sectors</span><span class="p">,</span>
+                <span class="n">cache</span><span class="o">=</span><span class="n">cache</span> <span class="ow">and</span> <span class="n">sector_resolution</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">recalculate</span><span class="o">=</span><span class="n">recalculate</span> <span class="ow">or</span> <span class="n">configured_path</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">combined_dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_footprint_resample</span><span class="p">(</span><span class="n">resample_to</span><span class="p">)</span><span class="o">.</span><span class="n">assign_attrs</span><span class="p">(</span>
+                <span class="n">resample_to</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">resample_to</span><span class="p">)</span>
             <span class="p">)</span>
 
+        <span class="k">if</span> <span class="n">calc_timeseries</span> <span class="ow">or</span> <span class="n">calc_fp_x_flux</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">sector_resolution</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">modelled_obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_modelled_obs_with_sector_resolution</span><span class="p">(</span>
+                    <span class="n">sector_resolution</span><span class="p">,</span>
+                    <span class="n">resample_to</span><span class="o">=</span><span class="n">resample_to</span><span class="p">,</span>
+                    <span class="n">platform</span><span class="o">=</span><span class="n">platform</span><span class="p">,</span>
+                    <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">,</span>
+                    <span class="n">recalculate</span><span class="o">=</span><span class="n">recalculate</span><span class="p">,</span>
+                    <span class="n">output_fp_x_flux</span><span class="o">=</span><span class="n">calc_fp_x_flux</span><span class="p">,</span>
+                    <span class="n">split_by_sectors</span><span class="o">=</span><span class="n">split_by_sectors</span><span class="p">,</span>
+                    <span class="n">output_units</span><span class="o">=</span><span class="n">output_units</span><span class="p">,</span>
+                    <span class="n">use_low_freq_flux</span><span class="o">=</span><span class="n">use_low_freq_flux</span><span class="p">,</span>
+                    <span class="n">allow_climatology</span><span class="o">=</span><span class="n">allow_climatology</span><span class="p">,</span>
+                    <span class="n">scenario</span><span class="o">=</span><span class="n">combined_dataset</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">modelled_obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_modelled_obs</span><span class="p">(</span>
+                    <span class="n">resample_to</span><span class="o">=</span><span class="n">resample_to</span><span class="p">,</span>
+                    <span class="n">sources</span><span class="o">=</span><span class="n">sources</span><span class="p">,</span>
+                    <span class="n">platform</span><span class="o">=</span><span class="n">platform</span><span class="p">,</span>
+                    <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">,</span>
+                    <span class="n">recalculate</span><span class="o">=</span><span class="n">recalculate</span><span class="p">,</span>
+                    <span class="n">output_fp_x_flux</span><span class="o">=</span><span class="n">calc_fp_x_flux</span><span class="p">,</span>
+                    <span class="n">split_by_sectors</span><span class="o">=</span><span class="n">split_by_sectors</span><span class="p">,</span>
+                    <span class="n">use_low_freq_flux</span><span class="o">=</span><span class="n">use_low_freq_flux</span><span class="p">,</span>
+                    <span class="n">allow_climatology</span><span class="o">=</span><span class="n">allow_climatology</span><span class="p">,</span>
+                <span class="p">)</span>
+
             <span class="n">combined_dataset</span> <span class="o">=</span> <span class="n">combined_dataset</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">modelled_obs</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s2">&quot;time_resolved_by_sector&quot;</span> <span class="ow">in</span> <span class="n">modelled_obs</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
+                <span class="n">combined_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;time_resolved_by_sector&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">modelled_obs</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span>
+                    <span class="s2">&quot;time_resolved_by_sector&quot;</span>
+                <span class="p">]</span>
 
         <span class="k">if</span> <span class="n">calc_bc</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1633,6 +2240,7 @@
                     <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">,</span>
                     <span class="n">recalculate</span><span class="o">=</span><span class="n">recalculate</span><span class="p">,</span>
                     <span class="n">output_sensitivity</span><span class="o">=</span><span class="n">calc_bc_sensitivity</span><span class="p">,</span>
+                    <span class="n">allow_climatology</span><span class="o">=</span><span class="n">allow_climatology</span><span class="p">,</span>
                 <span class="p">)</span>
 
                 <span class="n">combined_dataset</span> <span class="o">=</span> <span class="n">combined_dataset</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">modelled_baseline</span><span class="p">)</span>
@@ -1682,8 +2290,11 @@
         <span class="n">sources</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">resample_to</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;coarsest&quot;</span><span class="p">,</span>
         <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">allow_climatology</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">recalculate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">save_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">save_kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot comparison between observation and modelled timeseries data.</span>
 
@@ -1699,8 +2310,13 @@
 <span class="sd">                          - None to not resample and to just &quot;ffill&quot; footprint to obs</span>
 <span class="sd">                         Default = &quot;coarsest&quot;.</span>
 <span class="sd">            platform: Observation platform used to decide whether to resample e.g. &quot;satellite&quot;, &quot;insitu&quot;, &quot;flask&quot;</span>
+<span class="sd">            allow_climatology: When aligning datasets, allow any datasets which represent a year of data</span>
+<span class="sd">                to be treated as a climatology and reindexed accordingly.</span>
 <span class="sd">            cache: Cache this data after calculation. Default = True.</span>
 <span class="sd">            recalculate: Make sure to recalculate this data rather than return from cache. Default = False.</span>
+<span class="sd">            save_path: Path to save the figure. If None, the figure will not be saved.</span>
+<span class="sd">            save_kwargs: Additional keyword arguments to pass to the save function. These will be passed to the plotly write_html or write_image functions depending on the file extension of save_path.</span>
+<span class="sd">            example: width=1000, height=600, scale=2,</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Plotly Figure</span>
@@ -1758,8 +2374,30 @@
 
         <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x_data</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y_data</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;lines&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">label</span><span class="p">))</span>
 
+        <span class="k">if</span> <span class="n">save_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_save_fig</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span> <span class="o">**</span><span class="n">save_kwargs</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">fig</span></div>
-</div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_save_fig</span><span class="p">(</span><span class="n">fig</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">save_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">save_kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save a plotly figure to disk, dispatching on file extension.&quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">save_path</span><span class="p">)</span>
+        <span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">suffix</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.html&quot;</span><span class="p">:</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">write_html</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="o">**</span><span class="n">save_kwargs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">suffix</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;.png&quot;</span><span class="p">,</span> <span class="s2">&quot;.jpg&quot;</span><span class="p">,</span> <span class="s2">&quot;.jpeg&quot;</span><span class="p">,</span> <span class="s2">&quot;.svg&quot;</span><span class="p">,</span> <span class="s2">&quot;.pdf&quot;</span><span class="p">,</span> <span class="s2">&quot;.webp&quot;</span><span class="p">):</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">write_image</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="o">**</span><span class="n">save_kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Unsupported file extension &#39;</span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">&#39;. &quot;</span>
+                <span class="s2">&quot;Use .html for interactive, or .png/.jpg/.svg/.pdf/.webp for static images.&quot;</span>
+            <span class="p">)</span></div>
 
 
 
@@ -1855,36 +2493,67 @@
 <span class="c1">#     mf_mod = mod.model_mf(site, source=&quot;ch4_source1&quot;)</span>
 </pre></div>
 
-              </div>
+                </article>
               
               
-              <!-- Previous / next buttons -->
-<div class='prev-next-area'>
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
 </div>
+                </footer>
               
-          </main>
-          
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
 
-      </div>
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2024 OpenGHG development team.
+      <br/>
+    
+  </p>
+</div>
+      
     </div>
   
-    <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
-  <footer class="footer mt-5 mt-md-0">
-  <div class="container">
-    
-    <div class="footer-item">
-      <p class="copyright">
-    &copy; Copyright 2024 OpenGHG development team.<br>
-</p>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.24.0.
+</p></div>
+      
     </div>
-    
-    <div class="footer-item">
-      <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 8.2.3.<br>
-</p>
-    </div>
-    
-  </div>
-</footer>
+  
+</div>
+
+  </footer>
   </body>
 </html>
