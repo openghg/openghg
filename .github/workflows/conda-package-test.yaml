@@ -1,0 +1,32 @@
+name: Build and test conda package
+
+on:
+  pull_request:
+    branches: [master, devel]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -el {0}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Set conda package version
+        run: echo "GIT_TAG=$(git describe --abbrev=0 --tags)" >> "$GITHUB_ENV"
+      - uses: mamba-org/setup-micromamba@v3
+        with:
+          init-shell: bash
+      - name: Build and test conda package
+        run: |
+          micromamba create -n openghg_build boa conda-verify -c conda-forge
+          micromamba activate openghg_build
+          conda config --append channels openghg
+          mkdir -p "$RUNNER_TEMP/build"
+          conda mambabuild --croot "$RUNNER_TEMP/build" "$GITHUB_WORKSPACE/recipes" -c conda-forge
