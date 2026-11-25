@@ -120,9 +120,10 @@ class _BaseData:
                     if slice_start_date is None or slice_end_date is None:
                         raise RuntimeError("Slice dates were not normalised.")
 
+                    # Search has already added 1s to start_date and removed 1s from end_date.
+                    # Undo the start offset so start_date is inclusive, and keep the end offset
+                    # as it is, so end_date stays exclusive.
                     slice_start_date = slice_start_date - Timedelta("1s")
-                    # TODO: May want to consider this extra 1s subtraction as end_date on data has already has -1s applied.
-                    slice_end_date = slice_end_date - Timedelta("1s")
 
                     # TODO - I feel we should do this in a tider way
                     slice_start_date = slice_start_date.tz_localize(None)
