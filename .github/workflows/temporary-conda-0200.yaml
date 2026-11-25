@@ -1,6 +1,8 @@
 name: Temporary conda 0.20.0 build test
 
 on:
+  pull_request:
+    branches: [devel]
   workflow_dispatch:
 
 permissions:
