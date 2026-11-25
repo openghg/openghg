@@ -480,11 +480,12 @@ request until all tests pass. We only accept pull requests to devel.
 Documentation
 =============
 
-OpenGHG is fully documented using a combination of hand-written files
-(in the ``doc`` folder) and auto-generated api documentation created from
-Google `style docstrings <https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html>`__.
-for details. The documentation is automatically built using `Sphinx <http://sphinx-doc.org>`__. Whenever a commit is pushed to devel the
-documentation is automatically rebuilt and updated.
+OpenGHG is documented using a combination of hand-written files in the ``doc``
+folder and auto-generated API documentation created from docstrings. See the
+:doc:`docstring policy <docstrings>` for the required content and Google-style
+conventions. The documentation is built using `Sphinx <https://www.sphinx-doc.org/>`__.
+Whenever a commit is pushed to devel the documentation is automatically rebuilt and
+updated.
 
 Install ``make`` and `Pandoc <https://pandoc.org/installing.html>`__ and make sure both are on your ``PATH``.
 On macOS with Homebrew, use ``brew install pandoc``. From the repository root, install the

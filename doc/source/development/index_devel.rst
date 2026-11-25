@@ -24,6 +24,7 @@ Covers how we develop OpenGHG and the standards we adhere to
    :maxdepth: 1
 
    python_devel
+   docstrings
 
 Packaging & Release
 -------------------
