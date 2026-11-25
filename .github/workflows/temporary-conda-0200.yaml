@@ -1,0 +1,26 @@
+name: Temporary conda 0.20.0 build test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -el {0}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: mamba-org/setup-micromamba@v3
+        with:
+          init-shell: bash
+      - name: Build and test OpenGHG 0.20.0
+        run: |
+          micromamba create -n openghg_build boa conda-verify -c conda-forge
+          micromamba activate openghg_build
+          conda config --append channels openghg
+          mkdir -p "$RUNNER_TEMP/build"
+          GIT_TAG=0.20.0 conda mambabuild --croot "$RUNNER_TEMP/build" "$GITHUB_WORKSPACE/recipes" -c conda-forge
