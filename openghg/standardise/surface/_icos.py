@@ -129,8 +129,10 @@ def _read_data_large_header(
         site_fname = filepath.name.split("_")[-3]
         inlet_height_fname = filepath.name.split("_")[-2]
     except IndexError:
-        raise ValueError("Unable to read metadata from filename. We expect a filename such as \
-            ICOS_ATC_L2_L2-2024.1_RGL_90.0_CTS.CH4")
+        raise ValueError(
+            "Unable to read metadata from filename. We expect a filename such as \
+            ICOS_ATC_L2_L2-2024.1_RGL_90.0_CTS.CH4"
+        )
 
     if site_fname.lower() != site:
         raise ValueError("Site mismatch between site argument passed and filename.")
@@ -163,7 +165,7 @@ def _read_data_large_header(
 
     # Read some metadata before dropping the columns
     # sampling_height_data = df["samplingheight"][0]
-    site_name_data = df["#site"][0]
+    site_name_data = df["#site"].iloc[0]
 
     if site != site_name_data.lower():
         raise ValueError("Site mismatch between site argument passed and site in data.")

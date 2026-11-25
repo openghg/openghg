@@ -5,7 +5,7 @@ import pytest
 import yaml
 from openghg.retrieve import get_ceda_file
 
-# flake8: noqa : E501
+# ruff: noqa: E501
 
 
 def test_get_ceda_file_raises_no_args():

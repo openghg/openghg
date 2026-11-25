@@ -64,6 +64,24 @@ def test_format_inlet_special():
     assert output == special_keyword
 
 
+@pytest.mark.parametrize("sequence_type", [list, tuple])
+@pytest.mark.parametrize(
+    "values,options,expected",
+    [
+        ([], {}, []),
+        ([10, 20.23456, "30magl", None, slice(40, 60)], {}, ["10m", "20.2m", "30m", None, slice(40, 60)]),
+        ([10, "20"], {"units": "km"}, ["10km", "20km"]),
+        ([10, "20magl"], {"key_name": "inlet_magl"}, ["10", "20"]),
+        (["10magl"], {"special_keywords": ["10magl"]}, ["10magl"]),
+    ],
+)
+def test_format_inlet_sequence(sequence_type, values, options, expected):
+    output = format_inlet(sequence_type(values), **options)
+
+    assert isinstance(output, list)
+    assert output == expected
+
+
 @pytest.mark.parametrize(
     "test_input,expected",
     [("10m", 10.0), ("12.2m", 12.2), ("123magl", 123.0), ("13.3magl", 13.3), ("123", 123)],

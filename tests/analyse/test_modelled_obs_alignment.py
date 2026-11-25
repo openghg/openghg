@@ -30,7 +30,7 @@ def _irregular_time_resolved_fp_and_flux():
     fp.lon.attrs["units"] = "degrees_east"
     fp.H_back.attrs["units"] = "Hours"
 
-    flux_times = pd.date_range("2011-12-31 20:37:00", "2012-01-01 05:37:00", freq="h")
+    flux_times = pd.date_range("2011-12-31 20:00:00", "2012-01-01 05:00:00", freq="h")
     flux_values = np.arange(len(flux_times), dtype=float).reshape(-1, 1, 1)
     flux = xr.DataArray(
         flux_values,
@@ -50,25 +50,11 @@ def _irregular_time_resolved_fp_and_flux():
     return fp, flux, expected
 
 
-def test_fp_x_flux_time_resolved_aligns_all_irregular_footprint_times():
-    """Irregular footprint times should not be dropped by xarray's exact coordinate alignment."""
+def test_fp_x_flux_time_resolved_uses_flux_intervals_for_irregular_footprint_times():
+    """Irregular footprint times should use the containing left-labelled flux intervals."""
     fp, flux, expected = _irregular_time_resolved_fp_and_flux()
 
     result = _modelled_obs.fp_x_flux_time_resolved(fp, flux)
 
-    xr.testing.assert_allclose(result, expected)
-
-
-def test_high_freq_flux_without_second_reindex_reproduces_dropped_times():
-    """Probe the old behaviour: only footprint times already on the generated grid survive."""
-    fp, flux, _ = _irregular_time_resolved_fp_and_flux()
-
-    flux_high_freq = _modelled_obs._make_high_freq_flux(flux, fp, align_to_fp_time=False)
-    result = (flux_high_freq * fp.fp_time_resolved).sum("H_back")
-
-    expected = xr.DataArray(
-        np.array([7.0]).reshape(1, 1, 1),
-        coords={"time": fp.time.isel(time=[0]), "lat": fp.lat, "lon": fp.lon},
-        dims=("time", "lat", "lon"),
-    )
+    xr.testing.assert_identical(result.time, fp.time)
     xr.testing.assert_allclose(result, expected)

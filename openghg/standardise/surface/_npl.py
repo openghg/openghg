@@ -81,7 +81,7 @@ def parse_npl(
 
         # Convert methane to ppb
         if species_column == "CH4":
-            processed_data[species_column] *= 1000
+            processed_data[species_column] = processed_data[species_column] * 1000
 
         species = clean_string(species_column)
         species = synonyms(species, allow_new_species=True)

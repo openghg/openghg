@@ -131,22 +131,57 @@ class BoundaryConditions(BaseStore):
 
     def transform_data(
         self,
-        datapath: pathType,
-        database: str,
+        datapath: pathType | None,
+        database: str | None,
         if_exists: str = "auto",
         save_current: str = "auto",
         overwrite: bool = False,
         compressor: Any | None = None,
         filters: Any | None = None,
         info_metadata: dict | None = None,
+        data: Any | None = None,
         **kwargs: dict,
     ) -> list[dict]:
-        """Read and transform a cams boundary conditions data. This will find the appropriate parser function to use for the database specified. The necessary inputs are determined by which database is being used.
-        The underlying parser functions will be of the form:
-            - openghg.transform.boundary_conditions.parse_{database.lower()}
-                - e.g. openghg.transform.boundary_conditions.parse_cams()"""
+        """Transform raw boundary conditions and assign them to the store.
+
+        The database selects a parser such as
+        :func:`openghg.transform.boundary_conditions.parse_cams`. Exactly one
+        of ``datapath`` and ``data`` must be provided.
+
+        Args:
+            datapath: Path to raw boundary-condition data.
+            database: Name of the boundary-condition transform parser.
+            if_exists: Action to take when matching stored data exists.
+                Accepted values are ``"auto"``, ``"new"``, and ``"combine"``.
+            save_current: Whether to preserve the current stored version.
+                Accepted values are ``"auto"``, ``"y"``/``"yes"``, and
+                ``"n"``/``"no"``.
+            overwrite: Deprecated alias for ``if_exists="new"``.
+            compressor: Optional compressor used when storing transformed data.
+            filters: Optional storage filters.
+            info_metadata: Optional informational metadata to add to each
+                transformed datasource.
+            data: Raw in-memory data to transform instead of reading
+                ``datapath``.
+            **kwargs: Inputs for the selected parser.
+
+        Returns:
+            Metadata dictionaries identifying the assigned datasources.
+
+        Raises:
+            TransformError: If the selected parser cannot transform the input.
+            ValueError: If the database is unsupported or exactly one of
+                ``datapath`` and ``data`` is not provided.
+        """
 
         from openghg.store.spec import define_transform_parsers
+
+        transform_parsers = define_transform_parsers()[self._data_type]
+        if not isinstance(database, str) or database.upper() not in transform_parsers.__members__:
+            raise ValueError(f"Unable to transform '{database}' selected.")
+
+        if (datapath is None and data is None) or (datapath is not None and data is not None):
+            raise ValueError("Please specify exactly one of `datapath` or `data`.")
 
         if overwrite and if_exists == "auto":
             logger.warning(
@@ -160,26 +195,23 @@ class BoundaryConditions(BaseStore):
 
         new_version = check_if_need_new_version(if_exists, save_current)
 
-        fn_input_parameters["datapath"] = Path(datapath)
-
-        transform_parsers = define_transform_parsers()[self._data_type]
-
-        try:
-            transform_parsers[database.upper()].value
-        except KeyError:
-            raise ValueError(f"Unable to transform '{database}' selected.")
+        if data is not None:
+            fn_input_parameters["data"] = data
+        else:
+            assert datapath is not None
+            fn_input_parameters["datapath"] = Path(datapath)
 
         # Load the data retrieve object
         parser_fn = load_transform_parser(data_type=self._data_type, source_format=database)
 
         # Define parameters to pass to the parser function and remaining keys
-        parser_input_parameters, additional_input_parameters = split_function_inputs(
+        fn_input_parameters, additional_input_parameters = split_function_inputs(
             fn_input_parameters, parser_fn
         )
 
         # Call appropriate standardisation function with input parameters
         try:
-            bc_data = parser_fn(**parser_input_parameters)
+            bc_data = parser_fn(**fn_input_parameters)
         except (TypeError, ValueError) as err:
             msg = f"Error during transformation of data(s): {datapath}. Error: {err}"
             logger.exception(msg)
@@ -189,18 +221,8 @@ class BoundaryConditions(BaseStore):
         for mdd in bc_data:
             BoundaryConditions.validate_data(mdd.data)
 
-        required_keys = ("species", "bc_input", "domain")
-
-        if info_metadata:
-            common_keys = set(required_keys) & set(info_metadata.keys())
-
-            if common_keys:
-                raise ValueError(
-                    f"The following optional metadata keys are already present in required keys: {', '.join(common_keys)}"
-                )
-            else:
-                for parsed_data in bc_data:
-                    parsed_data.metadata.update(info_metadata)
+        # Check to ensure no required keys are being passed through info_metadata dict
+        self.check_info_keys(info_metadata)
 
         # Mop up and add additional keys to metadata which weren't passed to the parser
         bc_data = self.update_metadata(
@@ -211,7 +233,6 @@ class BoundaryConditions(BaseStore):
             data=bc_data,
             if_exists=if_exists,
             new_version=new_version,
-            required_keys=required_keys,
             compressor=compressor,
             filters=filters,
         )

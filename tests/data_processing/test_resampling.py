@@ -98,12 +98,13 @@ def tac_ds():
     return ds
 
 
-def test_mean_resample(tac_ds):
+@pytest.mark.parametrize("period", ["4h", "4H"])
+def test_mean_resample(tac_ds, period):
     ds = xr.ones_like(tac_ds)
 
-    ds_4h = mean_resample(ds, averaging_period="4h")
+    ds_4h = mean_resample(ds, averaging_period=period)
 
-    assert {"averaged_period": 4 * 3600.0, "averaged_period_str": "4h"}.items() <= ds_4h.attrs.items()
+    assert {"averaged_period": 4 * 3600.0, "averaged_period_str": period}.items() <= ds_4h.attrs.items()
 
     ds_4h_expected = xr.ones_like(ds.resample(time="4h").mean(keep_attrs=True))
 
@@ -121,6 +122,13 @@ def test_weighted_resample(tac_ds):
     xr.testing.assert_allclose(ds_4h_12h, ds_12h)
 
     assert ds_4h_12h.attrs == ds_12h.attrs
+
+
+def test_weighted_resample_preserves_variable_attrs(tac_ds):
+    result = weighted_resample(tac_ds, averaging_period="4h", species="ch4")
+
+    for variable in ("ch4", "ch4_variability", "ch4_number_of_observations"):
+        assert result[variable].attrs == tac_ds[variable].attrs
 
 
 def test_weighted_resample_with_nans(tac_ds):

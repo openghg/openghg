@@ -1,4 +1,5 @@
 import logging
+from calendar import monthrange
 from typing import Literal, TypeVar
 
 import numpy as np
@@ -7,6 +8,7 @@ import xarray as xr
 from numpy.typing import ArrayLike
 
 from openghg.types import ReindexMethod, XrDataLike
+from openghg.util._time import normalise_pandas_frequency
 
 logger = logging.getLogger("openghg.analyse")
 logger.setLevel(logging.INFO)  # Have to set level for logger as well as handler
@@ -48,10 +50,10 @@ def _extract_obs_freq(obs: XrDataLike) -> float | None:
 
 
 def infer_freq_in_seconds(times: ArrayLike, tol: float = 1.0) -> float:
-    """Infer the frequency of a sequence of floats representing time in nanoseconds.
+    """Infer the frequency of timestamps or numeric nanosecond values.
 
     Args:
-        times: times in nanoseconds
+        times: datetime-like values or numeric values in nanoseconds
         tol: tolerance for difference between min. and max. gaps between time
           points.
 
@@ -63,18 +65,17 @@ def infer_freq_in_seconds(times: ArrayLike, tol: float = 1.0) -> float:
           exceeds the specified tolerance.
 
     """
-    obs_data_period_s = np.nanmedian(np.diff(times) / 1e9).astype("float32")
-
-    obs_data_period_s_min = np.diff(times).min() / 1e9
-    obs_data_period_s_max = np.diff(times).max() / 1e9
-
-    max_diff = (obs_data_period_s_max - obs_data_period_s_min).astype(float)
+    gaps = np.diff(times)
+    if np.issubdtype(gaps.dtype, np.timedelta64):
+        gaps_s = gaps / np.timedelta64(1, "s")
+    else:
+        gaps_s = gaps / 1e9
 
     # Check if the periods differ by more than 1 second
-    if max_diff > tol:
+    if gaps_s.max() - gaps_s.min() > tol:
         raise ValueError("Sample period cannot be derived from observations")
 
-    return float(obs_data_period_s)
+    return float(np.nanmedian(gaps_s))
 
 
 def time_of_day_offset(date_time: pd.Timestamp | np.datetime64 | str) -> pd.Timedelta:
@@ -149,11 +150,53 @@ def _buffer_start_and_end_dates(
 
 def timedelta_to_hourly_freq(td: pd.Timedelta) -> str:
     """Convert a Timedelta into a frequency string in units of hours."""
-    return str(round(td / pd.to_timedelta(1, "h"), 5)) + "H"
+    return str(round(td / pd.to_timedelta(1, "h"), 5)) + "h"
 
 
 T1 = TypeVar("T1", xr.DataArray, xr.Dataset)
 T2 = TypeVar("T2", xr.DataArray, xr.Dataset)
+
+
+def reindex_time_to_target(source: T1, target: T2, allow_climatology: bool = True) -> T1:
+    """Reindex data using time coordinate in an appropriate way from the source to the target data.
+
+    A source whose timestamps do not overlap the target may represent climatological data (often monthly).
+    If allow_climatology is True, map each target timestamp to the latest
+    source year before forward-filling. Multi-year sources remain timestamped
+    data and are left unmodified when they do not overlap.
+
+    Args:
+        source: data to be reindexed
+        target: data to use for reindexing
+        allow_climatology: whether to treat yearly target data outside the date range of the source
+            data as a climatology and reindex based on this.
+
+    Returns:
+        xr.DataArray | xr.Dataset: Reindexed source data
+    """
+    source_times = pd.DatetimeIndex(source.time.values)
+    target_times = pd.DatetimeIndex(target.time.values)
+
+    if source_times.min() <= target_times.max() and target_times.min() <= source_times.max():
+        return source.reindex(time=target.time, method="ffill")
+
+    if allow_climatology:
+        if source_times.year.nunique() != 1:
+            return source.reindex(time=target.time, method="ffill")
+
+        reference_year = source_times.year.max()
+        reference_times = pd.DatetimeIndex(
+            [
+                timestamp.replace(
+                    year=reference_year,
+                    day=min(timestamp.day, monthrange(reference_year, timestamp.month)[1]),
+                )
+                for timestamp in target_times
+            ]
+        )
+        return source.reindex(time=reference_times, method="ffill").assign_coords(time=target.time)
+    else:
+        return source.reindex(time=target.time, method="ffill")
 
 
 def resample_obs_and_other(
@@ -173,7 +216,7 @@ def resample_obs_and_other(
      - "coarsest" - resample to the coarsest resolution between obs and footprints
      - "obs" - resample to observation data frequency
      - "other" - resample to footprint data frequency
-     - a valid resample period e.g. "2H"
+     - a valid resample period e.g. "2h"
 
     Args:
         obs: obs data (either as xr.DataArray or xr.Dataset)
@@ -201,8 +244,7 @@ def resample_obs_and_other(
     obs_data_timeperiod = pd.to_timedelta(obs_data_period_s, unit="s")
 
     # Derive the other data's period from the frequency of the data
-    other_data_period_ns = int(np.nanmedian(np.diff(other.time.values)))
-    other_data_timeperiod = pd.to_timedelta(other_data_period_ns, unit="ns")
+    other_data_timeperiod = pd.Timedelta(np.nanmedian(np.diff(other.time.values)))
 
     # get common start and end dates, accounting for periods in the end dates
     start_date, end_date = time_overlap(
@@ -227,8 +269,9 @@ def resample_obs_and_other(
     resample_keyword_choices = ("obs", "other", "coarsest")
 
     if resample_to not in resample_keyword_choices:
-        obs = obs.resample(indexer={"time": resample_to}, offset=offset).mean()
-        other = other.resample(indexer={"time": resample_to}, offset=offset).mean()
+        period = normalise_pandas_frequency(resample_to)
+        obs = obs.resample(indexer={"time": period}, offset=offset).mean()
+        other = other.resample(indexer={"time": period}, offset=offset).mean()
 
         return obs, other
 

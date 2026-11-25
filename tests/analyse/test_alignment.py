@@ -1,18 +1,98 @@
 import numpy as np
 import pandas as pd
 import pytest
+import xarray as xr
 
 from openghg.analyse._alignment import (
+    _buffer_start_and_end_dates,
     _extract_obs_freq,
     infer_freq_in_seconds,
     time_overlap,
-    _buffer_start_and_end_dates,
 )
-from openghg.retrieve import get_obs_surface, get_footprint
+from openghg.analyse._modelled_baseline import baseline_sensitivities
+from openghg.analyse._modelled_obs import fp_x_flux_integrated
+from openghg.retrieve import get_obs_surface
+
+
+def _climatology_inputs():
+    """Return monthly reference-year data and a December-to-January target."""
+    target_times = pd.to_datetime(["2012-12-31", "2013-01-01"])
+    source_times = pd.to_datetime(["2016-01-01", "2016-12-01"])
+    coords = {"time": target_times, "lat": [1.0], "lon": [10.0], "height": [500.0]}
+    footprint = xr.Dataset(
+        {
+            "fp": (("time", "lat", "lon"), np.ones((2, 1, 1))),
+            "particle_locations_n": (("time", "lon", "height"), np.ones((2, 1, 1))),
+            "particle_locations_e": (("time", "lat", "height"), np.ones((2, 1, 1))),
+            "particle_locations_s": (("time", "lon", "height"), np.ones((2, 1, 1))),
+            "particle_locations_w": (("time", "lat", "height"), np.ones((2, 1, 1))),
+        },
+        coords=coords,
+    )
+    footprint.fp.attrs["units"] = "m2 s mol-1"
+    for direction in "nesw":
+        footprint[f"particle_locations_{direction}"].attrs["units"] = "1"
+    footprint.lat.attrs["units"] = "degrees_north"
+    footprint.lon.attrs["units"] = "degrees_east"
+
+    flux = xr.Dataset(
+        {"flux": (("time", "lat", "lon"), np.array([[[1.0]], [[12.0]]]))},
+        coords={"time": source_times, "lat": [1.0], "lon": [10.0]},
+    )
+    flux.flux.attrs["units"] = "mol m-2 s-1"
+    flux.lat.attrs["units"] = "degrees_north"
+    flux.lon.attrs["units"] = "degrees_east"
+
+    bc = xr.Dataset(
+        {
+            f"vmr_{direction}": (dims, np.array([[[1.0]], [[12.0]]]))
+            for direction, dims in {
+                "n": ("time", "lon", "height"),
+                "e": ("time", "lat", "height"),
+                "s": ("time", "lon", "height"),
+                "w": ("time", "lat", "height"),
+            }.items()
+        },
+        coords={"time": source_times, "lat": [1.0], "lon": [10.0], "height": [500.0]},
+    )
+    for direction in "nesw":
+        bc[f"vmr_{direction}"].attrs["units"] = "1"
+
+    return footprint, flux, bc
+
+
+def test_fp_x_flux_integrated_maps_single_year_climatology_across_year_boundary():
+    """Monthly reference-year flux uses each matching target calendar month."""
+    footprint, flux, _ = _climatology_inputs()
+
+    result = fp_x_flux_integrated(footprint, flux)
+
+    np.testing.assert_allclose(result.values.ravel(), [12.0, 1.0])
+
+
+def test_fp_x_flux_integrated_broadcasts_annual_climatology_across_year_boundary():
+    """A single annual reference value remains valid for every target month."""
+    footprint, flux, _ = _climatology_inputs()
+    flux = flux.isel(time=[0])
+
+    result = fp_x_flux_integrated(footprint, flux)
+
+    np.testing.assert_allclose(result.values.ravel(), [1.0, 1.0])
+
+
+def test_baseline_sensitivities_maps_single_year_climatology_across_year_boundary():
+    """Monthly reference-year boundary conditions use each target calendar month."""
+    footprint, _, bc = _climatology_inputs()
+
+    sensitivities = baseline_sensitivities(bc, footprint)
+    result = sensitivities.to_dataarray().sum("variable").values.ravel()
+
+    np.testing.assert_allclose(result, [48.0, 4.0])
 
 
 @pytest.fixture
-def obs_data():
+def obs_data(tac_surface_store):
+    """Return TAC observations from the explicitly populated user store."""
     start_date = "2012-01-01"
     end_date = "2013-01-01"
 
@@ -22,27 +102,19 @@ def obs_data():
     inlet = "100m"
 
     obs_surface = get_obs_surface(
-        site=site, species=species, start_date=start_date, end_date=end_date, inlet=inlet, network=network
+        site=site,
+        species=species,
+        start_date=start_date,
+        end_date=end_date,
+        inlet=inlet,
+        network=network,
+        store=tac_surface_store,
     )
     return obs_surface
 
 
-@pytest.fixture
-def footprint_data():
-    start_date = "2012-01-01"
-    end_date = "2013-01-01"
-
-    site = "tac"
-    domain = "EUROPE"
-    inlet = "100m"
-
-    footprint = get_footprint(
-        site=site, domain=domain, height=inlet, start_date=start_date, end_date=end_date
-    )
-    return footprint
-
-
 def test_extract_obs_freq(obs_data):
+    """Test extracting a declared sampling frequency from real observations."""
     # this obs data has "sampling period" attribute:
     assert _extract_obs_freq(obs_data.data) == 60.0
 
@@ -51,14 +123,17 @@ def test_extract_obs_freq(obs_data):
     assert _extract_obs_freq(obs_data.data) is None
 
 
-def test_infer_freq_in_seconds():
+@pytest.mark.parametrize("time_unit", ["ns", "us", "ms"])
+def test_infer_freq_in_seconds(time_unit):
     """Test that we can infer the frequency from regular data.
 
     Also check that minor pertubations don't affect the result,
     if they're within tolerance and don't change the median gap.
     """
     freq_in_seconds = 3
-    times = pd.date_range("2020-01-01", freq=f"{freq_in_seconds}s", periods=10).values
+    times = pd.date_range("2020-01-01", freq=f"{freq_in_seconds}s", periods=10).to_numpy(
+        dtype=f"datetime64[{time_unit}]", copy=True
+    )
 
     assert freq_in_seconds == infer_freq_in_seconds(times)
 
@@ -77,7 +152,7 @@ def test_infer_freq_in_seconds_tolerance():
     Also test that we can raise tolerance.
     """
     freq_in_seconds = 3
-    times = pd.date_range("2020-01-01", freq="3s", periods=10).values
+    times = pd.date_range("2020-01-01", freq="3s", periods=10).to_numpy(copy=True)
 
     # adding 1s to a time point gives consecutive differences of 2s and 4s,
     # so the difference between the minimum and maximum gaps is 2s, which is
@@ -98,7 +173,7 @@ def test_infer_freq_footprint():
     that is used in another function.
     """
     freq = "1h"
-    times = pd.date_range("2020-01-01", freq=freq, periods=10).values
+    times = pd.date_range("2020-01-01", freq=freq, periods=10).to_numpy(copy=True)
     times[3] += pd.Timedelta("1m")
 
     # code used to infer freq of "other" (e.g. footprints) in `align_obs_and_other`

@@ -72,7 +72,6 @@ def parse_openghg(
     )
 
     with get_data(dataset=data, filepath=filepath) as data:
-
         # Extract current attributes from input data
         attributes = data.attrs
 

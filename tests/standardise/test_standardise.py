@@ -24,6 +24,12 @@ from openghg.util import find_domain
 import numpy as np
 
 
+@pytest.fixture(autouse=True)
+def clear_stores():
+    """Start each standardisation test with empty writable stores."""
+    clear_test_stores()
+
+
 def test_standardise_to_read_only_store():
     hfd_path = get_surface_datapath(filename="hfd.picarro.1minute.100m.min.dat", source_format="CRDS")
 
@@ -40,6 +46,7 @@ def test_standardise_to_read_only_store():
 
 
 def test_standardise_obs_two_writable_stores(reset_mock_user_config):
+    """Observation data is written only to the explicitly selected store."""
 
     clear_test_stores()
     hfd_path = get_surface_datapath(filename="hfd.picarro.1minute.100m.min.dat", source_format="CRDS")
@@ -50,7 +57,6 @@ def test_standardise_obs_two_writable_stores(reset_mock_user_config):
         instrument="picarro",
         network="DECC",
         source_format="CRDS",
-        force=True,
         store="user",
     )
 
@@ -107,7 +113,6 @@ def test_standardise_obs_openghg():
         instrument="picarro",
         source_format="openghg",
         sampling_period="1h",
-        force=True,
         store="user",
         update_mismatch="metadata",
     )
@@ -137,7 +142,6 @@ def test_standardise_obs_openghg_dataset():
         instrument="picarro",
         source_format="openghg",
         sampling_period="1h",
-        force=True,
         store="user",
         update_mismatch="metadata",
         tag=["direct_dataset"],
@@ -165,7 +169,6 @@ def test_standardise_surface_no_filepath_dataset_error():
             instrument="picarro",
             source_format="openghg",
             sampling_period="1h",
-            force=True,
             store="user",
             update_mismatch="metadata",
         )
@@ -315,7 +318,6 @@ def test_local_obs_metadata_mismatch_fail():
             source_format="openghg",
             sampling_period="1h",
             update_mismatch="never",
-            force=True,
             store="user",
         )
 
@@ -346,7 +348,6 @@ def test_standardise_column():
         species=species,
         obs_region=obs_region,
         selection=selection,
-        force=True,
         store="user",
     )
 
@@ -407,7 +408,6 @@ def test_standardise_tccon_obs():
         species=species,
         pressure_weights_method=pressure_weights_method,
         source_format="tccon",
-        force=True,
         store="user",
     )
 
@@ -442,7 +442,6 @@ def test_standardise_footprint():
         network=network,
         height=height,
         domain=domain,
-        force=True,
         high_spatial_resolution=True,
         overwrite=True,
         store="user",
@@ -490,7 +489,6 @@ def test_standardise_footprint_flexpart(source_format):
         model=model,
         met_model=met_model,
         source_format=source_format,
-        force=True,
         if_exists="new",
         store="user",
     )
@@ -521,7 +519,6 @@ def test_standardise_align_footprint():
         network=network,
         height=height,
         domain=domain,
-        force=True,
         overwrite=True,
         store="user",
     )
@@ -535,6 +532,7 @@ def test_standardise_align_footprint():
 
 
 def test_standardise_footprints_chunk(caplog):
+    """Footprint standardisation preserves the requested time chunks."""
     datapath = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
 
     site = "TAC"
@@ -550,7 +548,6 @@ def test_standardise_footprints_chunk(caplog):
         network=network,
         height=height,
         domain=domain,
-        force=True,
         store="user",
         chunks={"time": 2},
     )
@@ -565,6 +562,7 @@ def test_standardise_footprints_chunk(caplog):
 
 
 def test_standardise_flux():
+    """Flux standardisation returns the expected identifying metadata."""
     test_datapath = get_flux_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
 
     proc_results = standardise_flux(
@@ -573,7 +571,6 @@ def test_standardise_flux():
         source="gpp-cardamom",
         domain="europe",
         time_resolved=False,
-        force=True,
         store="user",
     )
 
@@ -621,7 +618,6 @@ def test_standardise_non_standard_flux_domain():
         source="gpp-cardamom",
         domain=domain,
         high_time_resolution=False,
-        force=True,
         store="user",
     )
 
@@ -649,7 +645,6 @@ def test_standardise_incomplete_flux():
             source="gpp-cardamom",
             domain="EUROPE",
             high_time_resolution=False,
-            force=True,
             store="user",
         )
 
@@ -813,7 +808,6 @@ def test_standardise_footprints_satellite_raises_error():
             period="1S",
             domain=domain,
             selection="LAND",
-            force=True,
             store="user",
             continuous=False,
         )
@@ -853,6 +847,50 @@ def test_standardise_footprint_satellite(caplog):
     assert data.metadata["obs_region"] == obs_region.lower()
     assert data.metadata["selection"] == "land"
     assert data.metadata["domain"] == domain.lower()
+
+
+@pytest.mark.parametrize(
+    "site,satellite,obs_region",
+    [
+        ("oco2_china", None, None),
+        (None, "oco2", "china"),
+    ],
+)
+def test_standardise_integrated_co2_footprint_for_site_or_satellite(site, satellite, obs_region):
+    """An explicit integrated CO2 footprint uses the integrated storage schema."""
+    clear_test_store("user")
+    datapath = get_footprint_datapath("oco2-CHINA_20220401_b0_001-column_NAME_UMG_EASTASIA_co2_202204.nc")
+
+    standardise_footprint(
+        filepath=datapath,
+        source_format="paris",
+        site=site,
+        satellite=satellite,
+        obs_region=obs_region,
+        model="name",
+        domain="eastasia",
+        inlet="column",
+        species="co2",
+        time_resolved=False,
+        continuous=False,
+        store="user",
+    )
+
+    if site is not None:
+        data = get_footprint(site=site, domain="eastasia", model="name", store="user")
+    else:
+        data = get_footprint(
+            satellite=satellite,
+            obs_region=obs_region,
+            domain="eastasia",
+            model="name",
+            store="user",
+        )
+
+    assert data.metadata["time_resolved"] == "false"
+    assert "fp" in data.data
+    assert "fp_time_resolved" not in data.data
+    assert "fp_residual" not in data.data
 
 
 def test_icos_corso_l1_flask_data():
@@ -1053,27 +1091,29 @@ def test_standardise_agage_using_filepath():
     """
     Test standardisation of AGAGE data using file path input.
     """
-    thd_path = get_surface_datapath(filename="agage_thd_cfc-11_20240703-test.nc", source_format="GC_nc")
+    thd_path = get_surface_datapath(
+        filename="agage-private_thd_cfc-11_20260113-test.nc", source_format="GC_nc"
+    )
 
     results = standardise_surface(
         filepath=thd_path,
         site="thd",
         instrument="gcmd",
-        network="AGAGE",
+        network="AGAGE-PRIVATE",
         source_format="AGAGE",
         sampling_period="1s",
-        force=True,
         store="user",
     )
 
     assert "cfc11" == results[0].get("species")
 
-    retrieved_data = get_obs_surface(site="thd", species="cfc11", source_format="AGAGE", network="AGAGE")
+    retrieved_data = get_obs_surface(
+        site="thd", species="cfc11", source_format="AGAGE", network="AGAGE-PRIVATE"
+    )
 
     assert retrieved_data is not None
-    assert retrieved_data is not None
     assert retrieved_data.metadata["instrument"] == "gcmd"
-    assert retrieved_data.metadata["network"] == "agage"
+    assert retrieved_data.metadata["network"] == "agage-private"
     assert retrieved_data.metadata["source_format"] == "AGAGE"
     assert retrieved_data.metadata["site"] == "thd"
 
@@ -1083,27 +1123,28 @@ def test_standardise_agage_using_dataset():
     Test standardisation of AGAGE data using dataset input.
     """
     thd_dataset = xr.open_dataset(
-        get_surface_datapath(filename="agage_thd_cfc-11_20240703-test.nc", source_format="GC_nc")
+        get_surface_datapath(filename="agage-private_thd_cfc-11_20260113-test.nc", source_format="GC_nc")
     )
 
     results = standardise_surface(
         data=thd_dataset,
         site="thd",
         instrument="gcmd",
-        network="AGAGE",
+        network="AGAGE-PRIVATE",
         source_format="AGAGE",
         sampling_period="1s",
-        force=True,
         store="user",
     )
 
     assert "cfc11" == results[0].get("species")
 
-    retrieved_data = get_obs_surface(site="thd", species="cfc11", source_format="AGAGE", network="AGAGE")
+    retrieved_data = get_obs_surface(
+        site="thd", species="cfc11", source_format="AGAGE", network="AGAGE-PRIVATE"
+    )
 
     assert retrieved_data is not None
     assert retrieved_data.metadata["instrument"] == "gcmd"
-    assert retrieved_data.metadata["network"] == "agage"
+    assert retrieved_data.metadata["network"] == "agage-private"
     assert retrieved_data.metadata["source_format"] == "AGAGE"
     assert retrieved_data.metadata["site"] == "thd"
 
@@ -1170,10 +1211,8 @@ def test_standardise_co2_games_using_dataset():
     assert retrieved_data.metadata["dataset_source"] == "PTEN"
 
 
-def test_standardise_6km_footprints():
-    """Test standardisation of 6km resolution footprints with associated metadata keys."""
-
-    filepath = get_footprint_datapath("IMP-26magl_NAME_UKV_EUROPE-6km_co2_202301.nc")
+def test_standardise_6km_footprints(tmp_path):
+    """Test a synthetic PARIS 6 km footprint retains inner-domain metadata on retrieval."""
     site = "IMP"
     model = "NAME"
     network = "UKV"
@@ -1182,6 +1221,27 @@ def test_standardise_6km_footprints():
     inner_domain = "6km"
     source_format = "paris"
     store = "user"
+    latitude, longitude = find_domain(f"{domain}-{inner_domain}")[:2]
+    filepath = tmp_path / "IMP-26magl_NAME_UKV_EUROPE-6km_co2_202301.nc"
+    shape = (2, latitude.size, longitude.size)
+    footprint = xr.Dataset(
+        data_vars={
+            "srr": (("time", "latitude", "longitude"), np.ones(shape, dtype=np.float32)),
+            "srr_time_resolved": (
+                ("time", "latitude", "longitude", "resolution"),
+                np.ones((*shape, 1), dtype=np.float32),
+            ),
+            "srr_residual": (("time", "latitude", "longitude"), np.zeros(shape, dtype=np.float32)),
+        },
+        coords={
+            "time": np.array(["2023-01-01T00:00", "2023-01-01T01:00"], dtype="datetime64[ns]"),
+            "latitude": latitude,
+            "longitude": longitude,
+            "resolution": np.array([1.0], dtype=np.float32),
+        },
+        attrs={"lpdm_native_output_unit": "ppm s"},
+    )
+    footprint.to_netcdf(filepath)
     results = standardise_footprint(
         filepath=filepath,
         site=site,
@@ -1196,7 +1256,7 @@ def test_standardise_6km_footprints():
         chunks={"time": 200, "lat": 200, "lon": 200},
     )
 
-    assert "co2" == results[0].get("species")
+    assert results[0].get("species") == "co2"
     assert "europe-6km" in results[0].get("domain")
 
     retrieved_data = get_footprint(
@@ -1226,7 +1286,6 @@ def test_negative_inlet_standardisation():
         calibration_scale="SIO-07",
         store="user",
         if_exists="new",
-        force=True,
         update_mismatch="from_definition",
         chunks={"time": 600},
     )

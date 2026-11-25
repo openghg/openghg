@@ -280,8 +280,10 @@ def read_local_config() -> dict:
     try:
         _ = config["object_store"]["user"]
     except KeyError:
-        raise ConfigFileError("Invalid config file detected, please please see the installation instructions \
-                or run openghg --quickstart")
+        raise ConfigFileError(
+            "Invalid config file detected, please please see the installation instructions \
+                or run openghg --quickstart"
+        )
 
     # Check see is the store uses the new zarr storage format
     # for OpenGHG >= 0.8.0
@@ -415,7 +417,7 @@ def handle_direct_store_path(path: str, name: str | None = None, add_new_store: 
         raise ObjectStoreError(f"'{path}' is not a valid path or store name.")
 
     logger.warning(
-        f"'{path}' is not a configured writable store name but looks like a path. " "Using it directly."
+        f"'{path}' is not a configured writable store name but looks like a path. Using it directly."
     )
 
     if add_new_store:

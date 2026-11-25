@@ -65,13 +65,7 @@ class Footprints(BaseStore):
     #     # Load in the metadata store
     #     metastore = load_metastore(key=fp._metakey)
 
-    #     sha1_hash = file_metadata["sha1_hash"]
     #     overwrite = metadata.get("overwrite", False)
-
-    #     if sha1_hash in fp._file_hashes and not overwrite:
-    #         print(
-    #             f"This file has been uploaded previously with the filename : {fp._file_hashes[sha1_hash]} - skipping."
-    #         )
 
     #     data_buf = BytesIO(binary_data)
     #     fp_data = open_dataset(data_buf)
@@ -164,9 +158,6 @@ class Footprints(BaseStore):
 
     #     fp.add_datasources(uuids=datasource_uuids, data=footprint_data, metastore=metastore)
 
-    #     # Record the file hash in case we see this file again
-    #     fp._file_hashes[sha1_hash] = filename
-
     #     fp.save()
 
     #     metastore.close()
@@ -219,7 +210,7 @@ class Footprints(BaseStore):
 
         # Checking inputs
         # - check time_resolved details are set in preference to high_time_resolution
-        if params.get("high_time_resolution") is not None:
+        if params.get("high_time_resolution"):
             warnings.warn(
                 "This argument is deprecated and will be replaced in future versions with time_resolved.",
                 DeprecationWarning,
@@ -259,9 +250,16 @@ class Footprints(BaseStore):
             params["species"] = synonyms(species)
 
         # - check time_resolved and short_lifetime values are appropriate for species
-        time_resolved = params.get("time_resolved", False)
+        time_resolved = params.get("time_resolved")
         short_lifetime = params.get("short_lifetime", False)
-        params["time_resolved"] = check_species_time_resolved(params["species"], time_resolved)
+        if time_resolved is None:
+            # Preserve the historical default for CO2, while allowing callers to
+            # explicitly select the integrated-footprint pipeline with False.
+            params["time_resolved"] = check_species_time_resolved(params["species"])
+        elif time_resolved:
+            params["time_resolved"] = check_species_time_resolved(params["species"], time_resolved)
+        else:
+            params["time_resolved"] = False
         params["short_lifetime"] = check_species_lifetime(params["species"], short_lifetime)
 
         if params.get("time_resolved") and params.get("sort") is True:

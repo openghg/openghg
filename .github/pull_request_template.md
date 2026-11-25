@@ -5,7 +5,7 @@
 
 - [ ] Closes #xxxx (Replace xxxx with the Github issue number)
 - [ ] [Tests added and passed](https://docs.openghg.org/development/python_devel.html#testing) if fixing a bug or adding a new feature
-- [ ] All code checks passing - `black --line-length 110` run over code, `mypy` and `flake8` not showing any errors
+- [ ] All code checks passing - `ruff format --check`, `ruff check`, and `mypy` not showing any errors
 - [ ] Documentation updated/added
 - [ ] Tutorials updated/added
 - [ ] Wiki updated

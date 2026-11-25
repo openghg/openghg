@@ -73,7 +73,6 @@ target/
 .ipynb_checkpoints
 
 # pyenv
-.python-version
 
 # celery beat schedule file
 celerybeat-schedule
@@ -140,3 +139,8 @@ doc/build/*
 
 # Logging output
 *.log
+
+# Ignore internal Graphify artifacts and caches
+graphify-out/*
+# Allow the reproducible code graph only
+!graphify-out/graph.json

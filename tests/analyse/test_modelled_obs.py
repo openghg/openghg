@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
+from helpers import get_flux_datapath, get_footprint_datapath
 
 from openghg.analyse import ModelScenario
 from openghg.analyse._modelled_obs import (
@@ -15,8 +16,9 @@ from openghg.analyse._modelled_obs import (
     time_resolved_and_residual_footprints,
     _max_h_back,
 )
-from openghg.dataobjects import ObsData
+from openghg.dataobjects import FluxData, ObsData
 from openghg.dataobjects._footprint_data import FootprintData
+from openghg.storage import get_zarr_directory_store
 
 
 @pytest.fixture
@@ -232,6 +234,46 @@ def expected_modelled_mf_at_time(release_time, aligned_time0, flux, footprint, m
     return expected_modelled_mf_hr
 
 
+@pytest.mark.parametrize("stored", [False, True], ids=["input-file", "existing-store"])
+def test_modelled_obs_legacy_hitres_units(tmp_path, stored):
+    """Legacy TAC metadata without fp_HiTRes units still gives the same mole fractions."""
+    with xr.open_dataset(get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")) as dataset:
+        footprint = dataset.load()
+    with xr.open_dataset(get_flux_datapath("co2-rtot-cardamom-2hr_TEST_2014.nc")) as dataset:
+        flux = FluxData({"species": "co2", "source": "natural-rtot", "domain": "TEST"}, data=dataset.load())
+
+    metadata = {"site": "tac", "inlet": "100m", "species": "co2", "domain": "TEST"}
+    expected = ModelScenario(footprint=FootprintData(metadata, data=footprint), flux=flux).calc_modelled_obs(
+        resample_to=None, output_units="ppm", output_fp_x_flux=True, split_by_sectors=True
+    )
+
+    legacy = footprint.copy(deep=True)
+    # Restore the metadata present before the PR's fixture-only units correction.
+    del legacy.fp_HiTRes.attrs["units"]
+    if stored:
+        store = get_zarr_directory_store(tmp_path / "legacy-footprint")
+        store.insert(legacy)
+        legacy = store.get()
+
+    assert "units" not in legacy.fp_HiTRes.attrs
+    actual = ModelScenario(footprint=FootprintData(metadata, data=legacy), flux=flux).calc_modelled_obs(
+        resample_to=None, output_units="ppm", output_fp_x_flux=True, split_by_sectors=True
+    )
+
+    xr.testing.assert_allclose(actual, expected)
+    assert actual.mf_mod_high_res.attrs == expected.mf_mod_high_res.attrs
+    assert "units" not in legacy.fp_HiTRes.attrs
+
+
+def test_modelled_obs_preserves_explicit_hitres_units(footprint_co2_dummy, flux_co2_dummy):
+    """Explicit high-resolution units take precedence over the integrated footprint's units."""
+    expected = ModelScenario(footprint=footprint_co2_dummy, flux=flux_co2_dummy).calc_modelled_obs()
+    footprint_co2_dummy.data.fp.attrs["units"] = "kg"
+    actual = ModelScenario(footprint=footprint_co2_dummy, flux=flux_co2_dummy).calc_modelled_obs()
+
+    xr.testing.assert_identical(actual, expected)
+
+
 def test_model_modelled_obs_co2(model_scenario_co2_dummy, footprint_co2_dummy, flux_co2_dummy):
     """Test expected modelled observations within footprints_dat_merge() method with known dummy data for co2"""
     combined_dataset = model_scenario_co2_dummy.footprints_data_merge()
@@ -336,7 +378,7 @@ def test_modelled_obs_co2_consistency(model_scenario_co2_dummy, model_scenario_p
 
 
 def test_fp_x_flux_time_resolved_irregular_times_are_ffilled(footprint_paris_co2_dummy, flux_co2_dummy):
-    """High-frequency flux should be forward-filled to irregular fp_time_resolved timestamps."""
+    """Each resolved lag should use its containing flux interval at irregular times."""
     fp = footprint_paris_co2_dummy.data.copy(deep=True)
     fp = fp.isel(time=slice(0, 2), lat=slice(0, 1), lon=slice(0, 1), H_back=slice(0, 2))
     fp["fp_time_resolved"][:] = 1.0
@@ -349,7 +391,7 @@ def test_fp_x_flux_time_resolved_irregular_times_are_ffilled(footprint_paris_co2
     result = fp_x_flux_time_resolved(fp, flux)
 
     expected = xr.DataArray(
-        np.array([2.0, 4.0]).reshape(2, 1, 1),
+        np.array([4.0, 4.0]).reshape(2, 1, 1),
         coords={"time": fp.time, "lat": fp.lat, "lon": fp.lon},
         dims=("time", "lat", "lon"),
     )

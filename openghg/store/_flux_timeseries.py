@@ -65,7 +65,6 @@ class FluxTimeseries(BaseStore):
     #     if_exists: str = "auto",
     #     save_current: str = "auto",
     #     overwrite: bool = False,
-    #     force: bool = False,
     #     compressor: Any | None = None,
     #     filters: Any | None = None,
     #     info_metadata: dict | None = None,
@@ -102,7 +101,6 @@ class FluxTimeseries(BaseStore):
     #             - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
     #             - "n" / "no" - Allow current data to updated / deleted
     #         overwrite: Deprecated. This will use options for if_exists="new".
-    #         force: Force adding of data even if this is identical to data stored.
     #         compressor: A custom compressor to use. If None, this will default to
     #             `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
     #             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
@@ -141,10 +139,6 @@ class FluxTimeseries(BaseStore):
     #         )
     #         if_exists = "new"
 
-    #     # Making sure new version will be created by default if force keyword is included.
-    #     if force and if_exists == "auto":
-    #         if_exists = "new"
-
     #     new_version = check_if_need_new_version(if_exists, save_current)
 
     #     filepath = Path(filepath)
@@ -162,13 +156,6 @@ class FluxTimeseries(BaseStore):
     #     # Get current parameter values and filter to only include function inputs
     #     fn_current_parameters = locals().copy()  # Make a copy of parameters passed to function
     #     fn_input_parameters = {key: fn_current_parameters[key] for key in fn_input_parameters}
-
-    #     _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
-
-    #     if not unseen_hashes:
-    #         return [{}]
-
-    #     filepath = next(iter(unseen_hashes.values()))
 
     #     # Define parameters to pass to the parser function and remaining keys
     #     parser_input_parameters, additional_input_parameters = split_function_inputs(
@@ -200,9 +187,6 @@ class FluxTimeseries(BaseStore):
     #         compressor=compressor,
     #         filters=filters,
     #     )
-
-    #     # Record the file hash in case we see this file again
-    #     self.store_hashes(unseen_hashes)
 
     #     return datasource_uuids
 

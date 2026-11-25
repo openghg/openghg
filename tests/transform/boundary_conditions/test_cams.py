@@ -1,6 +1,7 @@
 from helpers import get_bc_datapath
 import logging
 import numpy as np
+import pytest
 import xarray as xr
 
 from openghg.transform.boundary_conditions import parse_cams
@@ -155,6 +156,49 @@ def _write_mock_co2_cams_file(tmp_path, filename: str) -> xr.Dataset:
     data_path = tmp_path / filename
     ds.to_netcdf(data_path)
     return ds
+
+
+def test_parse_cams_data(monkeypatch, tmp_path):
+    """Direct CAMS data preserves expected values, times, units, and metadata."""
+    dataset = _write_mock_co2_cams_file(tmp_path, "cams73_v23r1_co2_conc_surface_inst_202101.nc")
+
+    monkeypatch.setattr(
+        "openghg.transform.boundary_conditions._cams.find_domain",
+        lambda domain: (
+            np.array([0.0, 1.0], dtype=float),
+            np.array([0.0, 1.0], dtype=float),
+            1.0,
+            1.0,
+        ),
+    )
+
+    results = parse_cams(data=dataset, bc_input="cams_test", domain="TESTDOMAIN", species="co2")
+
+    metadata = results["co2_cams_test_TESTDOMAIN"]["metadata"]
+    assert metadata["domain"] == "TESTDOMAIN"
+    assert metadata["species"] == "co2"
+
+    bc_data = results["co2_cams_test_TESTDOMAIN"]["data"].compute()
+    assert np.isclose(bc_data["vmr_n"].mean().item(), 170.5)
+    assert np.isclose(bc_data["vmr_s"].mean().item(), 140.5)
+    assert np.isclose(bc_data["vmr_e"].mean().item(), 157.0)
+    assert np.isclose(bc_data["vmr_w"].mean().item(), 154.0)
+    np.testing.assert_array_equal(
+        bc_data.time.values,
+        np.array(
+            ["2022-01-01T00:00", "2022-01-01T03:00", "2022-01-01T06:00"],
+            dtype="datetime64[ns]",
+        ),
+    )
+    for variable in ("vmr_n", "vmr_s", "vmr_e", "vmr_w"):
+        assert bc_data[variable].attrs["units"] == "1.0"
+
+
+@pytest.mark.parametrize("inputs", [{}, {"datapath": "raw.nc", "data": xr.Dataset()}])
+def test_parse_cams_requires_exactly_one_input(inputs):
+    """The exported parser rejects missing and ambiguous input selection."""
+    with pytest.raises(ValueError, match="exactly one"):
+        parse_cams(bc_input="cams_test", domain="TESTDOMAIN", **inputs)
 
 
 def test_cams_to_domain_uses_altitude_for_ch4(monkeypatch):

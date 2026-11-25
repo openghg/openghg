@@ -3,7 +3,8 @@ import logging
 import pytest
 from openghg.standardise.meta import get_attributes, data_variable_formatter
 
-# flake8: noqa
+# ruff: noqa
+
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)

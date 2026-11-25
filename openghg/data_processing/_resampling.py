@@ -34,6 +34,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from openghg.util import Registry
+from openghg.util._time import normalise_pandas_frequency
 
 from ._attrs import rename, update_attrs
 from ._xarray_helpers import xr_sqrt
@@ -53,9 +54,10 @@ def add_averaging_attrs(func: ResampleFunctionType) -> ResampleFunctionType:
 
     @wraps(func)
     def wrapper(ds: xr.Dataset, averaging_period: str, *args: Any, **kwargs: Any) -> xr.Dataset:
-        average_in_seconds = pd.Timedelta(averaging_period).total_seconds()
+        period = normalise_pandas_frequency(averaging_period)
+        average_in_seconds = pd.Timedelta(period).total_seconds()
         avg_attrs = {"averaged_period": average_in_seconds, "averaged_period_str": averaging_period}
-        return func(ds, averaging_period, *args, **kwargs).assign_attrs(avg_attrs)
+        return func(ds, period, *args, **kwargs).assign_attrs(avg_attrs)
 
     return wrapper
 
@@ -221,6 +223,7 @@ def _weighted_resample(
         weighted_resample_mf = (mf * n_obs).resample(time=averaging_period).sum(
             **sum_kwargs
         ) / n_obs_resample_sum
+        weighted_resample_mf.attrs = mf.attrs.copy()
 
         data_vars = {species: weighted_resample_mf, f"{species}_number_of_observations": n_obs_resample_sum}
 
@@ -232,6 +235,7 @@ def _weighted_resample(
                 - weighted_resample_mf**2
             )
             weighted_resample_mf_variability = xr_sqrt(weighted_resample_mf_variability_squared)
+            weighted_resample_mf_variability.attrs = mf_variability.attrs.copy()
 
             data_vars[f"{species}_variability"] = weighted_resample_mf_variability
 

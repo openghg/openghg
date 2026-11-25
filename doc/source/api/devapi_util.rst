@@ -2,7 +2,7 @@
 Util
 ====
 
-Helper functions that are used throughout OpenGHG. From file hashing to timestamp handling.
+Helper functions that are used throughout OpenGHG, from file handling to timestamp handling.
 
 Domain
 ======
@@ -52,17 +52,7 @@ File handling, compression
 
 .. autofunction:: openghg.util.read_header
 
-Hashing
-=======
-
-.. autofunction:: openghg.util.hash_bytes
-
-.. autofunction:: openghg.util.hash_file
-
-.. autofunction:: openghg.util.hash_retrieved_data
-
-.. autofunction:: openghg.util.hash_string
-
+.. autofunction:: openghg.util.convert_numpy_scalars
 
 Measurement helpers
 ===================

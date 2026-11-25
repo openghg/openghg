@@ -208,7 +208,7 @@ class TinyDBMetaStore(MetaStore):
         """
         search_functions = self._format_metadata(search_functions)
         queries = [tinydb.Query()[k].test(v) for k, v in search_functions.items()]
-        return reduce(lambda x, y: (x & y), queries)
+        return reduce(lambda x, y: x & y, queries)
 
     def _get_negative_lookup_query(self, negative_lookup_keys: list[str]) -> tinydb.queries.QueryInstance:
         """Return a TinyDB query that searches for all records that do not contain the given keys.
@@ -222,7 +222,7 @@ class TinyDBMetaStore(MetaStore):
         """
         negative_lookup_keys = [self._format_key(k) for k in negative_lookup_keys]
         queries = [~(tinydb.Query()[k].exists()) for k in negative_lookup_keys]
-        return reduce(lambda x, y: (x & y), queries)
+        return reduce(lambda x, y: x & y, queries)
 
     def _get_list_items_query(self, search_list_keys: dict[str, str | list]) -> tinydb.queries.QueryInstance:
         """Return a TinyDB query for searching list entries in the TinyDB database.
@@ -238,7 +238,7 @@ class TinyDBMetaStore(MetaStore):
         """
         search_list_keys = {k: [v] if not isinstance(v, list) else v for k, v in search_list_keys.items()}
         queries = [tinydb.Query()[k].all(v) for k, v in search_list_keys.items()]
-        return reduce(lambda x, y: (x & y), queries)
+        return reduce(lambda x, y: x & y, queries)
 
     def search(
         self,

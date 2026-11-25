@@ -43,16 +43,22 @@ If some input types needed for these operations are missing, the user will be al
 on which data types are missing.
 """
 
+import json
 import logging
+from functools import partial
 from typing import Any, Iterable, Union, cast
-from collections.abc import Hashable, Sequence
+from collections.abc import Hashable, Mapping, Sequence
 
 import pandas as pd
 import xarray as xr
 from pandas import Timestamp
 from xarray import Dataset
 
-from openghg.analyse._modelled_obs import fp_x_flux_integrated, fp_x_flux_time_resolved
+from openghg.analyse._modelled_obs import (
+    fp_x_flux_integrated,
+    fp_x_flux_time_resolved,
+    make_integrated_low_freq_flux,
+)
 from openghg.dataobjects import BoundaryConditionsData, FluxData, FootprintData, ObsData, ObsColumnData
 from openghg.retrieve import (
     get_obs_surface,
@@ -67,6 +73,7 @@ from openghg.retrieve import (
     search_column,
 )
 from openghg.util import synonyms, clean_string, format_inlet, verify_site_with_satellite, define_platform
+from openghg.util._time import normalise_pandas_frequency
 from openghg.types import SearchError, ReindexMethod
 from ._alignment import combine_datasets, resample_obs_and_other
 from ._modelled_baseline import baseline_sensitivities
@@ -130,7 +137,8 @@ class ModelScenario:
         flux: FluxData | dict[str, FluxData] | None = None,
         bc: BoundaryConditionsData | None = None,
         store: str | None = None,
-    ):
+        time_resolved: bool | None = None,
+    ) -> None:
         """Create a ModelScenario instance based on a set of keywords to be
         or directly supplied objects. This can be created as an empty class to be
         populated.
@@ -151,7 +159,10 @@ class ModelScenario:
         network: Network name e.g. "AGAGE".
         domain: Domain name e.g. "EUROPE".
         platform: Platform name e.g "satellite", "column-insitu".
-        max_level: Maximum level for processing.
+        max_level: Maximum level for processing column observations. This is required when
+            retrieving column observations. If comparing modelled observations using a
+            footprint, it must match the footprint's ``max_level`` attribute. When supplying
+            an ``ObsColumnData`` object directly, its stored ``max_level`` is used instead.
         obs_region: The geographic region covered by the data ("BRAZIL", "INDIA", "UK").
         selection: For satellite only, identifier for any data selection which has been
             performed on satellite data. This can be based on any form of filtering, binning etc.
@@ -171,6 +182,9 @@ class ModelScenario:
         flux: Supply FluxData object directly (e.g. from get_flux() function).
         bc: Supply BoundaryConditionsData object directly.
         store: Name of object store to retrieve data from.
+        time_resolved: Whether to filter retrieved footprints by time resolution.
+            ``True`` selects time-resolved footprints, ``False`` selects integrated
+            footprints, and ``None`` does not filter on footprint resolution.
 
         Returns:
             None
@@ -182,6 +196,7 @@ class ModelScenario:
         """
         self.obs: ObsData | ObsColumnData | None = None
         self.obs_column: ObsColumnData | None = None
+        self._requested_column_max_level: int | None = None
         self.footprint: FootprintData | None = None
         self.fluxes: dict[str, FluxData] | None = None
         self.bc: BoundaryConditionsData | None = None
@@ -199,9 +214,10 @@ class ModelScenario:
         # For ObsColumn data processing
         if platform in accepted_column_data_types:
             # Add observation column data (directly or through keywords, column or satellite)
-            if max_level is None:
+            if max_level is None and obs_column is None:
                 raise AttributeError(
-                    f"If you are using column-based data (i.e. platform is {accepted_column_data_types}), you need to pass max_level"
+                    "Retrieving column observations for ModelScenario requires max_level. "
+                    f"Column platforms are {accepted_column_data_types}."
                 )
             self.add_obs_column(
                 site=site,
@@ -254,7 +270,11 @@ class ModelScenario:
             species=species,
             footprint=footprint,
             store=store,
+            time_resolved=time_resolved,
         )
+
+        if self.platform in accepted_column_data_types and self.footprint is not None:
+            self._check_column_max_level(max_level=max_level)
 
         # Add flux data (directly or through keywords)
         self.add_flux(
@@ -284,8 +304,47 @@ class ModelScenario:
         self.modelled_obs: Dataset | None = None
         self.modelled_baseline: Dataset | None = None
         self.flux_stacked: Dataset | None = None
+        self._sector_modelled_obs_cache_key: tuple | None = None
 
         # TODO: Check species, site etc. values align between inputs?
+
+    def _check_column_max_level(self, max_level: int | None, footprint: FootprintData | None = None) -> None:
+        """Check that column observations and footprints use the same vertical extent."""
+        if footprint is None:
+            footprint = self.footprint
+        if footprint is None:
+            return
+
+        obs_max_level = max_level
+        if self.obs is not None:
+            obs_max_level = self.obs.data.attrs.get("max_level", max_level)
+
+        fp_max_level = footprint.data.attrs.get("max_level", footprint.metadata.get("max_level"))
+        if fp_max_level is None or str(fp_max_level).lower() == "unknown":
+            raise ValueError(
+                "Column footprint data must have a 'max_level' attribute before it can be used "
+                "in ModelScenario. Re-standardise the footprint from a source file containing "
+                "max_level or, for data in a writable object store, add the known footprint "
+                "value using data_manager(...).update_attributes(...). Also use "
+                "update_metadata(...) to keep the stored metadata consistent. Do not infer the "
+                "footprint value from the requested observation level."
+            )
+
+        try:
+            obs_max_level = int(obs_max_level) if obs_max_level is not None else None
+            fp_max_level = int(fp_max_level)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(
+                "The column observation and footprint 'max_level' attributes must be integers; "
+                f"received {obs_max_level!r} and {fp_max_level!r}."
+            ) from exc
+
+        if obs_max_level != fp_max_level:
+            raise ValueError(
+                "Column observations and footprints must use the same max_level in "
+                f"ModelScenario: observations use {obs_max_level}, while footprints use "
+                f"{fp_max_level}."
+            )
 
     def _get_data(self, keywords: ParamType, data_type: str) -> Any:
         """Use appropriate get function to search for data in object store."""
@@ -420,6 +479,7 @@ class ModelScenario:
 
         # Updating obs to be obs_column
         self.obs = obs_column
+        self._requested_column_max_level = max_level
 
         # Add keywords to class for convenience
         if self.obs_column is not None:
@@ -447,8 +507,35 @@ class ModelScenario:
         network: str | None = None,
         footprint: FootprintData | None = None,
         store: str | None = None,
+        time_resolved: bool | None = None,
     ) -> None:
-        """Add footprint data based on keywords or direct FootprintData object."""
+        """Add footprint data based on keywords or a supplied data object.
+
+        Args:
+            site: Site code, such as ``"TAC"``.
+            inlet: Observation inlet value, such as ``"100m"``.
+            height: Alias for ``inlet``.
+            domain: Domain name for the footprints.
+            model: Model used to create the footprints, such as ``"NAME"``.
+            satellite: Satellite name for satellite footprints.
+            obs_region: Geographic region covered by satellite footprints.
+            met_model: Meteorological model used to create the footprints.
+            start_date: Start of the date range to retrieve.
+            end_date: End of the date range to retrieve.
+            species: Species code. This is required for species-specific
+                footprints, including CO2.
+            fp_inlet: Footprint release-height option when it differs from the
+                observation inlet.
+            network: Observation network used when inferring the release height.
+            footprint: Footprint data to attach directly instead of retrieving it.
+            store: Name of the object store from which to retrieve data.
+            time_resolved: Whether to filter retrieved footprints by time resolution.
+                ``True`` selects time-resolved footprints, ``False`` selects integrated
+                footprints, and ``None`` does not filter on footprint resolution.
+
+        Returns:
+            None. The selected footprint is stored on this scenario.
+        """
         from openghg.util import (
             species_lifetime,
             extract_height_name,
@@ -515,6 +602,7 @@ class ModelScenario:
                     "start_date": start_date,
                     "end_date": end_date,
                     "store": store,
+                    "time_resolved": time_resolved,
                 }
 
                 # Check whether general inert footprint should be extracted (suitable for long-lived species)
@@ -686,30 +774,36 @@ class ModelScenario:
     ) -> Dataset:
         """Align units in dataset with obs units.
 
-        Units will only be updated for data variables that: 1) already have units, 2) have a "time" dimension.
+        Units will only be updated for data variables that: 1) have units and 2) have
+        a ``"time"`` dimension. Variables whose names end with
+        ``"_number_of_observations"`` are never converted, including when explicitly
+        listed in ``data_vars``. The input dataset is not modified.
 
         Args:
             ds: dataset to align units on
             output_units: target units; if None, then obs. units will be used,
               or "mol/mol" if these are not present.
             data_vars: data variables to convert; if None, all data variables satisfying the
-              conditions 1) and 2) will be converted.
+              conditions above will be converted.
 
         Returns:
-            input dataset with aligned units
+            A dataset with aligned units.
 
         """
+        # if output_units is None:
+        #     output_units = self.units or "mol/mol"  # use mol/mol if obs units are not available
         if output_units is None:
-            output_units = self.units or "mol/mol"  # use mol/mol if obs units are not available
+            output_units = self.units or "mol/mol"
 
         to_convert = []
         data_vars = data_vars or ds.data_vars
         for dv in data_vars:
-            if ds[dv].attrs.get("units") is not None and "time" in ds[dv].dims:
+            unit = ds[dv].attrs.get("units")
+            is_observation_count = str(dv).endswith("_number_of_observations")
+            if unit is not None and "time" in ds[dv].dims and not is_observation_count:
                 to_convert.append(dv)
 
         target_units = {dv: output_units for dv in to_convert}
-
         result = ds.pint.quantify().pint.to(target_units).pint.dequantify()
         return cast(xr.Dataset, result)
 
@@ -777,7 +871,9 @@ class ModelScenario:
 
         return platform
 
-    def _resample_obs_footprint(self, resample_to: str | None = "coarsest") -> tuple:
+    def _resample_obs_footprint(
+        self, resample_to: str | None = "coarsest", *, footprint: FootprintData | None = None
+    ) -> tuple:
         """Slice and resample obs and footprint data to align along time
 
         This slices the date to the smallest time frame
@@ -792,14 +888,17 @@ class ModelScenario:
 
         Args:
             resample_to: Resample option to use: either data based or using a valid pandas resample period.
+            footprint: Footprint to align. Defaults to the attached footprint.
 
         Returns:
             tuple: Two xarray.Dataset with aligned time dimensions
         """
-        # Check data is present (not None) and cast to correct type
-        self._check_data_is_present(need=["obs", "footprint"])
+        # An explicit footprint replaces only the attached-footprint requirement;
+        # observations are still required, and the default path retains both checks.
+        self._check_data_is_present(need=["obs"] if footprint is not None else ["obs", "footprint"])
         obs = cast(ObsData, self.obs)
-        footprint = cast(FootprintData, self.footprint)
+        if footprint is None:
+            footprint = cast(FootprintData, self.footprint)
 
         obs_data = obs.data
         footprint_data = footprint.data
@@ -844,13 +943,38 @@ class ModelScenario:
                 This data will be also be cached as the ModelScenario.scenario attribute.
         """
         self._check_data_is_present(need=["obs", "footprint"])
-        obs = cast(ObsData, self.obs)
         footprint = cast(FootprintData, self.footprint)
 
         # Return any matching cached data
         if self.scenario is not None and not recalculate:
             if self.scenario.attrs["resample_to"] == resample_to:
                 return self.scenario
+
+        combined_dataset = self._scenario_for_footprint(footprint, resample_to=resample_to, platform=platform)
+
+        if cache:
+            self.scenario = combined_dataset
+
+        return combined_dataset
+
+    def _scenario_for_footprint(
+        self,
+        footprint: FootprintData,
+        resample_to: str | None = "coarsest",
+        platform: str | None = None,
+    ) -> Dataset:
+        """Align an explicit footprint using the platform rules, without updating caches.
+
+        Without observations, only resample the footprint. Flux sources sharing a
+        footprint can reuse this aligned dataset for their calculations.
+        """
+        if self.obs is None and self.obs_column is None:
+            return self._check_footprint_resample(resample_to, footprint=footprint)
+
+        self._check_data_is_present(need=["obs"])
+        if isinstance(self.obs, ObsColumnData):
+            self._check_column_max_level(max_level=self._requested_column_max_level, footprint=footprint)
+        obs = cast(ObsData, self.obs)
 
         # Extract platform
         if platform is None:
@@ -884,7 +1008,9 @@ class ModelScenario:
                 )
 
         # Resample, align and merge the observation and footprint Datasets
-        resampled_obs, resampled_footprint = self._resample_obs_footprint(resample_to=resample_to)
+        resampled_obs, resampled_footprint = self._resample_obs_footprint(
+            resample_to=resample_to, footprint=footprint
+        )
 
         combined_dataset = combine_datasets(
             dataset_A=resampled_obs, dataset_B=resampled_footprint, tolerance=tolerance, method=merge_method
@@ -902,9 +1028,6 @@ class ModelScenario:
         attributes["resample_to"] = str(resample_to)
 
         combined_dataset.attrs.update(attributes)
-
-        if cache:
-            self.scenario = combined_dataset
 
         return combined_dataset
 
@@ -971,12 +1094,16 @@ class ModelScenario:
 
         return flux_stacked
 
-    def _check_footprint_resample(self, resample_to: str | None) -> Dataset:
+    def _check_footprint_resample(
+        self, resample_to: str | None, *, footprint: FootprintData | None = None
+    ) -> Dataset:
         """Check whether footprint needs resampling based on resample_to input.
         Ignores resample_to keywords of ("coarsest", "obs", "footprint") as this is
         for comparison with observation data but uses pandas frequencies to resample.
         """
-        footprint = cast(FootprintData, self.footprint)
+        if footprint is None:
+            self._check_data_is_present(need="footprint")
+            footprint = cast(FootprintData, self.footprint)
 
         if resample_to in ("coarsest", "obs", "footprint") or resample_to is None:
             return footprint.data
@@ -988,7 +1115,8 @@ class ModelScenario:
                 hours=start_date.hour + start_date.minute / 60.0 + start_date.second / 3600.0
             )
             offset = cast(pd.Timedelta, offset)  # mypy thinks this could be NaT
-            footprint_data = footprint_data.resample(indexer={"time": resample_to}, offset=offset).mean()
+            period = normalise_pandas_frequency(resample_to)
+            footprint_data = footprint_data.resample(indexer={"time": period}, offset=offset).mean()
             return footprint_data
 
     def _param_setup(
@@ -1025,37 +1153,22 @@ class ModelScenario:
         except AttributeError:
             raise ValueError(f"Did not recognise input for {param}")
 
-        # Check if cached modelled observations exist
-        # if self.modelled_obs is None or recalculate:
-        if parameter is None or recalculate:
-            # Check if observations are present and use these for resampling
+        if parameter is not None:
+            prev_resample_to = parameter.attrs.get("resample_to")
+        else:
+            prev_resample_to = None
+
+        # Check if parameter (e.g. modelled_obs or modelled_baseline) exists, the resample_to input is different than the current value or explicit recalculation is requested.
+        # - Note that if obs is not present, can resample the footprint directly as we don't have an obs data variable to store within self.scenario
+        if parameter is None or recalculate or str(prev_resample_to) != str(resample_to):
             if self.obs is not None or self.obs_column is not None:
                 self.combine_obs_footprint(
                     resample_to, platform=platform, recalculate=recalculate, cache=True
                 )
             else:
                 self.scenario = self._check_footprint_resample(resample_to)
-        elif self.obs is not None:
-            # Check previous resample_to input for cached data
-            # prev_resample_to = self.modelled_obs.attrs.get("resample_to")
-            prev_resample_to = parameter.attrs.get("resample_to")
-
-            # Check if this previous resample period matches input value
-            # - if not (or explicit recalculation requested), recreate scenario
-            # - if so return cached modelled observations
-            if prev_resample_to != str(resample_to) or recalculate:
-                self.combine_obs_footprint(resample_to, platform=platform, cache=True)
-            else:
-                # return self.modelled_obs
-                return False
-        elif recalculate:
-            # Recalculate based on footprint data if obs not present
-            self.scenario = self._check_footprint_resample(resample_to)
-
         # TODO: Add check for matching sources and recalculate otherwise
         else:
-            # Return cached modelled observations if explicit recalculation not requested
-            # return self.modelled_obs
             return False
 
         return True
@@ -1070,6 +1183,10 @@ class ModelScenario:
         output_fp_x_flux: bool = False,
         split_by_sectors: bool = False,
         output_units: float | str | None = None,
+        use_low_freq_flux: bool | None = None,
+        allow_climatology: bool = True,
+        *,
+        time_resolved_by_sector: Mapping[str, bool] | None = None,
     ) -> Dataset:
         """Calculate the modelled observation points based on site footprint and fluxes.
 
@@ -1093,6 +1210,17 @@ class ModelScenario:
               different flux sources. The total mf_mod and fp_x_flux are available under their usual names.
             output_units: target units; if None, then obs. units will be used,
               or "mol/mol" if these are not present.
+            use_low_freq_flux: For integrated footprints, use monthly-mean fluxes
+              instead of the flux at the release time. Defaults to True for an
+              integrated CO2 footprint and False otherwise.
+            allow_climatology: Allow a single year of flux data to be reindexed as a climatology
+              for integrated calculations.
+            time_resolved_by_sector: Optional flux-source name to boolean mapping.
+              True uses time-resolved sensitivities and False uses integrated ``fp``
+              from the single attached footprint dataset. Unspecified sources retain
+              the existing footprint-based default. None or an empty mapping retains
+              the existing calculation path. Configured calculations return ``mf_mod``
+              and, when requested, ``mf_mod_sectoral`` and ``fp_x_flux_sectoral``.
 
         Returns:
             xarray.Dataset: Modelled observation values along the time axis, optionally with "fp x flux".
@@ -1103,6 +1231,24 @@ class ModelScenario:
         """
         self._check_data_is_present(need=["footprint", "fluxes"])
 
+        sector_resolution = self._validate_sector_time_resolution(time_resolved_by_sector, sources)
+        if sector_resolution is not None:
+            return self._calc_modelled_obs_with_sector_resolution(
+                sector_resolution,
+                resample_to=resample_to,
+                platform=platform,
+                cache=cache,
+                recalculate=recalculate,
+                output_fp_x_flux=output_fp_x_flux,
+                split_by_sectors=split_by_sectors,
+                output_units=output_units,
+                use_low_freq_flux=use_low_freq_flux,
+                allow_climatology=allow_climatology,
+            )
+
+        # Switching back from an explicitly configured calculation must not
+        # return its cached result as if it came from the legacy default path.
+        recalculate = recalculate or self._sector_modelled_obs_cache_key is not None
         param_calculate = self._param_setup(
             param="modelled_obs", resample_to=resample_to, platform=platform, recalculate=recalculate
         )
@@ -1111,14 +1257,25 @@ class ModelScenario:
             modelled_obs = cast(Dataset, self.modelled_obs)
             return modelled_obs
 
-        # Check species and use high time resolution steps if this is carbon dioxide
-        if self.species == "co2":
+        if self.scenario is None:
+            raise ValueError("Combined data must have been defined before calculating modelled observations.")
+
+        time_resolved_footprint = self._footprint_is_time_resolved(self.scenario)
+
+        if time_resolved_footprint:
             modelled_obs = self._calc_modelled_obs_HiTRes(
-                sources=sources, output_TS=True, output_fpXflux=output_fp_x_flux
+                sources=sources,
+                output_TS=True,
+                output_fpXflux=output_fp_x_flux,
+                use_low_freq_flux=use_low_freq_flux,
             )
         else:
             modelled_obs = self._calc_modelled_obs_integrated(
-                sources=sources, output_TS=True, output_fpXflux=output_fp_x_flux
+                sources=sources,
+                output_TS=True,
+                output_fpXflux=output_fp_x_flux,
+                use_low_freq_flux=use_low_freq_flux,
+                allow_climatology=allow_climatology,
             )
 
         # calculate sectoral modelled mf and fp_x_flux
@@ -1127,13 +1284,14 @@ class ModelScenario:
             sectoral_datasets = []
 
             for source in sources:
-                if self.species == "co2":
+                if time_resolved_footprint:
                     mod_obs = self._calc_modelled_obs_HiTRes(
                         sources=source,
                         output_TS=True,
                         ts_name="mf_mod_high_res_sectoral",
                         output_fpXflux=output_fp_x_flux,
                         fp_x_flux_name="fp_x_flux_sectoral",
+                        use_low_freq_flux=use_low_freq_flux,
                     )
                 else:
                     mod_obs = self._calc_modelled_obs_integrated(
@@ -1142,6 +1300,7 @@ class ModelScenario:
                         ts_name="mf_mod_sectoral",
                         output_fpXflux=output_fp_x_flux,
                         fp_x_flux_name="fp_x_flux_sectoral",
+                        use_low_freq_flux=use_low_freq_flux,
                     )
                 mod_obs = mod_obs.expand_dims({"source": [source]})
                 sectoral_datasets.append(mod_obs)
@@ -1162,7 +1321,193 @@ class ModelScenario:
             self.modelled_obs = None  # Make sure this is reset and not cached
             self.scenario = None  # Reset this to None after calculation completed
 
+        self._sector_modelled_obs_cache_key = None
         return modelled_obs
+
+    def _validate_sector_time_resolution(
+        self, selection: Mapping[str, bool] | None, sources: str | list | None
+    ) -> dict[str, bool] | None:
+        """Validated resolution choices for the requested flux sources, including defaults."""
+        if selection is None:
+            return None
+        if not isinstance(selection, Mapping):
+            raise TypeError("time_resolved_by_sector must be a mapping of flux-source names to booleans.")
+        fluxes = cast(dict[str, FluxData], self.fluxes)
+        for source, resolved in selection.items():
+            if not isinstance(source, str):
+                raise TypeError("time_resolved_by_sector keys must be flux-source names (strings).")
+            if source not in fluxes:
+                raise ValueError(f"Unknown flux source in time_resolved_by_sector: {source!r}.")
+            if not isinstance(resolved, bool):
+                raise TypeError(f"time_resolved_by_sector[{source!r}] must be True or False.")
+        if not selection:
+            return None
+
+        footprint = cast(FootprintData, self.footprint).data
+        default = self._footprint_is_time_resolved(footprint)
+        resolution = {source: selection.get(source, default) for source in self._clean_sources_input(sources)}
+        if any(resolution.values()):
+            if not default:
+                raise ValueError(
+                    "Time-resolved sectors require fp_HiTRes or fp_time_resolved in the shared footprint."
+                )
+            if "fp_HiTRes" not in footprint and "fp_residual" not in footprint:
+                raise ValueError("Time-resolved sectors using fp_time_resolved also require fp_residual.")
+            resolved_variable = "fp_HiTRes" if "fp_HiTRes" in footprint else "fp_time_resolved"
+            if "H_back" not in footprint.coords or "H_back" not in footprint[resolved_variable].dims:
+                raise ValueError(
+                    "Time-resolved sectors require an H_back coordinate on their sensitivity variable."
+                )
+        if not all(resolution.values()) and "fp" not in footprint:
+            raise ValueError("Integrated sectors require fp in the shared footprint.")
+        return resolution
+
+    def _calc_modelled_obs_with_sector_resolution(
+        self,
+        sector_resolution: Mapping[str, bool],
+        *,
+        resample_to: str | None,
+        platform: str | None,
+        cache: bool,
+        recalculate: bool,
+        output_fp_x_flux: bool,
+        split_by_sectors: bool,
+        output_units: str | float | None,
+        use_low_freq_flux: bool | None,
+        allow_climatology: bool,
+        scenario: Dataset | None = None,
+    ) -> Dataset:
+        """Configured calculation state with optional aligned-footprint reuse."""
+        request_key = (
+            tuple(sector_resolution.items()),
+            resample_to,
+            platform,
+            output_fp_x_flux,
+            split_by_sectors,
+            output_units,
+            use_low_freq_flux,
+            allow_climatology,
+        )
+        if (
+            cache
+            and not recalculate
+            and self.modelled_obs is not None
+            and self._sector_modelled_obs_cache_key == request_key
+        ):
+            return self.modelled_obs
+
+        if scenario is None:
+            scenario = self._scenario_for_footprint(
+                cast(FootprintData, self.footprint), resample_to, platform
+            )
+        modelled_obs = self._calc_modelled_obs_by_sector(
+            scenario,
+            sector_resolution,
+            output_fp_x_flux=output_fp_x_flux,
+            split_by_sectors=split_by_sectors,
+            use_low_freq_flux=use_low_freq_flux,
+            allow_climatology=allow_climatology,
+        )
+        modelled_obs.attrs["resample_to"] = str(resample_to)
+        modelled_obs.attrs["time_resolved_by_sector"] = json.dumps(sector_resolution, sort_keys=True)
+        modelled_obs = self.convert_units(modelled_obs, output_units=output_units)
+        if cache:
+            self.scenario = scenario
+            self.modelled_obs = modelled_obs
+            self._sector_modelled_obs_cache_key = request_key
+        else:
+            self.scenario = None
+            self.modelled_obs = None
+            self._sector_modelled_obs_cache_key = None
+        return modelled_obs
+
+    def _calc_modelled_obs_by_sector(
+        self,
+        scenario: Dataset,
+        sector_resolution: Mapping[str, bool],
+        *,
+        output_fp_x_flux: bool,
+        split_by_sectors: bool,
+        use_low_freq_flux: bool | None,
+        allow_climatology: bool,
+    ) -> Dataset:
+        """Flux-sector contributions from one aligned footprint and existing kernels.
+
+        Each sector is calculated once and its contribution is included in the
+        total. Separate calculations avoid combining unlike flux time axes before
+        monthly averaging, so sectoral output does not alter the total.
+        """
+        total = None
+        sectoral = []
+        for source, resolved in sector_resolution.items():
+            if resolved and "fp_HiTRes" not in scenario:
+                sensitivity_names: tuple[str, ...] = ("fp_time_resolved", "fp_residual")
+            elif resolved and (scenario.fp_HiTRes.attrs.get("units") or "fp" not in scenario):
+                sensitivity_names = ("fp_HiTRes",)
+            else:
+                # Legacy fp_HiTRes can inherit sensitivity units from fp.
+                sensitivity_names = ("fp",)
+            missing_units = [name for name in sensitivity_names if not scenario[name].attrs.get("units")]
+            if missing_units:
+                raise ValueError(
+                    f"Sector {source!r} requires declared sensitivity units for {missing_units}."
+                )
+
+            calculate = (
+                self._calc_modelled_obs_HiTRes
+                if resolved
+                else partial(self._calc_modelled_obs_integrated, allow_climatology=allow_climatology)
+            )
+            # Sensitivity units are retained through reductions in the existing
+            # kernel. The option applies only to this configured pathway.
+            with xr.set_options(keep_attrs=True):
+                contribution = calculate(
+                    sources=source,
+                    scenario=scenario,
+                    output_TS=False,
+                    output_fpXflux=True,
+                    use_low_freq_flux=use_low_freq_flux,
+                ).fp_x_flux.pint.quantify()
+            try:
+                contribution = contribution.pint.to("mol/mol")
+            except ValueError as exc:
+                raise ValueError(
+                    f"Sector {source!r} footprint-times-flux must have mole-fraction units."
+                ) from exc
+            data = {"mf_mod": contribution.sum(["lat", "lon"])}
+            if output_fp_x_flux:
+                data["fp_x_flux"] = contribution
+            sector = Dataset(data)
+            # Exact coordinate alignment prevents silent loss of times or grid
+            # points when source contributions have different indexes.
+            if total is None:
+                total = sector.fillna(0)
+            else:
+                total, sector = xr.align(total, sector, join="exact")
+                # Sectoral diagnostics retain their masks. Totals use additive
+                # zero, matching the existing skip-NaN spatial reductions.
+                total = total + sector.fillna(0)
+            if split_by_sectors:
+                sectoral_data = {"mf_mod_sectoral": sector["mf_mod"]}
+                if output_fp_x_flux:
+                    sectoral_data["fp_x_flux_sectoral"] = sector["fp_x_flux"]
+                sectoral.append(Dataset(sectoral_data).expand_dims(source=[source]))
+
+        if total is None:
+            raise ValueError("At least one flux source is required for sector-level calculation.")
+        if split_by_sectors:
+            total = total.merge(xr.concat(sectoral, dim="source", join="exact"))
+        return cast(Dataset, total.pint.dequantify())
+
+    @staticmethod
+    def _footprint_is_time_resolved(footprint: FootprintData | Dataset) -> bool:
+        """Identify the temporal representation from the stored sensitivity variables.
+
+        Species metadata does not determine the calculation path: CO2 can also
+        use integrated footprints. This preserves the existing dispatch checks.
+        """
+        data = footprint.data if isinstance(footprint, FootprintData) else footprint
+        return any(name in data.data_vars for name in ("fp_HiTRes", "fp_time_resolved"))
 
     def _calc_modelled_obs_integrated(
         self,
@@ -1171,6 +1516,10 @@ class ModelScenario:
         ts_name: str = "mf_mod",
         output_fpXflux: bool = False,
         fp_x_flux_name: str = "fp_x_flux",
+        use_low_freq_flux: bool | None = None,
+        allow_climatology: bool = True,
+        *,
+        scenario: Dataset | None = None,
     ) -> Dataset:
         """Calculate modelled mole fraction timeseries using integrated footprints data.
 
@@ -1180,6 +1529,9 @@ class ModelScenario:
                        Default = True
             output_fpXflux : Whether to output the modelled flux map DataArray used to create
                             the timeseries. Default = False
+            allow_climatology: When aligning datasets, allow any datasets which represent a year of data
+                to be treated as a climatology and reindexed accordingly.
+            scenario: Aligned observation/footprint data. Defaults to the cached scenario.
 
         Returns:
             DataArray / DataArray :
@@ -1192,14 +1544,19 @@ class ModelScenario:
             If both output_TS and output_fpXflux are both True:
                 Both DataArrays are returned.
         """
-        if self.scenario is None:
+        if scenario is None:
+            scenario = self.scenario
+        if scenario is None:
             raise ValueError("Combined data must have been defined before calling this function.")
 
-        scenario = self.scenario
-
         flux = self.combine_flux_sources(sources)
-        flux_modelled = fp_x_flux_integrated(scenario, flux)
+        if use_low_freq_flux is None:
+            use_low_freq_flux = self.species == "co2"
 
+        if use_low_freq_flux:
+            flux = make_integrated_low_freq_flux(flux)
+
+        flux_modelled = fp_x_flux_integrated(scenario, flux, allow_climatology=allow_climatology)
         data = {}
 
         if output_TS:
@@ -1217,6 +1574,9 @@ class ModelScenario:
         ts_name: str = "mf_mod_high_res",
         output_fpXflux: bool = False,
         fp_x_flux_name: str = "fp_x_flux",
+        use_low_freq_flux: bool | None = None,
+        *,
+        scenario: Dataset | None = None,
     ) -> Dataset:
         """Calculate modelled mole fraction timeseries using high time resolution
         footprints data and emissions data. This is appropriate for time variable
@@ -1229,6 +1589,7 @@ class ModelScenario:
                        Default = True
             output_fpXflux : Whether to output the modelled flux map DataArray used to create
                             the timeseries. Default = False
+            scenario: Aligned observation/footprint data. Defaults to the cached scenario.
 
         Returns:
             DataArray / DataArray :
@@ -1261,13 +1622,31 @@ class ModelScenario:
         # TODO: Need to work out how this fits in with high time resolution method
         # Do we need to flag low resolution to use a different method? natural / anthro for example
 
-        if self.scenario is None:
+        if scenario is None:
+            scenario = self.scenario
+        if scenario is None:
             raise ValueError("Combined data must have been defined before calling this function.")
 
-        if "fp_HiTRes" in self.scenario:
-            fp = self.scenario.fp_HiTRes
+        if "fp_HiTRes" in scenario:
+            fp = scenario.fp_HiTRes
+            if not fp.attrs.get("units") and "fp" in scenario:
+                units = scenario.fp.attrs.get("units")
+                if units:
+                    # Legacy files and stores may only declare units on fp.
+                    # assign_attrs leaves the caller's footprint metadata unchanged.
+                    fp = fp.assign_attrs(units=units)
+        elif "fp_time_resolved" in scenario.data_vars:
+            fp = scenario[["fp_time_resolved", "fp_residual"]]
         else:
-            fp = self.scenario[["fp_time_resolved", "fp_residual"]]
+            return self._calc_modelled_obs_integrated(
+                sources=sources,
+                output_TS=output_TS,
+                ts_name=ts_name,
+                output_fpXflux=output_fpXflux,
+                fp_x_flux_name=fp_x_flux_name,
+                use_low_freq_flux=use_low_freq_flux,
+                scenario=scenario,
+            )
 
         flux_ds = self.combine_flux_sources(sources)
 
@@ -1276,7 +1655,7 @@ class ModelScenario:
         data = {}
 
         if output_TS:
-            data[ts_name] = fp_x_flux.sum(["lat", "lon"])
+            data[ts_name] = fp_x_flux.sum(["lat", "lon"], keep_attrs=True)
 
         if output_fpXflux:
             data[fp_x_flux_name] = fp_x_flux
@@ -1291,6 +1670,7 @@ class ModelScenario:
         recalculate: bool = False,
         output_sensitivity: bool = False,
         output_units: float | str | None = None,
+        allow_climatology: bool = True,
     ) -> Dataset:
         """Calculate the modelled baseline points based on site footprint and boundary conditions.
         Boundary conditions are multipled by any loss (exp(-t/lifetime)) for the species.
@@ -1310,6 +1690,8 @@ class ModelScenario:
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
             output_units: target units; if None, then obs. units will be used,
               or "mol/mol" if these are not present.
+            allow_climatology: When aligning datasets, allow any datasets which represent a year of data
+                to be treated as a climatology and reindexed accordingly.
 
         Returns:
             xarray.Dataset containing modelled baseline values along the time axis and baseline sensitivities
@@ -1337,7 +1719,9 @@ class ModelScenario:
         except AttributeError:
             species = None
 
-        sensitivities = baseline_sensitivities(bc=bc_data, fp=scenario, species=species)
+        sensitivities = baseline_sensitivities(
+            bc=bc_data, fp=scenario, species=species, allow_climatology=allow_climatology
+        )
 
         result = sensitivities if output_sensitivity else xr.Dataset()
 
@@ -1381,6 +1765,10 @@ class ModelScenario:
         cache: bool = True,
         recalculate: bool = False,
         output_units: str | float | None = None,
+        use_low_freq_flux: bool | None = None,
+        allow_climatology: bool = True,
+        *,
+        time_resolved_by_sector: Mapping[str, bool] | None = None,
     ) -> Dataset:
         """Produce combined object containing aligned footprint and observation data.
         Can also include modelled timeseries data derived from flux.
@@ -1402,26 +1790,67 @@ class ModelScenario:
             cache: Cache this data after calculation. Default = True.
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
             output_units: units to use for obs, or any data that should have the same units as obs (e.g. `mf_mod`).
+            use_low_freq_flux: For integrated footprints, use monthly-mean fluxes instead
+                of the flux at release time. ``None`` enables this for CO2 only.
+            allow_climatology: When aligning datasets, allow any datasets which represent a year of data
+                to be treated as a climatology and reindexed accordingly.
+            time_resolved_by_sector: Flux-source name to True (time-resolved) or
+                False (integrated) mapping, forwarded to ``calc_modelled_obs``.
+                All sources share the attached footprint dataset.
 
         Returns:
             xarray.Dataset: Combined dataset containing footprint and observation data
         """
-        combined_dataset = self.combine_obs_footprint(
-            resample_to=resample_to, platform=platform, cache=cache, recalculate=recalculate
-        )
-
-        if calc_timeseries or calc_fp_x_flux:
-            modelled_obs = self.calc_modelled_obs(
+        sector_resolution = None
+        if (calc_timeseries or calc_fp_x_flux) and time_resolved_by_sector is not None:
+            self._check_data_is_present(need=["footprint", "fluxes"])
+            sector_resolution = self._validate_sector_time_resolution(time_resolved_by_sector, sources)
+        configured_path = sector_resolution is not None or self._sector_modelled_obs_cache_key is not None
+        if self.obs is not None:
+            combined_dataset = self.combine_obs_footprint(
                 resample_to=resample_to,
-                sources=sources,
                 platform=platform,
-                cache=cache,
-                recalculate=recalculate,
-                output_fp_x_flux=calc_fp_x_flux,
-                split_by_sectors=split_by_sectors,
+                cache=cache and sector_resolution is None,
+                recalculate=recalculate or configured_path,
+            )
+        else:
+            combined_dataset = self._check_footprint_resample(resample_to).assign_attrs(
+                resample_to=str(resample_to)
             )
 
+        if calc_timeseries or calc_fp_x_flux:
+            if sector_resolution is not None:
+                modelled_obs = self._calc_modelled_obs_with_sector_resolution(
+                    sector_resolution,
+                    resample_to=resample_to,
+                    platform=platform,
+                    cache=cache,
+                    recalculate=recalculate,
+                    output_fp_x_flux=calc_fp_x_flux,
+                    split_by_sectors=split_by_sectors,
+                    output_units=output_units,
+                    use_low_freq_flux=use_low_freq_flux,
+                    allow_climatology=allow_climatology,
+                    scenario=combined_dataset,
+                )
+            else:
+                modelled_obs = self.calc_modelled_obs(
+                    resample_to=resample_to,
+                    sources=sources,
+                    platform=platform,
+                    cache=cache,
+                    recalculate=recalculate,
+                    output_fp_x_flux=calc_fp_x_flux,
+                    split_by_sectors=split_by_sectors,
+                    use_low_freq_flux=use_low_freq_flux,
+                    allow_climatology=allow_climatology,
+                )
+
             combined_dataset = combined_dataset.merge(modelled_obs)
+            if "time_resolved_by_sector" in modelled_obs.attrs:
+                combined_dataset.attrs["time_resolved_by_sector"] = modelled_obs.attrs[
+                    "time_resolved_by_sector"
+                ]
 
         if calc_bc:
             if self.bc is not None:
@@ -1431,6 +1860,7 @@ class ModelScenario:
                     cache=cache,
                     recalculate=recalculate,
                     output_sensitivity=calc_bc_sensitivity,
+                    allow_climatology=allow_climatology,
                 )
 
                 combined_dataset = combined_dataset.merge(modelled_baseline)
@@ -1474,8 +1904,11 @@ class ModelScenario:
         sources: str | list | None = None,
         resample_to: str | None = "coarsest",
         platform: str | None = None,
+        allow_climatology: bool = True,
         cache: bool = True,
         recalculate: bool = False,
+        save_path: str | None = None,
+        **save_kwargs: Any,
     ) -> Any:
         """Plot comparison between observation and modelled timeseries data.
 
@@ -1491,8 +1924,13 @@ class ModelScenario:
                           - None to not resample and to just "ffill" footprint to obs
                          Default = "coarsest".
             platform: Observation platform used to decide whether to resample e.g. "satellite", "insitu", "flask"
+            allow_climatology: When aligning datasets, allow any datasets which represent a year of data
+                to be treated as a climatology and reindexed accordingly.
             cache: Cache this data after calculation. Default = True.
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
+            save_path: Path to save the figure. If None, the figure will not be saved.
+            save_kwargs: Additional keyword arguments to pass to the save function. These will be passed to the plotly write_html or write_image functions depending on the file extension of save_path.
+            example: width=1000, height=600, scale=2,
 
         Returns:
             Plotly Figure
@@ -1550,7 +1988,29 @@ class ModelScenario:
 
         fig.add_trace(go.Scatter(x=x_data, y=y_data, mode="lines", name=label))
 
+        if save_path is not None:
+            self._save_fig(fig, save_path, **save_kwargs)
+
         return fig
+
+    @staticmethod
+    def _save_fig(fig: Any, save_path: str, **save_kwargs: Any) -> None:
+        """Save a plotly figure to disk, dispatching on file extension."""
+        from pathlib import Path
+
+        path = Path(save_path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+
+        suffix = path.suffix.lower()
+        if suffix == ".html":
+            fig.write_html(str(path), **save_kwargs)
+        elif suffix in (".png", ".jpg", ".jpeg", ".svg", ".pdf", ".webp"):
+            fig.write_image(str(path), **save_kwargs)
+        else:
+            raise ValueError(
+                f"Unsupported file extension '{suffix}'. "
+                "Use .html for interactive, or .png/.jpg/.svg/.pdf/.webp for static images."
+            )
 
 
 # def footprints_data_merge(data: Union[dict, ObsData],

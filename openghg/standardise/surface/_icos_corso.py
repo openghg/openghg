@@ -213,7 +213,6 @@ def parse_icos_corso(
         else:
             raise NotImplementedError()
     else:
-
         site_fname = filepath.name.split("_")[-5]
         inlet_height_fname = filepath.name.split("_")[-4]
 
@@ -291,13 +290,11 @@ def parse_icos_corso(
             raise ValueError("Couldn't identify data owner email")
 
     if sampling_period is None:
-
         f_header = [s for s in header if "TIME INTERVAL" in s]
         interval_str = f_header[0].split(":")[1].strip()
         if interval_str == "hourly":
             metadata["sampling_period"] = "3600.0"
         elif f"{species}_sampling_period" in data.data_vars:
-
             rounded_values = np.round(data[f"{species}_sampling_period"].values, decimals=2)
             unique_values = np.unique(rounded_values)
 

@@ -13,6 +13,7 @@ from ._domain import find_coord_name as find_coord_name
 from ._domain import find_domain as find_domain
 from ._domain import get_domain_info as get_domain_info
 from ._download import download_data as download_data
+from ._download import find_url as find_url
 from ._download import parse_url_filename as parse_url_filename
 from ._export import to_dashboard as to_dashboard
 from ._export import to_dashboard_mobile as to_dashboard_mobile
@@ -32,12 +33,9 @@ from ._file import load_standardise_parser as load_standardise_parser
 from ._file import load_transform_parser as load_transform_parser
 from ._file import open_nc_fn as open_nc_fn
 from ._file import open_time_nc_fn as open_time_nc_fn
+from ._file import preprocess_nc_data as preprocess_nc_data
 from ._file import read_header as read_header
 from ._function_inputs import split_function_inputs as split_function_inputs
-from ._hashing import hash_bytes as hash_bytes
-from ._hashing import hash_file as hash_file
-from ._hashing import hash_retrieved_data as hash_retrieved_data
-from ._hashing import hash_string as hash_string
 from ._inlet import extract_height_name as extract_height_name
 from ._inlet import extract_inlet_value as extract_inlet_value
 from ._inlet import format_inlet as format_inlet
@@ -48,6 +46,7 @@ from ._metadata_util import check_not_set_value as check_not_set_value
 from ._metadata_util import check_number_match as check_number_match
 from ._metadata_util import check_str_match as check_str_match
 from ._metadata_util import check_value_match as check_value_match
+from ._metadata_util import convert_numpy_scalars as convert_numpy_scalars
 from ._metadata_util import get_overlap_keys as get_overlap_keys
 from ._metadata_util import merge_and_extend_dict as merge_and_extend_dict
 from ._metadata_util import merge_dict as merge_dict

@@ -5,26 +5,30 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-from openghg.analyse._alignment import time_of_day_offset
+from openghg.analyse._alignment import reindex_time_to_target, time_of_day_offset
 from openghg.analyse._utils import reindex_on_dims
+from openghg.util._time import normalise_pandas_frequency
 
 
-def fp_x_flux_integrated(footprint: xr.Dataset, flux: xr.Dataset) -> xr.DataArray:
+def fp_x_flux_integrated(
+    footprint: xr.Dataset, flux: xr.Dataset, allow_climatology: bool = True
+) -> xr.DataArray:
     """Calculate footprint times flux.
 
     Args:
         footprint: footprint data; should have `fp` data variable.
         flux: flux data; should have `flux` data variable.
+        allow_climatology: when aligning flux data to footprint data, if one year is present and outside the target
+            date range of the footprint data, allow the flux data to be treated as a climatology and reindexed based on this.
 
     Returns:
         DataArray containing footprint times flux.
 
     """
     flux = reindex_on_dims(flux, footprint, ["lat", "lon"])
-
     # align separately on time
     # TODO: if method="nearest" was acceptable, then we could align all coordinates at once with reindex_like
-    flux = flux.reindex_like(footprint, method="ffill")
+    flux = reindex_time_to_target(flux, footprint, allow_climatology=allow_climatology)
 
     # align chunks for time after filling
     fp_time_chunks = footprint.fp.chunksizes.get("time")
@@ -36,19 +40,25 @@ def fp_x_flux_integrated(footprint: xr.Dataset, flux: xr.Dataset) -> xr.DataArra
     return cast(xr.DataArray, result.pint.dequantify())
 
 
+def make_integrated_low_freq_flux(flux: xr.DataArray | xr.Dataset) -> xr.Dataset:
+    """Create monthly-mean flux for integrated footprint calculations."""
+    flux_var = flux.flux if isinstance(flux, xr.Dataset) else flux
+    flux_low_freq = flux_var.resample({"time": "1MS"}).mean()
+    return flux_low_freq.to_dataset(name="flux")
+
+
 # helper functions for time-resolved calculation
 def calc_hourly_freq(times: xr.DataArray, dim: str = "time", input_nanoseconds: bool = False) -> int:
-    """Infer frequency of DataArray of times.
+    """Infer the frequency of a DataArray of times in whole hours.
 
-    Set `input_nanoseconds` to True if the times are in terms of nanoseconds.
-    Otherwise times are assumed to be in terms of hours.
+    Numeric times are assumed to be in hours, or nanoseconds with `input_nanoseconds=True`.
     """
-    nanosecond_to_hour = 1 / (1e9 * 60.0 * 60.0)
-
+    gaps = times.diff(dim=dim).values
+    if np.issubdtype(gaps.dtype, np.timedelta64):
+        return int((gaps / np.timedelta64(1, "h")).mean())
     if input_nanoseconds:
-        return int(times.diff(dim=dim).values.mean() * nanosecond_to_hour)
-    else:
-        return int(times.diff(dim=dim).values.mean())
+        return int(gaps.mean() / (1e9 * 3600))
+    return int(gaps.mean())
 
 
 def time_resolved_and_residual_footprints(fp_high_time_res: xr.DataArray) -> xr.Dataset:
@@ -120,6 +130,8 @@ def _padded_flux_slice_start_and_end(fp: xr.DataArray | xr.Dataset) -> tuple[np.
 
 def _make_low_freq_flux(flux: xr.DataArray, fp: xr.DataArray | xr.Dataset) -> xr.DataArray:
     start, end = _padded_flux_slice_start_and_end(fp)
+    # Monthly means are labelled at month start, including for mid-month releases.
+    start = pd.Timestamp(start).to_period("M").start_time
 
     flux_low_freq = (
         flux.resample({"time": "1MS"})
@@ -140,14 +152,12 @@ def _make_hf_flux_rolling_avg_array(
     # starting at each time point in flux_hf_rolling.time
     max_h_back = _max_h_back(fp_high_time_res)
     highest_res_h = _fp_time_and_h_back_freq_gcd(fp_high_time_res)
-    window_size = max_h_back // highest_res_h
-    flux_hf_rolling = flux_high_freq.rolling(time=window_size).construct("H_back")
 
-    # set H_back coordinates using highest_res_H frequency
+    # Size the rolling window from the lag coordinates so it includes the oldest lag.
     h_back_type = fp_high_time_res.H_back.dtype
-    flux_hf_rolling = flux_hf_rolling.assign_coords(
-        {"H_back": np.arange(0, max_h_back, highest_res_h, dtype=h_back_type)[::-1]}
-    )
+    lags = np.arange(0, max_h_back, highest_res_h, dtype=h_back_type)[::-1]
+    flux_hf_rolling = flux_high_freq.rolling(time=lags.size).construct("H_back")
+    flux_hf_rolling = flux_hf_rolling.assign_coords(H_back=lags)
     flux_hf_rolling.H_back.attrs["units"] = fp_high_time_res.H_back.attrs.get("units")
 
     # select subsequence of H_back times to match high res fp (i.e. fp without max H_back coord)
@@ -159,19 +169,18 @@ def _make_hf_flux_rolling_avg_array(
 def _make_high_freq_flux(
     flux: xr.DataArray,
     fp: xr.DataArray | xr.Dataset,
-    *,
-    align_to_fp_time: bool = True,
 ) -> xr.DataArray:
     fp_highest_res_hours = _fp_time_and_h_back_freq_gcd(fp)
     start, end = _padded_flux_slice_start_and_end(fp)
-    offset = time_of_day_offset(start)
-
-    # select values with start time padded to include first rolling window backwards in time
-    flux_high_freq = flux.sel(time=slice(start, end))
-
-    # resample flux
-    freq = f"{fp_highest_res_hours}h"
     flux_res_hours = calc_hourly_freq(flux.time, input_nanoseconds=True)
+    offset = time_of_day_offset(flux.time.values[0])
+
+    # Include the flux interval containing the padded start of the rolling window.
+    flux_slice_start = start - np.timedelta64(flux_res_hours, "h")
+    flux_high_freq = flux.sel(time=slice(flux_slice_start, end))
+
+    # Resample on the flux interval grid, not the offset of the first footprint release.
+    freq = f"{fp_highest_res_hours}h"
     flux_resampler = flux_high_freq.resample({"time": freq}, offset=offset)
 
     if flux_res_hours <= fp_highest_res_hours:
@@ -181,25 +190,20 @@ def _make_high_freq_flux(
         # upsampling
         flux_high_freq = flux_resampler.ffill()
 
-    # reindex to align
-    full_dates = pd.date_range(start, end, freq=freq, inclusive="left").to_numpy()
+    # Fill gaps on the regular, flux-aligned grid before constructing lag windows.
+    full_dates = pd.date_range(flux_high_freq.time.values[0], end, freq=freq, inclusive="left").to_numpy()
     flux_high_freq = flux_high_freq.reindex({"time": full_dates}, method="ffill")
 
     # create rolling windows
     flux_high_freq = _make_hf_flux_rolling_avg_array(flux_high_freq, fp)
 
-    if align_to_fp_time:
-        # reindex to align with fp time coordinates (after creating rolling windows to avoid NaN values at start of time series)
-        fp_index = pd.DatetimeIndex(fp.time.values)
-        flux_index = pd.DatetimeIndex(flux_high_freq.time.values)
-        need_second_reindex = (flux_index.get_indexer(fp_index) < 0).any()
-
-        if need_second_reindex:
-            flux_high_freq = flux_high_freq.reindex(
-                {"time": fp.time},
-                method="ffill",
-                tolerance=pd.Timedelta(hours=fp_highest_res_hours),
-            )
+    # Map each irregular release to the flux interval containing it. Do this after
+    # constructing rolling windows so the first release retains its full lag history.
+    flux_high_freq = flux_high_freq.reindex(
+        {"time": fp.time},
+        method="ffill",
+        tolerance=pd.Timedelta(hours=fp_highest_res_hours),
+    )
 
     flux_high_freq.attrs["units"] = flux.attrs.get("units")
 
@@ -229,7 +233,7 @@ def fp_x_flux_time_resolved(
     if averaging is not None:
         # TODO: could check if resampling is necessary
         # TODO: we might also want to change how we resample, depending on whether we're upsampling or downsampling
-        fp = fp.resample(time=averaging).ffill()
+        fp = fp.resample(time=normalise_pandas_frequency(averaging)).ffill()
 
     # explicit variables to make mypy happy...
     fp_time_resolved: xr.DataArray = fp.fp_time_resolved
