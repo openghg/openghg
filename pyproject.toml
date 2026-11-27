@@ -88,6 +88,7 @@ classifiers = [
         "pytest>=7.0.0,<=9.2.0",
         "pytest-cov<=7.1.0",
         "pytest-mock<=3.17.0",
+        "pytest-rerunfailures>=16.7",
         "pytest-timeout>=2.4.0,<3.0.0",
         "pytest-tornasync<=0.6.0.post2",
         "requests-mock<=1.12.1",
@@ -98,7 +99,7 @@ classifiers = [
         "types-requests<=2.33.0.20261030",
         "types-toml<=0.10.8.20260518",
         "types-urllib3",
-    ]
+]
     doc = [
         "sphinx",
         "Jinja2",

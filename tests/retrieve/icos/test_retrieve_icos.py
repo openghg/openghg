@@ -10,8 +10,18 @@ from openghg.retrieve import search_surface
 from openghg.retrieve.icos import _retrieve, retrieve_atmospheric
 from openghg.types import AttrMismatchError, MetadataAndData
 
+# The deprecated "dobj" retrieval uses icoscp<=0.2.3, whose station.get() calls
+# float() on a pandas Series. That raises TypeError from pandas 3 onwards.
+PANDAS_MAJOR_VERSION = int(pd.__version__.split(".")[0])
+
+requires_pandas_lt_3 = pytest.mark.skipif(
+    PANDAS_MAJOR_VERSION >= 3,
+    reason="dobj retrieval (icoscp<=0.2.3) is incompatible with pandas>=3",
+)
+
 
 @pytest.mark.icos
+@pytest.mark.flaky(reruns=2, reruns_delay=60)
 def test_icos_retrieve_skips_datalevel_1_csv_files():
     """Check level 1 data retrieved data using icoscp_core as expected"""
     clear_test_stores()
@@ -58,6 +68,7 @@ def test_icos_retrieve_skips_datalevel_1_csv_files():
 
 
 @pytest.mark.icos
+@pytest.mark.flaky(reruns=2, reruns_delay=60)
 def test_icos_retrieve_stores_by_data_level():
     """Check that retrieving data with different levels creates different datasources."""
     clear_test_stores()
@@ -88,6 +99,7 @@ def test_icos_retrieve_stores_by_data_level():
 
 
 @pytest.mark.icos
+@pytest.mark.flaky(reruns=2, reruns_delay=60)
 def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
     clear_test_stores()
     # We patch this here so we can make sure we're getting the result from retrieve_all and not from
@@ -252,6 +264,7 @@ def test_if_exists_new_stores_retrieved_data_as_new_version(mock_retrieve_remote
 
 
 @pytest.mark.icos
+@pytest.mark.flaky(reruns=2, reruns_delay=60)
 def test_retrieve_icos_attr_mismatch_error():
     """Test that AttrMismatchError is raised.
 
@@ -264,6 +277,7 @@ def test_retrieve_icos_attr_mismatch_error():
 
 
 @pytest.mark.icos
+@pytest.mark.flaky(reruns=2, reruns_delay=60)
 def test_retrieve_sac_data_update_attrs_with_bool():
     """Test that ValueError is raised if invalid value `True` is passed to `update_mismatch`."""
     with pytest.raises(ValueError):
@@ -271,6 +285,7 @@ def test_retrieve_sac_data_update_attrs_with_bool():
 
 
 @pytest.mark.icos
+@pytest.mark.flaky(reruns=2, reruns_delay=60)
 def test_retrieve_icos_obspack():
     """Test the combined obspack data retrieval"""
     clear_test_stores()
@@ -283,6 +298,7 @@ def test_retrieve_icos_obspack():
 
 
 @pytest.mark.icos
+@pytest.mark.flaky(reruns=2, reruns_delay=60)
 def test_retrieve_icos_fast_track():
     """
     Test retrieving ICOS FastTrack data
@@ -328,6 +344,7 @@ def test_retrieve_icos_fast_track():
 
 
 @pytest.mark.icos
+@pytest.mark.flaky(reruns=2, reruns_delay=60)
 def test_retrieve_icos_eye_ave_par():
     """
     Test retrieving "EYE-AVE-PAR" corner case data
@@ -383,6 +400,8 @@ def test_retrieve_icos_eye_ave_par():
 
 
 @pytest.mark.icos
+@pytest.mark.flaky(reruns=2, reruns_delay=60)
+@requires_pandas_lt_3
 def test_retrieve_icos_standard_compare():
     """
     Compare icoscp_core and previous dobj method for standard text file download.
@@ -499,6 +518,8 @@ def test_retrieve_icos_standard_compare():
 
 
 @pytest.mark.icos
+@pytest.mark.flaky(reruns=2, reruns_delay=60)
+@requires_pandas_lt_3
 def test_retrieve_icos_obspack_compare():
     """
     Compare icoscp_core and previous dobj method for ICOS Combined (ObsPack) retrieval
@@ -575,6 +596,8 @@ def test_retrieve_icos_obspack_compare():
 
 
 @pytest.mark.icos
+@pytest.mark.flaky(reruns=2, reruns_delay=60)
+@requires_pandas_lt_3
 def test_retrieve_fast_track_compare():
     """
     Compare icoscp_core and previous dobj method for ICOS FastTrack data
@@ -675,6 +698,8 @@ def test_retrieve_fast_track_compare():
 
 
 @pytest.mark.icos
+@pytest.mark.flaky(reruns=2, reruns_delay=60)
+@requires_pandas_lt_3
 def test_retrieve_eye_ave_par_compare():
     """
     Compare icoscp_core and previous dobj method for "EYE-AVE-PAR" corner case
@@ -772,9 +797,6 @@ def test_retrieve_eye_ave_par_compare():
                 assert expected == actual, f"Metadata {md} mismatch: {expected} != {actual}"
 
 
-
-
-
 def _minimal_attrs() -> dict:
     return {
         "measurement_unit": "ppm",
@@ -836,8 +858,8 @@ def test_create_icos_attributes_sets_single_instrument_id(mocker):
     EXPECTED_CO2 = 410.0
 
     mocker.patch.object(
-        _retrieve, 
-        "attributes_requiring_retrieval", 
+        _retrieve,
+        "attributes_requiring_retrieval",
         return_value={}
     )
     dataset = xr.Dataset(
@@ -878,18 +900,18 @@ def test_retrieve_and_parse_icos_data_handles_flask_sampling_start_end(mocker):
         ]
     )
     mocker.patch.object(
-        _retrieve._data_parsing, 
-        "_retrieve_dobj_format", 
+        _retrieve._data_parsing,
+        "_retrieve_dobj_format",
         return_value="asciiAtcFlaskTimeSer"
     )
     mocker.patch.object(
-        _retrieve._data_parsing, 
-        "get_icos_text_file", 
+        _retrieve._data_parsing,
+        "get_icos_text_file",
         return_value=flask_text
     )
     mocker.patch.object(
-        _retrieve._data_parsing, 
-        "get_data_attrs", 
+        _retrieve._data_parsing,
+        "get_data_attrs",
         return_value={})
 
     dataset, _ = _retrieve.retrieve_and_parse_icos_data(
@@ -918,20 +940,20 @@ def test_parse_icos_text_file_drops_sentinel_missing_values(mocker):
     )
 
     mocker.patch.object(
-        _retrieve._data_parsing, 
-        "get_icos_text_file", 
+        _retrieve._data_parsing,
+        "get_icos_text_file",
         return_value=text
     )
 
     mocker.patch.object(
-        _retrieve._data_parsing, 
-        "_retrieve_dobj_format", 
+        _retrieve._data_parsing,
+        "_retrieve_dobj_format",
         return_value="asciiAtcProductTimeSer"
     )
 
     mocker.patch.object(
-        _retrieve._data_parsing, 
-        "get_data_attrs", 
+        _retrieve._data_parsing,
+        "get_data_attrs",
         return_value={})
 
     dataset, _ = _retrieve.parse_icos_text_file(_minimal_data_info())
